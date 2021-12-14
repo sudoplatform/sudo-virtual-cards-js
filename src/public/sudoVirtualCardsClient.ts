@@ -1,0 +1,663 @@
+import {
+  Base64,
+  CachePolicy,
+  DefaultConfigurationManager,
+  DefaultLogger,
+  DefaultSudoKeyManager,
+  ListOutput,
+  SudoCryptoProvider,
+  SudoKeyManager,
+} from '@sudoplatform/sudo-common'
+import { SudoUserClient } from '@sudoplatform/sudo-user'
+import { WebSudoCryptoProvider } from '@sudoplatform/sudo-web-crypto-provider'
+import { ApiClient } from '../private/data/common/apiClient'
+import {
+  DefaultDeviceKeyWorker,
+  DeviceKeyWorker,
+} from '../private/data/common/deviceKeyWorker'
+import { SudoVirtualCardsClientPrivateOptions } from '../private/data/common/privateSudoVirtualCardsClientOptions'
+import { DefaultFundingSourceService } from '../private/data/fundingSource/defaultFundingSourceService'
+import { ProvisionalFundingSourceApiTransformer } from '../private/data/fundingSource/transformer/provisionalFundingSourceApiTransformer'
+import { DefaultSudoUserService } from '../private/data/sudoUser/defaultSudoUserService'
+import { DefaultTransactionService } from '../private/data/transaction/defaultTransactionService'
+import { DefaultVirtualCardService } from '../private/data/virtualCard/defaultVirtualCardService'
+import { SudoUserService } from '../private/domain/entities/sudoUser/sudoUserService'
+import { TransactionService } from '../private/domain/entities/transaction/transactionService'
+import { VirtualCardService } from '../private/domain/entities/virtualCard/virtualCardService'
+import { CancelFundingSourceUseCase } from '../private/domain/use-cases/fundingSource/cancelFundingSourceUseCase'
+import { CompleteFundingSourceUseCase } from '../private/domain/use-cases/fundingSource/completeFundingSourceUseCase'
+import { GetFundingSourceClientConfigurationUseCase } from '../private/domain/use-cases/fundingSource/getFundingSourceClientConfigurationUseCase'
+import { GetFundingSourceUseCase } from '../private/domain/use-cases/fundingSource/getFundingSourceUseCase'
+import { ListFundingSourcesUseCase } from '../private/domain/use-cases/fundingSource/listFundingSourcesUseCase'
+import { SetupFundingSourceUseCase } from '../private/domain/use-cases/fundingSource/setupFundingSourceUseCase'
+import { GetTransactionUseCase } from '../private/domain/use-cases/transaction/getTransactionUseCase'
+import { ListTransactionsByCardIdUseCase } from '../private/domain/use-cases/transaction/listTransactionsByCardIdUseCase'
+import { CancelVirtualCardUseCase } from '../private/domain/use-cases/virtualCard/cancelVirtualCardUseCase'
+import { GetProvisionalCardUseCase } from '../private/domain/use-cases/virtualCard/getProvisionalCardUseCase'
+import { GetVirtualCardUseCase } from '../private/domain/use-cases/virtualCard/getVirtualCardUseCase'
+import { ListProvisionalCardsUseCase } from '../private/domain/use-cases/virtualCard/listProvisionalCardsUseCase'
+import { ListVirtualCardsUseCase } from '../private/domain/use-cases/virtualCard/listVirtualCardsUseCase'
+import { ProvisionVirtualCardUseCase } from '../private/domain/use-cases/virtualCard/provisionVirtualCardUseCase'
+import { UpdateVirtualCardUseCase } from '../private/domain/use-cases/virtualCard/updateVirtualCardUseCase'
+import { VirtualCardsServiceConfigNotFoundError } from './errors'
+import { APIResult, ProvisionalVirtualCard } from './typings'
+import { DateRange } from './typings/dateRange'
+import {
+  ProvisionalCardFilter,
+  TransactionFilter,
+  VirtualCardFilter,
+} from './typings/filters'
+import {
+  FundingSource,
+  FundingSourceClientConfiguration,
+  FundingSourceType,
+  ProvisionalFundingSource,
+} from './typings/fundingSource'
+import {
+  ListProvisionalCardsResults,
+  ListTransactionsResults,
+  ListVirtualCardsResults,
+} from './typings/listOperationResult'
+import { SortOrder } from './typings/sortOrder'
+import { Transaction } from './typings/transaction'
+import {
+  BillingAddress,
+  VirtualCard,
+  VirtualCardSealedAttributes,
+} from './typings/virtualCard'
+
+/**
+ * Input for {@link SudoVirtualCardsClient.setupFundingSource}.
+ *
+ * @property {string} currency The ISO 4217 currency code that is being used for the setup.
+ * @property {FundingSourceType} type The type of the funding source being setup.
+ */
+export interface SetupFundingSourceInput {
+  currency: string
+  type: FundingSourceType
+}
+
+/**
+ * Input for the completion data of {@link SudoVirtualCardsClient.completeFundingSource}.
+ *
+ * @property {string} provider Provider used to save the funding source information.
+ * @property {string} paymentMethod Identifier of the Payment Method used.
+ */
+export interface CompleteFundingSourceStripeCompletionDataInput {
+  provider: 'stripe'
+  paymentMethod: string
+}
+
+export type CompleteFundingSourceCompletionDataInput =
+  CompleteFundingSourceStripeCompletionDataInput
+
+/**
+ * Input for {@link SudoVirtualCardsClient.completeFundingSource}.
+ *
+ * @property {string} id Identifier of the provisional funding source to be completed and provisioned.
+ * @property {string} completionData JSON string of the completion data to be passed back to the service.
+ */
+export interface CompleteFundingSourceInput {
+  id: string
+  completionData: CompleteFundingSourceCompletionDataInput
+}
+
+/**
+ * Input for {@link SudoVirtualCardsClient.getFundingSource}.
+ *
+ * @property {string} id The identifier of the funding source to be retrieved.
+ * @property {CachePolicy} cachePolicy Determines how the funding source will be fetched.
+ */
+export interface GetFundingSourceInput {
+  id: string
+  cachePolicy: CachePolicy
+}
+
+/**
+ * Input for {@link SudoVirtualCardsClient.listFundingSources}.
+ *
+ * @property {CachePolicy} cachePolicy Determines how the funding sources will be fetched.
+ * @property {number} limit Number of items to return.  Will be defaulted if omitted.
+ * @property {string} nextToken A token generated by a previous call.
+ */
+export interface ListFundingSourcesInput {
+  cachePolicy: CachePolicy
+  limit?: number
+  nextToken?: string
+}
+
+/**
+ * Input for {@link ProvisionVirtualCardInput} billingAddress.
+ *
+ * @property {string} addressLine1 First line of the billing address.
+ * @property {string} addressLine2 Optional - Second line of the billing address.
+ * @property {string} city City of the billing address.
+ * @property {string} state State of the billing address.
+ * @property {string} postalCode Postal Code of the billing address.
+ * @property {string} country Country of the billing address.
+ */
+export interface ProvisionVirtualCardBillingAddressInput {
+  addressLine1: string
+  addressLine2?: string
+  city: string
+  state: string
+  postalCode: string
+  country: string
+}
+
+/**
+ * Input for {@link SudoVirtualCardsClient.provisionVirtualCard}.
+ *
+ * @property {string[]} ownershipProofs Proof of sudo ownership for provisioning cards.
+ * @property {string} fundingSourceId Identifier of the funding source backing the provisioned card.
+ * @property {string} cardHolder Name to appear on the card.
+ * @property {string} alias Alias to associate the card with.
+ * @property {string} currency ISO Currency code to provision the card with.
+ * @property {ProvisionVirtualCardBillingAddressInput} billingAddress Optional - Billing address of the card.
+ * @property {string} clientRefId Optional - Identifier of the client.
+ */
+export interface ProvisionVirtualCardInput {
+  ownershipProofs: string[]
+  fundingSourceId: string
+  cardHolder: string
+  alias: string
+  currency: string
+  billingAddress?: ProvisionVirtualCardBillingAddressInput
+  clientRefId?: string
+}
+
+/**
+ * Input for {@link SudoVirtualCardsClient.updateVirtualCard}.
+ *
+ * @property {string} id Identifier of the card to update.
+ * @property {number} expectedCardVersion Version of card to update. If specified, version must match existing version of card.
+ * @property {string} cardHolder Updated card holder. Leave as existing to remain unchanged.
+ * @property {string} alias Updated alias. Leave as existing to remain unchanged.
+ * @property {string} billingAddress Updated billing address. To remove, set to undefined.
+ */
+export interface UpdateVirtualCardInput {
+  id: string
+  expectedCardVersion?: number
+  cardHolder: string
+  alias: string
+  billingAddress: BillingAddress | undefined
+}
+
+/**
+ * Input for {@link SudoVirtualCardsClient.cancelVirtualCard}
+ *
+ * @property {string} id Identifier of the card to cancel.
+ */
+export interface CancelVirtualCardInput {
+  id: string
+}
+
+/**
+ * Input for {@link SudoVirtualCardsClient.getProvisionalCard}.
+ *
+ * @property {string} id Identifier of the provisional card to get.
+ * @property {CachePolicy} cachePolicy Cache Policy to use to access provisional card.
+ */
+export interface GetProvisionalCardInput {
+  id: string
+  cachePolicy: CachePolicy
+}
+
+/**
+ * Input for {@link SudoVirtualCardsClient.listProvisionalCards}.
+ *
+ * @property {ListProvisionalCardsInput} filter Filter for provisional cards list.
+ * @property {CachePolicy} cachePolicy Cache Policy to use to access provisional cards.
+ * @property {number} limit Number of cards to return.
+ * @property {string} nextToken Paginated next token.
+ */
+export interface ListProvisionalCardsInput {
+  filter?: ProvisionalCardFilter
+  cachePolicy?: CachePolicy
+  limit?: number
+  nextToken?: string
+}
+
+/**
+ * Input for {@link SudoVirtualCardsClient.getVirtualCard}.
+ *
+ * @property {string} id Identifier of the virtual card to get.
+ * @property {CachePolicy} cachePolicy Cache Policy to use to access virtual card.
+ */
+export interface GetVirtualCardInput {
+  id: string
+  cachePolicy: CachePolicy
+}
+
+/**
+ * Input for {@link SudoVirtualCardsClient.listVirtualCards}.
+ *
+ * @property {ListProvisionalCardsInput} filter Filter for virtual cards list.
+ * @property {CachePolicy} cachePolicy Cache Policy to use to access virtual cards.
+ * @property {number} limit Number of cards to return.
+ * @property {string} nextToken Paginated next token.
+ */
+export interface ListVirtualCardsInput {
+  filter?: VirtualCardFilter
+  cachePolicy?: CachePolicy
+  limit?: number
+  nextToken?: string
+}
+
+/**
+ * Input for {@link SudoVirtualCardsClient.getTransaction}.
+ *
+ * @property {string} id Identifier of the transaction to get.
+ * @property {CachePolicy} cachePolicy Cache Policy to use to access a transaction.
+ */
+export interface GetTransactionInput {
+  id: string
+  cachePolicy?: CachePolicy
+}
+
+/**
+ * Input for {@link SudoVirtualCardsClient.listTransactionsByCardId}
+ *
+ * @property {string} cardId Identifier of the card to list for related transactions.
+ * @property {CachePolicy} cachePolicy Cache Policy to use to access transactions.
+ * @property {TransactionFilter} filter Filter for controlling data returned from query.
+ * @property {number} limit Number of transactions to return.
+ * @property {string} nextToken Paginated next token.
+ */
+export interface ListTransactionsByCardIdInput {
+  cardId: string
+  cachePolicy?: CachePolicy
+  filter?: TransactionFilter
+  limit?: number
+  nextToken?: string
+  dateRange?: DateRange
+  sortOrder?: SortOrder
+}
+
+export interface SudoVirtualCardsClient {
+  /**
+   * Get the funding source client configuration.
+   *
+   * @returns {ProvisionalFundingSource} The configuration of the client funding source data.
+   */
+  getFundingSourceClientConfiguration(): Promise<
+    FundingSourceClientConfiguration[]
+  >
+
+  /**
+   * Setup the funding source.
+   * @param {SetupFundingSourceInput} input Parameters used to setup the provisional funding source.
+   * @returns {ProvisionalFundingSource} The provisional funding source.
+   */
+  setupFundingSource(
+    input: SetupFundingSourceInput,
+  ): Promise<ProvisionalFundingSource>
+
+  /**
+   * Complete a provisional funding source.
+   * @param {CompleteFundingSourceInput} input Parameters used to complete the funding source.
+   * @returns {FundingSource} The funding source to be provisioned.
+   */
+  completeFundingSource(
+    input: CompleteFundingSourceInput,
+  ): Promise<FundingSource>
+
+  /**
+   * Get a funding source identified by id.
+   *
+   * @param {GetFundingSourceInput} input Parameters used to retrieve a funding source.
+   * @returns {FundingSource | undefined} The funding source identified by id or undefined if the funding source
+   *  cannot be found.
+   *
+   * @throws {@link NotSignedInError}
+   */
+  getFundingSource(
+    input: GetFundingSourceInput,
+  ): Promise<FundingSource | undefined>
+
+  /**
+   * Get a list of all created funding sources for the signed in user.
+   *
+   * @param {ListFundingSourcesInput} input Parameters used to retrieve a list of created funding sources.
+   * @returns {ListOutput<FundingSource>} An array of funding sources or an empty array if no matching funding sources
+   *  can be found.
+   *
+   * @throws {@link NotSignedInError}
+   */
+  listFundingSources(
+    input: ListFundingSourcesInput,
+  ): Promise<ListOutput<FundingSource>>
+
+  /**
+   * Cancel a single funding source identified by id.
+   *
+   * @param {string} id The identifier of the funding source to cancel.
+   * @returns {FundingSource} The funding source that was cancelled.
+   *
+   * @throws {@link NotSignedInError}
+   */
+  cancelFundingSource(id: string): Promise<FundingSource>
+
+  /**
+   * Provision a virtual card.
+   * @param {ProvisionVirtualCardInput} input Parameters used to provision a virtual card.
+   *
+   * @returns {ProvisionalFundingSource} The card that is being provisioned. Please poll the card via the list methods to access the card.
+   */
+  provisionVirtualCard(
+    input: ProvisionVirtualCardInput,
+  ): Promise<ProvisionalVirtualCard>
+
+  /**
+   * Update a virtual card.
+   * @param input Parameters used to update a virtual card.
+   *
+   * @returns {VirtualCard} The virtual card that was updated.
+   */
+  updateVirtualCard(
+    input: UpdateVirtualCardInput,
+  ): Promise<APIResult<VirtualCard, VirtualCardSealedAttributes>>
+
+  /**
+   * Cancel a virtual card.
+   * @param input Parameters used to cancel a virtual card.
+   *
+   * @returns {string} The identifier of the card that was just cancelled.
+   */
+  cancelVirtualCard(
+    input: CancelVirtualCardInput,
+  ): Promise<APIResult<VirtualCard, VirtualCardSealedAttributes>>
+
+  /**
+   * Get a provisional card.
+   * @param input Parameters used to get a provisional card.
+   *
+   * @returns {ProvisionalVirtualCard | undefined} The card that is being queried, or undefined if not found.
+   */
+  getProvisionalCard(
+    input: GetProvisionalCardInput,
+  ): Promise<ProvisionalVirtualCard | undefined>
+
+  /**
+   * List provisional cards.
+   * @param input Parameters used to list provisional cards.
+   *
+   * @returns {ListProvisionalCardsResults} Result of the provisional card list.
+   */
+  listProvisionalCards(
+    input?: ListProvisionalCardsInput,
+  ): Promise<ListProvisionalCardsResults>
+
+  /**
+   * Get a virtual card.
+   * @param input Parameters used to get a virtual card.
+   *
+   * @returns {ProvisionalVirtualCard | undefined} The card that is being queried, or undefined if not found.
+   */
+  getVirtualCard(input: GetVirtualCardInput): Promise<VirtualCard | undefined>
+
+  /**
+   * List virtual cards.
+   * @param input Parameters used to list virtual cards.
+   *
+   * @returns {ListProvisionalCardsResults} Result of the virtual card list.
+   */
+  listVirtualCards(
+    input?: ListVirtualCardsInput,
+  ): Promise<ListVirtualCardsResults>
+
+  /**
+   * Get a transaction.
+   * @param input Parameters used to get a transaction.
+   *
+   * @returns {Transaction | undefined} The transaction that is being queried, or undefined if not found.
+   */
+  getTransaction(input: GetTransactionInput): Promise<Transaction | undefined>
+
+  /**
+   * List transactions.
+   * @param input Parameters used for list transactions.
+   *
+   * @returns {ListTransactionsResults} Results of the transaction list.
+   */
+  listTransactionsByCardId(
+    input: ListTransactionsByCardIdInput,
+  ): Promise<ListTransactionsResults>
+}
+
+export type SudoVirtualCardsClientOptions = {
+  /** Sudo User client to use. No default */
+  sudoUserClient: SudoUserClient
+
+  /** SudoCryptoProvider to use. Default is to create a WebSudoCryptoProvider */
+  sudoCryptoProvider?: SudoCryptoProvider
+}
+
+export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
+  private readonly apiClient: ApiClient
+  private readonly fundingSourceService: DefaultFundingSourceService
+  private readonly sudoUserService: SudoUserService
+  private readonly virtualCardService: VirtualCardService
+  private readonly transactionService: TransactionService
+  private readonly deviceKeyWorker: DeviceKeyWorker
+  private readonly keyManager: SudoKeyManager
+  private readonly cryptoProvider: SudoCryptoProvider
+  private readonly sudoUserClient: SudoUserClient
+  private readonly log = new DefaultLogger(this.constructor.name)
+
+  public constructor(opts: SudoVirtualCardsClientOptions) {
+    const privateOptions = opts as
+      | SudoVirtualCardsClientPrivateOptions
+      | undefined
+    this.apiClient = privateOptions?.apiClient ?? new ApiClient()
+    this.sudoUserClient = opts.sudoUserClient
+    this.cryptoProvider = new WebSudoCryptoProvider(
+      'SudoVirtualCardsClient',
+      'com.sudoplatform.appservicename',
+    )
+    this.keyManager = new DefaultSudoKeyManager(this.cryptoProvider)
+    this.deviceKeyWorker = new DefaultDeviceKeyWorker(
+      this.keyManager,
+      this.sudoUserClient,
+    )
+    this.fundingSourceService = new DefaultFundingSourceService(this.apiClient)
+    this.virtualCardService = new DefaultVirtualCardService(
+      this.apiClient,
+      this.deviceKeyWorker,
+    )
+    this.transactionService = new DefaultTransactionService(
+      this.apiClient,
+      this.deviceKeyWorker,
+    )
+    this.sudoUserService = new DefaultSudoUserService(this.sudoUserClient)
+
+    if (!DefaultConfigurationManager.getInstance().getConfigSet('vcService')) {
+      throw new VirtualCardsServiceConfigNotFoundError()
+    }
+  }
+
+  public async getFundingSourceClientConfiguration(): Promise<
+    FundingSourceClientConfiguration[]
+  > {
+    const useCase = new GetFundingSourceClientConfigurationUseCase(
+      this.fundingSourceService,
+    )
+    const rawData = await useCase.execute()
+    const clientConfig = JSON.parse(Base64.decodeString(rawData)) as {
+      fundingSourceTypes: FundingSourceClientConfiguration[]
+    }
+    return clientConfig.fundingSourceTypes
+  }
+
+  public async setupFundingSource(
+    input: SetupFundingSourceInput,
+  ): Promise<ProvisionalFundingSource> {
+    const useCase = new SetupFundingSourceUseCase(
+      this.fundingSourceService,
+      this.sudoUserService,
+    )
+    const result = await useCase.execute(input)
+    return ProvisionalFundingSourceApiTransformer.transformEntity(result)
+  }
+
+  public async completeFundingSource(
+    input: CompleteFundingSourceInput,
+  ): Promise<FundingSource> {
+    const useCase = new CompleteFundingSourceUseCase(
+      this.fundingSourceService,
+      this.sudoUserClient,
+    )
+    return await useCase.execute({
+      ...input,
+      completionData: { ...input.completionData, version: 1 },
+    })
+  }
+
+  public async getFundingSource({
+    id,
+    cachePolicy,
+  }: GetFundingSourceInput): Promise<FundingSource | undefined> {
+    this.log.debug(this.getFundingSource.name, {
+      id,
+      cachePolicy,
+    })
+    const useCase = new GetFundingSourceUseCase(
+      this.fundingSourceService,
+      this.sudoUserService,
+    )
+    const result = await useCase.execute({
+      id,
+      cachePolicy,
+    })
+    return result
+  }
+
+  public async listFundingSources({
+    cachePolicy,
+    limit,
+    nextToken,
+  }: ListFundingSourcesInput): Promise<ListOutput<FundingSource>> {
+    this.log.debug(this.listFundingSources.name, {
+      limit,
+      nextToken,
+      cachePolicy,
+    })
+    const useCase = new ListFundingSourcesUseCase(
+      this.fundingSourceService,
+      this.sudoUserService,
+    )
+    const { fundingSources, nextToken: resultNextToken } =
+      await useCase.execute({
+        cachePolicy,
+        limit,
+        nextToken,
+      })
+    return {
+      items: fundingSources,
+      nextToken: resultNextToken,
+    }
+  }
+
+  public async cancelFundingSource(id: string): Promise<FundingSource> {
+    this.log.debug(this.cancelFundingSource.name, {
+      id,
+    })
+    const useCase = new CancelFundingSourceUseCase(
+      this.fundingSourceService,
+      this.sudoUserService,
+    )
+    return await useCase.execute(id)
+  }
+
+  public async provisionVirtualCard(
+    input: ProvisionVirtualCardInput,
+  ): Promise<ProvisionalVirtualCard> {
+    const useCase = new ProvisionVirtualCardUseCase(
+      this.virtualCardService,
+      this.sudoUserClient,
+    )
+    return await useCase.execute(input)
+  }
+
+  public async updateVirtualCard(
+    input: UpdateVirtualCardInput,
+  ): Promise<APIResult<VirtualCard, VirtualCardSealedAttributes>> {
+    const useCase = new UpdateVirtualCardUseCase(
+      this.virtualCardService,
+      this.sudoUserService,
+    )
+    return await useCase.execute(input)
+  }
+
+  public async cancelVirtualCard(
+    input: CancelVirtualCardInput,
+  ): Promise<APIResult<VirtualCard, VirtualCardSealedAttributes>> {
+    const useCase = new CancelVirtualCardUseCase(
+      this.virtualCardService,
+      this.sudoUserService,
+    )
+    return await useCase.execute(input)
+  }
+
+  public async getProvisionalCard({
+    id,
+    cachePolicy,
+  }: GetProvisionalCardInput): Promise<ProvisionalVirtualCard | undefined> {
+    const useCase = new GetProvisionalCardUseCase(
+      this.virtualCardService,
+      this.sudoUserService,
+    )
+    return await useCase.execute({ id, cachePolicy })
+  }
+
+  async listProvisionalCards(
+    input: ListProvisionalCardsInput,
+  ): Promise<ListProvisionalCardsResults> {
+    const useCase = new ListProvisionalCardsUseCase(
+      this.virtualCardService,
+      this.sudoUserService,
+    )
+    return await useCase.execute(input)
+  }
+
+  async getVirtualCard({
+    id,
+    cachePolicy,
+  }: GetVirtualCardInput): Promise<VirtualCard | undefined> {
+    const useCase = new GetVirtualCardUseCase(
+      this.virtualCardService,
+      this.sudoUserService,
+    )
+    return await useCase.execute({ id, cachePolicy })
+  }
+
+  async listVirtualCards(
+    input: ListVirtualCardsInput,
+  ): Promise<ListVirtualCardsResults> {
+    const useCase = new ListVirtualCardsUseCase(
+      this.virtualCardService,
+      this.sudoUserService,
+    )
+    return await useCase.execute(input)
+  }
+
+  async getTransaction(
+    input: GetTransactionInput,
+  ): Promise<Transaction | undefined> {
+    const useCase = new GetTransactionUseCase(
+      this.transactionService,
+      this.sudoUserService,
+    )
+    return await useCase.execute(input)
+  }
+
+  async listTransactionsByCardId(
+    input: ListTransactionsByCardIdInput,
+  ): Promise<ListTransactionsResults> {
+    const useCase = new ListTransactionsByCardIdUseCase(
+      this.transactionService,
+      this.sudoUserService,
+    )
+    return await useCase.execute(input)
+  }
+}

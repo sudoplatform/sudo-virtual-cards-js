@@ -1,0 +1,42 @@
+import {
+  AppSyncError,
+  mapGraphQLToClientError,
+  VersionMismatchError,
+} from '@sudoplatform/sudo-common'
+import {
+  CardNotFoundError,
+  DuplicateFundingSourceError,
+  FundingSourceCompletionDataInvalidError,
+  FundingSourceNotFoundError,
+  FundingSourceNotSetupError,
+  FundingSourceStateError,
+  ProvisionalFundingSourceNotFoundError,
+  UnacceptableFundingSourceError,
+} from '../../../../public/errors'
+
+export class ErrorTransformer {
+  static toClientError(error: AppSyncError): Error {
+    switch (error.errorType) {
+      case 'DynamoDB:ConditionalCheckFailedException':
+        return new VersionMismatchError()
+      case 'sudoplatform.virtual-cards.FundingSourceStateError':
+        return new FundingSourceStateError(error.message)
+      case 'sudoplatform.virtual-cards.FundingSourceNotSetupErrorCode':
+        return new FundingSourceNotSetupError(error.message)
+      case 'sudoplatform.virtual-cards.ProvisionalFundingSourceNotFoundError':
+        return new ProvisionalFundingSourceNotFoundError(error.message)
+      case 'sudoplatform.virtual-cards.FundingSourceNotFoundError':
+        return new FundingSourceNotFoundError(error.message)
+      case 'sudoplatform.virtual-cards.FundingSourceCompletionDataInvalidError':
+        return new FundingSourceCompletionDataInvalidError(error.message)
+      case 'sudoplatform.virtual-cards.DuplicateFundingSourceError':
+        return new DuplicateFundingSourceError(error.message)
+      case 'sudoplatform.virtual-cards.UnacceptableFundingSourceError':
+        return new UnacceptableFundingSourceError(error.message)
+      case 'sudoplatform.virtual-cards.CardNotFoundError':
+        return new CardNotFoundError(error.message)
+      default:
+        return mapGraphQLToClientError(error)
+    }
+  }
+}

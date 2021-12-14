@@ -1,0 +1,110 @@
+query GetPublicKey($keyId: String!) {
+  getPublicKeyForVirtualCards(keyId: $keyId) {
+    ...PublicKey
+  }
+}
+
+query GetPublicKeys($limit: Int, $nextToken: String) {
+  getPublicKeysForVirtualCards(limit: $limit, nextToken: $nextToken) {
+    ...PaginatedPublicKey
+  }
+}
+
+query GetKeyRing(
+  $keyRingId: String!
+  $limit: Int
+  $nextToken: String
+  $keyFormats: [KeyFormat!]
+) {
+  getKeyRingForVirtualCards(
+    keyRingId: $keyRingId
+    limit: $limit
+    nextToken: $nextToken
+    keyFormats: $keyFormats
+  ) {
+    ...PaginatedPublicKey
+  }
+}
+
+query GetFundingSourceClientConfiguration {
+  getFundingSourceClientConfiguration {
+    data
+  }
+}
+
+query GetFundingSource($id: ID!) {
+  getFundingSource(id: $id) {
+    ...FundingSource
+  }
+}
+
+query ListFundingSources($limit: Int, $nextToken: String) {
+  listFundingSources(limit: $limit, nextToken: $nextToken) {
+    items {
+      ...FundingSource
+    }
+  }
+}
+
+query GetProvisionalCard($id: ID!) {
+  getProvisionalCard(id: $id) {
+    ...ProvisionalCard
+  }
+}
+
+query ListProvisionalCards(
+  $filter: ProvisionalCardFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listProvisionalCards(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      ...ProvisionalCard
+    }
+    nextToken
+  }
+}
+
+query GetCard($id: ID!, $keyId: String) {
+  getCard(id: $id, keyId: $keyId) {
+    ...SealedCard
+  }
+}
+
+query ListCards($filter: CardFilterInput, $limit: Int, $nextToken: String) {
+  listCards(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      ...SealedCard
+    }
+    nextToken
+  }
+}
+
+query GetTransaction($id: ID!, $keyId: String) {
+  getTransaction(id: $id, keyId: $keyId) {
+    ...SealedTransaction
+  }
+}
+
+query ListTransactionsByCardId(
+  $cardId: ID!
+  $filter: TransactionFilterInput
+  $limit: Int
+  $nextToken: String
+  $dateRange: DateRangeInput
+  $sortOrder: SortOrder
+) {
+  listTransactionsByCardId(
+    cardId: $cardId
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+    dateRange: $dateRange
+    sortOrder: $sortOrder
+  ) {
+    items {
+      ...SealedTransaction
+    }
+    nextToken
+  }
+}
