@@ -161,7 +161,7 @@ export class ApiClient {
 
   public async getFundingSource(
     id: string,
-    fetchPolicy: FetchPolicy,
+    fetchPolicy: FetchPolicy = 'network-only',
   ): Promise<FundingSource | undefined> {
     const data = await this.performQuery<GetFundingSourceQuery>({
       query: GetFundingSourceDocument,
@@ -173,7 +173,7 @@ export class ApiClient {
   }
 
   public async listFundingSources(
-    fetchPolicy: FetchPolicy,
+    fetchPolicy: FetchPolicy = 'network-only',
     limit?: number,
     nextToken?: string,
   ): Promise<FundingSourceConnection> {

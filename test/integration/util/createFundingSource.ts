@@ -38,7 +38,8 @@ export const createFundingSource = async (
   const paymentMethod = await stripe.paymentMethods.create({
     type: 'card',
     card: {
-      exp_month: exp.getUTCMonth(),
+      // getUTCMonth is indexed at 0, so + 1 is essential.
+      exp_month: exp.getUTCMonth() + 1,
       exp_year: exp.getUTCFullYear(),
       number: options?.creditCardNumber ?? '4242424242424242',
       cvc: options?.securityCode ?? '123',

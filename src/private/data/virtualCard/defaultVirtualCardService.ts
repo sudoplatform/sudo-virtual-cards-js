@@ -18,12 +18,12 @@ import {
 import { ProvisionalVirtualCardEntity } from '../../domain/entities/virtualCard/provisionalVirtualCardEntity'
 import { VirtualCardEntity } from '../../domain/entities/virtualCard/virtualCardEntity'
 import {
-  CardServiceGetProvisionalCardInput,
-  CardServiceGetVirtualCardInput,
-  CardServiceListProvisionalCardsInput,
-  CardServiceListVirtualCardsInput,
   VirtualCardService,
   VirtualCardServiceCancelCardInput,
+  VirtualCardServiceGetProvisionalCardInput,
+  VirtualCardServiceGetVirtualCardInput,
+  VirtualCardServiceListProvisionalCardsInput,
+  VirtualCardServiceListVirtualCardsInput,
   VirtualCardServiceProvisionVirtualCardInput,
   VirtualCardServiceUpdateVirtualCardUseCaseInput,
 } from '../../domain/entities/virtualCard/virtualCardService'
@@ -184,8 +184,12 @@ export class DefaultVirtualCardService implements VirtualCardService {
   async getVirtualCard({
     id,
     cachePolicy,
-  }: CardServiceGetVirtualCardInput): Promise<VirtualCardEntity | undefined> {
-    const fetchPolicy = FetchPolicyTransformer.transformCachePolicy(cachePolicy)
+  }: VirtualCardServiceGetVirtualCardInput): Promise<
+    VirtualCardEntity | undefined
+  > {
+    const fetchPolicy = cachePolicy
+      ? FetchPolicyTransformer.transformCachePolicy(cachePolicy)
+      : undefined
     const sealedCard = await this.appSync.getCard({ id }, fetchPolicy)
     if (!sealedCard) {
       return undefined
@@ -195,7 +199,7 @@ export class DefaultVirtualCardService implements VirtualCardService {
   }
 
   async listVirtualCards(
-    input?: CardServiceListVirtualCardsInput,
+    input?: VirtualCardServiceListVirtualCardsInput,
   ): Promise<
     ListOperationResult<VirtualCardEntity, VirtualCardSealedAttributes>
   > {
@@ -250,10 +254,12 @@ export class DefaultVirtualCardService implements VirtualCardService {
   async getProvisionalCard({
     id,
     cachePolicy,
-  }: CardServiceGetProvisionalCardInput): Promise<
+  }: VirtualCardServiceGetProvisionalCardInput): Promise<
     ProvisionalVirtualCardEntity | undefined
   > {
-    const fetchPolicy = FetchPolicyTransformer.transformCachePolicy(cachePolicy)
+    const fetchPolicy = cachePolicy
+      ? FetchPolicyTransformer.transformCachePolicy(cachePolicy)
+      : undefined
     const data = await this.appSync.getProvisionalCard(id, fetchPolicy)
     if (!data) {
       return undefined
@@ -277,7 +283,7 @@ export class DefaultVirtualCardService implements VirtualCardService {
     })
   }
   async listProvisionalCards(
-    input?: CardServiceListProvisionalCardsInput,
+    input?: VirtualCardServiceListProvisionalCardsInput,
   ): Promise<ListOperationResult<ProvisionalVirtualCardEntity>> {
     const fetchPolicy = input?.cachePolicy
       ? FetchPolicyTransformer.transformCachePolicy(input.cachePolicy)

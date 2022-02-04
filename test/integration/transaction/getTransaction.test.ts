@@ -6,7 +6,13 @@ import { Sudo, SudoProfilesClient } from '@sudoplatform/sudo-profiles'
 import { SudoVirtualCardsSimulatorClient } from '@sudoplatform/sudo-virtual-cards-simulator'
 import Stripe from 'stripe'
 import { v4 } from 'uuid'
-import { SudoVirtualCardsClient, Transaction, VirtualCard } from '../../../src'
+import waitForExpect from 'wait-for-expect'
+import {
+  ListTransactionsResults,
+  SudoVirtualCardsClient,
+  Transaction,
+  VirtualCard,
+} from '../../../src'
 import { provisionVirtualCard } from '../util/provisionVirtualCard'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
@@ -46,11 +52,20 @@ describe('GetTransaction Test Suite', () => {
       billingAddress: card.billingAddress,
       csc: card.csc,
     })
-    const transactionResult = await instanceUnderTest.listTransactionsByCardId({
-      cardId: card.id,
+
+    let transactionResult: ListTransactionsResults | undefined
+    await waitForExpect(async () => {
+      transactionResult = await instanceUnderTest.listTransactionsByCardId({
+        cardId: card.id,
+      })
+      if (transactionResult.status !== ListOperationResultStatus.Success) {
+        fail('failed to get successful transactions')
+      }
+      expect(transactionResult.items).toHaveLength(1)
     })
-    if (transactionResult.status !== ListOperationResultStatus.Success) {
-      fail('failed to get successful transactions')
+
+    if (transactionResult?.status !== ListOperationResultStatus.Success) {
+      fail('transaction result unexpectedly falsy')
     }
     transaction = transactionResult.items[0]
   })
@@ -60,14 +75,14 @@ describe('GetTransaction Test Suite', () => {
       const result = await instanceUnderTest.getTransaction({
         id: transaction.id,
       })
-      if (!result) {
-        fail('result is undefined')
-      }
       expect(result).toStrictEqual(transaction)
     })
+
     it('returns undefined for non-existent transaction', async () => {
       await expect(
-        instanceUnderTest.getTransaction({ id: v4() }),
+        instanceUnderTest.getTransaction({
+          id: v4(),
+        }),
       ).resolves.toBeUndefined()
     })
   })

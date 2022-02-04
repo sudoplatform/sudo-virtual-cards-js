@@ -3,4 +3,8 @@
   "eslint.validate": [
     "typescript"
   ],
+  "cSpell.words": [
+    "sudoplatformconfig",
+    "sudoservice"
+  ],
 }

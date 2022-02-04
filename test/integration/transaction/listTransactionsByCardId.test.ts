@@ -5,12 +5,16 @@ import {
 import { Sudo, SudoProfilesClient } from '@sudoplatform/sudo-profiles'
 import { SudoVirtualCardsSimulatorClient } from '@sudoplatform/sudo-virtual-cards-simulator'
 import Stripe from 'stripe'
+import waitForExpect from 'wait-for-expect'
 import { SudoVirtualCardsClient, VirtualCard } from '../../../src'
 import { provisionVirtualCard } from '../util/provisionVirtualCard'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
 describe('ListTransactionsByCardId Test Suite', () => {
   jest.setTimeout(240000)
+  waitForExpect.defaults.interval = 250
+  waitForExpect.defaults.timeout = 5000
+
   const log = new DefaultLogger('SudoVirtualCardsClientIntegrationTests')
   let instanceUnderTest: SudoVirtualCardsClient
   let vcSimulator: SudoVirtualCardsSimulatorClient
@@ -76,14 +80,17 @@ describe('ListTransactionsByCardId Test Suite', () => {
 
   describe('listTransactionsByCardId', () => {
     it('returns expected result', async () => {
-      const result = await instanceUnderTest.listTransactionsByCardId({
-        cardId: card.id,
+      await waitForExpect(async () => {
+        const result = await instanceUnderTest.listTransactionsByCardId({
+          cardId: card.id,
+        })
+        if (result.status !== ListOperationResultStatus.Success) {
+          fail('unexpected result')
+        }
+        expect(result.items).toHaveLength(2)
       })
-      if (result.status !== ListOperationResultStatus.Success) {
-        fail('unexpected result')
-      }
-      expect(result.items).toHaveLength(2)
     })
+
     it('limits transactions as expected', async () => {
       const result = await instanceUnderTest.listTransactionsByCardId({
         cardId: card.id,

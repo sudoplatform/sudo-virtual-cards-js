@@ -16,7 +16,7 @@ import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
  */
 interface GetFundingSourceUseCaseInput {
   id: string
-  cachePolicy: CachePolicy
+  cachePolicy?: CachePolicy
 }
 
 interface GetFundingSourceUseCaseOutput {

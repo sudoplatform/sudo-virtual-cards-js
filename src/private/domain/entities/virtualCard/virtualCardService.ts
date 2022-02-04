@@ -29,9 +29,9 @@ export interface VirtualCardServiceCancelCardInput {
   id: string
 }
 
-export interface CardServiceGetVirtualCardInput {
+export interface VirtualCardServiceGetVirtualCardInput {
   id: string
-  cachePolicy: CachePolicy
+  cachePolicy?: CachePolicy
 }
 
 export interface VirtualCardServiceUpdateVirtualCardUseCaseInput {
@@ -51,19 +51,19 @@ export interface VirtualCardServiceUpdateVirtualCardUseCaseInput {
     | undefined
 }
 
-export interface CardServiceListVirtualCardsInput {
+export interface VirtualCardServiceListVirtualCardsInput {
   filter?: VirtualCardFilter
   cachePolicy?: CachePolicy
   limit?: number
   nextToken?: string
 }
 
-export interface CardServiceGetProvisionalCardInput {
+export interface VirtualCardServiceGetProvisionalCardInput {
   id: string
-  cachePolicy: CachePolicy
+  cachePolicy?: CachePolicy
 }
 
-export interface CardServiceListProvisionalCardsInput {
+export interface VirtualCardServiceListProvisionalCardsInput {
   filter?: ProvisionalCardFilter
   cachePolicy?: CachePolicy
   limit?: number
@@ -84,20 +84,20 @@ export interface VirtualCardService {
   ): Promise<APIResult<VirtualCardEntity, VirtualCardSealedAttributes>>
 
   getVirtualCard(
-    input: CardServiceGetVirtualCardInput,
+    input: VirtualCardServiceGetVirtualCardInput,
   ): Promise<VirtualCardEntity | undefined>
 
   listVirtualCards(
-    input?: CardServiceListVirtualCardsInput,
+    input?: VirtualCardServiceListVirtualCardsInput,
   ): Promise<
     ListOperationResult<VirtualCardEntity, VirtualCardSealedAttributes>
   >
 
   getProvisionalCard(
-    input: CardServiceGetProvisionalCardInput,
+    input: VirtualCardServiceGetProvisionalCardInput,
   ): Promise<ProvisionalVirtualCardEntity | undefined>
 
   listProvisionalCards(
-    input?: CardServiceListProvisionalCardsInput,
+    input?: VirtualCardServiceListProvisionalCardsInput,
   ): Promise<ListOperationResult<ProvisionalVirtualCardEntity>>
 }

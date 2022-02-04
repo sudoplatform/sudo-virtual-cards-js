@@ -1,5 +1,4 @@
 import {
-  CachePolicy,
   EncryptionAlgorithm,
   FatalError,
   ListOperationResult,
@@ -81,8 +80,9 @@ export class DefaultTransactionService implements TransactionService {
   async getTransaction(
     input: TransactionServiceGetTransactionInput,
   ): Promise<TransactionEntity | undefined> {
-    const cachePolicy = input.cachePolicy ?? CachePolicy.CacheOnly
-    const fetchPolicy = FetchPolicyTransformer.transformCachePolicy(cachePolicy)
+    const fetchPolicy = input.cachePolicy
+      ? FetchPolicyTransformer.transformCachePolicy(input.cachePolicy)
+      : undefined
     const sealedTransaction = await this.appSync.getTransaction(
       {
         id: input.id,

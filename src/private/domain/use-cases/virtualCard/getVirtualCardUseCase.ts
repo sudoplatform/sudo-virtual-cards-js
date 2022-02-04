@@ -5,7 +5,7 @@ import { VirtualCardUseCaseOutput } from './outputs'
 
 export interface GetVirtualCardUseCaseInput {
   id: string
-  cachePolicy: CachePolicy
+  cachePolicy?: CachePolicy
 }
 
 export type GetVirtualCardUseCaseOutput = VirtualCardUseCaseOutput

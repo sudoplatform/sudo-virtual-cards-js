@@ -61,9 +61,9 @@ export class DefaultFundingSourceService implements FundingSourceService {
   async getFundingSource(
     input: FundingSourceServiceGetFundingSourceInput,
   ): Promise<FundingSourceEntity | undefined> {
-    const fetchPolicy = FetchPolicyTransformer.transformCachePolicy(
-      input.cachePolicy,
-    )
+    const fetchPolicy = input.cachePolicy
+      ? FetchPolicyTransformer.transformCachePolicy(input.cachePolicy)
+      : undefined
     const result = await this.appSync.getFundingSource(input.id, fetchPolicy)
     if (!result) {
       return undefined
@@ -76,7 +76,9 @@ export class DefaultFundingSourceService implements FundingSourceService {
     limit,
     nextToken,
   }: FundingSourceServiceListFundingSourcesInput): Promise<FundingSourceServiceListFundingSourcesOutput> {
-    const fetchPolicy = FetchPolicyTransformer.transformCachePolicy(cachePolicy)
+    const fetchPolicy = cachePolicy
+      ? FetchPolicyTransformer.transformCachePolicy(cachePolicy)
+      : undefined
     const result = await this.appSync.listFundingSources(
       fetchPolicy,
       limit,
