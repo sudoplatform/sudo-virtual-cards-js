@@ -148,7 +148,8 @@ export interface ProvisionVirtualCardBillingAddressInput {
 /**
  * Input for {@link SudoVirtualCardsClient.provisionVirtualCard}.
  *
- * @property {string[]} ownershipProofs Proof of sudo ownership for provisioning cards.
+ * @property {string[]} ownershipProofs Proof of sudo ownership for provisioning cards. The ownership proof must
+ *  contain an audience of "sudoplatform.virtual-cards.virtual-card".
  * @property {string} fundingSourceId Identifier of the funding source backing the provisioned card.
  * @property {string} cardHolder Name to appear on the card.
  * @property {string} alias Alias to associate the card with.

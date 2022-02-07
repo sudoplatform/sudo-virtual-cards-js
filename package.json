@@ -20,7 +20,7 @@
     "build:transpile": "babel src --out-dir lib --extensions '.ts'",
     "build:typecheck": "tsc --noEmit",
     "build:declarations": "tsc --project tsconfig.declarations.json",
-    "build:docs": "typedoc --treatWarningsAsErrors --excludePrivate --out docs src/index.ts"
+    "build:docs": "typedoc --readme README.external.md --treatWarningsAsErrors --excludePrivate --out docs src/index.ts"
   },
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
