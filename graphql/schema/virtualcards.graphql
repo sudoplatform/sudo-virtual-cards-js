@@ -121,6 +121,7 @@ type SealedCard {
   csc: String! # SealedStringAttribute
   billingAddress: SealedAddressAttribute
   expiry: SealedExpiryAttribute!
+  lastTransaction: SealedTransaction
 }
 
 type Owner {

@@ -16,6 +16,10 @@ import {
   DeviceKeyWorker,
 } from '../private/data/common/deviceKeyWorker'
 import { SudoVirtualCardsClientPrivateOptions } from '../private/data/common/privateSudoVirtualCardsClientOptions'
+import {
+  DefaultTransactionWorker,
+  TransactionWorker,
+} from '../private/data/common/transactionWorker'
 import { DefaultFundingSourceService } from '../private/data/fundingSource/defaultFundingSourceService'
 import { ProvisionalFundingSourceApiTransformer } from '../private/data/fundingSource/transformer/provisionalFundingSourceApiTransformer'
 import { DefaultSudoUserService } from '../private/data/sudoUser/defaultSudoUserService'
@@ -441,6 +445,7 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
   private readonly virtualCardService: VirtualCardService
   private readonly transactionService: TransactionService
   private readonly deviceKeyWorker: DeviceKeyWorker
+  private readonly transactionWorker: TransactionWorker
   private readonly keyManager: SudoKeyManager
   private readonly cryptoProvider: SudoCryptoProvider
   private readonly sudoUserClient: SudoUserClient
@@ -463,14 +468,17 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
       this.keyManager,
       this.sudoUserClient,
     )
+    this.transactionWorker = new DefaultTransactionWorker(this.deviceKeyWorker)
+
     this.fundingSourceService = new DefaultFundingSourceService(this.apiClient)
     this.virtualCardService = new DefaultVirtualCardService(
       this.apiClient,
       this.deviceKeyWorker,
+      this.transactionWorker,
     )
     this.transactionService = new DefaultTransactionService(
       this.apiClient,
-      this.deviceKeyWorker,
+      this.transactionWorker,
     )
     this.sudoUserService = new DefaultSudoUserService(this.sudoUserClient)
 

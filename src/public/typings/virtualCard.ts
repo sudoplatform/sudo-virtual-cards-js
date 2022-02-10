@@ -1,4 +1,5 @@
 import { Owner } from '@sudoplatform/sudo-common'
+import { Transaction } from './transaction'
 
 /**
  * Virtual Card sealed attributes.
@@ -40,6 +41,7 @@ export interface VirtualCardSealedAttributes {
  * @property {string} csc Card Security Code of the virtual card.
  * @property {string} billingAddress Billing address associated with the virtual card.
  * @property {string} expiry Expiry information of the card.
+ * @property {Transaction} lastTransaction Most recent transaction, if any, that has occurred on the card.
  */
 export interface VirtualCard extends VirtualCardSealedAttributes {
   id: string
@@ -60,6 +62,7 @@ export interface VirtualCard extends VirtualCardSealedAttributes {
   csc: string
   billingAddress?: BillingAddress | undefined
   expiry: Expiry
+  lastTransaction?: Transaction
 }
 
 /**

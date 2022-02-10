@@ -20,7 +20,6 @@ import {
 
 export class GraphQLDataFactory {
   private static readonly commonProps = {
-    id: 'dummyId',
     owner: 'dummyOwner',
     version: 1,
     createdAtEpochMs: 1.0,
@@ -37,6 +36,7 @@ export class GraphQLDataFactory {
 
   static readonly provisionalFundingSource: ProvisionalFundingSource = {
     ...GraphQLDataFactory.commonProps,
+    id: 'dummyFundingSourceId',
     state: ProvisionalFundingSourceState.Completed,
     stateReason: StateReason.Unlocked,
     provisioningData: this.provisioningData,
@@ -44,6 +44,7 @@ export class GraphQLDataFactory {
 
   static readonly fundingSource: FundingSource = {
     ...GraphQLDataFactory.commonProps,
+    id: 'dummyFundingSourceId',
     currency: 'dummyCurrency',
     last4: 'dummyLast4',
     network: CreditCardNetwork.Visa,
@@ -57,12 +58,14 @@ export class GraphQLDataFactory {
 
   static readonly provisionalCard: ProvisionalCard = {
     ...this.commonProps,
+    id: 'dummyVirtualCardId',
     clientRefId: 'dummyClientRefId',
     provisioningState: ProvisioningState.Provisioning,
   }
 
   static readonly sealedCard: SealedCard = {
     ...this.commonProps,
+    id: 'dummyVirtualCardId',
     activeToEpochMs: 3.0,
     algorithm: 'AES/CBC/PKCS7Padding',
     keyId: 'dummyKeyId',
@@ -92,6 +95,7 @@ export class GraphQLDataFactory {
 
   static readonly publicKey: PublicKey = {
     ...this.commonProps,
+    id: 'dummyKeyId',
     algorithm: 'dummyAlgorithm',
     keyFormat: KeyFormat.RsaPublicKey,
     keyId: 'dummyKeyId',
@@ -107,9 +111,10 @@ export class GraphQLDataFactory {
 
   static readonly sealedTransaction: SealedTransaction = {
     ...this.commonProps,
+    id: 'dummyTransactionId',
     algorithm: 'AES/CBC/PKCS7Padding',
     billedAmount: this.sealedCurrencyAmount,
-    cardId: 'dummyCardId',
+    cardId: 'dummyVirtualCardId',
     declineReason: 'dummyDeclineReason',
     description: 'dummyDescription',
     detail: [
@@ -128,9 +133,9 @@ export class GraphQLDataFactory {
     ],
     keyId: 'dummyKeyId',
     sequenceId: 'dummySequenceId',
-    sortDateEpochMs: 3.0,
+    sortDateEpochMs: 100.0,
     transactedAmount: this.sealedCurrencyAmount,
     transactedAtEpochMs: 'SEALED-NUMBER',
-    type: TransactionType.Complete,
+    type: TransactionType.Pending,
   }
 }

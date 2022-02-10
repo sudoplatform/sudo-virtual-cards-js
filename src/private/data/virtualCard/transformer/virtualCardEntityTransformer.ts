@@ -1,4 +1,5 @@
 import { VirtualCardEntity } from '../../../domain/entities/virtualCard/virtualCardEntity'
+import { TransactionEntityTransformer } from '../../transaction/transformer/TransactionEntityTransformer'
 import {
   VirtualCardSealedAttributes,
   VirtualCardUnsealed,
@@ -19,6 +20,9 @@ export class VirtualCardEntityTransformer {
       csc: data.csc,
       billingAddress: data.billingAddress,
       expiry: data.expiry,
+      lastTransaction: data.lastTransaction
+        ? TransactionEntityTransformer.transform(data.lastTransaction)
+        : undefined,
     }
   }
 

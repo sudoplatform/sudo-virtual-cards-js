@@ -358,7 +358,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     it('returns expected result', async () => {
       await expect(
         instanceUnderTest.getFundingSourceClientConfiguration(),
-      ).resolves.toStrictEqual([
+      ).resolves.toEqual([
         {
           type: 'stripe',
           version: 1,
@@ -388,7 +388,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       })
       verify(mockSetupFundingSourceUseCase.execute(anything())).once()
       const [args] = capture(mockSetupFundingSourceUseCase.execute).first()
-      expect(args).toStrictEqual<typeof args>({
+      expect(args).toEqual<typeof args>({
         currency,
         type: FundingSourceType.CreditCard,
       })
@@ -399,7 +399,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
           currency: 'dummyCurrency',
           type: FundingSourceType.CreditCard,
         }),
-      ).resolves.toStrictEqual(ApiDataFactory.provisionalFundingSource)
+      ).resolves.toEqual(ApiDataFactory.provisionalFundingSource)
     })
   })
 
@@ -424,7 +424,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       })
       verify(mockCompleteFundingSourceUseCase.execute(anything())).once()
       const [args] = capture(mockCompleteFundingSourceUseCase.execute).first()
-      expect(args).toStrictEqual<typeof args>({
+      expect(args).toEqual<typeof args>({
         id,
         completionData: { provider: 'stripe', version: 1, paymentMethod: '' },
       })
@@ -435,7 +435,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
           id: '',
           completionData: { provider: 'stripe', paymentMethod: '' },
         }),
-      ).resolves.toStrictEqual(ApiDataFactory.fundingSource)
+      ).resolves.toEqual(ApiDataFactory.fundingSource)
     })
   })
 
@@ -599,7 +599,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       })
       verify(mockProvisionVirtualCardUseCase.execute(anything())).once()
       const [args] = capture(mockProvisionVirtualCardUseCase.execute).first()
-      expect(args).toStrictEqual<typeof args>({
+      expect(args).toEqual<typeof args>({
         clientRefId,
         ownershipProofs,
         fundingSourceId,
@@ -617,7 +617,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
           alias: '',
           currency: '',
         }),
-      ).resolves.toStrictEqual(ApiDataFactory.provisionalVirtualCard)
+      ).resolves.toEqual(ApiDataFactory.provisionalVirtualCard)
     })
   })
   describe('updateVirtualCard', () => {
@@ -653,7 +653,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       })
       verify(mockUpdateVirtualCardUseCase.execute(anything())).once()
       const [args] = capture(mockUpdateVirtualCardUseCase.execute).first()
-      expect(args).toStrictEqual<typeof args>({
+      expect(args).toEqual<typeof args>({
         id,
         expectedCardVersion,
         cardHolder,
@@ -669,7 +669,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
           alias: '',
           billingAddress: undefined,
         }),
-      ).resolves.toStrictEqual({
+      ).resolves.toEqual({
         status: APIResultStatus.Success,
         result: ApiDataFactory.virtualCard,
       })
@@ -697,7 +697,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       })
       verify(mockCancelVirtualCardUseCase.execute(anything())).once()
       const [args] = capture(mockCancelVirtualCardUseCase.execute).first()
-      expect(args).toStrictEqual<typeof args>({
+      expect(args).toEqual<typeof args>({
         id,
       })
     })
@@ -706,7 +706,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
         instanceUnderTest.cancelVirtualCard({
           id: '',
         }),
-      ).resolves.toStrictEqual({
+      ).resolves.toEqual({
         status: APIResultStatus.Success,
         result: ApiDataFactory.virtualCard,
       })
@@ -734,7 +734,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       })
       verify(mockGetProvisionalCardUseCase.execute(anything())).once()
       const [args] = capture(mockGetProvisionalCardUseCase.execute).first()
-      expect(args).toStrictEqual<typeof args>({
+      expect(args).toEqual<typeof args>({
         id,
         cachePolicy: CachePolicy.CacheOnly,
       })
@@ -745,7 +745,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
           id: '',
           cachePolicy: CachePolicy.CacheOnly,
         }),
-      ).resolves.toStrictEqual(ApiDataFactory.provisionalVirtualCard)
+      ).resolves.toEqual(ApiDataFactory.provisionalVirtualCard)
     })
   })
   describe('listProvisionalCards', () => {
@@ -772,7 +772,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       })
       verify(mockListProvisionalCardsUseCase.execute(anything())).once()
       const [args] = capture(mockListProvisionalCardsUseCase.execute).first()
-      expect(args).toStrictEqual<typeof args>({
+      expect(args).toEqual<typeof args>({
         filter,
         cachePolicy: CachePolicy.CacheOnly,
         limit,
@@ -780,9 +780,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       })
     })
     it('returns expected result', async () => {
-      await expect(
-        instanceUnderTest.listProvisionalCards(),
-      ).resolves.toStrictEqual({
+      await expect(instanceUnderTest.listProvisionalCards()).resolves.toEqual({
         status: ListOperationResultStatus.Success,
         items: [ApiDataFactory.provisionalVirtualCard],
       })
@@ -810,7 +808,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       })
       verify(mockGetVirtualCardUseCase.execute(anything())).once()
       const [args] = capture(mockGetVirtualCardUseCase.execute).first()
-      expect(args).toStrictEqual<typeof args>({
+      expect(args).toEqual<typeof args>({
         id,
         cachePolicy: CachePolicy.CacheOnly,
       })
@@ -821,7 +819,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
           id: '',
           cachePolicy: CachePolicy.CacheOnly,
         }),
-      ).resolves.toStrictEqual(ApiDataFactory.virtualCard)
+      ).resolves.toEqual(ApiDataFactory.virtualCard)
     })
   })
   describe('listVirtualCards', () => {
@@ -848,7 +846,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       })
       verify(mockListVirtualCardsUseCase.execute(anything())).once()
       const [args] = capture(mockListVirtualCardsUseCase.execute).first()
-      expect(args).toStrictEqual<typeof args>({
+      expect(args).toEqual<typeof args>({
         filter,
         cachePolicy: CachePolicy.CacheOnly,
         limit,
@@ -856,12 +854,10 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       })
     })
     it('returns expected result', async () => {
-      await expect(instanceUnderTest.listVirtualCards()).resolves.toStrictEqual(
-        {
-          status: ListOperationResultStatus.Success,
-          items: [ApiDataFactory.virtualCard],
-        },
-      )
+      await expect(instanceUnderTest.listVirtualCards()).resolves.toEqual({
+        status: ListOperationResultStatus.Success,
+        items: [ApiDataFactory.virtualCard],
+      })
     })
   })
   describe('getTransaction', () => {
@@ -886,7 +882,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       })
       verify(mockGetTransactionUseCase.execute(anything())).once()
       const [args] = capture(mockGetTransactionUseCase.execute).first()
-      expect(args).toStrictEqual<typeof args>({
+      expect(args).toEqual<typeof args>({
         id,
         cachePolicy: CachePolicy.CacheOnly,
       })
@@ -897,7 +893,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
           id: '',
           cachePolicy: CachePolicy.CacheOnly,
         }),
-      ).resolves.toStrictEqual(ApiDataFactory.transaction)
+      ).resolves.toEqual(ApiDataFactory.transaction)
     })
   })
   describe('listTransactionsByCardId', () => {
@@ -935,7 +931,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       const [args] = capture(
         mockListTransactionsByCardIdUseCase.execute,
       ).first()
-      expect(args).toStrictEqual<typeof args>({
+      expect(args).toEqual<typeof args>({
         cardId,
         cachePolicy,
         filter,
@@ -948,7 +944,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     it('returns expected result', async () => {
       await expect(
         instanceUnderTest.listTransactionsByCardId({ cardId: '' }),
-      ).resolves.toStrictEqual({
+      ).resolves.toEqual({
         status: ListOperationResultStatus.Success,
         items: [ApiDataFactory.transaction],
       })

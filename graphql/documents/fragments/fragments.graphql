@@ -103,6 +103,13 @@ fragment SealedCard on SealedCard {
   }
 }
 
+fragment SealedCardWithLastTransaction on SealedCard {
+  ...SealedCard
+  lastTransaction {
+    ...SealedTransaction
+  }
+}
+
 fragment ProvisionalCard on ProvisionalCard {
   id
   owner

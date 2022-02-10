@@ -30,12 +30,12 @@ mutation ProvisionVirtualCard($input: CardProvisionRequest!) {
 
 mutation UpdateVirtualCard($input: CardUpdateRequest!) {
   updateCard(input: $input) {
-    ...SealedCard
+    ...SealedCardWithLastTransaction
   }
 }
 
 mutation CancelVirtualCard($input: CardCancelRequest!) {
   cancelCard(input: $input) {
-    ...SealedCard
+    ...SealedCardWithLastTransaction
   }
 }

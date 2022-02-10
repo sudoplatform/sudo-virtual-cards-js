@@ -1,5 +1,6 @@
 import { Owner } from '@sudoplatform/sudo-common'
 import { CardState } from '../../../..'
+import { TransactionEntity } from '../transaction/transactionEntity'
 
 /**
  * Domain representation of a virtual card entity.
@@ -43,6 +44,7 @@ export interface VirtualCardEntity {
   csc: string
   billingAddress?: VirtualCardBillingAddressEntity | undefined
   expiry: VirtualCardExpiryEntity
+  lastTransaction?: TransactionEntity
 }
 
 /**

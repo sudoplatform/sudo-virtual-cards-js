@@ -9,12 +9,14 @@ import {
 } from '@sudoplatform/sudo-common'
 import _ from 'lodash'
 import { v4 } from 'uuid'
-import { APIResult, APIResultStatus, CardState } from '../../..'
 import {
   KeyFormat,
   ProvisionalCard,
   SealedCard,
 } from '../../../gen/graphqlTypes'
+import { APIResult, APIResultStatus } from '../../../public/typings/apiResult'
+import { CardState } from '../../../public/typings/virtualCard'
+import { TransactionEntity } from '../../domain/entities/transaction/transactionEntity'
 import { ProvisionalVirtualCardEntity } from '../../domain/entities/virtualCard/provisionalVirtualCardEntity'
 import { VirtualCardEntity } from '../../domain/entities/virtualCard/virtualCardEntity'
 import {
@@ -29,6 +31,10 @@ import {
 } from '../../domain/entities/virtualCard/virtualCardService'
 import { ApiClient } from '../common/apiClient'
 import { DeviceKey, DeviceKeyWorker, KeyType } from '../common/deviceKeyWorker'
+import {
+  TransactionUnsealed,
+  TransactionWorker,
+} from '../common/transactionWorker'
 import { FetchPolicyTransformer } from '../common/transformer/fetchPolicyTransformer'
 import { ProvisionalVirtualCardEntityTransformer } from './transformer/provisionalVirtualCardEntityTransformer'
 import { VirtualCardEntityTransformer } from './transformer/virtualCardEntityTransformer'
@@ -69,6 +75,7 @@ export interface VirtualCardUnsealed {
   csc: string
   billingAddress?: VirtualCardBillingAddress
   expiry: VirtualCardExpiry
+  lastTransaction?: TransactionUnsealed
 }
 
 export type ProvisionalCardUnsealed = Omit<ProvisionalCard, 'card'> & {
@@ -85,12 +92,14 @@ export interface VirtualCardSealedAttributes {
   csc: string
   billingAddress?: VirtualCardBillingAddress
   expiry: VirtualCardExpiry
+  lastTransaction?: TransactionEntity
 }
 
 export class DefaultVirtualCardService implements VirtualCardService {
   constructor(
     private readonly appSync: ApiClient,
     private readonly deviceKeyWorker: DeviceKeyWorker,
+    private readonly transactionWorker: TransactionWorker,
   ) {}
 
   async provisionVirtualCard(
@@ -158,6 +167,7 @@ export class DefaultVirtualCardService implements VirtualCardService {
       }
     }
   }
+
   async cancelVirtualCard({
     id,
   }: VirtualCardServiceCancelCardInput): Promise<
@@ -251,6 +261,7 @@ export class DefaultVirtualCardService implements VirtualCardService {
       }
     }
   }
+
   async getProvisionalCard({
     id,
     cachePolicy,
@@ -282,6 +293,7 @@ export class DefaultVirtualCardService implements VirtualCardService {
       card: unsealedCard,
     })
   }
+
   async listProvisionalCards(
     input?: VirtualCardServiceListProvisionalCardsInput,
   ): Promise<ListOperationResult<ProvisionalVirtualCardEntity>> {
@@ -426,6 +438,9 @@ export class DefaultVirtualCardService implements VirtualCardService {
           })
         : undefined,
       expiry: await unsealExpiry(card.expiry),
+      lastTransaction: card.lastTransaction
+        ? await this.transactionWorker.unsealTransaction(card.lastTransaction)
+        : undefined,
     }
   }
 

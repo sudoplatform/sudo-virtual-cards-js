@@ -4,12 +4,24 @@ import { ServiceDataFactory } from '../../../../data-factory/service'
 
 describe('VirtualCardEntityTransformer Test Suite', () => {
   describe('VirtualCardEntityTransformer', () => {
-    it('successfully transforms graphql to entity format', () => {
+    it('successfully transforms graphql to entity format with no last transaction', () => {
       expect(
         VirtualCardEntityTransformer.transform(
           ServiceDataFactory.virtualCardUnsealed,
         ),
-      ).toStrictEqual(EntityDataFactory.virtualCard)
+      ).toEqual(EntityDataFactory.virtualCard)
+    })
+
+    it('successfully transforms graphql to entity format with last transaction', () => {
+      expect(
+        VirtualCardEntityTransformer.transform({
+          ...ServiceDataFactory.virtualCardUnsealed,
+          lastTransaction: ServiceDataFactory.transactionUnsealed,
+        }),
+      ).toEqual({
+        ...EntityDataFactory.virtualCard,
+        lastTransaction: EntityDataFactory.transaction,
+      })
     })
   })
 })

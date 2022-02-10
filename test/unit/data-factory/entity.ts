@@ -2,7 +2,6 @@ import { Base64 } from '@sudoplatform/sudo-common'
 import {
   CardState,
   CreditCardNetwork,
-  DeclineReason,
   FundingSourceState,
   ProvisionalFundingSourceState,
   ProvisioningState,
@@ -20,7 +19,6 @@ import { ProvisionalVirtualCardEntity } from '../../../src/private/domain/entiti
 
 export class EntityDataFactory {
   private static readonly commonProps = {
-    id: 'dummyId',
     owner: 'dummyOwner',
     version: 1,
     createdAt: new Date(1.0),
@@ -36,6 +34,7 @@ export class EntityDataFactory {
   )
   static readonly provisionalFundingSource: ProvisionalFundingSourceEntity = {
     ...this.commonProps,
+    id: 'dummyFundingSourceId',
     provisioningData: this.provisioningData,
     state: ProvisionalFundingSourceState.Completed,
     stateReason: StateReason.Unlocked,
@@ -43,6 +42,7 @@ export class EntityDataFactory {
 
   static readonly fundingSource: FundingSourceEntity = {
     ...this.commonProps,
+    id: 'dummyFundingSourceId',
     currency: 'dummyCurrency',
     last4: 'dummyLast4',
     network: CreditCardNetwork.Visa,
@@ -51,6 +51,7 @@ export class EntityDataFactory {
 
   static readonly provisionalVirtualCard: ProvisionalVirtualCardEntity = {
     ...this.commonProps,
+    id: 'dummyVirtualCardId',
     clientRefId: 'dummyClientRefId',
     provisioningState: ProvisioningState.Provisioning,
     card: undefined,
@@ -58,6 +59,7 @@ export class EntityDataFactory {
 
   static readonly virtualCard: VirtualCard = {
     ...this.commonProps,
+    id: 'dummyVirtualCardId',
     owners: [
       {
         id: 'dummyOwnerId',
@@ -88,33 +90,42 @@ export class EntityDataFactory {
     },
   }
 
-  private static readonly currencyAmount: CurrencyAmountEntity = {
+  private static readonly virtualCardAmount: CurrencyAmountEntity = {
     currency: 'USD',
     amount: 100,
   }
 
+  private static readonly fundingSourceAmount: CurrencyAmountEntity = {
+    currency: 'USD',
+    amount: 123,
+  }
+
   static readonly transaction: TransactionEntity = {
     ...this.commonProps,
+    id: 'dummyTransactionId',
     transactedAt: new Date(100.0),
-    cardId: 'dummyCardId',
+    cardId: 'dummyVirtualCardId',
     sequenceId: 'dummySequenceId',
-    type: TransactionType.Complete,
-    billedAmount: this.currencyAmount,
-    transactedAmount: this.currencyAmount,
+    type: TransactionType.Pending,
+    billedAmount: this.virtualCardAmount,
+    transactedAmount: this.virtualCardAmount,
     description: 'dummyDescription',
-    declineReason: DeclineReason.Declined,
     detail: [
       {
-        virtualCardAmount: this.currencyAmount,
+        virtualCardAmount: this.virtualCardAmount,
         markup: {
-          percent: 100,
-          flat: 100,
-          minCharge: 100,
+          percent: 299,
+          flat: 31,
+          minCharge: 50,
         },
-        markupAmount: this.currencyAmount,
-        fundingSourceAmount: this.currencyAmount,
+        markupAmount: {
+          currency: 'USD',
+          amount:
+            this.fundingSourceAmount.amount - this.virtualCardAmount.amount,
+        },
+        fundingSourceAmount: this.fundingSourceAmount,
         fundingSourceId: 'dummyFundingSourceId',
-        description: 'dummyDescription',
+        description: 'dummyFundingSourceDescription',
       },
     ],
   }

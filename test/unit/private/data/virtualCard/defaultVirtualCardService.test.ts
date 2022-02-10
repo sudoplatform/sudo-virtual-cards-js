@@ -17,6 +17,7 @@ import { APIResultStatus } from '../../../../../src'
 import { KeyFormat } from '../../../../../src/gen/graphqlTypes'
 import { ApiClient } from '../../../../../src/private/data/common/apiClient'
 import { DeviceKeyWorker } from '../../../../../src/private/data/common/deviceKeyWorker'
+import { TransactionWorker } from '../../../../../src/private/data/common/transactionWorker'
 import {
   DefaultVirtualCardService,
   VirtualCardSealedAttributes,
@@ -35,13 +36,21 @@ describe('DefaultVirtualCardService Test Suite', () => {
   let instanceUnderTest: DefaultVirtualCardService
   const mockAppSync = mock<ApiClient>()
   const mockDeviceKeyWorker = mock<DeviceKeyWorker>()
+  const mockTransactionWorker = mock<TransactionWorker>()
 
   beforeEach(() => {
     reset(mockAppSync)
     reset(mockDeviceKeyWorker)
+    reset(mockTransactionWorker)
+
     instanceUnderTest = new DefaultVirtualCardService(
       instance(mockAppSync),
       instance(mockDeviceKeyWorker),
+      instance(mockTransactionWorker),
+    )
+
+    when(mockTransactionWorker.unsealTransaction(anything())).thenResolve(
+      ServiceDataFactory.transactionUnsealed,
     )
   })
 
@@ -88,6 +97,7 @@ describe('DefaultVirtualCardService Test Suite', () => {
         true,
       )
     })
+
     it('calls app sync provision', async () => {
       const alias = v4()
       const billingAddress = {
@@ -112,7 +122,7 @@ describe('DefaultVirtualCardService Test Suite', () => {
       })
       verify(mockAppSync.provisionVirtualCard(anything())).once()
       const [args] = capture(mockAppSync.provisionVirtualCard).first()
-      expect(args).toStrictEqual<typeof args>({
+      expect(args).toEqual<typeof args>({
         alias,
         billingAddress,
         cardHolder,
@@ -154,7 +164,7 @@ describe('DefaultVirtualCardService Test Suite', () => {
       })
       verify(mockAppSync.updateVirtualCard(anything())).once()
       const [args] = capture(mockAppSync.updateVirtualCard).first()
-      expect(args).toStrictEqual<typeof args>({
+      expect(args).toEqual<typeof args>({
         id,
         expectedVersion: expectedCardVersion,
         cardHolder,
@@ -162,6 +172,7 @@ describe('DefaultVirtualCardService Test Suite', () => {
         billingAddress,
       })
     })
+
     it('returns expected result', async () => {
       await expect(
         instanceUnderTest.updateVirtualCard({
@@ -170,7 +181,7 @@ describe('DefaultVirtualCardService Test Suite', () => {
           alias: '',
           billingAddress: undefined,
         }),
-      ).resolves.toStrictEqual({
+      ).resolves.toEqual({
         status: APIResultStatus.Success,
         result: {
           ...EntityDataFactory.virtualCard,
@@ -213,14 +224,15 @@ describe('DefaultVirtualCardService Test Suite', () => {
       await instanceUnderTest.cancelVirtualCard({ id })
       verify(mockAppSync.cancelVirtualCard(anything())).once()
       const [args] = capture(mockAppSync.cancelVirtualCard).first()
-      expect(args).toStrictEqual<typeof args>({
+      expect(args).toEqual<typeof args>({
         id,
       })
     })
+
     it('returns expected result', async () => {
       await expect(
         instanceUnderTest.cancelVirtualCard({ id: '' }),
-      ).resolves.toStrictEqual({
+      ).resolves.toEqual({
         status: APIResultStatus.Success,
         result: {
           ...EntityDataFactory.virtualCard,
@@ -258,7 +270,7 @@ describe('DefaultVirtualCardService Test Suite', () => {
       )
     })
 
-    it('calls expected methods', async () => {
+    it('calls expected methods without lastTransaction', async () => {
       const id = v4()
       await instanceUnderTest.getVirtualCard({
         id,
@@ -268,12 +280,36 @@ describe('DefaultVirtualCardService Test Suite', () => {
       const [appSyncArgs, appSyncFetchPolicy] = capture(
         mockAppSync.getCard,
       ).first()
-      expect(appSyncArgs).toStrictEqual<typeof appSyncArgs>({
+      expect(appSyncArgs).toEqual<typeof appSyncArgs>({
         id,
       })
-      expect(appSyncFetchPolicy).toStrictEqual('cache-only')
+      expect(appSyncFetchPolicy).toEqual('cache-only')
       verify(mockDeviceKeyWorker.unsealString(anything())).atLeast(1)
+      verify(mockTransactionWorker.unsealTransaction(anything())).never()
     })
+
+    it('calls expected methods with lastTransaction', async () => {
+      when(mockAppSync.getCard(anything(), anything())).thenResolve({
+        ...GraphQLDataFactory.sealedCard,
+        lastTransaction: GraphQLDataFactory.sealedTransaction,
+      })
+      const id = v4()
+      await instanceUnderTest.getVirtualCard({
+        id,
+        cachePolicy: CachePolicy.CacheOnly,
+      })
+      verify(mockAppSync.getCard(anything(), anything())).once()
+      const [appSyncArgs, appSyncFetchPolicy] = capture(
+        mockAppSync.getCard,
+      ).first()
+      expect(appSyncArgs).toEqual<typeof appSyncArgs>({
+        id,
+      })
+      expect(appSyncFetchPolicy).toEqual('cache-only')
+      verify(mockDeviceKeyWorker.unsealString(anything())).atLeast(1)
+      verify(mockTransactionWorker.unsealTransaction(anything())).once()
+    })
+
     it('returns undefined if appsync returns undefined', async () => {
       when(mockAppSync.getCard(anything(), anything())).thenResolve(undefined)
       await expect(
@@ -283,12 +319,13 @@ describe('DefaultVirtualCardService Test Suite', () => {
         }),
       ).resolves.toBeUndefined()
     })
-    it('returns expected result', async () => {
+
+    it('returns expected result without lastTransaction', async () => {
       const result = await instanceUnderTest.getVirtualCard({
         id: '',
         cachePolicy: CachePolicy.CacheOnly,
       })
-      expect(result).toStrictEqual<typeof result>({
+      expect(result).toEqual<typeof result>({
         ...EntityDataFactory.virtualCard,
         cardHolder: 'UNSEALED-STRING',
         alias: 'UNSEALED-STRING',
@@ -306,6 +343,38 @@ describe('DefaultVirtualCardService Test Suite', () => {
           mm: 'UNSEALED-STRING',
           yyyy: 'UNSEALED-STRING',
         },
+      })
+    })
+
+    it('returns expected result with lastTransaction', async () => {
+      when(mockAppSync.getCard(anything(), anything())).thenResolve({
+        ...GraphQLDataFactory.sealedCard,
+        lastTransaction: GraphQLDataFactory.sealedTransaction,
+      })
+
+      const result = await instanceUnderTest.getVirtualCard({
+        id: '',
+        cachePolicy: CachePolicy.CacheOnly,
+      })
+      expect(result).toEqual<typeof result>({
+        ...EntityDataFactory.virtualCard,
+        cardHolder: 'UNSEALED-STRING',
+        alias: 'UNSEALED-STRING',
+        pan: 'UNSEALED-STRING',
+        csc: 'UNSEALED-STRING',
+        billingAddress: {
+          addressLine1: 'UNSEALED-STRING',
+          addressLine2: 'UNSEALED-STRING',
+          city: 'UNSEALED-STRING',
+          state: 'UNSEALED-STRING',
+          country: 'UNSEALED-STRING',
+          postalCode: 'UNSEALED-STRING',
+        },
+        expiry: {
+          mm: 'UNSEALED-STRING',
+          yyyy: 'UNSEALED-STRING',
+        },
+        lastTransaction: EntityDataFactory.transaction,
       })
     })
   })
@@ -344,27 +413,27 @@ describe('DefaultVirtualCardService Test Suite', () => {
         appSyncNextToken,
         appSyncFetchPolicy,
       ] = capture(mockAppSync.listCards).first()
-      expect(appSyncFilter).toStrictEqual<typeof appSyncFilter>(filter)
-      expect(appSyncLimit).toStrictEqual(limit)
-      expect(appSyncNextToken).toStrictEqual(nextToken)
-      expect(appSyncFetchPolicy).toStrictEqual('cache-only')
+      expect(appSyncFilter).toEqual<typeof appSyncFilter>(filter)
+      expect(appSyncLimit).toEqual(limit)
+      expect(appSyncNextToken).toEqual(nextToken)
+      expect(appSyncFetchPolicy).toEqual('cache-only')
       verify(mockDeviceKeyWorker.unsealString(anything())).atLeast(1)
     })
+
     it('returns empty list if appsync returns empty list', async () => {
       when(
         mockAppSync.listCards(anything(), anything(), anything(), anything()),
       ).thenResolve({ items: [] })
-      await expect(instanceUnderTest.listVirtualCards()).resolves.toStrictEqual(
-        {
-          status: ListOperationResultStatus.Success,
-          items: [],
-          nextToken: undefined,
-        },
-      )
+      await expect(instanceUnderTest.listVirtualCards()).resolves.toEqual({
+        status: ListOperationResultStatus.Success,
+        items: [],
+        nextToken: undefined,
+      })
     })
+
     it('returns expected result', async () => {
       const result = await instanceUnderTest.listVirtualCards()
-      expect(result).toStrictEqual<typeof result>({
+      expect(result).toEqual<typeof result>({
         status: ListOperationResultStatus.Success,
         items: [
           {
@@ -390,6 +459,49 @@ describe('DefaultVirtualCardService Test Suite', () => {
         nextToken,
       })
     })
+
+    it('returns expected result with lastTransaction', async () => {
+      when(
+        mockAppSync.listCards(anything(), anything(), anything(), anything()),
+      ).thenResolve({
+        items: [
+          {
+            ...GraphQLDataFactory.sealedCard,
+            lastTransaction: GraphQLDataFactory.sealedTransaction,
+          },
+        ],
+        nextToken,
+      })
+
+      const result = await instanceUnderTest.listVirtualCards()
+      expect(result).toEqual<typeof result>({
+        status: ListOperationResultStatus.Success,
+        items: [
+          {
+            ...EntityDataFactory.virtualCard,
+            cardHolder: 'UNSEALED-STRING',
+            alias: 'UNSEALED-STRING',
+            pan: 'UNSEALED-STRING',
+            csc: 'UNSEALED-STRING',
+            billingAddress: {
+              addressLine1: 'UNSEALED-STRING',
+              addressLine2: 'UNSEALED-STRING',
+              city: 'UNSEALED-STRING',
+              state: 'UNSEALED-STRING',
+              country: 'UNSEALED-STRING',
+              postalCode: 'UNSEALED-STRING',
+            },
+            expiry: {
+              mm: 'UNSEALED-STRING',
+              yyyy: 'UNSEALED-STRING',
+            },
+            lastTransaction: EntityDataFactory.transaction,
+          },
+        ],
+        nextToken,
+      })
+    })
+
     it('returns partial results when all unsealing fails', async () => {
       when(
         mockAppSync.listCards(anything(), anything(), anything(), anything()),
@@ -403,30 +515,29 @@ describe('DefaultVirtualCardService Test Suite', () => {
         new Error('failed to unseal 1'),
         new Error('failed to unseal 2'),
       )
-      await expect(instanceUnderTest.listVirtualCards()).resolves.toStrictEqual(
-        {
-          status: ListOperationResultStatus.Partial,
-          nextToken: undefined,
-          items: [],
-          failed: [
-            {
-              item: generatePartialVirtualCard({
-                ...EntityDataFactory.virtualCard,
-                id: '1',
-              }),
-              cause: new Error('failed to unseal 1'),
-            },
-            {
-              item: generatePartialVirtualCard({
-                ...EntityDataFactory.virtualCard,
-                id: '2',
-              }),
-              cause: new Error('failed to unseal 2'),
-            },
-          ],
-        },
-      )
+      await expect(instanceUnderTest.listVirtualCards()).resolves.toEqual({
+        status: ListOperationResultStatus.Partial,
+        nextToken: undefined,
+        items: [],
+        failed: [
+          {
+            item: generatePartialVirtualCard({
+              ...EntityDataFactory.virtualCard,
+              id: '1',
+            }),
+            cause: new Error('failed to unseal 1'),
+          },
+          {
+            item: generatePartialVirtualCard({
+              ...EntityDataFactory.virtualCard,
+              id: '2',
+            }),
+            cause: new Error('failed to unseal 2'),
+          },
+        ],
+      })
     })
+
     it('returns partial results when some unsealing fails', async () => {
       when(
         mockAppSync.listCards(anything(), anything(), anything(), anything()),
@@ -442,40 +553,38 @@ describe('DefaultVirtualCardService Test Suite', () => {
       const failedCard = generatePartialVirtualCard(
         EntityDataFactory.virtualCard,
       )
-      await expect(instanceUnderTest.listVirtualCards()).resolves.toStrictEqual(
-        {
-          status: ListOperationResultStatus.Partial,
-          nextToken: undefined,
-          items: [
-            {
-              ...EntityDataFactory.virtualCard,
-              id: '2',
-              cardHolder: 'UNSEALED-STRING',
-              alias: 'UNSEALED-STRING',
-              pan: 'UNSEALED-STRING',
-              csc: 'UNSEALED-STRING',
-              billingAddress: {
-                addressLine1: 'UNSEALED-STRING',
-                addressLine2: 'UNSEALED-STRING',
-                city: 'UNSEALED-STRING',
-                state: 'UNSEALED-STRING',
-                country: 'UNSEALED-STRING',
-                postalCode: 'UNSEALED-STRING',
-              },
-              expiry: {
-                mm: 'UNSEALED-STRING',
-                yyyy: 'UNSEALED-STRING',
-              },
+      await expect(instanceUnderTest.listVirtualCards()).resolves.toEqual({
+        status: ListOperationResultStatus.Partial,
+        nextToken: undefined,
+        items: [
+          {
+            ...EntityDataFactory.virtualCard,
+            id: '2',
+            cardHolder: 'UNSEALED-STRING',
+            alias: 'UNSEALED-STRING',
+            pan: 'UNSEALED-STRING',
+            csc: 'UNSEALED-STRING',
+            billingAddress: {
+              addressLine1: 'UNSEALED-STRING',
+              addressLine2: 'UNSEALED-STRING',
+              city: 'UNSEALED-STRING',
+              state: 'UNSEALED-STRING',
+              country: 'UNSEALED-STRING',
+              postalCode: 'UNSEALED-STRING',
             },
-          ],
-          failed: [
-            {
-              cause: new Error('failed to unseal 1'),
-              item: { ...failedCard, id: '1' },
+            expiry: {
+              mm: 'UNSEALED-STRING',
+              yyyy: 'UNSEALED-STRING',
             },
-          ],
-        },
-      )
+          },
+        ],
+        failed: [
+          {
+            cause: new Error('failed to unseal 1'),
+            item: { ...failedCard, id: '1' },
+          },
+        ],
+      })
     })
   })
 
@@ -503,10 +612,11 @@ describe('DefaultVirtualCardService Test Suite', () => {
       const [appSyncArgs, appSyncFetchPolicy] = capture(
         mockAppSync.getProvisionalCard,
       ).first()
-      expect(appSyncArgs).toStrictEqual<typeof appSyncArgs>(id)
-      expect(appSyncFetchPolicy).toStrictEqual('cache-only')
+      expect(appSyncArgs).toEqual<typeof appSyncArgs>(id)
+      expect(appSyncFetchPolicy).toEqual('cache-only')
       verify(mockDeviceKeyWorker.unsealString(anything())).atLeast(1)
     })
+
     it('returns undefined if appsync returns undefined', async () => {
       when(mockAppSync.getProvisionalCard(anything(), anything())).thenResolve(
         undefined,
@@ -518,12 +628,13 @@ describe('DefaultVirtualCardService Test Suite', () => {
         }),
       ).resolves.toBeUndefined()
     })
+
     it('returns expected result', async () => {
       const result = await instanceUnderTest.getProvisionalCard({
         id: '',
         cachePolicy: CachePolicy.CacheOnly,
       })
-      expect(result).toStrictEqual<typeof result>({
+      expect(result).toEqual<typeof result>({
         ...EntityDataFactory.provisionalVirtualCard,
         card: {
           ...EntityDataFactory.virtualCard,
@@ -600,12 +711,13 @@ describe('DefaultVirtualCardService Test Suite', () => {
         appSyncNextToken,
         appSyncFetchPolicy,
       ] = capture(mockAppSync.listProvisionalCards).first()
-      expect(appSyncFilter).toStrictEqual<typeof appSyncFilter>(filter)
-      expect(appSyncLimit).toStrictEqual(limit)
-      expect(appSyncNextToken).toStrictEqual(nextToken)
-      expect(appSyncFetchPolicy).toStrictEqual('cache-only')
+      expect(appSyncFilter).toEqual<typeof appSyncFilter>(filter)
+      expect(appSyncLimit).toEqual(limit)
+      expect(appSyncNextToken).toEqual(nextToken)
+      expect(appSyncFetchPolicy).toEqual('cache-only')
       verify(mockDeviceKeyWorker.unsealString(anything())).atLeast(1)
     })
+
     it('returns empty list if appsync returns empty list', async () => {
       when(
         mockAppSync.listProvisionalCards(
@@ -615,17 +727,16 @@ describe('DefaultVirtualCardService Test Suite', () => {
           anything(),
         ),
       ).thenResolve({ items: [] })
-      await expect(
-        instanceUnderTest.listProvisionalCards(),
-      ).resolves.toStrictEqual({
+      await expect(instanceUnderTest.listProvisionalCards()).resolves.toEqual({
         status: ListOperationResultStatus.Success,
         items: [],
         nextToken: undefined,
       })
     })
+
     it('returns expected result', async () => {
       const result = await instanceUnderTest.listProvisionalCards()
-      expect(result).toStrictEqual<typeof result>({
+      expect(result).toEqual<typeof result>({
         status: ListOperationResultStatus.Success,
         items: [
           {
@@ -654,13 +765,12 @@ describe('DefaultVirtualCardService Test Suite', () => {
         nextToken,
       })
     })
+
     it('returns partial KeyNotFoundError when key cannot be found for sealed card', async () => {
       when(mockDeviceKeyWorker.keyExists(anything(), anything())).thenResolve(
         false,
       )
-      await expect(
-        instanceUnderTest.listProvisionalCards(),
-      ).resolves.toStrictEqual({
+      await expect(instanceUnderTest.listProvisionalCards()).resolves.toEqual({
         status: ListOperationResultStatus.Partial,
         nextToken,
         items: [],
@@ -674,12 +784,11 @@ describe('DefaultVirtualCardService Test Suite', () => {
         ],
       })
     })
+
     it('returns partial when card fails to unseal', async () => {
       const error = new Error(v4())
       when(mockDeviceKeyWorker.unsealString(anything())).thenReject(error)
-      await expect(
-        instanceUnderTest.listProvisionalCards(),
-      ).resolves.toStrictEqual({
+      await expect(instanceUnderTest.listProvisionalCards()).resolves.toEqual({
         status: ListOperationResultStatus.Partial,
         nextToken,
         items: [],
@@ -712,20 +821,23 @@ describe('DefaultVirtualCardService Test Suite', () => {
       await instanceUnderTest.getPublicKeyOrRegisterNewKey()
       verify(mockDeviceKeyWorker.generateKeyPair()).once()
     })
+
     it('checks that key is registered when key locally exists', async () => {
       await instanceUnderTest.getPublicKeyOrRegisterNewKey()
       verify(mockAppSync.getKeyRing(anything())).once()
       const [args] = capture(mockAppSync.getKeyRing).first()
-      expect(args).toStrictEqual<typeof args>({
+      expect(args).toEqual<typeof args>({
         keyRingId: ServiceDataFactory.deviceKey.keyRingId,
         keyFormats: [KeyFormat.RsaPublicKey],
       })
     })
+
     it('registers newly created key when first created', async () => {
       when(mockDeviceKeyWorker.getCurrentPublicKey()).thenResolve(undefined)
       await instanceUnderTest.getPublicKeyOrRegisterNewKey()
       verify(mockAppSync.createPublicKey(anything())).once()
     })
+
     it('registers local key when key is not registered to service', async () => {
       when(mockAppSync.getKeyRing(anything())).thenResolve({
         items: [],
@@ -733,6 +845,7 @@ describe('DefaultVirtualCardService Test Suite', () => {
       await instanceUnderTest.getPublicKeyOrRegisterNewKey()
       verify(mockAppSync.createPublicKey(anything())).once()
     })
+
     it('does not register when key is already registered', async () => {
       when(mockAppSync.getKeyRing(anything())).thenResolve({
         items: [
@@ -749,7 +862,7 @@ describe('DefaultVirtualCardService Test Suite', () => {
   })
 
   describe('unsealVirtualCard', () => {
-    it('unseals correctly', async () => {
+    it('unseals correctly without last transaction', async () => {
       when(mockDeviceKeyWorker.unsealString(anything())).thenResolve(
         'UNSEALED_STRING',
       )
@@ -777,6 +890,38 @@ describe('DefaultVirtualCardService Test Suite', () => {
         },
       })
     })
+
+    it('unseals correctly with last transaction', async () => {
+      when(mockDeviceKeyWorker.unsealString(anything())).thenResolve(
+        'UNSEALED_STRING',
+      )
+
+      await expect(
+        instanceUnderTest.unsealVirtualCard({
+          ...GraphQLDataFactory.sealedCard,
+          cancelledAtEpochMs: 1.0,
+          lastTransaction: GraphQLDataFactory.sealedTransaction,
+        }),
+      ).resolves.toMatchObject({
+        cardHolder: 'UNSEALED_STRING',
+        alias: 'UNSEALED_STRING',
+        pan: 'UNSEALED_STRING',
+        csc: 'UNSEALED_STRING',
+        billingAddress: {
+          addressLine1: 'UNSEALED_STRING',
+          addressLine2: 'UNSEALED_STRING',
+          city: 'UNSEALED_STRING',
+          state: 'UNSEALED_STRING',
+          country: 'UNSEALED_STRING',
+          postalCode: 'UNSEALED_STRING',
+        },
+        expiry: {
+          mm: 'UNSEALED_STRING',
+          yyyy: 'UNSEALED_STRING',
+        },
+      })
+    })
+
     it('handles undefined values', async () => {
       when(mockDeviceKeyWorker.unsealString(anything())).thenResolve(
         'UNSEALED_STRING',
@@ -795,6 +940,7 @@ describe('DefaultVirtualCardService Test Suite', () => {
         billingAddress: expect.objectContaining({ addressLine2: undefined }),
       })
     })
+
     it('handles undefined billing address', async () => {
       when(mockDeviceKeyWorker.unsealString(anything())).thenResolve(
         'UNSEALED_STRING',

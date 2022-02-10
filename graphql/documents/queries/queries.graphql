@@ -67,14 +67,14 @@ query ListProvisionalCards(
 
 query GetCard($id: ID!, $keyId: String) {
   getCard(id: $id, keyId: $keyId) {
-    ...SealedCard
+    ...SealedCardWithLastTransaction
   }
 }
 
 query ListCards($filter: CardFilterInput, $limit: Int, $nextToken: String) {
   listCards(filter: $filter, limit: $limit, nextToken: $nextToken) {
     items {
-      ...SealedCard
+      ...SealedCardWithLastTransaction
     }
     nextToken
   }

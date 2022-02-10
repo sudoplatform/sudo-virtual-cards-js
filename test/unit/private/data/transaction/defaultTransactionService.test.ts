@@ -7,15 +7,14 @@ import {
   capture,
   instance,
   mock,
-  objectContaining,
   reset,
   verify,
   when,
 } from 'ts-mockito'
 import { v4 } from 'uuid'
-import { DeclineReason, SortOrder } from '../../../../../src'
+import { SortOrder } from '../../../../../src'
 import { ApiClient } from '../../../../../src/private/data/common/apiClient'
-import { DeviceKeyWorker } from '../../../../../src/private/data/common/deviceKeyWorker'
+import { TransactionWorker } from '../../../../../src/private/data/common/transactionWorker'
 import { DefaultTransactionService } from '../../../../../src/private/data/transaction/defaultTransactionService'
 import { TransactionSealedAttributes } from '../../../../../src/private/data/transaction/transactionSealedAttributes'
 import { TransactionEntity } from '../../../../../src/private/domain/entities/transaction/transactionEntity'
@@ -26,14 +25,19 @@ import { ServiceDataFactory } from '../../../data-factory/service'
 describe('DefaultTransactionService Test Suite', () => {
   let instanceUnderTest: DefaultTransactionService
   const mockAppSync = mock<ApiClient>()
-  const mockDeviceKeyWorker = mock<DeviceKeyWorker>()
+  const mockTransactionWorker = mock<TransactionWorker>()
 
   beforeEach(() => {
     reset(mockAppSync)
-    reset(mockDeviceKeyWorker)
+    reset(mockTransactionWorker)
+
     instanceUnderTest = new DefaultTransactionService(
       instance(mockAppSync),
-      instance(mockDeviceKeyWorker),
+      instance(mockTransactionWorker),
+    )
+
+    when(mockTransactionWorker.unsealTransaction(anything())).thenResolve(
+      ServiceDataFactory.transactionUnsealed,
     )
   })
 
@@ -56,30 +60,9 @@ describe('DefaultTransactionService Test Suite', () => {
 
   describe('getTransaction', () => {
     beforeEach(() => {
-      when(mockDeviceKeyWorker.getCurrentPublicKey()).thenResolve(
-        ServiceDataFactory.deviceKey,
-      )
       when(mockAppSync.getTransaction(anything(), anything())).thenResolve(
         GraphQLDataFactory.sealedTransaction,
       )
-      when(mockDeviceKeyWorker.unsealString(anything())).thenResolve(
-        'UNSEALED-STRING',
-      )
-      // Required as decline reason needs to match a true decline reason
-      when(
-        mockDeviceKeyWorker.unsealString(
-          objectContaining({
-            encrypted: GraphQLDataFactory.sealedTransaction.declineReason,
-          }),
-        ),
-      ).thenResolve(DeclineReason.Declined)
-      when(
-        mockDeviceKeyWorker.unsealString(
-          objectContaining({
-            encrypted: 'SEALED-NUMBER',
-          }),
-        ),
-      ).thenResolve('100')
     })
 
     it('calls expected methods', async () => {
@@ -88,14 +71,16 @@ describe('DefaultTransactionService Test Suite', () => {
         id,
         cachePolicy: CachePolicy.CacheOnly,
       })
+
       verify(mockAppSync.getTransaction(anything(), anything())).once()
       const [appSyncArgs, appSyncFetchPolicy] = capture(
         mockAppSync.getTransaction,
       ).first()
       expect(appSyncArgs).toStrictEqual<typeof appSyncArgs>({ id })
       expect(appSyncFetchPolicy).toStrictEqual('cache-only')
-      verify(mockDeviceKeyWorker.unsealString(anything())).atLeast(1)
+      verify(mockTransactionWorker.unsealTransaction(anything())).atLeast(1)
     })
+
     it('returns undefined if appsync returns undefined', async () => {
       when(mockAppSync.getTransaction(anything(), anything())).thenResolve(
         undefined,
@@ -107,58 +92,24 @@ describe('DefaultTransactionService Test Suite', () => {
         }),
       ).resolves.toBeUndefined()
     })
+
     it('returns expected result', async () => {
       const result = await instanceUnderTest.getTransaction({
         id: '',
         cachePolicy: CachePolicy.CacheOnly,
       })
-      const currencyAmount = { amount: 100, currency: 'UNSEALED-STRING' }
-      expect(result).toStrictEqual<typeof result>({
-        ...EntityDataFactory.transaction,
-        description: 'UNSEALED-STRING',
-        billedAmount: currencyAmount,
-        detail: [
-          {
-            ...EntityDataFactory.transaction.detail![0],
-            description: 'UNSEALED-STRING',
-            fundingSourceAmount: currencyAmount,
-            markupAmount: currencyAmount,
-            virtualCardAmount: currencyAmount,
-          },
-        ],
-        transactedAmount: currencyAmount,
-      })
+      expect(result).toEqual<typeof result>(EntityDataFactory.transaction)
     })
   })
+
   describe('listTransactionsByCardId', () => {
     beforeEach(() => {
-      when(mockDeviceKeyWorker.getCurrentPublicKey()).thenResolve(
-        ServiceDataFactory.deviceKey,
-      )
       when(
         mockAppSync.listTransactionsByCardId(anything(), anything()),
       ).thenResolve({
         items: [GraphQLDataFactory.sealedTransaction],
         nextToken: undefined,
       })
-      when(mockDeviceKeyWorker.unsealString(anything())).thenResolve(
-        'UNSEALED-STRING',
-      )
-      // Required as decline reason needs to match a true decline reason
-      when(
-        mockDeviceKeyWorker.unsealString(
-          objectContaining({
-            encrypted: GraphQLDataFactory.sealedTransaction.declineReason,
-          }),
-        ),
-      ).thenResolve(DeclineReason.Declined)
-      when(
-        mockDeviceKeyWorker.unsealString(
-          objectContaining({
-            encrypted: 'SEALED-NUMBER',
-          }),
-        ),
-      ).thenResolve('100')
     })
 
     it('calls expected methods', async () => {
@@ -184,7 +135,7 @@ describe('DefaultTransactionService Test Suite', () => {
       const [appSyncArgs, fetchPolicy] = capture(
         mockAppSync.listTransactionsByCardId,
       ).first()
-      expect(appSyncArgs).toStrictEqual<typeof appSyncArgs>({
+      expect(appSyncArgs).toEqual<typeof appSyncArgs>({
         cardId,
         filter,
         limit,
@@ -195,9 +146,10 @@ describe('DefaultTransactionService Test Suite', () => {
         },
         sortOrder,
       })
-      expect(fetchPolicy).toStrictEqual<typeof fetchPolicy>('cache-only')
-      verify(mockDeviceKeyWorker.unsealString(anything())).atLeast(1)
+      expect(fetchPolicy).toEqual<typeof fetchPolicy>('cache-only')
+      verify(mockTransactionWorker.unsealTransaction(anything())).atLeast(1)
     })
+
     it('returns empty list if appsync returns empty list', async () => {
       when(
         mockAppSync.listTransactionsByCardId(anything(), anything()),
@@ -210,33 +162,18 @@ describe('DefaultTransactionService Test Suite', () => {
         nextToken: undefined,
       })
     })
+
     it('returns expected result', async () => {
       const result = await instanceUnderTest.listTransactionsByCardId({
         cardId: '',
       })
-      const currencyAmount = { amount: 100, currency: 'UNSEALED-STRING' }
-      expect(result).toStrictEqual<typeof result>({
+      expect(result).toEqual<typeof result>({
         status: ListOperationResultStatus.Success,
         nextToken: undefined,
-        items: [
-          {
-            ...EntityDataFactory.transaction,
-            description: 'UNSEALED-STRING',
-            billedAmount: currencyAmount,
-            detail: [
-              {
-                ...EntityDataFactory.transaction.detail![0],
-                description: 'UNSEALED-STRING',
-                fundingSourceAmount: currencyAmount,
-                markupAmount: currencyAmount,
-                virtualCardAmount: currencyAmount,
-              },
-            ],
-            transactedAmount: currencyAmount,
-          },
-        ],
+        items: [EntityDataFactory.transaction],
       })
     })
+
     it('returns partial results when all unsealing fails', async () => {
       when(
         mockAppSync.listTransactionsByCardId(anything(), anything()),
@@ -246,13 +183,14 @@ describe('DefaultTransactionService Test Suite', () => {
           { ...GraphQLDataFactory.sealedTransaction, id: '2' },
         ],
       })
-      when(mockDeviceKeyWorker.unsealString(anything())).thenReject(
+      when(mockTransactionWorker.unsealTransaction(anything())).thenReject(
         new Error('failed to unseal 1'),
         new Error('failed to unseal 2'),
       )
+
       await expect(
         instanceUnderTest.listTransactionsByCardId({ cardId: '' }),
-      ).resolves.toStrictEqual({
+      ).resolves.toEqual({
         status: ListOperationResultStatus.Partial,
         nextToken: undefined,
         items: [],
@@ -274,6 +212,7 @@ describe('DefaultTransactionService Test Suite', () => {
         ],
       })
     })
+
     it('returns partial results when some unsealing fails', async () => {
       when(
         mockAppSync.listTransactionsByCardId(anything(), anything()),
@@ -283,45 +222,19 @@ describe('DefaultTransactionService Test Suite', () => {
           { ...GraphQLDataFactory.sealedTransaction, id: '2' },
         ],
       })
-      when(mockDeviceKeyWorker.unsealString(anything()))
+      when(mockTransactionWorker.unsealTransaction(anything()))
         .thenReject(new Error('failed to unseal 1'))
-        .thenResolve('UNSEALED-STRING')
-      when(
-        mockDeviceKeyWorker.unsealString(
-          objectContaining({
-            encrypted: GraphQLDataFactory.sealedTransaction.declineReason,
-          }),
-        ),
-      ).thenResolve(DeclineReason.Declined)
-      when(
-        mockDeviceKeyWorker.unsealString(
-          objectContaining({
-            encrypted: 'SEALED-NUMBER',
-          }),
-        ),
-      ).thenResolve('100')
-      const currencyAmount = { amount: 100, currency: 'UNSEALED-STRING' }
+        .thenResolve({ ...ServiceDataFactory.transactionUnsealed, id: '2' })
+
       await expect(
         instanceUnderTest.listTransactionsByCardId({ cardId: '' }),
-      ).resolves.toStrictEqual({
+      ).resolves.toEqual({
         status: ListOperationResultStatus.Partial,
         nextToken: undefined,
         items: [
           {
             ...EntityDataFactory.transaction,
             id: '2',
-            description: 'UNSEALED-STRING',
-            billedAmount: currencyAmount,
-            detail: [
-              {
-                ...EntityDataFactory.transaction.detail![0],
-                description: 'UNSEALED-STRING',
-                fundingSourceAmount: currencyAmount,
-                markupAmount: currencyAmount,
-                virtualCardAmount: currencyAmount,
-              },
-            ],
-            transactedAmount: currencyAmount,
           },
         ],
         failed: [
