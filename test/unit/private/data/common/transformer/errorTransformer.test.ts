@@ -11,6 +11,7 @@ import {
   FundingSourceNotFoundError,
   FundingSourceNotSetupError,
   FundingSourceStateError,
+  IdentityVerificationNotVerifiedError,
   ProvisionalFundingSourceNotFoundError,
   UnacceptableFundingSourceError,
 } from '../../../../../../src'
@@ -45,6 +46,8 @@ describe('Error Transformer Test Suite', () => {
     ${new FundingSourceNotFoundError(errorMsg)}
     ${'sudoplatform.virtual-cards.CardNotFoundError'}
     ${new CardNotFoundError(errorMsg)}
+    ${'sudoplatform.IdentityVerificationNotVerifiedError'}
+    ${new IdentityVerificationNotVerifiedError(errorMsg)}
   `(
     'converts $appSyncErrorType to $expectedErrorType',
     ({ appSyncErrorType, expectedErrorType }) => {

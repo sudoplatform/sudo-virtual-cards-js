@@ -10,6 +10,7 @@ import {
   FundingSourceNotFoundError,
   FundingSourceNotSetupError,
   FundingSourceStateError,
+  IdentityVerificationNotVerifiedError,
   ProvisionalFundingSourceNotFoundError,
   UnacceptableFundingSourceError,
 } from '../../../../public/errors'
@@ -35,6 +36,8 @@ export class ErrorTransformer {
         return new UnacceptableFundingSourceError(error.message)
       case 'sudoplatform.virtual-cards.CardNotFoundError':
         return new CardNotFoundError(error.message)
+      case 'sudoplatform.IdentityVerificationNotVerifiedError':
+        return new IdentityVerificationNotVerifiedError(error.message)
       default:
         return mapGraphQLToClientError(error)
     }

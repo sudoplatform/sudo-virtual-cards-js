@@ -94,3 +94,14 @@ export class CardNotFoundError extends VirtualCardsError {
     super(msg)
   }
 }
+
+/**
+ * On funding source creation, the funding source identity information
+ * does match closely enough with information verified during identity
+ * verification.
+ */
+export class IdentityVerificationNotVerifiedError extends VirtualCardsError {
+  constructor(msg?: string) {
+    super(msg)
+  }
+}
