@@ -8,12 +8,14 @@ import {
   CardNotFoundError,
   DuplicateFundingSourceError,
   FundingSourceCompletionDataInvalidError,
+  FundingSourceNotActiveError,
   FundingSourceNotFoundError,
   FundingSourceNotSetupError,
   FundingSourceStateError,
   IdentityVerificationNotVerifiedError,
   ProvisionalFundingSourceNotFoundError,
   UnacceptableFundingSourceError,
+  VelocityExceededError,
 } from '../../../../../../src'
 import { ErrorTransformer } from '../../../../../../src/private/data/common/transformer/errorTransformer'
 
@@ -44,10 +46,14 @@ describe('Error Transformer Test Suite', () => {
     ${new UnacceptableFundingSourceError(errorMsg)}
     ${'sudoplatform.virtual-cards.FundingSourceNotFoundError'}
     ${new FundingSourceNotFoundError(errorMsg)}
+    ${'sudoplatform.virtual-cards.FundingSourceNotActiveError'}
+    ${new FundingSourceNotActiveError(errorMsg)}
     ${'sudoplatform.virtual-cards.CardNotFoundError'}
     ${new CardNotFoundError(errorMsg)}
     ${'sudoplatform.IdentityVerificationNotVerifiedError'}
     ${new IdentityVerificationNotVerifiedError(errorMsg)}
+    ${'sudoplatform.virtual-cards.VelocityExceededError'}
+    ${new VelocityExceededError(errorMsg)}
   `(
     'converts $appSyncErrorType to $expectedErrorType',
     ({ appSyncErrorType, expectedErrorType }) => {

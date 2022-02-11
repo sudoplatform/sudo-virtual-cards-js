@@ -279,6 +279,19 @@ export interface ListTransactionsByCardIdInput {
   sortOrder?: SortOrder
 }
 
+/**
+ * Sudo Platform Virtual Cards client API
+ *
+ * All methods should be expected to be able to throw the following
+ * errors defined in {@link "@sudoplatform/sudo-common"}:
+ *
+ * @throws {@link NotSignedInError}
+ *  User not signed in. Sign in before performing the operation.
+ * @throws {@link AccountLockedError}
+ *  Account has been locked. Contact support.
+ * @throws {@link ServiceError}
+ *  Transient error at the service. Try the operation again
+ */
 export interface SudoVirtualCardsClient {
   /**
    * Get the funding source client configuration.
@@ -293,6 +306,12 @@ export interface SudoVirtualCardsClient {
    * Setup the funding source.
    * @param {SetupFundingSourceInput} input Parameters used to setup the provisional funding source.
    * @returns {ProvisionalFundingSource} The provisional funding source.
+   * @throws {@link InsufficientEntitlementsError}
+   *   User has insufficient entitlements to setup a new funding source.
+   * @throws {@link VelocityExceededError}
+   *   Configured maximum rate of attempts to add a funding source has
+   *   been exceeded or too many failed attempts have recently been made.
+   *   Wait before retrying.
    */
   setupFundingSource(
     input: SetupFundingSourceInput,
@@ -302,6 +321,21 @@ export interface SudoVirtualCardsClient {
    * Complete a provisional funding source.
    * @param {CompleteFundingSourceInput} input Parameters used to complete the funding source.
    * @returns {FundingSource} The funding source to be provisioned.
+   * @throws {@link DuplicateFundingSourceError}
+   *  User already has an active funding source matching the funding
+   *  source being created.
+   * @throws {@link FundingSourceCompletionDataInvalidError}
+   *  Completion data provided does not match provisional funding
+   *  source specified.
+   * @throws {@link IdentityVerificationNotVerifiedError}
+   *  Identity information associated with funding source does not
+   *  sufficiently match identity information provided during identity
+   *  verification.
+   * @throws {@link ProvisionalFundingSourceNotFoundError}
+   *  No provisional funding source with the ID specified could be found.
+   * @throws {@link UnacceptableFundingSourceError}
+   *  The funding source provided is not acceptable for use to fund virtual
+   *  card transactions.
    */
   completeFundingSource(
     input: CompleteFundingSourceInput,
@@ -314,7 +348,8 @@ export interface SudoVirtualCardsClient {
    * @returns {FundingSource | undefined} The funding source identified by id or undefined if the funding source
    *  cannot be found.
    *
-   * @throws {@link NotSignedInError}
+   * @throws {@link FundingSourceNotFoundError}
+   *   No funding source matching the specified ID could be found.
    */
   getFundingSource(
     input: GetFundingSourceInput,
@@ -326,8 +361,6 @@ export interface SudoVirtualCardsClient {
    * @param {ListFundingSourcesInput} input Parameters used to retrieve a list of created funding sources.
    * @returns {ListOutput<FundingSource>} An array of funding sources or an empty array if no matching funding sources
    *  can be found.
-   *
-   * @throws {@link NotSignedInError}
    */
   listFundingSources(
     input?: ListFundingSourcesInput,
@@ -339,7 +372,8 @@ export interface SudoVirtualCardsClient {
    * @param {string} id The identifier of the funding source to cancel.
    * @returns {FundingSource} The funding source that was cancelled.
    *
-   * @throws {@link NotSignedInError}
+   * @throws {@link FundingSourceNotFoundError}
+   *   No funding source matching the specified ID could be found.
    */
   cancelFundingSource(id: string): Promise<FundingSource>
 
@@ -348,6 +382,15 @@ export interface SudoVirtualCardsClient {
    * @param {ProvisionVirtualCardInput} input Parameters used to provision a virtual card.
    *
    * @returns {ProvisionalFundingSource} The card that is being provisioned. Please poll the card via the list methods to access the card.
+   * @throws {@link FundingSourceNotFoundError}
+   *   No funding source matching the specified ID could be found.
+   * @throws {@link FundingSourceNotActiveError}
+   *   The funding source matching the specified ID is not active.
+   * @throws {@link InsufficientEntitlementsError}
+   *   User has insufficient entitlements to setup a new virtual card.
+   * @throws {@link VelocityExceededError}
+   *   Configured maximum rate of attempts to add a virtual card has
+   *   been exceeded. Wait before retrying.
    */
   provisionVirtualCard(
     input: ProvisionVirtualCardInput,
@@ -358,6 +401,9 @@ export interface SudoVirtualCardsClient {
    * @param input Parameters used to update a virtual card.
    *
    * @returns {VirtualCard} The virtual card that was updated.
+   *
+   * @throws {@link CardNotFoundError}
+   *  No virtual card matching the ID specified could be found
    */
   updateVirtualCard(
     input: UpdateVirtualCardInput,
@@ -368,6 +414,9 @@ export interface SudoVirtualCardsClient {
    * @param input Parameters used to cancel a virtual card.
    *
    * @returns {string} The identifier of the card that was just cancelled.
+   *
+   * @throws {@link CardNotFoundError}
+   *  No virtual card matching the ID specified could be found
    */
   cancelVirtualCard(
     input: CancelVirtualCardInput,

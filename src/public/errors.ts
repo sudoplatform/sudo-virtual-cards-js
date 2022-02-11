@@ -49,6 +49,18 @@ export class FundingSourceNotFoundError extends VirtualCardsError {
 }
 
 /**
+ * The Funding Source is not active.
+ *
+ * The Funding Source attempted to be accessed must be active for
+ * the attempted operation.
+ */
+export class FundingSourceNotActiveError extends VirtualCardsError {
+  constructor(msg?: string) {
+    super(msg)
+  }
+}
+
+/**
  * The Funding Source completion data is invalid.
  *
  * The completion data passed to `completeFundingSource` is invalid or corrupted.
@@ -101,6 +113,16 @@ export class CardNotFoundError extends VirtualCardsError {
  * verification.
  */
 export class IdentityVerificationNotVerifiedError extends VirtualCardsError {
+  constructor(msg?: string) {
+    super(msg)
+  }
+}
+
+/**
+ * Attempts to create the resource have exceeded the allowable
+ * velocity for that resource.
+ */
+export class VelocityExceededError extends VirtualCardsError {
   constructor(msg?: string) {
     super(msg)
   }

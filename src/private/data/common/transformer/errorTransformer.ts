@@ -7,12 +7,14 @@ import {
   CardNotFoundError,
   DuplicateFundingSourceError,
   FundingSourceCompletionDataInvalidError,
+  FundingSourceNotActiveError,
   FundingSourceNotFoundError,
   FundingSourceNotSetupError,
   FundingSourceStateError,
   IdentityVerificationNotVerifiedError,
   ProvisionalFundingSourceNotFoundError,
   UnacceptableFundingSourceError,
+  VelocityExceededError,
 } from '../../../../public/errors'
 
 export class ErrorTransformer {
@@ -26,6 +28,8 @@ export class ErrorTransformer {
         return new FundingSourceNotSetupError(error.message)
       case 'sudoplatform.virtual-cards.ProvisionalFundingSourceNotFoundError':
         return new ProvisionalFundingSourceNotFoundError(error.message)
+      case 'sudoplatform.virtual-cards.FundingSourceNotActiveError':
+        return new FundingSourceNotActiveError(error.message)
       case 'sudoplatform.virtual-cards.FundingSourceNotFoundError':
         return new FundingSourceNotFoundError(error.message)
       case 'sudoplatform.virtual-cards.FundingSourceCompletionDataInvalidError':
@@ -36,6 +40,8 @@ export class ErrorTransformer {
         return new UnacceptableFundingSourceError(error.message)
       case 'sudoplatform.virtual-cards.CardNotFoundError':
         return new CardNotFoundError(error.message)
+      case 'sudoplatform.virtual-cards.VelocityExceededError':
+        return new VelocityExceededError(error.message)
       case 'sudoplatform.IdentityVerificationNotVerifiedError':
         return new IdentityVerificationNotVerifiedError(error.message)
       default:
