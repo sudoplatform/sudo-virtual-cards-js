@@ -449,6 +449,9 @@ export interface SudoVirtualCardsClient {
    *
    * @throws {@link CardNotFoundError}
    *  No virtual card matching the ID specified could be found
+   * @throws {@link CardStateError}
+   *  Card not in ISSUED state. It must be in ISSUED state in order
+   *  to update.
    */
   updateVirtualCard(
     input: UpdateVirtualCardInput,

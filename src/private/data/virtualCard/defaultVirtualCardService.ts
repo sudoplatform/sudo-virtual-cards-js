@@ -441,7 +441,7 @@ export class DefaultVirtualCardService implements VirtualCardService {
         : undefined,
       last4: card.last4,
       cardHolder: await unseal(card.cardHolder),
-      alias: await unseal(card.alias),
+      alias: card.alias ? await unseal(card.alias) : undefined,
       pan: await unseal(card.pan),
       csc: await unseal(card.csc),
       billingAddress: card.billingAddress

@@ -108,6 +108,15 @@ export class CardNotFoundError extends VirtualCardsError {
 }
 
 /**
+ * The card state was not appropriate for the
+ */
+export class CardStateError extends VirtualCardsError {
+  constructor(msg?: string) {
+    super(msg)
+  }
+}
+
+/**
  * On funding source creation, the funding source identity information
  * does match closely enough with information verified during identity
  * verification.

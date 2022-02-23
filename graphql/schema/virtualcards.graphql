@@ -124,7 +124,7 @@ type SealedCard {
   metadata: SealedAttribute
 
   # deprecated - set a property in metadata instead
-  alias: String! # SealedStringAttribute
+  alias: String # SealedStringAttribute
 }
 
 type Owner {

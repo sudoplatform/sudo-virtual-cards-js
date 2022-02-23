@@ -290,6 +290,49 @@ describe('DefaultVirtualCardService Test Suite', () => {
         },
       })
     })
+
+    it('returns expected result when no alias is returned', async () => {
+      when(mockAppSync.updateVirtualCard(anything())).thenResolve({
+        ...GraphQLDataFactory.sealedCard,
+        alias: undefined,
+      })
+
+      await expect(
+        instanceUnderTest.updateVirtualCard({
+          id: '',
+          cardHolder: '',
+          alias: null,
+          billingAddress: undefined,
+        }),
+      ).resolves.toEqual({
+        status: APIResultStatus.Success,
+        result: {
+          ...EntityDataFactory.virtualCard,
+          cardHolder: 'UNSEALED-STRING',
+          pan: 'UNSEALED-STRING',
+          csc: 'UNSEALED-STRING',
+          billingAddress: {
+            addressLine1: 'UNSEALED-STRING',
+            addressLine2: 'UNSEALED-STRING',
+            city: 'UNSEALED-STRING',
+            state: 'UNSEALED-STRING',
+            country: 'UNSEALED-STRING',
+            postalCode: 'UNSEALED-STRING',
+          },
+          expiry: {
+            mm: 'UNSEALED-STRING',
+            yyyy: 'UNSEALED-STRING',
+          },
+          metadata: {
+            alias: 'metadata-alias',
+            color: 'metadata-color',
+          },
+
+          // For now, undefined alias gets mapped to empty string for backwards compatibility
+          alias: '',
+        },
+      })
+    })
   })
 
   describe('cancelVirtualCard', () => {

@@ -6,6 +6,7 @@ import {
 import { v4 } from 'uuid'
 import {
   CardNotFoundError,
+  CardStateError,
   DuplicateFundingSourceError,
   FundingSourceCompletionDataInvalidError,
   FundingSourceNotActiveError,
@@ -50,6 +51,8 @@ describe('Error Transformer Test Suite', () => {
     ${new FundingSourceNotActiveError(errorMsg)}
     ${'sudoplatform.virtual-cards.CardNotFoundError'}
     ${new CardNotFoundError(errorMsg)}
+    ${'sudoplatform.virtual-cards.CardStateError'}
+    ${new CardStateError(errorMsg)}
     ${'sudoplatform.IdentityVerificationNotVerifiedError'}
     ${new IdentityVerificationNotVerifiedError(errorMsg)}
     ${'sudoplatform.virtual-cards.VelocityExceededError'}
