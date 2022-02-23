@@ -1,4 +1,4 @@
-import { Base64 } from '@sudoplatform/sudo-common'
+import { Base64, EncryptionAlgorithm } from '@sudoplatform/sudo-common'
 import {
   CardState,
   CreditCardNetwork,
@@ -11,6 +11,7 @@ import {
   ProvisionalFundingSourceState,
   ProvisioningState,
   PublicKey,
+  SealedAttribute,
   SealedCard,
   SealedCurrencyAmountAttribute,
   SealedTransaction,
@@ -63,11 +64,18 @@ export class GraphQLDataFactory {
     provisioningState: ProvisioningState.Provisioning,
   }
 
+  static readonly sealedCardMetadata: SealedAttribute = {
+    algorithm: EncryptionAlgorithm.AesCbcPkcs7Padding,
+    keyId: 'dummySymmetricKeyId',
+    plainTextType: 'json-string',
+    base64EncodedSealedData: 'dummyBase64EncodedSealedData',
+  }
+
   static readonly sealedCard: SealedCard = {
     ...this.commonProps,
     id: 'dummyVirtualCardId',
     activeToEpochMs: 3.0,
-    algorithm: 'AES/CBC/PKCS7Padding',
+    algorithm: 'RSAEncryptionOAEPAESCBC',
     keyId: 'dummyKeyId',
     keyRingId: 'dummyKeyRingId',
     alias: 'dummyAlias',
@@ -91,6 +99,7 @@ export class GraphQLDataFactory {
     state: CardState.Issued,
     last4: 'dummyLast4',
     owners: [{ id: 'dummyOwnerId', issuer: 'dummyIssuer' }],
+    metadata: { ...this.sealedCardMetadata },
   }
 
   static readonly publicKey: PublicKey = {
@@ -112,7 +121,7 @@ export class GraphQLDataFactory {
   static readonly sealedTransaction: SealedTransaction = {
     ...this.commonProps,
     id: 'dummyTransactionId',
-    algorithm: 'AES/CBC/PKCS7Padding',
+    algorithm: 'RSAEncryptionOAEPAESCBC',
     billedAmount: this.sealedCurrencyAmount,
     cardId: 'dummyVirtualCardId',
     declineReason: 'dummyDeclineReason',

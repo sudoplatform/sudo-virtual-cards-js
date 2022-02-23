@@ -15,7 +15,7 @@ export class VirtualCardEntityTransformer {
       ...VirtualCardEntityTransformer.transformOverlap(data),
       last4: data.last4,
       cardHolder: data.cardHolder,
-      alias: data.alias,
+      alias: data.alias ?? '', // default to empty string until we remove altogether
       pan: data.pan,
       csc: data.csc,
       billingAddress: data.billingAddress,
@@ -23,6 +23,7 @@ export class VirtualCardEntityTransformer {
       lastTransaction: data.lastTransaction
         ? TransactionEntityTransformer.transform(data.lastTransaction)
         : undefined,
+      metadata: data.metadata,
     }
   }
 

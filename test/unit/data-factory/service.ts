@@ -10,6 +10,9 @@ export class ServiceDataFactory {
     keyData: new TextEncoder().encode('dummyKeyData').buffer,
     keyFormat: PublicKeyFormat.RSAPublicKey,
   }
+
+  static readonly symmetricKeyId = 'dummySymmetricKeyId'
+
   static readonly deviceKey: DeviceKey = {
     id: 'dummyId',
     keyRingId: 'dummyKeyRingId',
@@ -51,6 +54,10 @@ export class ServiceDataFactory {
     expiry: {
       mm: 'mm',
       yyyy: 'yyyy',
+    },
+    metadata: {
+      alias: 'metadata-alias',
+      color: 'metadata-color',
     },
   }
 

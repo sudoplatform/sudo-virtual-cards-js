@@ -4,6 +4,7 @@ import {
   ProvisionalCardFilter,
   VirtualCardFilter,
 } from '../../../../public/typings/filters'
+import { Metadata } from '../../../../public/typings/metadata'
 import { VirtualCardSealedAttributes } from '../../../data/virtualCard/defaultVirtualCardService'
 import { ProvisionalVirtualCardEntity } from './provisionalVirtualCardEntity'
 import { VirtualCardEntity } from './virtualCardEntity'
@@ -13,7 +14,7 @@ export interface VirtualCardServiceProvisionVirtualCardInput {
   ownershipProofs: string[]
   fundingSourceId: string
   cardHolder: string
-  alias: string
+  currency: string
   billingAddress?: {
     addressLine1: string
     addressLine2?: string
@@ -22,7 +23,8 @@ export interface VirtualCardServiceProvisionVirtualCardInput {
     postalCode: string
     country: string
   }
-  currency: string
+  metadata?: Metadata
+  alias?: string
 }
 
 export interface VirtualCardServiceCancelCardInput {
@@ -37,18 +39,19 @@ export interface VirtualCardServiceGetVirtualCardInput {
 export interface VirtualCardServiceUpdateVirtualCardUseCaseInput {
   id: string
   expectedCardVersion?: number
-  cardHolder: string
-  alias: string
-  billingAddress:
-    | {
-        addressLine1: string
-        addressLine2?: string
-        city: string
-        state: string
-        postalCode: string
-        country: string
-      }
-    | undefined
+  cardHolder?: string
+  billingAddress?: {
+    addressLine1: string
+    addressLine2?: string
+    city: string
+    state: string
+    postalCode: string
+    country: string
+  } | null
+  metadata?: Metadata | null
+
+  /** @deprecated */
+  alias?: string | null
 }
 
 export interface VirtualCardServiceListVirtualCardsInput {

@@ -22,6 +22,7 @@ import {
 import { v4 } from 'uuid'
 import {
   APIResultStatus,
+  CreateKeysIfAbsentResult,
   DefaultSudoVirtualCardsClient,
   FundingSourceType,
   SortOrder,
@@ -37,6 +38,7 @@ import { GetFundingSourceClientConfigurationUseCase } from '../../../src/private
 import { GetFundingSourceUseCase } from '../../../src/private/domain/use-cases/fundingSource/getFundingSourceUseCase'
 import { ListFundingSourcesUseCase } from '../../../src/private/domain/use-cases/fundingSource/listFundingSourcesUseCase'
 import { SetupFundingSourceUseCase } from '../../../src/private/domain/use-cases/fundingSource/setupFundingSourceUseCase'
+import { CreateKeysIfAbsentUseCase } from '../../../src/private/domain/use-cases/key/createKeysIfAbsent'
 import { GetTransactionUseCase } from '../../../src/private/domain/use-cases/transaction/getTransactionUseCase'
 import { ListTransactionsByCardIdUseCase } from '../../../src/private/domain/use-cases/transaction/listTransactionsByCardIdUseCase'
 import { CancelVirtualCardUseCase } from '../../../src/private/domain/use-cases/virtualCard/cancelVirtualCardUseCase'
@@ -59,6 +61,7 @@ DefaultConfigurationManager.getInstance().setConfig(
 )
 
 // Constructor mocks
+
 jest.mock('../../../src/private/data/fundingSource/defaultFundingSourceService')
 const JestMockDefaultFundingSourceService =
   DefaultFundingSourceService as jest.MockedClass<
@@ -77,6 +80,11 @@ const JestMockSudoKeyManager = DefaultSudoKeyManager as jest.MockedClass<
 >
 
 // Use case Mocks
+jest.mock('../../../src/private/domain/use-cases/key/createKeysIfAbsent')
+const JestMockCreateKeysIfAbsentUseCase =
+  CreateKeysIfAbsentUseCase as jest.MockedClass<
+    typeof CreateKeysIfAbsentUseCase
+  >
 jest.mock(
   '../../../src/private/domain/use-cases/fundingSource/setupFundingSourceUseCase',
 )
@@ -188,6 +196,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
   const mockFundingSourceService = mock<DefaultFundingSourceService>()
 
   // Use case Mocks
+  const mockCreateKeysIfAbsentUseCase = mock<CreateKeysIfAbsentUseCase>()
   const mockSetupFundingSourceUseCase = mock<SetupFundingSourceUseCase>()
   const mockGetFundingSourceClientConfigurationUseCase =
     mock<GetFundingSourceClientConfigurationUseCase>()
@@ -216,6 +225,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     reset(mockApiClient)
     reset(mockFundingSourceService)
 
+    reset(mockCreateKeysIfAbsentUseCase)
     reset(mockSetupFundingSourceUseCase)
     reset(mockGetFundingSourceClientConfigurationUseCase)
     reset(mockCompleteFundingSourceUseCase)
@@ -237,6 +247,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     JestMockWebSudoCryptoProvider.mockClear()
     JestMockSudoKeyManager.mockClear()
 
+    JestMockCreateKeysIfAbsentUseCase.mockClear()
     JestMockSetupFundingSourceUseCase.mockClear()
     JestMockGetFundingSourceClientConfigurationUseCase.mockClear()
     JestMockCompleteFundingSourceUseCase.mockClear()
@@ -258,6 +269,9 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     )
     JestMockApiClient.mockImplementation(() => instance(mockApiClient))
 
+    JestMockCreateKeysIfAbsentUseCase.mockImplementation(() =>
+      instance(mockCreateKeysIfAbsentUseCase),
+    )
     JestMockSetupFundingSourceUseCase.mockImplementation(() =>
       instance(mockSetupFundingSourceUseCase),
     )
@@ -324,6 +338,29 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       })
       expect(JestMockApiClient).toHaveBeenCalledTimes(1)
       expect(JestMockDefaultFundingSourceService).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('createKeysIfAbsent', () => {
+    const result: CreateKeysIfAbsentResult = {
+      symmetricKey: { created: true, keyId: 'symmetric-key' },
+      keyPair: { created: true, keyId: 'key-pair' },
+    }
+
+    beforeEach(() => {
+      when(mockCreateKeysIfAbsentUseCase.execute()).thenResolve(result)
+    })
+
+    it('generates use case', async () => {
+      await instanceUnderTest.createKeysIfAbsent()
+      expect(JestMockCreateKeysIfAbsentUseCase).toHaveBeenCalledTimes(1)
+    })
+
+    it('calls use case as expected', async () => {
+      await expect(instanceUnderTest.createKeysIfAbsent()).resolves.toEqual(
+        result,
+      )
+      verify(mockCreateKeysIfAbsentUseCase.execute()).once()
     })
   })
 

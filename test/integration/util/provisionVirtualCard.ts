@@ -4,6 +4,7 @@ import Stripe from 'stripe'
 import { v4 } from 'uuid'
 import {
   BillingAddress,
+  Metadata,
   ProvisioningState,
   SudoVirtualCardsClient,
   VirtualCard,
@@ -31,12 +32,18 @@ export const provisionVirtualCard = async (
     cardHolder?: string
     currency?: string
     billingAddress?: BillingAddress
+    metadata?: Metadata
   },
 ): Promise<VirtualCard> => {
   const cardHolder = options?.cardHolder ?? 'cardMaxPerSudo:null'
   const currency = options?.currency ?? 'USD'
   const billingAddress = options?.billingAddress ?? optBillingAddress
   const alias = options?.alias ?? v4()
+  const metadata = options?.metadata ?? {
+    alias: 'metadata-alias',
+    color: 'red',
+  }
+
   let fundingSourceId
   if (!options?.fundingSourceId) {
     if (!stripe) {
@@ -67,6 +74,7 @@ export const provisionVirtualCard = async (
     cardHolder,
     currency,
     billingAddress,
+    metadata,
   })
   let card: VirtualCard | undefined
   for (let i = 0; i < 15; ++i) {

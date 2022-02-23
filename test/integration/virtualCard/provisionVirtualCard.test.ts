@@ -3,7 +3,12 @@ import { Sudo, SudoProfilesClient } from '@sudoplatform/sudo-profiles'
 import Stripe from 'stripe'
 import { v4 } from 'uuid'
 import waitForExpect from 'wait-for-expect'
-import { ProvisioningState, SudoVirtualCardsClient } from '../../../src'
+import {
+  CardState,
+  ProvisioningState,
+  ProvisionVirtualCardInput,
+  SudoVirtualCardsClient,
+} from '../../../src'
 import { createFundingSource } from '../util/createFundingSource'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
@@ -34,7 +39,8 @@ describe('ProvisionVirtualCard Test Suite', () => {
         'sudoplatform.virtual-cards.virtual-card',
       )
       const alias = v4()
-      const result = await instanceUnderTest.provisionVirtualCard({
+
+      const input: ProvisionVirtualCardInput = {
         ownershipProofs: [ownershipProof],
         fundingSourceId: fundingSource.id,
         cardHolder: 'cardMaxPerSudo:null',
@@ -47,22 +53,37 @@ describe('ProvisionVirtualCard Test Suite', () => {
           postalCode: '30318',
           country: 'US',
         },
-      })
+        metadata: {
+          alias,
+          color: 'red',
+        },
+      }
+
+      const result = await instanceUnderTest.provisionVirtualCard(input)
+
       await waitForExpect(
         async () => {
-          await expect(
-            instanceUnderTest.getProvisionalCard({
-              id: result.id,
-              cachePolicy: CachePolicy.RemoteOnly,
-            }),
-          ).resolves.toMatchObject({
+          const provisionalCard = await instanceUnderTest.getProvisionalCard({
+            id: result.id,
+            cachePolicy: CachePolicy.RemoteOnly,
+          })
+          expect(provisionalCard).toMatchObject({
             provisioningState: ProvisioningState.Completed,
+          })
+          expect(provisionalCard?.card).toMatchObject({
+            state: CardState.Issued,
+            currency: 'USD',
+            cardHolder: input.cardHolder,
+            billingAddress: input.billingAddress,
+            alias: input.alias ?? '',
+            metadata: input.metadata,
           })
         },
         15000,
         1000,
       )
     })
+
     it('provision two cards', async () => {
       if (!sudo.id) {
         fail('no sudo id')

@@ -1,4 +1,6 @@
 import {
+  DecodeError,
+  DefaultLogger,
   EncryptionAlgorithm,
   FatalError,
   KeyNotFoundError,
@@ -12,9 +14,11 @@ import { v4 } from 'uuid'
 import {
   KeyFormat,
   ProvisionalCard,
+  SealedAttribute,
   SealedCard,
 } from '../../../gen/graphqlTypes'
 import { APIResult, APIResultStatus } from '../../../public/typings/apiResult'
+import { Metadata } from '../../../public/typings/metadata'
 import { CardState } from '../../../public/typings/virtualCard'
 import { TransactionEntity } from '../../domain/entities/transaction/transactionEntity'
 import { ProvisionalVirtualCardEntity } from '../../domain/entities/virtualCard/provisionalVirtualCardEntity'
@@ -70,12 +74,13 @@ export interface VirtualCardUnsealed {
   cancelledAtEpochMs?: number | null
   last4: string
   cardHolder: string
-  alias: string
+  alias?: string
   pan: string
   csc: string
   billingAddress?: VirtualCardBillingAddress
   expiry: VirtualCardExpiry
   lastTransaction?: TransactionUnsealed
+  metadata?: Metadata
 }
 
 export type ProvisionalCardUnsealed = Omit<ProvisionalCard, 'card'> & {
@@ -93,9 +98,12 @@ export interface VirtualCardSealedAttributes {
   billingAddress?: VirtualCardBillingAddress
   expiry: VirtualCardExpiry
   lastTransaction?: TransactionEntity
+  metadata?: Metadata
 }
 
 export class DefaultVirtualCardService implements VirtualCardService {
+  private readonly log = new DefaultLogger(this.constructor.name)
+
   constructor(
     private readonly appSync: ApiClient,
     private readonly deviceKeyWorker: DeviceKeyWorker,
@@ -106,10 +114,13 @@ export class DefaultVirtualCardService implements VirtualCardService {
     input: VirtualCardServiceProvisionVirtualCardInput,
   ): Promise<ProvisionalVirtualCardEntity> {
     const publicKey = await this.getPublicKeyOrRegisterNewKey()
+    const sealedMetadata = await this.sealMetadata(input.metadata)
+
     const data = await this.appSync.provisionVirtualCard({
       alias: input.alias,
       billingAddress: input.billingAddress,
       cardHolder: input.cardHolder,
+      metadata: sealedMetadata,
       clientRefId: v4(),
       currency: input.currency,
       fundingSourceId: input.fundingSourceId,
@@ -143,15 +154,18 @@ export class DefaultVirtualCardService implements VirtualCardService {
     cardHolder,
     alias,
     billingAddress,
+    metadata,
   }: VirtualCardServiceUpdateVirtualCardUseCaseInput): Promise<
     APIResult<VirtualCardEntity, VirtualCardSealedAttributes>
   > {
+    const sealedMetadata = await this.sealMetadata(metadata)
     const sealedCard = await this.appSync.updateVirtualCard({
       id,
       expectedVersion: expectedCardVersion,
       cardHolder,
       alias,
       billingAddress,
+      metadata: sealedMetadata,
     })
     try {
       const unsealed = await this.unsealVirtualCard(sealedCard)
@@ -410,6 +424,7 @@ export class DefaultVirtualCardService implements VirtualCardService {
         yyyy: await unseal(input.yyyy),
       }
     }
+
     return {
       id: card.id,
       owner: card.owner,
@@ -441,9 +456,15 @@ export class DefaultVirtualCardService implements VirtualCardService {
       lastTransaction: card.lastTransaction
         ? await this.transactionWorker.unsealTransaction(card.lastTransaction)
         : undefined,
+      metadata: await this.unsealMetadata(card.metadata),
     }
   }
 
+  /**
+   * @deprecated
+   *   Replaced with pre-requisite to have called {@link createKeysIfAbsent} but
+   *   left in place and called for now for backwards compatibility.
+   */
   async getPublicKeyOrRegisterNewKey(): Promise<DeviceKey> {
     let publicKey = await this.deviceKeyWorker.getCurrentPublicKey()
     let registerRequired = false
@@ -503,5 +524,68 @@ export class DefaultVirtualCardService implements VirtualCardService {
       })
     }
     return publicKey
+  }
+
+  private async sealMetadata(
+    metadata?: Metadata | null,
+  ): Promise<SealedAttribute | undefined | null> {
+    if (metadata === undefined || metadata === null) {
+      return metadata
+    }
+
+    const secretKeyId =
+      (await this.deviceKeyWorker.getCurrentSymmetricKeyId()) ??
+      (await this.deviceKeyWorker.generateCurrentSymmetricKey())
+
+    const serialisedMetadata = JSON.stringify(metadata)
+    const sealedMetadata = await this.deviceKeyWorker.sealString({
+      string: serialisedMetadata,
+      keyId: secretKeyId,
+      keyType: KeyType.SymmetricKey,
+      algorithm: EncryptionAlgorithm.AesCbcPkcs7Padding,
+    })
+
+    return {
+      keyId: secretKeyId,
+      algorithm: EncryptionAlgorithm.AesCbcPkcs7Padding,
+      plainTextType: 'json-string',
+      base64EncodedSealedData: sealedMetadata,
+    }
+  }
+
+  private async unsealMetadata(
+    metadata?: SealedAttribute | null,
+  ): Promise<Metadata | undefined> {
+    if (metadata === undefined || metadata === null) {
+      return undefined
+    }
+
+    let algorithm: EncryptionAlgorithm
+    switch (metadata.algorithm) {
+      case 'AES/CBC/PKCS7Padding':
+        algorithm = EncryptionAlgorithm.AesCbcPkcs7Padding
+        break
+      default:
+        throw new UnrecognizedAlgorithmError(metadata.algorithm)
+    }
+
+    const unsealedMetadata = await this.deviceKeyWorker.unsealString({
+      encrypted: metadata.base64EncodedSealedData,
+      keyId: metadata.keyId,
+      keyType: KeyType.SymmetricKey,
+      algorithm,
+    })
+
+    try {
+      const parsed = JSON.parse(unsealedMetadata) as Metadata
+      return parsed
+    } catch (err) {
+      const message = 'Unable to parse unsealed metadata as JSON'
+      this.log.error(message, {
+        err,
+        unsealedMetadata,
+      })
+      throw new DecodeError(message)
+    }
   }
 }

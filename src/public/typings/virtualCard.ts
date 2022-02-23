@@ -1,11 +1,11 @@
 import { Owner } from '@sudoplatform/sudo-common'
+import { Metadata } from './metadata'
 import { Transaction } from './transaction'
 
 /**
  * Virtual Card sealed attributes.
  *
  * @property {string} cardHolder Name of the virtual card holder.
- * @property {string} alias Alias associated with the virtual card.
  * @property {string} pan Permanent Account Number of the virtual card.
  * @property {string} csc Card Security Code of the virtual card.
  * @property {string} billingAddress Billing address associated with the virtual card.
@@ -13,11 +13,13 @@ import { Transaction } from './transaction'
  */
 export interface VirtualCardSealedAttributes {
   cardHolder: string
-  alias: string
   pan: string
   csc: string
-  billingAddress?: BillingAddress | undefined
+  billingAddress?: BillingAddress
   expiry: Expiry
+
+  /** @deprecated Use client side sealed metadata instead */
+  alias: string
 }
 
 /**
@@ -36,12 +38,12 @@ export interface VirtualCardSealedAttributes {
  * @property {Date} cancelledAt If the card is inactive, date when card became inactive.
  * @property {string} last4 Last 4 digits of the virtual card.
  * @property {string} cardHolder Name of the virtual card holder.
- * @property {string} alias Alias associated with the virtual card.
  * @property {string} pan Permanent Account Number of the virtual card.
  * @property {string} csc Card Security Code of the virtual card.
  * @property {string} billingAddress Billing address associated with the virtual card.
  * @property {string} expiry Expiry information of the card.
  * @property {Transaction} lastTransaction Most recent transaction, if any, that has occurred on the card.
+ * @property {JSONValue} metadata Client side sealed arbitrary metadata object
  */
 export interface VirtualCard extends VirtualCardSealedAttributes {
   id: string
@@ -57,12 +59,15 @@ export interface VirtualCard extends VirtualCardSealedAttributes {
   cancelledAt?: Date
   last4: string
   cardHolder: string
-  alias: string
   pan: string
   csc: string
   billingAddress?: BillingAddress | undefined
   expiry: Expiry
   lastTransaction?: Transaction
+  metadata?: Metadata
+
+  /** @deprecated Store alias as a property of metadata instead */
+  alias: string
 }
 
 /**

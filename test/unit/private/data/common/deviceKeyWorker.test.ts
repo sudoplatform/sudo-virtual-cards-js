@@ -78,6 +78,7 @@ describe('DeviceKeyWorker Test Suite', () => {
       })
     })
   })
+
   describe('getCurrentPublicKey', () => {
     beforeEach(() => {
       when(mockKeyManager.getPassword(anything())).thenResolve(
@@ -85,6 +86,7 @@ describe('DeviceKeyWorker Test Suite', () => {
       )
       when(mockUserClient.getSubject()).thenResolve('dummySubject')
     })
+
     it('returns undefined when there is no password for "vc-keypair"', async () => {
       when(mockKeyManager.getPassword(anyString())).thenResolve(undefined)
       await expect(
@@ -93,7 +95,8 @@ describe('DeviceKeyWorker Test Suite', () => {
       verify(mockKeyManager.getPassword(anyString())).once()
       verify(mockKeyManager.getPublicKey(anyString())).never()
     })
-    it('returns undefined when there is no public key for password "vpn-keypair"', async () => {
+
+    it('returns undefined when there is no public key for password "vc-keypair"', async () => {
       when(mockKeyManager.getPublicKey(anything())).thenResolve(undefined)
       await expect(
         instanceUnderTest.getCurrentPublicKey(),
@@ -103,6 +106,30 @@ describe('DeviceKeyWorker Test Suite', () => {
       const [actualKey] = capture(mockKeyManager.getPublicKey).first()
       expect(actualKey).toStrictEqual('dummyPassword')
     })
+
+    it('returns undefined when there is no private key for password "vc-keypair"', async () => {
+      const keyPairId = v4()
+      const keyPairIdBits = new TextEncoder().encode(keyPairId)
+      when(mockKeyManager.getPassword('vc-keypair')).thenResolve(keyPairIdBits)
+      when(mockKeyManager.getPublicKey(keyPairId)).thenResolve(
+        ServiceDataFactory.sudoCommonPublicKey,
+      )
+      when(mockKeyManager.doesPrivateKeyExists(anything())).thenResolve(false)
+      when(mockUserClient.getSubject()).thenResolve('dummySubject')
+
+      await expect(
+        instanceUnderTest.getCurrentPublicKey(),
+      ).resolves.toBeUndefined()
+      verify(mockUserClient.getSubject()).once()
+      verify(mockKeyManager.getPassword(anything())).once()
+      verify(mockKeyManager.getPublicKey(anything())).once()
+      verify(mockKeyManager.doesPrivateKeyExists(anything())).once()
+      const [actualPrivateKeyName] = capture(
+        mockKeyManager.doesPrivateKeyExists,
+      ).first()
+      expect(actualPrivateKeyName).toEqual(keyPairId)
+    })
+
     it('currentPublicKey is retrieved from keyManager.getPassword if it is not in memory', async () => {
       const keyPairId = v4()
       const keyPairIdBits = new TextEncoder().encode(keyPairId)
@@ -110,6 +137,7 @@ describe('DeviceKeyWorker Test Suite', () => {
       when(mockKeyManager.getPublicKey(keyPairId)).thenResolve(
         ServiceDataFactory.sudoCommonPublicKey,
       )
+      when(mockKeyManager.doesPrivateKeyExists(anything())).thenResolve(true)
       when(mockUserClient.getSubject()).thenResolve('dummySubject')
 
       const currentPublicKey = await instanceUnderTest.getCurrentPublicKey()
@@ -119,8 +147,15 @@ describe('DeviceKeyWorker Test Suite', () => {
       verify(mockUserClient.getSubject()).once()
       verify(mockKeyManager.getPassword(anything())).once()
       verify(mockKeyManager.getPublicKey(anything())).once()
+      verify(mockKeyManager.doesPrivateKeyExists(anything())).once()
+      const [actualPrivateKeyName] = capture(
+        mockKeyManager.doesPrivateKeyExists,
+      ).first()
+      expect(actualPrivateKeyName).toEqual(keyPairId)
+
       expect(currentPublicKey?.id).toEqual(keyPairId)
     })
+
     it('returns immediately if currentPublicKey is set', async () => {
       const key = ServiceDataFactory.sudoCommonPublicKey
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -136,34 +171,62 @@ describe('DeviceKeyWorker Test Suite', () => {
   })
   describe('keyExists', () => {
     it('returns false when keytype symmetric returns undefined', async () => {
-      when(mockKeyManager.getSymmetricKey(anything())).thenResolve(undefined)
+      when(mockKeyManager.doesSymmetricKeyExists(anything())).thenResolve(false)
+
+      const keyName = 'symmetric-key'
       await expect(
-        instanceUnderTest.keyExists('', KeyType.SymmetricKey),
+        instanceUnderTest.keyExists(keyName, KeyType.SymmetricKey),
       ).resolves.toBeFalsy()
+
+      verify(mockKeyManager.doesSymmetricKeyExists(anything())).once()
+      const [actualName] = capture(
+        mockKeyManager.doesSymmetricKeyExists,
+      ).first()
+      expect(actualName).toEqual(keyName)
     })
+
     it('returns false when keytype keypair returns undefined', async () => {
-      when(mockKeyManager.getPrivateKey(anything())).thenResolve(undefined)
+      when(mockKeyManager.doesPrivateKeyExists(anything())).thenResolve(false)
+
+      const keyName = 'key-pair'
       await expect(
-        instanceUnderTest.keyExists('', KeyType.KeyPair),
+        instanceUnderTest.keyExists(keyName, KeyType.KeyPair),
       ).resolves.toBeFalsy()
+
+      verify(mockKeyManager.doesPrivateKeyExists(anything())).once()
+      const [actualName] = capture(mockKeyManager.doesPrivateKeyExists).first()
+      expect(actualName).toEqual(keyName)
     })
+
     it('returns true when keytype keypair returns key', async () => {
-      when(mockKeyManager.getPrivateKey(anything())).thenResolve(
-        new Uint8Array(),
-      )
+      when(mockKeyManager.doesPrivateKeyExists(anything())).thenResolve(true)
+
+      const keyName = 'key-pair'
       await expect(
-        instanceUnderTest.keyExists('', KeyType.KeyPair),
+        instanceUnderTest.keyExists(keyName, KeyType.KeyPair),
       ).resolves.toBeTruthy()
+
+      verify(mockKeyManager.doesPrivateKeyExists(anything())).once()
+      const [actualName] = capture(mockKeyManager.doesPrivateKeyExists).first()
+      expect(actualName).toEqual(keyName)
     })
+
     it('returns true when keytype symmetric returns key', async () => {
-      when(mockKeyManager.getSymmetricKey(anything())).thenResolve(
-        new Uint8Array(),
-      )
+      when(mockKeyManager.doesSymmetricKeyExists(anything())).thenResolve(true)
+
+      const keyName = 'symmetric-key'
       await expect(
-        instanceUnderTest.keyExists('', KeyType.SymmetricKey),
+        instanceUnderTest.keyExists(keyName, KeyType.SymmetricKey),
       ).resolves.toBeTruthy()
+
+      verify(mockKeyManager.doesSymmetricKeyExists(anything())).once()
+      const [actualName] = capture(
+        mockKeyManager.doesSymmetricKeyExists,
+      ).first()
+      expect(actualName).toEqual(keyName)
     })
   })
+
   describe('removeKey', () => {
     it('removes symmetric key when called with KeyType SymmetricKey', async () => {
       const keyId = v4()

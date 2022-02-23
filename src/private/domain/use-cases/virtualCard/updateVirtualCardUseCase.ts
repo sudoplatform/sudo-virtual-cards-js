@@ -1,5 +1,6 @@
 import { NotSignedInError } from '@sudoplatform/sudo-common'
 import { APIResult } from '../../../..'
+import { Metadata } from '../../../../public/typings/metadata'
 import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
 import { VirtualCardService } from '../../entities/virtualCard/virtualCardService'
 import {
@@ -11,9 +12,10 @@ import { VirtualCardBillingAddress } from './virtualCardBillingAddress'
 interface UpdateVirtualCardUseCaseInput {
   id: string
   expectedCardVersion?: number
-  cardHolder: string
-  alias: string
-  billingAddress: VirtualCardBillingAddress | undefined
+  cardHolder?: string
+  alias?: string | null
+  billingAddress?: VirtualCardBillingAddress | null
+  metadata?: Metadata | null
 }
 
 type UpdateVirtualCardUseCaseOutput = APIResult<

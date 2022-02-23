@@ -1,5 +1,6 @@
 import {
   CachePolicy,
+  EncryptionAlgorithm,
   KeyNotFoundError,
   ListOperationResultStatus,
 } from '@sudoplatform/sudo-common'
@@ -14,9 +15,15 @@ import {
 } from 'ts-mockito'
 import { v4 } from 'uuid'
 import { APIResultStatus } from '../../../../../src'
-import { KeyFormat } from '../../../../../src/gen/graphqlTypes'
+import {
+  CardUpdateRequest,
+  KeyFormat,
+} from '../../../../../src/gen/graphqlTypes'
 import { ApiClient } from '../../../../../src/private/data/common/apiClient'
-import { DeviceKeyWorker } from '../../../../../src/private/data/common/deviceKeyWorker'
+import {
+  DeviceKeyWorker,
+  UnsealInput,
+} from '../../../../../src/private/data/common/deviceKeyWorker'
 import { TransactionWorker } from '../../../../../src/private/data/common/transactionWorker'
 import {
   DefaultVirtualCardService,
@@ -27,6 +34,7 @@ import {
   VirtualCardBillingAddressEntity,
   VirtualCardEntity,
 } from '../../../../../src/private/domain/entities/virtualCard/virtualCardEntity'
+import { VirtualCardServiceUpdateVirtualCardUseCaseInput } from '../../../../../src/private/domain/entities/virtualCard/virtualCardService'
 import { uuidV4Regex } from '../../../../utility/uuidV4Regex'
 import { EntityDataFactory } from '../../../data-factory/entity'
 import { GraphQLDataFactory } from '../../../data-factory/graphQl'
@@ -37,6 +45,16 @@ describe('DefaultVirtualCardService Test Suite', () => {
   const mockAppSync = mock<ApiClient>()
   const mockDeviceKeyWorker = mock<DeviceKeyWorker>()
   const mockTransactionWorker = mock<TransactionWorker>()
+
+  const defaultUnsealString = (arg: UnsealInput): Promise<string> => {
+    if (arg.algorithm === EncryptionAlgorithm.AesCbcPkcs7Padding) {
+      return Promise.resolve(
+        JSON.stringify(ServiceDataFactory.virtualCardUnsealed.metadata),
+      )
+    } else {
+      return Promise.resolve('UNSEALED-STRING')
+    }
+  }
 
   beforeEach(() => {
     reset(mockAppSync)
@@ -52,6 +70,9 @@ describe('DefaultVirtualCardService Test Suite', () => {
     when(mockTransactionWorker.unsealTransaction(anything())).thenResolve(
       ServiceDataFactory.transactionUnsealed,
     )
+    when(mockDeviceKeyWorker.unsealString(anything())).thenCall(
+      defaultUnsealString,
+    )
   })
 
   const generatePartialVirtualCard = (
@@ -64,7 +85,7 @@ describe('DefaultVirtualCardService Test Suite', () => {
     delete _card.csc
     delete _card.expiry
     delete _card.pan
-    delete _card.pan
+    delete _card.metadata
     return _card as Omit<VirtualCardEntity, keyof VirtualCardSealedAttributes>
   }
 
@@ -78,6 +99,9 @@ describe('DefaultVirtualCardService Test Suite', () => {
 
   describe('provisionVirtualCard', () => {
     beforeEach(() => {
+      when(mockDeviceKeyWorker.getCurrentSymmetricKeyId()).thenResolve(
+        ServiceDataFactory.symmetricKeyId,
+      )
       when(mockDeviceKeyWorker.getCurrentPublicKey()).thenResolve(
         ServiceDataFactory.deviceKey,
       )
@@ -87,9 +111,6 @@ describe('DefaultVirtualCardService Test Suite', () => {
       when(mockAppSync.getKeyRing(anything())).thenResolve({
         items: [GraphQLDataFactory.publicKey],
       })
-      when(mockDeviceKeyWorker.unsealString(anything())).thenResolve(
-        'UNSEALED_STRING',
-      )
       when(mockAppSync.provisionVirtualCard(anything())).thenResolve(
         GraphQLDataFactory.provisionalCard,
       )
@@ -140,27 +161,32 @@ describe('DefaultVirtualCardService Test Suite', () => {
       when(mockDeviceKeyWorker.getCurrentPublicKey()).thenResolve(
         ServiceDataFactory.deviceKey,
       )
+      when(mockDeviceKeyWorker.getCurrentSymmetricKeyId()).thenResolve(
+        ServiceDataFactory.symmetricKeyId,
+      )
       when(mockAppSync.updateVirtualCard(anything())).thenResolve(
         GraphQLDataFactory.sealedCard,
       )
-      when(mockDeviceKeyWorker.unsealString(anything())).thenResolve(
-        'UNSEALED-STRING',
+      when(mockDeviceKeyWorker.sealString(anything())).thenResolve(
+        GraphQLDataFactory.sealedCardMetadata.base64EncodedSealedData,
       )
     })
 
-    it('calls appsync cancel', async () => {
+    it('calls appsync update correctly for full update', async () => {
       const id = v4()
       const expectedCardVersion = 10
       const cardHolder = v4()
       const alias = v4()
       const billingAddress = EntityDataFactory.virtualCard
         .billingAddress as VirtualCardBillingAddressEntity
+      const metadata = EntityDataFactory.virtualCard.metadata
       await instanceUnderTest.updateVirtualCard({
         id,
         expectedCardVersion,
         cardHolder,
         alias,
         billingAddress,
+        metadata,
       })
       verify(mockAppSync.updateVirtualCard(anything())).once()
       const [args] = capture(mockAppSync.updateVirtualCard).first()
@@ -170,8 +196,64 @@ describe('DefaultVirtualCardService Test Suite', () => {
         cardHolder,
         alias,
         billingAddress,
+        metadata: GraphQLDataFactory.sealedCardMetadata,
       })
+      verify(mockDeviceKeyWorker.sealString(anything())).once()
     })
+
+    it.each`
+      update
+      ${'cardHolder'}
+      ${'alias'}
+      ${'billingAddress'}
+      ${'metadata'}
+    `(
+      'calls appsync update correctly for partial update: $update',
+      async ({ update }) => {
+        const id = v4()
+        const expectedCardVersion = 10
+        const updateValues: Partial<VirtualCardServiceUpdateVirtualCardUseCaseInput> =
+          {
+            cardHolder: v4(),
+            alias: v4(),
+            billingAddress: EntityDataFactory.virtualCard
+              .billingAddress as VirtualCardBillingAddressEntity,
+            metadata: EntityDataFactory.virtualCard.metadata,
+          }
+
+        const appsyncUpdateValues: Partial<CardUpdateRequest> = {
+          cardHolder: updateValues.cardHolder,
+          alias: updateValues.alias,
+          billingAddress: EntityDataFactory.virtualCard
+            .billingAddress as VirtualCardBillingAddressEntity,
+          metadata: GraphQLDataFactory.sealedCardMetadata,
+        }
+
+        when(mockAppSync.updateVirtualCard(anything())).thenResolve({
+          ...GraphQLDataFactory.sealedCard,
+          [update]: appsyncUpdateValues[update as keyof CardUpdateRequest],
+        })
+
+        await instanceUnderTest.updateVirtualCard({
+          id,
+          expectedCardVersion,
+          [update]:
+            updateValues[
+              update as keyof VirtualCardServiceUpdateVirtualCardUseCaseInput
+            ],
+        })
+        verify(mockAppSync.updateVirtualCard(anything())).once()
+        const [args] = capture(mockAppSync.updateVirtualCard).first()
+        expect(args).toEqual<typeof args>({
+          id,
+          expectedVersion: expectedCardVersion,
+          [update]: appsyncUpdateValues[update as keyof CardUpdateRequest],
+        })
+        verify(mockDeviceKeyWorker.sealString(anything())).times(
+          update === 'metadata' ? 1 : 0,
+        )
+      },
+    )
 
     it('returns expected result', async () => {
       await expect(
@@ -201,6 +283,10 @@ describe('DefaultVirtualCardService Test Suite', () => {
             mm: 'UNSEALED-STRING',
             yyyy: 'UNSEALED-STRING',
           },
+          metadata: {
+            alias: 'metadata-alias',
+            color: 'metadata-color',
+          },
         },
       })
     })
@@ -213,9 +299,6 @@ describe('DefaultVirtualCardService Test Suite', () => {
       )
       when(mockAppSync.cancelVirtualCard(anything())).thenResolve(
         GraphQLDataFactory.sealedCard,
-      )
-      when(mockDeviceKeyWorker.unsealString(anything())).thenResolve(
-        'UNSEALED-STRING',
       )
     })
 
@@ -252,6 +335,10 @@ describe('DefaultVirtualCardService Test Suite', () => {
             mm: 'UNSEALED-STRING',
             yyyy: 'UNSEALED-STRING',
           },
+          metadata: {
+            alias: 'metadata-alias',
+            color: 'metadata-color',
+          },
         },
       })
     })
@@ -264,9 +351,6 @@ describe('DefaultVirtualCardService Test Suite', () => {
       )
       when(mockAppSync.getCard(anything(), anything())).thenResolve(
         GraphQLDataFactory.sealedCard,
-      )
-      when(mockDeviceKeyWorker.unsealString(anything())).thenResolve(
-        'UNSEALED-STRING',
       )
     })
 
@@ -343,6 +427,10 @@ describe('DefaultVirtualCardService Test Suite', () => {
           mm: 'UNSEALED-STRING',
           yyyy: 'UNSEALED-STRING',
         },
+        metadata: {
+          alias: 'metadata-alias',
+          color: 'metadata-color',
+        },
       })
     })
 
@@ -374,6 +462,10 @@ describe('DefaultVirtualCardService Test Suite', () => {
           mm: 'UNSEALED-STRING',
           yyyy: 'UNSEALED-STRING',
         },
+        metadata: {
+          alias: 'metadata-alias',
+          color: 'metadata-color',
+        },
         lastTransaction: EntityDataFactory.transaction,
       })
     })
@@ -389,9 +481,6 @@ describe('DefaultVirtualCardService Test Suite', () => {
       when(
         mockAppSync.listCards(anything(), anything(), anything(), anything()),
       ).thenResolve({ items: [GraphQLDataFactory.sealedCard], nextToken })
-      when(mockDeviceKeyWorker.unsealString(anything())).thenResolve(
-        'UNSEALED-STRING',
-      )
     })
 
     it('calls expected methods', async () => {
@@ -454,6 +543,10 @@ describe('DefaultVirtualCardService Test Suite', () => {
               mm: 'UNSEALED-STRING',
               yyyy: 'UNSEALED-STRING',
             },
+            metadata: {
+              alias: 'metadata-alias',
+              color: 'metadata-color',
+            },
           },
         ],
         nextToken,
@@ -494,6 +587,10 @@ describe('DefaultVirtualCardService Test Suite', () => {
             expiry: {
               mm: 'UNSEALED-STRING',
               yyyy: 'UNSEALED-STRING',
+            },
+            metadata: {
+              alias: 'metadata-alias',
+              color: 'metadata-color',
             },
             lastTransaction: EntityDataFactory.transaction,
           },
@@ -549,7 +646,7 @@ describe('DefaultVirtualCardService Test Suite', () => {
       })
       when(mockDeviceKeyWorker.unsealString(anything()))
         .thenReject(new Error('failed to unseal 1'))
-        .thenResolve('UNSEALED-STRING')
+        .thenCall(defaultUnsealString)
       const failedCard = generatePartialVirtualCard(
         EntityDataFactory.virtualCard,
       )
@@ -576,6 +673,10 @@ describe('DefaultVirtualCardService Test Suite', () => {
               mm: 'UNSEALED-STRING',
               yyyy: 'UNSEALED-STRING',
             },
+            metadata: {
+              alias: 'metadata-alias',
+              color: 'metadata-color',
+            },
           },
         ],
         failed: [
@@ -594,9 +695,6 @@ describe('DefaultVirtualCardService Test Suite', () => {
         ...GraphQLDataFactory.provisionalCard,
         card: [{ ...GraphQLDataFactory.sealedCard }],
       })
-      when(mockDeviceKeyWorker.unsealString(anything())).thenResolve(
-        'UNSEALED-STRING',
-      )
       when(mockDeviceKeyWorker.keyExists(anything(), anything())).thenResolve(
         true,
       )
@@ -654,6 +752,10 @@ describe('DefaultVirtualCardService Test Suite', () => {
             mm: 'UNSEALED-STRING',
             yyyy: 'UNSEALED-STRING',
           },
+          metadata: {
+            alias: 'metadata-alias',
+            color: 'metadata-color',
+          },
         },
       })
     })
@@ -679,9 +781,6 @@ describe('DefaultVirtualCardService Test Suite', () => {
         ],
         nextToken,
       })
-      when(mockDeviceKeyWorker.unsealString(anything())).thenResolve(
-        'UNSEALED-STRING',
-      )
       when(mockDeviceKeyWorker.keyExists(anything(), anything())).thenResolve(
         true,
       )
@@ -758,6 +857,10 @@ describe('DefaultVirtualCardService Test Suite', () => {
               expiry: {
                 mm: 'UNSEALED-STRING',
                 yyyy: 'UNSEALED-STRING',
+              },
+              metadata: {
+                alias: 'metadata-alias',
+                color: 'metadata-color',
               },
             },
           },
@@ -863,39 +966,32 @@ describe('DefaultVirtualCardService Test Suite', () => {
 
   describe('unsealVirtualCard', () => {
     it('unseals correctly without last transaction', async () => {
-      when(mockDeviceKeyWorker.unsealString(anything())).thenResolve(
-        'UNSEALED_STRING',
-      )
       await expect(
         instanceUnderTest.unsealVirtualCard({
           ...GraphQLDataFactory.sealedCard,
           cancelledAtEpochMs: 1.0,
         }),
       ).resolves.toMatchObject({
-        cardHolder: 'UNSEALED_STRING',
-        alias: 'UNSEALED_STRING',
-        pan: 'UNSEALED_STRING',
-        csc: 'UNSEALED_STRING',
+        cardHolder: 'UNSEALED-STRING',
+        alias: 'UNSEALED-STRING',
+        pan: 'UNSEALED-STRING',
+        csc: 'UNSEALED-STRING',
         billingAddress: {
-          addressLine1: 'UNSEALED_STRING',
-          addressLine2: 'UNSEALED_STRING',
-          city: 'UNSEALED_STRING',
-          state: 'UNSEALED_STRING',
-          country: 'UNSEALED_STRING',
-          postalCode: 'UNSEALED_STRING',
+          addressLine1: 'UNSEALED-STRING',
+          addressLine2: 'UNSEALED-STRING',
+          city: 'UNSEALED-STRING',
+          state: 'UNSEALED-STRING',
+          country: 'UNSEALED-STRING',
+          postalCode: 'UNSEALED-STRING',
         },
         expiry: {
-          mm: 'UNSEALED_STRING',
-          yyyy: 'UNSEALED_STRING',
+          mm: 'UNSEALED-STRING',
+          yyyy: 'UNSEALED-STRING',
         },
       })
     })
 
     it('unseals correctly with last transaction', async () => {
-      when(mockDeviceKeyWorker.unsealString(anything())).thenResolve(
-        'UNSEALED_STRING',
-      )
-
       await expect(
         instanceUnderTest.unsealVirtualCard({
           ...GraphQLDataFactory.sealedCard,
@@ -903,29 +999,26 @@ describe('DefaultVirtualCardService Test Suite', () => {
           lastTransaction: GraphQLDataFactory.sealedTransaction,
         }),
       ).resolves.toMatchObject({
-        cardHolder: 'UNSEALED_STRING',
-        alias: 'UNSEALED_STRING',
-        pan: 'UNSEALED_STRING',
-        csc: 'UNSEALED_STRING',
+        cardHolder: 'UNSEALED-STRING',
+        alias: 'UNSEALED-STRING',
+        pan: 'UNSEALED-STRING',
+        csc: 'UNSEALED-STRING',
         billingAddress: {
-          addressLine1: 'UNSEALED_STRING',
-          addressLine2: 'UNSEALED_STRING',
-          city: 'UNSEALED_STRING',
-          state: 'UNSEALED_STRING',
-          country: 'UNSEALED_STRING',
-          postalCode: 'UNSEALED_STRING',
+          addressLine1: 'UNSEALED-STRING',
+          addressLine2: 'UNSEALED-STRING',
+          city: 'UNSEALED-STRING',
+          state: 'UNSEALED-STRING',
+          country: 'UNSEALED-STRING',
+          postalCode: 'UNSEALED-STRING',
         },
         expiry: {
-          mm: 'UNSEALED_STRING',
-          yyyy: 'UNSEALED_STRING',
+          mm: 'UNSEALED-STRING',
+          yyyy: 'UNSEALED-STRING',
         },
       })
     })
 
     it('handles undefined values', async () => {
-      when(mockDeviceKeyWorker.unsealString(anything())).thenResolve(
-        'UNSEALED_STRING',
-      )
       await expect(
         instanceUnderTest.unsealVirtualCard({
           ...GraphQLDataFactory.sealedCard,
@@ -942,9 +1035,6 @@ describe('DefaultVirtualCardService Test Suite', () => {
     })
 
     it('handles undefined billing address', async () => {
-      when(mockDeviceKeyWorker.unsealString(anything())).thenResolve(
-        'UNSEALED_STRING',
-      )
       await expect(
         instanceUnderTest.unsealVirtualCard({
           ...GraphQLDataFactory.sealedCard,

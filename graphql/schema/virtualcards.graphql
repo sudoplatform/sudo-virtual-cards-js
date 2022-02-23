@@ -116,12 +116,15 @@ type SealedCard {
   cancelledAtEpochMs: Float
   last4: String!
   cardHolder: String! # SealedStringAttribute
-  alias: String! # SealedStringAttribute
   pan: String! # SealedStringAttribute
   csc: String! # SealedStringAttribute
   billingAddress: SealedAddressAttribute
   expiry: SealedExpiryAttribute!
   lastTransaction: SealedTransaction
+  metadata: SealedAttribute
+
+  # deprecated - set a property in metadata instead
+  alias: String! # SealedStringAttribute
 }
 
 type Owner {
@@ -266,20 +269,26 @@ input CardProvisionRequest {
   ownerProofs: [ID!]!
   keyRingId: ID!
   fundingSourceId: ID!
+  currency: String!
 
   cardHolder: String!
-  alias: String!
   billingAddress: AddressInput
-  currency: String!
+  metadata: SealedAttributeInput
+
+  # deprecated - set a property in metadata instead
+  alias: String
 }
 
 input CardUpdateRequest {
   id: ID!
   keyId: String
   expectedVersion: Int
-  cardHolder: String!
+  cardHolder: String
   billingAddress: AddressInput
-  alias: String!
+  metadata: SealedAttributeInput
+
+  # deprecated - set a property in metadata instead
+  alias: String
 }
 
 input CardCancelRequest {

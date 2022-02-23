@@ -88,6 +88,10 @@ export class EntityDataFactory {
       mm: 'mm',
       yyyy: 'yyyy',
     },
+    metadata: {
+      alias: 'metadata-alias',
+      color: 'metadata-color',
+    },
   }
 
   private static readonly virtualCardAmount: CurrencyAmountEntity = {

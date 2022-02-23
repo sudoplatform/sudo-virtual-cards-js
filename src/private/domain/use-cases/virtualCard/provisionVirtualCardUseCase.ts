@@ -1,5 +1,6 @@
 import { NotSignedInError } from '@sudoplatform/sudo-common'
 import { ProvisioningState } from '../../../..'
+import { Metadata } from '../../../../public/typings/metadata'
 import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
 import { VirtualCardService } from '../../entities/virtualCard/virtualCardService'
 import { VirtualCardUseCaseOutput } from './outputs'
@@ -10,9 +11,11 @@ interface ProvisionVirtualCardUseCaseInput {
   ownershipProofs: string[]
   fundingSourceId: string
   cardHolder: string
-  alias: string
-  billingAddress?: VirtualCardBillingAddress
   currency: string
+  billingAddress?: VirtualCardBillingAddress
+  metadata?: Metadata
+  /** @deprecated Use an alias property in metadata instead */
+  alias?: string
 }
 
 interface ProvisionVirtualCardUseCaseOutput {

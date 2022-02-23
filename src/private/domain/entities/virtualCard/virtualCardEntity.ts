@@ -1,5 +1,6 @@
 import { Owner } from '@sudoplatform/sudo-common'
 import { CardState } from '../../../..'
+import { Metadata } from '../../../../public/typings/metadata'
 import { TransactionEntity } from '../transaction/transactionEntity'
 
 /**
@@ -45,6 +46,7 @@ export interface VirtualCardEntity {
   billingAddress?: VirtualCardBillingAddressEntity | undefined
   expiry: VirtualCardExpiryEntity
   lastTransaction?: TransactionEntity
+  metadata?: Metadata
 }
 
 /**

@@ -157,5 +157,51 @@ describe('UpdateVirtualCard Test Suite', () => {
         }),
       ).rejects.toThrow(CardNotFoundError)
     })
+
+    it('can clear billing address by updating to null while leaving other properties unchanged', async () => {
+      expectSetupComplete()
+
+      const update = await instanceUnderTest.updateVirtualCard({
+        id: card.id,
+        billingAddress: null,
+      })
+      expect(update.status).toEqual(APIResultStatus.Success)
+      if (update.status !== APIResultStatus.Success) {
+        fail('update status unexpectedly unsuccessful')
+      }
+      const updated = update.result
+
+      // Billing address may either be undefined or empty string
+      // depending on environment
+      expect([undefined, '']).toContainEqual(updated.billingAddress)
+
+      // updatedAt and version should be updated but all other properties should be unchanged
+      expect(updated).toEqual({
+        ...card,
+        updatedAt: updated.updatedAt,
+        version: updated.version,
+        billingAddress: updated.billingAddress,
+      })
+    })
+
+    it('can clear metadata by updating to null while leaving other properties unchanged', async () => {
+      expectSetupComplete()
+
+      const update = await instanceUnderTest.updateVirtualCard({
+        id: card.id,
+        metadata: null,
+      })
+      expect(update.status).toEqual(APIResultStatus.Success)
+      if (update.status !== APIResultStatus.Success) {
+        fail('update status unexpectedly unsuccessful')
+      }
+      const updated = update.result
+      expect(updated).toEqual({
+        ...card,
+        updatedAt: updated.updatedAt,
+        version: updated.version,
+        metadata: undefined,
+      })
+    })
   })
 })

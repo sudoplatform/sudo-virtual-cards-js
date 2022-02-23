@@ -1,5 +1,6 @@
 import {
   Base64,
+  Buffer,
   DecodeError,
   DefaultLogger,
   EncryptionAlgorithm,
@@ -35,12 +36,13 @@ export interface UnsealInput {
 }
 
 export interface SealInput {
-  payload: ArrayBuffer
+  string: string
   keyId: string
   keyType: KeyType
   algorithm?: EncryptionAlgorithm
 }
 
+const SECRET_KEY_ID_KEY = 'vc-secret-key'
 const KEY_PAIR_ID_KEY = 'vc-keypair'
 const KEY_RING_SERVICE_NAME = 'sudo-vc'
 const RSA_KEY_SIZE = 256
@@ -50,9 +52,15 @@ export interface DeviceKeyWorker {
 
   getCurrentPublicKey(): Promise<DeviceKey | undefined>
 
+  generateCurrentSymmetricKey(): Promise<string>
+
+  getCurrentSymmetricKeyId(): Promise<string | undefined>
+
   keyExists(id: string, type: KeyType): Promise<boolean>
 
   removeKey(id: string, type: KeyType): Promise<void>
+
+  sealString(input: SealInput): Promise<string>
 
   unsealString(input: UnsealInput): Promise<string>
 }
@@ -108,6 +116,13 @@ export class DefaultDeviceKeyWorker implements DeviceKeyWorker {
     if (!publicKey) {
       return undefined
     }
+
+    // Make sure we have the private key as well
+    const privateKeyId = await this.keyManager.doesPrivateKeyExists(keyPairId)
+    if (!privateKeyId) {
+      return undefined
+    }
+
     this.currentPublicKey = {
       id: keyPairId,
       keyRingId,
@@ -118,16 +133,37 @@ export class DefaultDeviceKeyWorker implements DeviceKeyWorker {
     return this.currentPublicKey
   }
 
+  async generateCurrentSymmetricKey(): Promise<string> {
+    const keyId = v4()
+    const keyIdBits = new TextEncoder().encode(keyId)
+    // We need to delete any old key id information before adding a new key.
+    await this.keyManager.deletePassword(SECRET_KEY_ID_KEY)
+    await this.keyManager.addPassword(keyIdBits.buffer, SECRET_KEY_ID_KEY)
+    await this.keyManager.generateSymmetricKey(keyId)
+    return keyId
+  }
+
+  async getCurrentSymmetricKeyId(): Promise<string | undefined> {
+    const keyIdBits = await this.keyManager.getPassword(SECRET_KEY_ID_KEY)
+    const keyId = new TextDecoder().decode(keyIdBits)
+    if (!keyId.length) {
+      return undefined
+    }
+    const exists = await this.keyManager.doesSymmetricKeyExists(keyId)
+    if (!exists) {
+      return undefined
+    }
+
+    return keyId
+  }
+
   async keyExists(id: string, type: KeyType): Promise<boolean> {
-    let key: ArrayBuffer | undefined
     switch (type) {
       case KeyType.SymmetricKey:
-        key = await this.keyManager.getSymmetricKey(id)
-        return key !== undefined
+        return await this.keyManager.doesSymmetricKeyExists(id)
       case KeyType.PrivateKey:
       case KeyType.KeyPair:
-        key = await this.keyManager.getPrivateKey(id)
-        return key !== undefined
+        return await this.keyManager.doesPrivateKeyExists(id)
     }
   }
 
@@ -163,6 +199,27 @@ export class DefaultDeviceKeyWorker implements DeviceKeyWorker {
         return await this.unsealStringWithSymmetricKeyId({
           symmetricKeyId: keyId,
           encrypted,
+          algorithm,
+        })
+    }
+  }
+
+  async sealString({
+    keyId,
+    keyType,
+    string,
+    algorithm,
+  }: SealInput): Promise<string> {
+    switch (keyType) {
+      case KeyType.PrivateKey:
+      case KeyType.KeyPair:
+        throw new IllegalArgumentError(
+          'Private key sealing not yet implemented',
+        )
+      case KeyType.SymmetricKey:
+        return await this.sealStringWithSymmetricKeyId({
+          symmetricKeyId: keyId,
+          string,
           algorithm,
         })
     }
@@ -252,6 +309,38 @@ export class DefaultDeviceKeyWorker implements DeviceKeyWorker {
       const message = 'Could not decode unsealed payload as UTF-8'
       this.log.error(message, { err })
       throw new DecodeError('Could not decode unsealed payload as UTF-8')
+    }
+  }
+
+  private async sealStringWithSymmetricKeyId({
+    symmetricKeyId,
+    string,
+    algorithm,
+  }: {
+    symmetricKeyId: string
+    string: string
+    algorithm?: EncryptionAlgorithm
+  }): Promise<string> {
+    const unsealedBuffer = Buffer.fromString(string)
+    let sealedBuffer: ArrayBuffer
+    try {
+      const options = algorithm ? { algorithm } : {}
+      sealedBuffer = await this.keyManager.encryptWithSymmetricKeyName(
+        symmetricKeyId,
+        unsealedBuffer,
+        options,
+      )
+    } catch (err) {
+      const message = 'Could not seal payload'
+      this.log.error(message, { err })
+      throw err
+    }
+    try {
+      return Base64.encode(sealedBuffer)
+    } catch (err) {
+      const message = 'Could not encode sealed payload as Base64'
+      this.log.error(message, { err })
+      throw new FatalError(message)
     }
   }
 

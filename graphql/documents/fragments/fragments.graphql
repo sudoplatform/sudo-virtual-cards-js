@@ -46,6 +46,13 @@ fragment FundingSource on CreditCardFundingSource {
   network
 }
 
+fragment SealedAttribute on SealedAttribute {
+  keyId
+  algorithm
+  plainTextType
+  base64EncodedSealedData
+}
+
 fragment ProvisionalCard on ProvisionalCard {
   id
   owner
@@ -100,6 +107,9 @@ fragment SealedCard on SealedCard {
   }
   expiry {
     ...SealedExpiryAttribute
+  }
+  metadata {
+    ...SealedAttribute
   }
 }
 

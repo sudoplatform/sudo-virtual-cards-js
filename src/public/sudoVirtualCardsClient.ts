@@ -10,6 +10,7 @@ import {
 } from '@sudoplatform/sudo-common'
 import { SudoUserClient } from '@sudoplatform/sudo-user'
 import { WebSudoCryptoProvider } from '@sudoplatform/sudo-web-crypto-provider'
+import { Mutex } from 'async-mutex'
 import { ApiClient } from '../private/data/common/apiClient'
 import {
   DefaultDeviceKeyWorker,
@@ -22,9 +23,11 @@ import {
 } from '../private/data/common/transactionWorker'
 import { DefaultFundingSourceService } from '../private/data/fundingSource/defaultFundingSourceService'
 import { ProvisionalFundingSourceApiTransformer } from '../private/data/fundingSource/transformer/provisionalFundingSourceApiTransformer'
+import { DefaultKeyService } from '../private/data/key/defaultKeyService'
 import { DefaultSudoUserService } from '../private/data/sudoUser/defaultSudoUserService'
 import { DefaultTransactionService } from '../private/data/transaction/defaultTransactionService'
 import { DefaultVirtualCardService } from '../private/data/virtualCard/defaultVirtualCardService'
+import { KeyService } from '../private/domain/entities/key/keyService'
 import { SudoUserService } from '../private/domain/entities/sudoUser/sudoUserService'
 import { TransactionService } from '../private/domain/entities/transaction/transactionService'
 import { VirtualCardService } from '../private/domain/entities/virtualCard/virtualCardService'
@@ -34,6 +37,7 @@ import { GetFundingSourceClientConfigurationUseCase } from '../private/domain/us
 import { GetFundingSourceUseCase } from '../private/domain/use-cases/fundingSource/getFundingSourceUseCase'
 import { ListFundingSourcesUseCase } from '../private/domain/use-cases/fundingSource/listFundingSourcesUseCase'
 import { SetupFundingSourceUseCase } from '../private/domain/use-cases/fundingSource/setupFundingSourceUseCase'
+import { CreateKeysIfAbsentUseCase } from '../private/domain/use-cases/key/createKeysIfAbsent'
 import { GetTransactionUseCase } from '../private/domain/use-cases/transaction/getTransactionUseCase'
 import { ListTransactionsByCardIdUseCase } from '../private/domain/use-cases/transaction/listTransactionsByCardIdUseCase'
 import { CancelVirtualCardUseCase } from '../private/domain/use-cases/virtualCard/cancelVirtualCardUseCase'
@@ -44,7 +48,11 @@ import { ListVirtualCardsUseCase } from '../private/domain/use-cases/virtualCard
 import { ProvisionVirtualCardUseCase } from '../private/domain/use-cases/virtualCard/provisionVirtualCardUseCase'
 import { UpdateVirtualCardUseCase } from '../private/domain/use-cases/virtualCard/updateVirtualCardUseCase'
 import { VirtualCardsServiceConfigNotFoundError } from './errors'
-import { APIResult, ProvisionalVirtualCard } from './typings'
+import {
+  APIResult,
+  CreateKeyIfAbsentResult,
+  ProvisionalVirtualCard,
+} from './typings'
 import { DateRange } from './typings/dateRange'
 import {
   ProvisionalCardFilter,
@@ -62,6 +70,7 @@ import {
   ListTransactionsResults,
   ListVirtualCardsResults,
 } from './typings/listOperationResult'
+import { Metadata } from './typings/metadata'
 import { SortOrder } from './typings/sortOrder'
 import { Transaction } from './typings/transaction'
 import {
@@ -156,36 +165,45 @@ export interface ProvisionVirtualCardBillingAddressInput {
  *  contain an audience of "sudoplatform.virtual-cards.virtual-card".
  * @property {string} fundingSourceId Identifier of the funding source backing the provisioned card.
  * @property {string} cardHolder Name to appear on the card.
- * @property {string} alias Alias to associate the card with.
  * @property {string} currency ISO Currency code to provision the card with.
  * @property {ProvisionVirtualCardBillingAddressInput} billingAddress Optional - Billing address of the card.
  * @property {string} clientRefId Optional - Identifier of the client.
+ * @property {JSONValue} metadata Client side sealed arbitrary metadata object
  */
 export interface ProvisionVirtualCardInput {
   ownershipProofs: string[]
   fundingSourceId: string
   cardHolder: string
-  alias: string
   currency: string
   billingAddress?: ProvisionVirtualCardBillingAddressInput
   clientRefId?: string
+  metadata?: Metadata
+
+  /** @deprecated Specify as an alias property in metadata instead */
+  alias?: string
 }
 
 /**
  * Input for {@link SudoVirtualCardsClient.updateVirtualCard}.
  *
+ * To leave a property unchanged, leave it undefined.
+ * To remove a property, set it to null.
+ * To update a property, set it to the new value.
+ *
  * @property {string} id Identifier of the card to update.
  * @property {number} expectedCardVersion Version of card to update. If specified, version must match existing version of card.
  * @property {string} cardHolder Updated card holder. Leave as existing to remain unchanged.
- * @property {string} alias Updated alias. Leave as existing to remain unchanged.
  * @property {string} billingAddress Updated billing address. To remove, set to undefined.
+ * @property {JSONValue} metadata Client side sealed arbitrary metadata object
  */
 export interface UpdateVirtualCardInput {
   id: string
   expectedCardVersion?: number
-  cardHolder: string
-  alias: string
-  billingAddress: BillingAddress | undefined
+  cardHolder?: string
+  billingAddress?: BillingAddress | null
+  metadata?: Metadata | null
+  /** @deprecated Use an alias property in metadata instead */
+  alias?: string | null
 }
 
 /**
@@ -280,6 +298,19 @@ export interface ListTransactionsByCardIdInput {
 }
 
 /**
+ * Result for {@link SudoVirtualCardsClient.createKeyIfAbsent}
+ *
+ * @property {CreateKeyIfAbsentResult} symmetricKey
+ *  Result of createKeysIfAbsent operation for the symmetric key
+ * @property {CreateKeyIfAbsentResult} keyPair
+ *  Result of createKeysIfAbsent operation for the key pair
+ */
+export interface CreateKeysIfAbsentResult {
+  symmetricKey: CreateKeyIfAbsentResult
+  keyPair: CreateKeyIfAbsentResult
+}
+
+/**
  * Sudo Platform Virtual Cards client API
  *
  * All methods should be expected to be able to throw the following
@@ -293,6 +324,20 @@ export interface ListTransactionsByCardIdInput {
  *  Transient error at the service. Try the operation again
  */
 export interface SudoVirtualCardsClient {
+  /**
+   * Create key pair and secret key for use by the Virtual Cards Client if
+   * they have not already been created.
+   *
+   * The key pair is used to register a public key with the service for the
+   * encryption of virtual card and transaction details.
+   *
+   * The secret key is used for client side encryption of user specific
+   * card metadata.
+   *
+   * @returns {CreateKeysIfAbsentResult}
+   */
+  createKeysIfAbsent(): Promise<CreateKeysIfAbsentResult>
+
   /**
    * Get the funding source client configuration.
    *
@@ -493,12 +538,14 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
   private readonly sudoUserService: SudoUserService
   private readonly virtualCardService: VirtualCardService
   private readonly transactionService: TransactionService
+  private readonly keyService: KeyService
   private readonly deviceKeyWorker: DeviceKeyWorker
   private readonly transactionWorker: TransactionWorker
   private readonly keyManager: SudoKeyManager
   private readonly cryptoProvider: SudoCryptoProvider
   private readonly sudoUserClient: SudoUserClient
   private readonly log = new DefaultLogger(this.constructor.name)
+  private readonly serialise = new Mutex()
 
   public constructor(opts: SudoVirtualCardsClientOptions) {
     const privateOptions = opts as
@@ -519,6 +566,10 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
     )
     this.transactionWorker = new DefaultTransactionWorker(this.deviceKeyWorker)
 
+    this.keyService = new DefaultKeyService(
+      this.apiClient,
+      this.deviceKeyWorker,
+    )
     this.fundingSourceService = new DefaultFundingSourceService(this.apiClient)
     this.virtualCardService = new DefaultVirtualCardService(
       this.apiClient,
@@ -530,10 +581,30 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
       this.transactionWorker,
     )
     this.sudoUserService = new DefaultSudoUserService(this.sudoUserClient)
-
     if (!DefaultConfigurationManager.getInstance().getConfigSet('vcService')) {
       throw new VirtualCardsServiceConfigNotFoundError()
     }
+  }
+
+  /**
+   * Create key pair and secret key for use by the Virtual Cards Client if
+   * they have not already been created.
+   *
+   * The key pair is used to register a public key with the service for the
+   * encryption of virtual card and transaction details.
+   *
+   * The secret key is used for client side encryption of user specific
+   * card metadata.
+   */
+  public async createKeysIfAbsent(): Promise<CreateKeysIfAbsentResult> {
+    return this.serialise.runExclusive(async () => {
+      const useCase = new CreateKeysIfAbsentUseCase(
+        this.sudoUserClient,
+        this.keyService,
+      )
+
+      return await useCase.execute()
+    })
   }
 
   public async getFundingSourceClientConfiguration(): Promise<
@@ -552,24 +623,28 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
   public async setupFundingSource(
     input: SetupFundingSourceInput,
   ): Promise<ProvisionalFundingSource> {
-    const useCase = new SetupFundingSourceUseCase(
-      this.fundingSourceService,
-      this.sudoUserService,
-    )
-    const result = await useCase.execute(input)
-    return ProvisionalFundingSourceApiTransformer.transformEntity(result)
+    return this.serialise.runExclusive(async () => {
+      const useCase = new SetupFundingSourceUseCase(
+        this.fundingSourceService,
+        this.sudoUserService,
+      )
+      const result = await useCase.execute(input)
+      return ProvisionalFundingSourceApiTransformer.transformEntity(result)
+    })
   }
 
   public async completeFundingSource(
     input: CompleteFundingSourceInput,
   ): Promise<FundingSource> {
-    const useCase = new CompleteFundingSourceUseCase(
-      this.fundingSourceService,
-      this.sudoUserClient,
-    )
-    return await useCase.execute({
-      ...input,
-      completionData: { ...input.completionData, version: 1 },
+    return this.serialise.runExclusive(async () => {
+      const useCase = new CompleteFundingSourceUseCase(
+        this.fundingSourceService,
+        this.sudoUserClient,
+      )
+      return await useCase.execute({
+        ...input,
+        completionData: { ...input.completionData, version: 1 },
+      })
     })
   }
 
@@ -620,105 +695,125 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
   }
 
   public async cancelFundingSource(id: string): Promise<FundingSource> {
-    this.log.debug(this.cancelFundingSource.name, {
-      id,
+    return this.serialise.runExclusive(async () => {
+      this.log.debug(this.cancelFundingSource.name, {
+        id,
+      })
+      const useCase = new CancelFundingSourceUseCase(
+        this.fundingSourceService,
+        this.sudoUserService,
+      )
+      return await useCase.execute(id)
     })
-    const useCase = new CancelFundingSourceUseCase(
-      this.fundingSourceService,
-      this.sudoUserService,
-    )
-    return await useCase.execute(id)
   }
 
   public async provisionVirtualCard(
     input: ProvisionVirtualCardInput,
   ): Promise<ProvisionalVirtualCard> {
-    const useCase = new ProvisionVirtualCardUseCase(
-      this.virtualCardService,
-      this.sudoUserClient,
-    )
-    return await useCase.execute(input)
+    return this.serialise.runExclusive(async () => {
+      const useCase = new ProvisionVirtualCardUseCase(
+        this.virtualCardService,
+        this.sudoUserClient,
+      )
+      return await useCase.execute(input)
+    })
   }
 
   public async updateVirtualCard(
     input: UpdateVirtualCardInput,
   ): Promise<APIResult<VirtualCard, VirtualCardSealedAttributes>> {
-    const useCase = new UpdateVirtualCardUseCase(
-      this.virtualCardService,
-      this.sudoUserService,
-    )
-    return await useCase.execute(input)
+    return this.serialise.runExclusive(async () => {
+      const useCase = new UpdateVirtualCardUseCase(
+        this.virtualCardService,
+        this.sudoUserService,
+      )
+      return await useCase.execute(input)
+    })
   }
 
   public async cancelVirtualCard(
     input: CancelVirtualCardInput,
   ): Promise<APIResult<VirtualCard, VirtualCardSealedAttributes>> {
-    const useCase = new CancelVirtualCardUseCase(
-      this.virtualCardService,
-      this.sudoUserService,
-    )
-    return await useCase.execute(input)
+    return this.serialise.runExclusive(async () => {
+      const useCase = new CancelVirtualCardUseCase(
+        this.virtualCardService,
+        this.sudoUserService,
+      )
+      return await useCase.execute(input)
+    })
   }
 
   public async getProvisionalCard({
     id,
     cachePolicy,
   }: GetProvisionalCardInput): Promise<ProvisionalVirtualCard | undefined> {
-    const useCase = new GetProvisionalCardUseCase(
-      this.virtualCardService,
-      this.sudoUserService,
-    )
-    return await useCase.execute({ id, cachePolicy })
+    return this.serialise.runExclusive(async () => {
+      const useCase = new GetProvisionalCardUseCase(
+        this.virtualCardService,
+        this.sudoUserService,
+      )
+      return await useCase.execute({ id, cachePolicy })
+    })
   }
 
   async listProvisionalCards(
     input: ListProvisionalCardsInput,
   ): Promise<ListProvisionalCardsResults> {
-    const useCase = new ListProvisionalCardsUseCase(
-      this.virtualCardService,
-      this.sudoUserService,
-    )
-    return await useCase.execute(input)
+    return this.serialise.runExclusive(async () => {
+      const useCase = new ListProvisionalCardsUseCase(
+        this.virtualCardService,
+        this.sudoUserService,
+      )
+      return await useCase.execute(input)
+    })
   }
 
   async getVirtualCard({
     id,
     cachePolicy,
   }: GetVirtualCardInput): Promise<VirtualCard | undefined> {
-    const useCase = new GetVirtualCardUseCase(
-      this.virtualCardService,
-      this.sudoUserService,
-    )
-    return await useCase.execute({ id, cachePolicy })
+    return this.serialise.runExclusive(async () => {
+      const useCase = new GetVirtualCardUseCase(
+        this.virtualCardService,
+        this.sudoUserService,
+      )
+      return await useCase.execute({ id, cachePolicy })
+    })
   }
 
   async listVirtualCards(
     input: ListVirtualCardsInput,
   ): Promise<ListVirtualCardsResults> {
-    const useCase = new ListVirtualCardsUseCase(
-      this.virtualCardService,
-      this.sudoUserService,
-    )
-    return await useCase.execute(input)
+    return this.serialise.runExclusive(async () => {
+      const useCase = new ListVirtualCardsUseCase(
+        this.virtualCardService,
+        this.sudoUserService,
+      )
+      return await useCase.execute(input)
+    })
   }
 
   async getTransaction(
     input: GetTransactionInput,
   ): Promise<Transaction | undefined> {
-    const useCase = new GetTransactionUseCase(
-      this.transactionService,
-      this.sudoUserService,
-    )
-    return await useCase.execute(input)
+    return this.serialise.runExclusive(async () => {
+      const useCase = new GetTransactionUseCase(
+        this.transactionService,
+        this.sudoUserService,
+      )
+      return await useCase.execute(input)
+    })
   }
 
   async listTransactionsByCardId(
     input: ListTransactionsByCardIdInput,
   ): Promise<ListTransactionsResults> {
-    const useCase = new ListTransactionsByCardIdUseCase(
-      this.transactionService,
-      this.sudoUserService,
-    )
-    return await useCase.execute(input)
+    return this.serialise.runExclusive(async () => {
+      const useCase = new ListTransactionsByCardIdUseCase(
+        this.transactionService,
+        this.sudoUserService,
+      )
+      return await useCase.execute(input)
+    })
   }
 }
