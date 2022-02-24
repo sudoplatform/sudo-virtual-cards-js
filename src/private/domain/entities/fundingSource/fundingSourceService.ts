@@ -11,6 +11,7 @@ export interface FundingSourceServiceSetupFundingSourceInput {
 export interface FundingSourceServiceCompleteFundingSourceInput {
   id: string
   completionData: { provider: string; version: number; paymentMethod: string }
+  updateCardFundingSource?: boolean
 }
 
 /**

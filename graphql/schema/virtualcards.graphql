@@ -249,6 +249,7 @@ input SetupFundingSourceRequest {
 input CompleteFundingSourceRequest {
   id: ID!
   completionData: ID!
+  updateCardFundingSource: Boolean
 }
 
 input IdInput {

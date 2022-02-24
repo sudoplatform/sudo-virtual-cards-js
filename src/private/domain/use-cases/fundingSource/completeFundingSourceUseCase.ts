@@ -6,6 +6,7 @@ import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
 interface CompleteFundingSourceUseCaseInput {
   id: string
   completionData: { provider: string; version: number; paymentMethod: string }
+  updateCardFundingSource?: boolean
 }
 
 interface CompleteFundingSourceUseCaseOutput {

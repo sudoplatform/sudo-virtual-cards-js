@@ -102,6 +102,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
             payment_method: completionData.paymentMethod,
           }),
         ),
+        updateCardFundingSource: undefined,
       })
     })
     it('returns appsync data', async () => {

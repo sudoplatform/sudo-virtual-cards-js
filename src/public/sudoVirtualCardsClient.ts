@@ -109,10 +109,13 @@ export type CompleteFundingSourceCompletionDataInput =
  *
  * @property {string} id Identifier of the provisional funding source to be completed and provisioned.
  * @property {string} completionData JSON string of the completion data to be passed back to the service.
+ * @property {boolean} updateCardFundingSource flag to indicate whether to update inactive card funding sources
+ *  with a new funding source when a funding source is created.
  */
 export interface CompleteFundingSourceInput {
   id: string
   completionData: CompleteFundingSourceCompletionDataInput
+  updateCardFundingSource?: boolean
 }
 
 /**

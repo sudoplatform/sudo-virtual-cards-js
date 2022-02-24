@@ -27,6 +27,7 @@ export const createFundingSource = async (
     securityCode?: string
     currency?: string
     type?: FundingSourceType
+    updateCardFundingSource?: boolean
   },
 ): Promise<FundingSource> => {
   const provisionalCard = await virtualCardsClient.setupFundingSource({
@@ -70,5 +71,6 @@ export const createFundingSource = async (
       provider: 'stripe',
       paymentMethod: setupIntent.payment_method.toString(),
     },
+    updateCardFundingSource: options?.updateCardFundingSource,
   })
 }

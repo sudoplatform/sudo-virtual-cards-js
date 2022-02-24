@@ -43,6 +43,7 @@ export class DefaultFundingSourceService implements FundingSourceService {
   async completeFundingSource({
     id,
     completionData,
+    updateCardFundingSource,
   }: FundingSourceServiceCompleteFundingSourceInput): Promise<FundingSourceEntity> {
     const encodedCompletionData = Base64.encodeString(
       JSON.stringify({
@@ -54,6 +55,7 @@ export class DefaultFundingSourceService implements FundingSourceService {
     const result = await this.appSync.completeFundingSource({
       id,
       completionData: encodedCompletionData,
+      updateCardFundingSource,
     })
     return FundingSourceEntityTransformer.transformGraphQL(result)
   }
