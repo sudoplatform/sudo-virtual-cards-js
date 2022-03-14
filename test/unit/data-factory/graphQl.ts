@@ -1,6 +1,7 @@
 import { Base64, EncryptionAlgorithm } from '@sudoplatform/sudo-common'
 import {
   CardState,
+  CardType,
   CreditCardNetwork,
   FundingSource,
   FundingSourceConnection,
@@ -17,6 +18,7 @@ import {
   SealedTransaction,
   StateReason,
   TransactionType,
+  VirtualCardsConfig,
 } from '../../../src/gen/graphqlTypes'
 
 export class GraphQLDataFactory {
@@ -146,5 +148,32 @@ export class GraphQLDataFactory {
     transactedAmount: this.sealedCurrencyAmount,
     transactedAtEpochMs: 'SEALED-NUMBER',
     type: TransactionType.Pending,
+  }
+
+  static readonly configurationData: VirtualCardsConfig = {
+    fundingSourceSupportInfo: [
+      {
+        detail: [{ cardType: CardType.Credit }],
+        fundingSourceType: 'card',
+        network: 'VISA',
+        providerType: 'stripe',
+      },
+    ],
+    maxCardCreationVelocity: ['5/P1D'],
+    maxFundingSourceVelocity: ['5/P1D'],
+    maxFundingSourceFailureVelocity: [''],
+    maxTransactionAmount: [
+      {
+        currency: 'USD',
+        amount: '25000',
+      },
+    ],
+    maxTransactionVelocity: [
+      {
+        currency: 'USD',
+        velocity: ['25000/P1D'],
+      },
+    ],
+    virtualCardCurrencies: ['USD'],
   }
 }

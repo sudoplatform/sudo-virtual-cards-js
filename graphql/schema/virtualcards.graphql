@@ -27,6 +27,43 @@ type PaginatedPublicKey {
   nextToken: String
 }
 
+enum CardType {
+  CREDIT
+  DEBIT
+  PREPAID
+}
+
+type FundingSourceSupportDetail {
+  cardType: CardType!
+}
+
+type FundingSourceSupportInfo {
+  providerType: String!
+  fundingSourceType: String!
+  network: String!
+  detail: [FundingSourceSupportDetail!]!
+}
+
+type CurrencyVelocity {
+  currency: String!
+  velocity: [String!]!
+}
+
+type CurrencyAmount {
+  currency: String!
+  amount: String!
+}
+
+type VirtualCardsConfig {
+  maxFundingSourceVelocity: [String!]!
+  maxFundingSourceFailureVelocity: [String!]!
+  maxCardCreationVelocity: [String!]!
+  maxTransactionVelocity: [CurrencyVelocity!]!
+  maxTransactionAmount: [CurrencyAmount!]!
+  virtualCardCurrencies: [String!]!
+  fundingSourceSupportInfo: [FundingSourceSupportInfo!]!
+}
+
 type PublicKey {
   id: ID!
   keyId: String!
@@ -346,6 +383,7 @@ enum SortOrder {
 }
 
 type Query {
+  getVirtualCardsConfig: VirtualCardsConfig!
   getPublicKeyForVirtualCards(keyId: String!): PublicKey
   getPublicKeysForVirtualCards(
     limit: Int
@@ -362,7 +400,8 @@ type Query {
   listFundingSources(limit: Int, nextToken: String): FundingSourceConnection!
   getProvisionalCard(id: ID!): ProvisionalCard
   listProvisionalCards(
-    filter: ProvisionalCardFilterInput
+    filter: 
+    ProvisionalCardFilterInput
     limit: Int
     nextToken: String
   ): ProvisionalCardConnection!

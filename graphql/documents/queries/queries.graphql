@@ -1,3 +1,9 @@
+query GetVirtualCardsConfig {
+  getVirtualCardsConfig {
+    ...VirtualCardsConfig
+  }
+}
+
 query GetPublicKey($keyId: String!) {
   getPublicKeyForVirtualCards(keyId: $keyId) {
     ...PublicKey

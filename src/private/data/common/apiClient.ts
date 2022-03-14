@@ -54,6 +54,8 @@ import {
   GetTransactionDocument,
   GetTransactionQuery,
   GetTransactionQueryVariables,
+  GetVirtualCardsConfigDocument,
+  GetVirtualCardsConfigQuery,
   IdInput,
   KeyFormat,
   ListCardsDocument,
@@ -82,6 +84,7 @@ import {
   SetupFundingSourceRequest,
   UpdateVirtualCardDocument,
   UpdateVirtualCardMutation,
+  VirtualCardsConfig,
 } from '../../../gen/graphqlTypes'
 import { ErrorTransformer } from './transformer/errorTransformer'
 
@@ -93,6 +96,15 @@ export class ApiClient {
     const clientManager =
       apiClientManager ?? DefaultApiClientManager.getInstance()
     this.client = clientManager.getClient({ disableOffline: true })
+  }
+
+  public async getVirtualCardsConfig(): Promise<VirtualCardsConfig> {
+    const data = await this.performQuery<GetVirtualCardsConfigQuery>({
+      query: GetVirtualCardsConfigDocument,
+      variables: {},
+      calleeName: this.getVirtualCardsConfig.name,
+    })
+    return data.getVirtualCardsConfig
   }
 
   public async createPublicKey(

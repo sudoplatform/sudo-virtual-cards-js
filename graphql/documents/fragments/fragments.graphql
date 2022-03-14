@@ -178,3 +178,34 @@ fragment SealedTransaction on SealedTransaction {
     description
   }
 }
+
+fragment FundingSourceSupportDetail on FundingSourceSupportDetail {
+  cardType
+}
+
+fragment FundingSourceSupportInfo on FundingSourceSupportInfo {
+  providerType
+  fundingSourceType
+  network
+  detail {
+    ...FundingSourceSupportDetail
+  }
+}
+
+fragment VirtualCardsConfig on VirtualCardsConfig {
+  maxFundingSourceVelocity
+  maxFundingSourceFailureVelocity
+  maxCardCreationVelocity
+  maxTransactionVelocity {
+    currency
+    velocity
+  }
+  maxTransactionAmount {
+    currency
+    amount
+  }
+  virtualCardCurrencies
+  fundingSourceSupportInfo {
+    ...FundingSourceSupportInfo
+  }
+}

@@ -21,6 +21,7 @@ import {
   DefaultTransactionWorker,
   TransactionWorker,
 } from '../private/data/common/transactionWorker'
+import { DefaultVirtualCardsConfigService } from '../private/data/configuration/defaultConfigService'
 import { DefaultFundingSourceService } from '../private/data/fundingSource/defaultFundingSourceService'
 import { ProvisionalFundingSourceApiTransformer } from '../private/data/fundingSource/transformer/provisionalFundingSourceApiTransformer'
 import { DefaultKeyService } from '../private/data/key/defaultKeyService'
@@ -31,6 +32,7 @@ import { KeyService } from '../private/domain/entities/key/keyService'
 import { SudoUserService } from '../private/domain/entities/sudoUser/sudoUserService'
 import { TransactionService } from '../private/domain/entities/transaction/transactionService'
 import { VirtualCardService } from '../private/domain/entities/virtualCard/virtualCardService'
+import { GetVirtualCardsConfigUseCase } from '../private/domain/use-cases/configuration/getConfigUseCase'
 import { CancelFundingSourceUseCase } from '../private/domain/use-cases/fundingSource/cancelFundingSourceUseCase'
 import { CompleteFundingSourceUseCase } from '../private/domain/use-cases/fundingSource/completeFundingSourceUseCase'
 import { GetFundingSourceClientConfigurationUseCase } from '../private/domain/use-cases/fundingSource/getFundingSourceClientConfigurationUseCase'
@@ -53,6 +55,7 @@ import {
   CreateKeyIfAbsentResult,
   ProvisionalVirtualCard,
 } from './typings'
+import { VirtualCardsConfig } from './typings/config'
 import { DateRange } from './typings/dateRange'
 import {
   ProvisionalCardFilter,
@@ -528,6 +531,13 @@ export interface SudoVirtualCardsClient {
   listTransactionsByCardId(
     input: ListTransactionsByCardIdInput,
   ): Promise<ListTransactionsResults>
+
+  /**
+   * Get the configuration data for the virtual cards service.
+   *
+   * @returns {VirtualCardsConfig} The configuration data for the virtual cards service.
+   */
+  getVirtualCardsConfig(): Promise<VirtualCardsConfig>
 }
 
 export type SudoVirtualCardsClientOptions = {
@@ -540,6 +550,7 @@ export type SudoVirtualCardsClientOptions = {
 
 export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
   private readonly apiClient: ApiClient
+  private readonly configurationDataService: DefaultVirtualCardsConfigService
   private readonly fundingSourceService: DefaultFundingSourceService
   private readonly sudoUserService: SudoUserService
   private readonly virtualCardService: VirtualCardService
@@ -550,6 +561,7 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
   private readonly keyManager: SudoKeyManager
   private readonly cryptoProvider: SudoCryptoProvider
   private readonly sudoUserClient: SudoUserClient
+
   private readonly log = new DefaultLogger(this.constructor.name)
   private readonly serialise = new Mutex()
 
@@ -575,6 +587,9 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
     this.keyService = new DefaultKeyService(
       this.apiClient,
       this.deviceKeyWorker,
+    )
+    this.configurationDataService = new DefaultVirtualCardsConfigService(
+      this.apiClient,
     )
     this.fundingSourceService = new DefaultFundingSourceService(this.apiClient)
     this.virtualCardService = new DefaultVirtualCardService(
@@ -821,5 +836,13 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
       )
       return await useCase.execute(input)
     })
+  }
+
+  async getVirtualCardsConfig(): Promise<VirtualCardsConfig> {
+    const useCase = new GetVirtualCardsConfigUseCase(
+      this.configurationDataService,
+      this.sudoUserService,
+    )
+    return await useCase.execute()
   }
 }

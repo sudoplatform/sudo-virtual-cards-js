@@ -1,4 +1,5 @@
 export * from './apiResult'
+export * from './config'
 export * from './createKeyIfAbsentResult'
 export * from './dateRange'
 export * from './filters'

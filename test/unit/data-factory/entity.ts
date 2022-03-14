@@ -1,6 +1,7 @@
 import { Base64 } from '@sudoplatform/sudo-common'
 import {
   CardState,
+  CardType,
   CreditCardNetwork,
   FundingSourceState,
   ProvisionalFundingSourceState,
@@ -9,6 +10,7 @@ import {
   TransactionType,
   VirtualCard,
 } from '../../../src'
+import { VirtualCardsConfigEntity } from '../../../src/private/domain/entities/configuration/virtualCardsConfigEntity'
 import { FundingSourceEntity } from '../../../src/private/domain/entities/fundingSource/fundingSourceEntity'
 import { ProvisionalFundingSourceEntity } from '../../../src/private/domain/entities/fundingSource/provisionalFundingSourceEntity'
 import {
@@ -132,5 +134,32 @@ export class EntityDataFactory {
         description: 'dummyFundingSourceDescription',
       },
     ],
+  }
+
+  static readonly configurationData: VirtualCardsConfigEntity = {
+    fundingSourceSupportInfo: [
+      {
+        detail: [{ cardType: CardType.Credit }],
+        fundingSourceType: 'card',
+        network: 'VISA',
+        providerType: 'stripe',
+      },
+    ],
+    maxCardCreationVelocity: ['5/P1D'],
+    maxFundingSourceVelocity: ['5/P1D'],
+    maxFundingSourceFailureVelocity: [''],
+    maxTransactionAmount: [
+      {
+        currency: 'USD',
+        amount: 25000,
+      },
+    ],
+    maxTransactionVelocity: [
+      {
+        currency: 'USD',
+        velocity: ['25000/P1D'],
+      },
+    ],
+    virtualCardCurrencies: ['USD'],
   }
 }
