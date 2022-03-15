@@ -1,16 +1,18 @@
 /**
- * @property {string} id Identifier of the virtual card.
- * @property {string} owner Owner Identifier of the virtual card.
- * @property {number} version Current version record of the virtual card.
- * @property {Date} createdAt Date of when the virtual card was created.
- * @property {Date} updatedAt Date of when the virtual card was last updated.
- * @property {Date} transactedAt Date of when the virtual card was transacted.
+ * @property {string} id Identifier of the transaction.
+ * @property {string} owner Owner Identifier of the transaction.
+ * @property {number} version Current version of the transaction.
+ * @property {Date} createdAt Date when the transaction was created.
+ * @property {Date} updatedAt Date when the transaction was last updated.
+ * @property {TransactionType} type Type of the transaction.
+ * @property {Date} transactedAt Date when the transaction occurred at the merchant.
+ * @property {Date?} settledAt Date when the transaction was completed. Complete and Refund transactions only.
  * @property {string} cardId Identifier of the virtual card associated with the transaction.
- * @property {string} sequenceId Identifier of the sequence of the transaction that it is involved in.
- * @property {CurrencyAmount} billedAmount Amount billed per the transaction.
- * @property {CurrencyAmount} transactedAmount Amount transacted per the transaction.
- * @property {string} description Information describing of the transaction
- * @property {DeclineReason} declineReason Reason that the transaction was declined. Undefined in the transaction is not a decline.
+ * @property {string} sequenceId Identifier of the sequence of related transactions.
+ * @property {CurrencyAmount} billedAmount Amount of transaction in currency of the virtual card.
+ * @property {CurrencyAmount} transactedAmount Amount of transaction as charged by the merchant.
+ * @property {string} description Transaction statement description
+ * @property {DeclineReason} declineReason Reason that the transaction was declined. Decline transactions only.
  * @property {TransactionDetailCharge[]} detail Details of the transaction charge.
  */
 export interface Transaction {
@@ -20,6 +22,7 @@ export interface Transaction {
   createdAt: Date
   updatedAt: Date
   transactedAt: Date
+  settledAt?: Date
   cardId: string
   sequenceId: string
   type: TransactionType

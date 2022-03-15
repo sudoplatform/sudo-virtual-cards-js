@@ -39,11 +39,15 @@ describe('ListTransactionsByCardIdUseCase Test Suite', () => {
         mockTransactionService.listTransactionsByCardId(anything()),
       ).thenResolve({
         status: ListOperationResultStatus.Success,
-        items: [EntityDataFactory.transaction],
+        items: [
+          EntityDataFactory.transaction,
+          EntityDataFactory.settledTransaction,
+        ],
         nextToken: undefined,
       })
       when(mockUserService.isSignedIn()).thenResolve(true)
     })
+
     it('throws NotSignedInError if user is not signed in', async () => {
       when(mockUserService.isSignedIn()).thenResolve(false)
       await expect(
@@ -52,6 +56,7 @@ describe('ListTransactionsByCardIdUseCase Test Suite', () => {
         }),
       ).rejects.toThrow(NotSignedInError)
     })
+
     it('completes successfully', async () => {
       const cardId = v4()
       const cachePolicy = CachePolicy.CacheOnly
@@ -83,7 +88,10 @@ describe('ListTransactionsByCardIdUseCase Test Suite', () => {
         sortOrder,
       })
       expect(result).toStrictEqual({
-        items: [EntityDataFactory.transaction],
+        items: [
+          EntityDataFactory.transaction,
+          EntityDataFactory.settledTransaction,
+        ],
         nextToken: undefined,
         status: ListOperationResultStatus.Success,
       })

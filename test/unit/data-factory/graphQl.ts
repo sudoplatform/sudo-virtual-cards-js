@@ -150,6 +150,36 @@ export class GraphQLDataFactory {
     type: TransactionType.Pending,
   }
 
+  static readonly sealedSettledTransaction: SealedTransaction = {
+    ...this.commonProps,
+    id: 'dummyTransactionId',
+    algorithm: 'RSAEncryptionOAEPAESCBC',
+    billedAmount: this.sealedCurrencyAmount,
+    cardId: 'dummyVirtualCardId',
+    declineReason: 'dummyDeclineReason',
+    description: 'dummyDescription',
+    detail: [
+      {
+        description: 'dummyDescription',
+        fundingSourceAmount: this.sealedCurrencyAmount,
+        fundingSourceId: 'dummyFundingSourceId',
+        markup: {
+          percent: 'SEALED-NUMBER',
+          flat: 'SEALED-NUMBER',
+          minCharge: 'SEALED-NUMBER',
+        },
+        markupAmount: this.sealedCurrencyAmount,
+        virtualCardAmount: this.sealedCurrencyAmount,
+      },
+    ],
+    keyId: 'dummyKeyId',
+    sequenceId: 'dummySequenceId',
+    sortDateEpochMs: 120.0,
+    transactedAmount: this.sealedCurrencyAmount,
+    transactedAtEpochMs: 'SEALED-NUMBER',
+    type: TransactionType.Complete,
+  }
+
   static readonly configurationData: VirtualCardsConfig = {
     fundingSourceSupportInfo: [
       {

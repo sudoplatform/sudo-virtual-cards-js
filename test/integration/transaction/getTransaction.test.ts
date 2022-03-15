@@ -27,7 +27,7 @@ describe('GetTransaction Test Suite', () => {
   let sudo: Sudo
   let card: VirtualCard
 
-  let transaction: Transaction
+  let authorization: Transaction
 
   beforeEach(async () => {
     const result = await setupVirtualCardsClient(log)
@@ -53,29 +53,29 @@ describe('GetTransaction Test Suite', () => {
       csc: card.csc,
     })
 
-    let transactionResult: ListTransactionsResults | undefined
+    let authorizationResult: ListTransactionsResults | undefined
     await waitForExpect(async () => {
-      transactionResult = await instanceUnderTest.listTransactionsByCardId({
+      authorizationResult = await instanceUnderTest.listTransactionsByCardId({
         cardId: card.id,
       })
-      if (transactionResult.status !== ListOperationResultStatus.Success) {
+      if (authorizationResult.status !== ListOperationResultStatus.Success) {
         fail('failed to get successful transactions')
       }
-      expect(transactionResult.items).toHaveLength(1)
+      expect(authorizationResult.items).toHaveLength(1)
     })
 
-    if (transactionResult?.status !== ListOperationResultStatus.Success) {
+    if (authorizationResult?.status !== ListOperationResultStatus.Success) {
       fail('transaction result unexpectedly falsy')
     }
-    transaction = transactionResult.items[0]
+    authorization = authorizationResult.items[0]
   })
 
   describe('getTransaction', () => {
-    it('returns expected result', async () => {
+    it('returns expected result for an authorization', async () => {
       const result = await instanceUnderTest.getTransaction({
-        id: transaction.id,
+        id: authorization.id,
       })
-      expect(result).toStrictEqual(transaction)
+      expect(result).toStrictEqual(authorization)
     })
 
     it('returns undefined for non-existent transaction', async () => {

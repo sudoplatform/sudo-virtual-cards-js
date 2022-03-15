@@ -12,6 +12,7 @@ export interface TransactionUseCaseOutput {
   createdAt: Date
   updatedAt: Date
   transactedAt: Date
+  settledAt?: Date
   cardId: string
   sequenceId: string
   type: TransactionType

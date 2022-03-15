@@ -164,7 +164,7 @@ export enum FundingSourceType {
 }
 
 /**
- * The Sudo Platform SDK representation of an enumaration depicting the provisional funding source credit card network.
+ * The Sudo Platform SDK representation of an enumeration depicting the provisional funding source credit card network.
  *
  * @enum CreditCardNetwork
  */

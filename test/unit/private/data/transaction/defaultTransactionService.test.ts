@@ -50,6 +50,7 @@ describe('DefaultTransactionService Test Suite', () => {
     delete _transaction.description
     delete _transaction.transactedAtEpochMs
     delete _transaction.transactedAt
+    delete _transaction.settledAt
     delete _transaction.declineReason
     delete _transaction.detail
     return _transaction as Omit<
@@ -93,12 +94,28 @@ describe('DefaultTransactionService Test Suite', () => {
       ).resolves.toBeUndefined()
     })
 
-    it('returns expected result', async () => {
+    it('returns expected pending transaction result', async () => {
       const result = await instanceUnderTest.getTransaction({
         id: '',
         cachePolicy: CachePolicy.CacheOnly,
       })
       expect(result).toEqual<typeof result>(EntityDataFactory.transaction)
+    })
+
+    it('returns expected settled transaction result', async () => {
+      when(mockAppSync.getTransaction(anything(), anything())).thenResolve(
+        GraphQLDataFactory.sealedSettledTransaction,
+      )
+      when(mockTransactionWorker.unsealTransaction(anything())).thenResolve(
+        ServiceDataFactory.settledTransactionUnsealed,
+      )
+      const result = await instanceUnderTest.getTransaction({
+        id: '',
+        cachePolicy: CachePolicy.CacheOnly,
+      })
+      expect(result).toEqual<typeof result>(
+        EntityDataFactory.settledTransaction,
+      )
     })
   })
 

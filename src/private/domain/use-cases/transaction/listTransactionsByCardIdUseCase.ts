@@ -8,10 +8,10 @@ import {
   DeclineReason,
   SortOrder,
   TransactionFilter,
-  TransactionType,
 } from '../../../..'
 import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
 import { TransactionService } from '../../entities/transaction/transactionService'
+import { TransactionUseCaseOutput } from './outputs'
 
 interface ListTransactionsByCardIdUseCaseInput {
   cardId: string
@@ -41,29 +41,13 @@ interface TransactionDetailChargeUseCaseOutput {
   description: string
 }
 
-interface TransactionUseCaseOutput {
-  id: string
-  owner: string
-  version: number
-  createdAt: Date
-  updatedAt: Date
-  transactedAt: Date
-  cardId: string
-  sequenceId: string
-  type: TransactionType
-  billedAmount: CurrencyAmountUseCaseOutput
-  transactedAmount: CurrencyAmountUseCaseOutput
-  description: string
-  declineReason?: DeclineReason
-  detail?: TransactionDetailChargeUseCaseOutput[]
-}
-
 interface TransactionSealedAttributesUseCaseOutput {
   billedAmount: CurrencyAmountUseCaseOutput
   transactedAmount: CurrencyAmountUseCaseOutput
   description: string
   transactedAtEpochMs: undefined
   transactedAt: Date
+  settledAt?: Date
   declineReason?: DeclineReason
   detail?: TransactionDetailChargeUseCaseOutput[]
 }

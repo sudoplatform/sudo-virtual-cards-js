@@ -1,3 +1,4 @@
+import { TransactionType } from '../../../../public'
 import { TransactionEntity } from '../../../domain/entities/transaction/transactionEntity'
 import { TransactionUnsealed } from '../../common/transactionWorker'
 import { TransactionSealedAttributes } from '../defaultTransactionService'
@@ -8,7 +9,7 @@ export class TransactionEntityTransformer {
   }
 
   static transformSuccess(data: TransactionUnsealed): TransactionEntity {
-    return {
+    const entity: TransactionEntity = {
       ...TransactionEntityTransformer.transformOverlap(data),
       transactedAt: new Date(data.transactedAtEpochMs),
       billedAmount: data.billedAmount,
@@ -17,6 +18,14 @@ export class TransactionEntityTransformer {
       declineReason: data.declineReason,
       detail: data.detail,
     }
+    if (
+      entity.type === TransactionType.Complete ||
+      entity.type === TransactionType.Refund
+    ) {
+      entity.settledAt = new Date(data.sortDateEpochMs)
+    }
+
+    return entity
   }
 
   static transformFailure(

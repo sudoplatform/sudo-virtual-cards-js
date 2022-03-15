@@ -136,6 +136,37 @@ export class EntityDataFactory {
     ],
   }
 
+  static readonly settledTransaction: TransactionEntity = {
+    ...this.commonProps,
+    id: 'dummyTransactionId',
+    transactedAt: new Date(100.0),
+    settledAt: new Date(120.0),
+    cardId: 'dummyVirtualCardId',
+    sequenceId: 'dummySequenceId',
+    type: TransactionType.Complete,
+    billedAmount: this.virtualCardAmount,
+    transactedAmount: this.virtualCardAmount,
+    description: 'dummyDescription',
+    detail: [
+      {
+        virtualCardAmount: this.virtualCardAmount,
+        markup: {
+          percent: 299,
+          flat: 31,
+          minCharge: 50,
+        },
+        markupAmount: {
+          currency: 'USD',
+          amount:
+            this.fundingSourceAmount.amount - this.virtualCardAmount.amount,
+        },
+        fundingSourceAmount: this.fundingSourceAmount,
+        fundingSourceId: 'dummyFundingSourceId',
+        description: 'dummyFundingSourceDescription',
+      },
+    ],
+  }
+
   static readonly configurationData: VirtualCardsConfigEntity = {
     fundingSourceSupportInfo: [
       {
