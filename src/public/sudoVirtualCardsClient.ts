@@ -538,6 +538,11 @@ export interface SudoVirtualCardsClient {
    * @returns {VirtualCardsConfig} The configuration data for the virtual cards service.
    */
   getVirtualCardsConfig(): Promise<VirtualCardsConfig>
+
+  /**
+   * Removes any cached data maintained by this client.
+   */
+  reset(): Promise<void>
 }
 
 export type SudoVirtualCardsClientOptions = {
@@ -844,5 +849,9 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
       this.sudoUserService,
     )
     return await useCase.execute()
+  }
+
+  async reset(): Promise<void> {
+    await this.keyManager.removeAllKeys()
   }
 }

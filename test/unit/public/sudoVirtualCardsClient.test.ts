@@ -5,7 +5,6 @@ import {
   DefaultSudoKeyManager,
   ListOperationResultStatus,
   SudoCryptoProvider,
-  SudoKeyManager,
 } from '@sudoplatform/sudo-common'
 import { SudoProfilesClient } from '@sudoplatform/sudo-profiles'
 import { SudoUserClient } from '@sudoplatform/sudo-user'
@@ -189,7 +188,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
   const mockSudoUserClient = mock<SudoUserClient>()
   const mockSudoProfilesClient = mock<SudoProfilesClient>()
   const mockSudoCryptoProvider = mock<SudoCryptoProvider>()
-  const mockSudoKeyManager = mock<SudoKeyManager>()
+  const mockSudoKeyManager = mock<DefaultSudoKeyManager>()
   const mockApiClient = mock<ApiClient>()
 
   // Mocks generated inside of constructor
@@ -268,6 +267,9 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       instance(mockFundingSourceService),
     )
     JestMockApiClient.mockImplementation(() => instance(mockApiClient))
+    JestMockSudoKeyManager.mockImplementation(() =>
+      instance(mockSudoKeyManager),
+    )
 
     JestMockCreateKeysIfAbsentUseCase.mockImplementation(() =>
       instance(mockCreateKeysIfAbsentUseCase),
@@ -326,6 +328,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       sudoUserClient: instance(mockSudoUserClient),
     }
     instanceUnderTest = new DefaultSudoVirtualCardsClient(options)
+    mockSudoKeyManager
   })
 
   describe('constructor', () => {
@@ -985,6 +988,12 @@ describe('SudoVirtualCardsClient Test Suite', () => {
         status: ListOperationResultStatus.Success,
         items: [ApiDataFactory.transaction],
       })
+    })
+  })
+  describe('reset', () => {
+    it('deletes all keys from keyManager', async () => {
+      await instanceUnderTest.reset()
+      verify(mockSudoKeyManager.removeAllKeys()).once()
     })
   })
 })
