@@ -49,6 +49,7 @@ query ListFundingSources($limit: Int, $nextToken: String) {
     items {
       ...FundingSource
     }
+    nextToken
   }
 }
 

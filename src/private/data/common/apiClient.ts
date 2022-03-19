@@ -191,7 +191,7 @@ export class ApiClient {
   ): Promise<FundingSourceConnection> {
     const data = await this.performQuery<ListFundingSourcesQuery>({
       query: ListFundingSourcesDocument,
-      variables: { input: { limit, nextToken } },
+      variables: { limit, nextToken },
       fetchPolicy,
       calleeName: this.listFundingSources.name,
     })

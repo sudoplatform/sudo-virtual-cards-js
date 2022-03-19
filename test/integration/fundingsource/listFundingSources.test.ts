@@ -55,5 +55,20 @@ describe('SudoVirtualCardsClient ListFundingSources Test Suite', () => {
       })
       expect(result.items).toEqual([])
     })
+
+    it('returns expected result when limit specified', async () => {
+      await createFundingSource(instanceUnderTest, stripe, {
+        creditCardNumber: Visa.creditCardNumber,
+      })
+      await createFundingSource(instanceUnderTest, stripe, {
+        creditCardNumber: Mastercard.creditCardNumber,
+      })
+      const result = await instanceUnderTest.listFundingSources({
+        cachePolicy: CachePolicy.RemoteOnly,
+        limit: 1,
+      })
+      expect(result.items).toHaveLength(1)
+      expect(result.nextToken).toBeTruthy()
+    })
   })
 })

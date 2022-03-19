@@ -379,7 +379,7 @@ describe('ApiClient Test Suite', () => {
       const [args] = capture(mockClient.query as any).first()
       expect(args).toStrictEqual({
         fetchPolicy: 'cache-only',
-        variables: { input: { limit, nextToken } },
+        variables: { limit, nextToken },
         query: ListFundingSourcesDocument,
       })
     })
