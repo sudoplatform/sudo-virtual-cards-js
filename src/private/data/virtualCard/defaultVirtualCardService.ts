@@ -231,12 +231,7 @@ export class DefaultVirtualCardService implements VirtualCardService {
       ? FetchPolicyTransformer.transformCachePolicy(input.cachePolicy)
       : undefined
     const { items: sealedCards, nextToken: newNextToken } =
-      await this.appSync.listCards(
-        input?.filter,
-        input?.limit,
-        input?.nextToken,
-        fetchPolicy,
-      )
+      await this.appSync.listCards(input?.limit, input?.nextToken, fetchPolicy)
     const success: VirtualCardUnsealed[] = []
     const failed: {
       item: Omit<VirtualCardUnsealed, keyof VirtualCardSealedAttributes>
@@ -316,7 +311,6 @@ export class DefaultVirtualCardService implements VirtualCardService {
       : undefined
     const { items, nextToken: newNextToken } =
       await this.appSync.listProvisionalCards(
-        input?.filter,
         input?.limit,
         input?.nextToken,
         fetchPolicy,

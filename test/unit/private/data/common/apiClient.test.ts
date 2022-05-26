@@ -697,17 +697,11 @@ describe('ApiClient Test Suite', () => {
           },
         },
       } as any)
-      const filter = { id: { eq: v4() } }
       const fetchPolicy = 'cache-only'
       const limit = 100
       const nextToken = v4()
       await expect(
-        instanceUnderTest.listProvisionalCards(
-          filter,
-          limit,
-          nextToken,
-          fetchPolicy,
-        ),
+        instanceUnderTest.listProvisionalCards(limit, nextToken, fetchPolicy),
       ).resolves.toStrictEqual({
         items: [GraphQLDataFactory.provisionalCard],
         nextToken: undefined,
@@ -716,7 +710,7 @@ describe('ApiClient Test Suite', () => {
       const [args] = capture(mockClient.query as any).first()
       expect(args).toStrictEqual({
         fetchPolicy: 'cache-only',
-        variables: { filter, limit, nextToken },
+        variables: { limit, nextToken },
         query: ListProvisionalCardsDocument,
       })
     })
@@ -797,12 +791,11 @@ describe('ApiClient Test Suite', () => {
           },
         },
       } as any)
-      const filter = { id: { eq: v4() } }
       const fetchPolicy = 'cache-only'
       const limit = 100
       const nextToken = v4()
       await expect(
-        instanceUnderTest.listCards(filter, limit, nextToken, fetchPolicy),
+        instanceUnderTest.listCards(limit, nextToken, fetchPolicy),
       ).resolves.toStrictEqual({
         items: [GraphQLDataFactory.sealedCard],
         nextToken: undefined,
@@ -811,7 +804,7 @@ describe('ApiClient Test Suite', () => {
       const [args] = capture(mockClient.query as any).first()
       expect(args).toStrictEqual({
         fetchPolicy: 'cache-only',
-        variables: { filter, limit, nextToken },
+        variables: { limit, nextToken },
         query: ListCardsDocument,
       })
     })
@@ -1027,7 +1020,6 @@ describe('ApiClient Test Suite', () => {
         },
       } as any)
       const cardId = v4()
-      const filter = { id: { eq: v4() } }
       const fetchPolicy = 'cache-only'
       const limit = 100
       const nextToken = v4()
@@ -1037,7 +1029,6 @@ describe('ApiClient Test Suite', () => {
         instanceUnderTest.listTransactionsByCardId(
           {
             cardId,
-            filter,
             limit,
             nextToken,
             dateRange,
@@ -1055,7 +1046,6 @@ describe('ApiClient Test Suite', () => {
         fetchPolicy: 'cache-only',
         variables: {
           cardId,
-          filter,
           limit,
           nextToken,
           dateRange,

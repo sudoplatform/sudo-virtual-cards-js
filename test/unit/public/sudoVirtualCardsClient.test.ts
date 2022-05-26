@@ -801,11 +801,9 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       expect(JestMockListProvisionalCardsUseCase).toHaveBeenCalledTimes(1)
     })
     it('calls use case as expected', async () => {
-      const filter = { id: { eq: v4() } }
       const limit = 23
       const nextToken = v4()
       await instanceUnderTest.listProvisionalCards({
-        filter,
         cachePolicy: CachePolicy.CacheOnly,
         limit,
         nextToken,
@@ -813,7 +811,6 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       verify(mockListProvisionalCardsUseCase.execute(anything())).once()
       const [args] = capture(mockListProvisionalCardsUseCase.execute).first()
       expect(args).toEqual<typeof args>({
-        filter,
         cachePolicy: CachePolicy.CacheOnly,
         limit,
         nextToken,
@@ -875,11 +872,9 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       expect(JestMockListVirtualCardsUseCase).toHaveBeenCalledTimes(1)
     })
     it('calls use case as expected', async () => {
-      const filter = { id: { eq: v4() } }
       const limit = 23
       const nextToken = v4()
       await instanceUnderTest.listVirtualCards({
-        filter,
         cachePolicy: CachePolicy.CacheOnly,
         limit,
         nextToken,
@@ -887,7 +882,6 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       verify(mockListVirtualCardsUseCase.execute(anything())).once()
       const [args] = capture(mockListVirtualCardsUseCase.execute).first()
       expect(args).toEqual<typeof args>({
-        filter,
         cachePolicy: CachePolicy.CacheOnly,
         limit,
         nextToken,
@@ -953,7 +947,6 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     it('calls use case as expected', async () => {
       const cardId = v4()
       const cachePolicy = CachePolicy.CacheOnly
-      const filter = { id: { eq: v4() } }
       const limit = 100
       const nextToken = v4()
       const dateRange = { startDate: new Date(), endDate: new Date() }
@@ -961,7 +954,6 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       await instanceUnderTest.listTransactionsByCardId({
         cardId,
         cachePolicy,
-        filter,
         limit,
         nextToken,
         dateRange,
@@ -974,7 +966,6 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       expect(args).toEqual<typeof args>({
         cardId,
         cachePolicy,
-        filter,
         limit,
         nextToken,
         dateRange,

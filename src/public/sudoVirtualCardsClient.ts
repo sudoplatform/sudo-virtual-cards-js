@@ -58,11 +58,6 @@ import {
 import { VirtualCardsConfig } from './typings/config'
 import { DateRange } from './typings/dateRange'
 import {
-  ProvisionalCardFilter,
-  TransactionFilter,
-  VirtualCardFilter,
-} from './typings/filters'
-import {
   FundingSource,
   FundingSourceClientConfiguration,
   FundingSourceType,
@@ -235,13 +230,11 @@ export interface GetProvisionalCardInput {
 /**
  * Input for {@link SudoVirtualCardsClient.listProvisionalCards}.
  *
- * @property {ListProvisionalCardsInput} filter Filter for provisional cards list.
  * @property {CachePolicy} cachePolicy Cache Policy to use to access provisional cards.
  * @property {number} limit Number of cards to return.
  * @property {string} nextToken Paginated next token.
  */
 export interface ListProvisionalCardsInput {
-  filter?: ProvisionalCardFilter
   cachePolicy?: CachePolicy
   limit?: number
   nextToken?: string
@@ -261,13 +254,11 @@ export interface GetVirtualCardInput {
 /**
  * Input for {@link SudoVirtualCardsClient.listVirtualCards}.
  *
- * @property {ListProvisionalCardsInput} filter Filter for virtual cards list.
  * @property {CachePolicy} cachePolicy Cache Policy to use to access virtual cards.
  * @property {number} limit Number of cards to return.
  * @property {string} nextToken Paginated next token.
  */
 export interface ListVirtualCardsInput {
-  filter?: VirtualCardFilter
   cachePolicy?: CachePolicy
   limit?: number
   nextToken?: string
@@ -289,14 +280,12 @@ export interface GetTransactionInput {
  *
  * @property {string} cardId Identifier of the card to list for related transactions.
  * @property {CachePolicy} cachePolicy Cache Policy to use to access transactions.
- * @property {TransactionFilter} filter Filter for controlling data returned from query.
  * @property {number} limit Number of transactions to return.
  * @property {string} nextToken Paginated next token.
  */
 export interface ListTransactionsByCardIdInput {
   cardId: string
   cachePolicy?: CachePolicy
-  filter?: TransactionFilter
   limit?: number
   nextToken?: string
   dateRange?: DateRange

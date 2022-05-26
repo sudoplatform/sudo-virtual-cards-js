@@ -1,9 +1,5 @@
 import { CachePolicy, ListOperationResult } from '@sudoplatform/sudo-common'
 import { APIResult } from '../../../..'
-import {
-  ProvisionalCardFilter,
-  VirtualCardFilter,
-} from '../../../../public/typings/filters'
 import { Metadata } from '../../../../public/typings/metadata'
 import { VirtualCardSealedAttributes } from '../../../data/virtualCard/defaultVirtualCardService'
 import { ProvisionalVirtualCardEntity } from './provisionalVirtualCardEntity'
@@ -55,7 +51,6 @@ export interface VirtualCardServiceUpdateVirtualCardUseCaseInput {
 }
 
 export interface VirtualCardServiceListVirtualCardsInput {
-  filter?: VirtualCardFilter
   cachePolicy?: CachePolicy
   limit?: number
   nextToken?: string
@@ -67,7 +62,6 @@ export interface VirtualCardServiceGetProvisionalCardInput {
 }
 
 export interface VirtualCardServiceListProvisionalCardsInput {
-  filter?: ProvisionalCardFilter
   cachePolicy?: CachePolicy
   limit?: number
   nextToken?: string

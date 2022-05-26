@@ -24,7 +24,6 @@ import {
   CancelVirtualCardDocument,
   CancelVirtualCardMutation,
   CardCancelRequest,
-  CardFilterInput,
   CardProvisionRequest,
   CardUpdateRequest,
   CompleteFundingSourceDocument,
@@ -70,7 +69,6 @@ import {
   PaginatedPublicKey,
   ProvisionalCard,
   ProvisionalCardConnection,
-  ProvisionalCardFilterInput,
   ProvisionalFundingSource,
   ProvisionVirtualCardDocument,
   ProvisionVirtualCardMutation,
@@ -254,7 +252,6 @@ export class ApiClient {
   }
 
   public async listProvisionalCards(
-    filter?: ProvisionalCardFilterInput,
     limit?: number,
     nextToken?: string,
     fetchPolicy: FetchPolicy = 'network-only',
@@ -262,7 +259,7 @@ export class ApiClient {
     const data = await this.performQuery<ListProvisionalCardsQuery>({
       query: ListProvisionalCardsDocument,
       fetchPolicy,
-      variables: { filter, limit, nextToken },
+      variables: { limit, nextToken },
       calleeName: this.listProvisionalCards.name,
     })
     return data.listProvisionalCards
@@ -282,7 +279,6 @@ export class ApiClient {
   }
 
   public async listCards(
-    filter?: CardFilterInput,
     limit?: number,
     nextToken?: string,
     fetchPolicy: FetchPolicy = 'network-only',
@@ -290,7 +286,7 @@ export class ApiClient {
     const data = await this.performQuery<ListCardsQuery>({
       query: ListCardsDocument,
       fetchPolicy,
-      variables: { filter, limit, nextToken },
+      variables: { limit, nextToken },
       calleeName: this.listCards.name,
     })
     return data.listCards

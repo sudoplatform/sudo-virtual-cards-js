@@ -3,7 +3,6 @@
 docs
 lib
 node_modules
-src/gen
 yarn-error.log
 .yalc
 yalc.lock

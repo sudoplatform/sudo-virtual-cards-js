@@ -339,39 +339,6 @@ type FundingSourceConnection {
   nextToken: String
 }
 
-input ProvisionalCardFilterInput {
-  id: IDFilterInput
-  owner: IDFilterInput
-  clientRefId: IDFilterInput
-}
-
-input IDFilterInput {
-  ne: ID
-  eq: ID
-  le: ID
-  lt: ID
-  ge: ID
-  gt: ID
-  contains: ID
-  notContains: ID
-  between: [ID]
-  beginsWith: ID
-}
-
-input CardFilterInput {
-  id: IDFilterInput
-  owner: IDFilterInput
-  keyId: IDFilterInput
-  state: IDFilterInput
-}
-
-input TransactionFilterInput {
-  id: IDFilterInput
-  owner: IDFilterInput
-  cardId: IDFilterInput
-  keyId: IDFilterInput
-}
-
 input DateRangeInput {
   startDateEpochMs: Float!
   endDateEpochMs: Float!
@@ -400,21 +367,17 @@ type Query {
   listFundingSources(limit: Int, nextToken: String): FundingSourceConnection!
   getProvisionalCard(id: ID!): ProvisionalCard
   listProvisionalCards(
-    filter: 
-    ProvisionalCardFilterInput
     limit: Int
     nextToken: String
   ): ProvisionalCardConnection!
   getCard(id: ID!, keyId: String): SealedCard
   listCards(
-    filter: CardFilterInput
     limit: Int
     nextToken: String
   ): SealedCardConnection!
   getTransaction(id: ID!, keyId: String): SealedTransaction
   listTransactionsByCardId(
     cardId: ID!
-    filter: TransactionFilterInput
     limit: Int
     nextToken: String
     dateRange: DateRangeInput

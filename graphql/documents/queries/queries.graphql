@@ -60,11 +60,10 @@ query GetProvisionalCard($id: ID!) {
 }
 
 query ListProvisionalCards(
-  $filter: ProvisionalCardFilterInput
   $limit: Int
   $nextToken: String
 ) {
-  listProvisionalCards(filter: $filter, limit: $limit, nextToken: $nextToken) {
+  listProvisionalCards(limit: $limit, nextToken: $nextToken) {
     items {
       ...ProvisionalCard
     }
@@ -78,8 +77,8 @@ query GetCard($id: ID!, $keyId: String) {
   }
 }
 
-query ListCards($filter: CardFilterInput, $limit: Int, $nextToken: String) {
-  listCards(filter: $filter, limit: $limit, nextToken: $nextToken) {
+query ListCards($limit: Int, $nextToken: String) {
+  listCards(limit: $limit, nextToken: $nextToken) {
     items {
       ...SealedCardWithLastTransaction
     }
@@ -95,7 +94,6 @@ query GetTransaction($id: ID!, $keyId: String) {
 
 query ListTransactionsByCardId(
   $cardId: ID!
-  $filter: TransactionFilterInput
   $limit: Int
   $nextToken: String
   $dateRange: DateRangeInput
@@ -103,7 +101,6 @@ query ListTransactionsByCardId(
 ) {
   listTransactionsByCardId(
     cardId: $cardId
-    filter: $filter
     limit: $limit
     nextToken: $nextToken
     dateRange: $dateRange

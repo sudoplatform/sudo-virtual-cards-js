@@ -51,11 +51,9 @@ describe('ListProvisionalCardsUseCase Test Suite', () => {
       )
     })
     it('completes successfully', async () => {
-      const filter = { id: { eq: v4() } }
       const limit = 5
       const inputNextToken = v4()
       const result = await instanceUnderTest.execute({
-        filter,
         cachePolicy: CachePolicy.CacheOnly,
         limit,
         nextToken: inputNextToken,
@@ -65,7 +63,6 @@ describe('ListProvisionalCardsUseCase Test Suite', () => {
         mockVirtualCardService.listProvisionalCards,
       ).first()
       expect(args).toStrictEqual<typeof args>({
-        filter,
         cachePolicy: CachePolicy.CacheOnly,
         limit,
         nextToken: inputNextToken,

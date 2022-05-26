@@ -3,7 +3,6 @@ import {
   ListOperationResult,
   NotSignedInError,
 } from '@sudoplatform/sudo-common'
-import { ProvisionalCardFilter } from '../../../..'
 import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
 import { VirtualCardService } from '../../entities/virtualCard/virtualCardService'
 import {
@@ -12,7 +11,6 @@ import {
 } from './outputs'
 
 export interface ListVirtualCardsUseCaseInput {
-  filter?: ProvisionalCardFilter
   cachePolicy?: CachePolicy
   limit?: number
   nextToken?: string

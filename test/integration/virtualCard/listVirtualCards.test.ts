@@ -115,21 +115,6 @@ describe('ListVirtualCards Test Suite', () => {
       })
     })
 
-    it('filters cards as expected', async () => {
-      expectSetupComplete()
-
-      const result = await instanceUnderTest.listVirtualCards({
-        filter: { id: { ne: cards[0].id } },
-      })
-      if (result.status !== ListOperationResultStatus.Success) {
-        fail(`Wrong status: ${result.status}`)
-      }
-      expect(result.items).toHaveLength(4)
-      expect(result).toMatchObject({
-        items: expect.arrayContaining(cards.slice(1, 4)),
-      })
-    })
-
     it('limits cards as expected', async () => {
       expectSetupComplete()
 

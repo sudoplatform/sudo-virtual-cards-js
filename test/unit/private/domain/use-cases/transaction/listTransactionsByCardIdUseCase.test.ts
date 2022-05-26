@@ -60,7 +60,6 @@ describe('ListTransactionsByCardIdUseCase Test Suite', () => {
     it('completes successfully', async () => {
       const cardId = v4()
       const cachePolicy = CachePolicy.CacheOnly
-      const filter = { id: { eq: v4() } }
       const limit = 100
       const nextToken = v4()
       const dateRange = { startDate: new Date(), endDate: new Date() }
@@ -68,7 +67,6 @@ describe('ListTransactionsByCardIdUseCase Test Suite', () => {
       const result = await instanceUnderTest.execute({
         cardId,
         cachePolicy,
-        filter,
         limit,
         nextToken,
         dateRange,
@@ -81,7 +79,6 @@ describe('ListTransactionsByCardIdUseCase Test Suite', () => {
       expect(args).toStrictEqual<typeof args>({
         cardId,
         cachePolicy,
-        filter,
         limit,
         nextToken,
         dateRange,

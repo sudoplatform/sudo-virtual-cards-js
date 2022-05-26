@@ -82,7 +82,6 @@ export class DefaultTransactionService implements TransactionService {
       await this.appSync.listTransactionsByCardId(
         {
           cardId: input.cardId,
-          filter: input.filter,
           limit: input.limit,
           nextToken: input.nextToken,
           dateRange,

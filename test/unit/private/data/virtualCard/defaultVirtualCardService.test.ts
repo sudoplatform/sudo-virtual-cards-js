@@ -522,30 +522,22 @@ describe('DefaultVirtualCardService Test Suite', () => {
         ServiceDataFactory.deviceKey,
       )
       when(
-        mockAppSync.listCards(anything(), anything(), anything(), anything()),
+        mockAppSync.listCards(anything(), anything(), anything()),
       ).thenResolve({ items: [GraphQLDataFactory.sealedCard], nextToken })
     })
 
     it('calls expected methods', async () => {
-      const filter = { id: { eq: v4() } }
       const limit = 4
       const nextToken = v4()
       await instanceUnderTest.listVirtualCards({
-        filter,
         limit,
         nextToken,
         cachePolicy: CachePolicy.CacheOnly,
       })
-      verify(
-        mockAppSync.listCards(anything(), anything(), anything(), anything()),
-      ).once()
-      const [
-        appSyncFilter,
-        appSyncLimit,
-        appSyncNextToken,
-        appSyncFetchPolicy,
-      ] = capture(mockAppSync.listCards).first()
-      expect(appSyncFilter).toEqual<typeof appSyncFilter>(filter)
+      verify(mockAppSync.listCards(anything(), anything(), anything())).once()
+      const [appSyncLimit, appSyncNextToken, appSyncFetchPolicy] = capture(
+        mockAppSync.listCards,
+      ).first()
       expect(appSyncLimit).toEqual(limit)
       expect(appSyncNextToken).toEqual(nextToken)
       expect(appSyncFetchPolicy).toEqual('cache-only')
@@ -554,7 +546,7 @@ describe('DefaultVirtualCardService Test Suite', () => {
 
     it('returns empty list if appsync returns empty list', async () => {
       when(
-        mockAppSync.listCards(anything(), anything(), anything(), anything()),
+        mockAppSync.listCards(anything(), anything(), anything()),
       ).thenResolve({ items: [] })
       await expect(instanceUnderTest.listVirtualCards()).resolves.toEqual({
         status: ListOperationResultStatus.Success,
@@ -598,7 +590,7 @@ describe('DefaultVirtualCardService Test Suite', () => {
 
     it('returns expected result with lastTransaction', async () => {
       when(
-        mockAppSync.listCards(anything(), anything(), anything(), anything()),
+        mockAppSync.listCards(anything(), anything(), anything()),
       ).thenResolve({
         items: [
           {
@@ -644,7 +636,7 @@ describe('DefaultVirtualCardService Test Suite', () => {
 
     it('returns partial results when all unsealing fails', async () => {
       when(
-        mockAppSync.listCards(anything(), anything(), anything(), anything()),
+        mockAppSync.listCards(anything(), anything(), anything()),
       ).thenResolve({
         items: [
           { ...GraphQLDataFactory.sealedCard, id: '1' },
@@ -680,7 +672,7 @@ describe('DefaultVirtualCardService Test Suite', () => {
 
     it('returns partial results when some unsealing fails', async () => {
       when(
-        mockAppSync.listCards(anything(), anything(), anything(), anything()),
+        mockAppSync.listCards(anything(), anything(), anything()),
       ).thenResolve({
         items: [
           { ...GraphQLDataFactory.sealedCard, id: '1' },
@@ -809,12 +801,7 @@ describe('DefaultVirtualCardService Test Suite', () => {
 
     beforeEach(() => {
       when(
-        mockAppSync.listProvisionalCards(
-          anything(),
-          anything(),
-          anything(),
-          anything(),
-        ),
+        mockAppSync.listProvisionalCards(anything(), anything(), anything()),
       ).thenResolve({
         items: [
           {
@@ -830,30 +817,19 @@ describe('DefaultVirtualCardService Test Suite', () => {
     })
 
     it('calls expected methods', async () => {
-      const filter = { id: { eq: v4() } }
       const limit = 4
       const nextToken = v4()
       await instanceUnderTest.listProvisionalCards({
-        filter,
         limit,
         nextToken,
         cachePolicy: CachePolicy.CacheOnly,
       })
       verify(
-        mockAppSync.listProvisionalCards(
-          anything(),
-          anything(),
-          anything(),
-          anything(),
-        ),
+        mockAppSync.listProvisionalCards(anything(), anything(), anything()),
       ).once()
-      const [
-        appSyncFilter,
-        appSyncLimit,
-        appSyncNextToken,
-        appSyncFetchPolicy,
-      ] = capture(mockAppSync.listProvisionalCards).first()
-      expect(appSyncFilter).toEqual<typeof appSyncFilter>(filter)
+      const [appSyncLimit, appSyncNextToken, appSyncFetchPolicy] = capture(
+        mockAppSync.listProvisionalCards,
+      ).first()
       expect(appSyncLimit).toEqual(limit)
       expect(appSyncNextToken).toEqual(nextToken)
       expect(appSyncFetchPolicy).toEqual('cache-only')
@@ -862,12 +838,7 @@ describe('DefaultVirtualCardService Test Suite', () => {
 
     it('returns empty list if appsync returns empty list', async () => {
       when(
-        mockAppSync.listProvisionalCards(
-          anything(),
-          anything(),
-          anything(),
-          anything(),
-        ),
+        mockAppSync.listProvisionalCards(anything(), anything(), anything()),
       ).thenResolve({ items: [] })
       await expect(instanceUnderTest.listProvisionalCards()).resolves.toEqual({
         status: ListOperationResultStatus.Success,

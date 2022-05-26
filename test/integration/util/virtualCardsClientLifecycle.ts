@@ -153,7 +153,6 @@ export const setupVirtualCardsClient = async (
       country: 'US',
       dateOfBirth: '1975-02-28',
     })
-    await userClient.refreshTokens(tokens.refreshToken)
 
     const virtualCardsSimulatorClient =
       new DefaultSudoVirtualCardsSimulatorClient({

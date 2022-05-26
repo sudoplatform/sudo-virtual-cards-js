@@ -1,5 +1,5 @@
 import { CachePolicy, ListOperationResult } from '@sudoplatform/sudo-common'
-import { DateRange, SortOrder, TransactionFilter } from '../../../..'
+import { DateRange, SortOrder } from '../../../..'
 import { TransactionSealedAttributes } from '../../../data/transaction/transactionSealedAttributes'
 import { TransactionEntity } from './transactionEntity'
 
@@ -11,7 +11,6 @@ export interface TransactionServiceGetTransactionInput {
 export interface TransactionServiceListTransactionsByCardIdInput {
   cardId: string
   cachePolicy?: CachePolicy
-  filter?: TransactionFilter
   limit?: number
   nextToken?: string
   dateRange?: DateRange

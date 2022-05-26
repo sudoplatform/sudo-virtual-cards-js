@@ -132,7 +132,6 @@ describe('DefaultTransactionService Test Suite', () => {
     it('calls expected methods', async () => {
       const cardId = v4()
       const cachePolicy = CachePolicy.CacheOnly
-      const filter = { id: { eq: v4() } }
       const limit = 4
       const nextToken = v4()
       const dateRange = { startDate: new Date(), endDate: new Date() }
@@ -140,7 +139,6 @@ describe('DefaultTransactionService Test Suite', () => {
       await instanceUnderTest.listTransactionsByCardId({
         cardId,
         cachePolicy,
-        filter,
         limit,
         nextToken,
         dateRange,
@@ -154,7 +152,6 @@ describe('DefaultTransactionService Test Suite', () => {
       ).first()
       expect(appSyncArgs).toEqual<typeof appSyncArgs>({
         cardId,
-        filter,
         limit,
         nextToken,
         dateRange: {

@@ -3,12 +3,7 @@ import {
   ListOperationResult,
   NotSignedInError,
 } from '@sudoplatform/sudo-common'
-import {
-  DateRange,
-  DeclineReason,
-  SortOrder,
-  TransactionFilter,
-} from '../../../..'
+import { DateRange, DeclineReason, SortOrder } from '../../../..'
 import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
 import { TransactionService } from '../../entities/transaction/transactionService'
 import { TransactionUseCaseOutput } from './outputs'
@@ -16,7 +11,6 @@ import { TransactionUseCaseOutput } from './outputs'
 interface ListTransactionsByCardIdUseCaseInput {
   cardId: string
   cachePolicy?: CachePolicy
-  filter?: TransactionFilter
   limit?: number
   nextToken?: string
   dateRange?: DateRange

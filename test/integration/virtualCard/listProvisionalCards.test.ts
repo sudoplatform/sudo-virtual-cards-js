@@ -67,15 +67,6 @@ describe('ListProvisionalCards Test Suite', () => {
       }
       expect(result.items).toHaveLength(5)
     })
-    it('filters cards as expected', async () => {
-      const result = await instanceUnderTest.listProvisionalCards({
-        filter: { id: { ne: cards[0].id } },
-      })
-      if (result.status !== ListOperationResultStatus.Success) {
-        fail(`Wrong status: ${result.status}`)
-      }
-      expect(result.items).toHaveLength(4)
-    })
     it('limits cards as expected', async () => {
       const result = await instanceUnderTest.listProvisionalCards({ limit: 1 })
       if (result.status !== ListOperationResultStatus.Success) {
