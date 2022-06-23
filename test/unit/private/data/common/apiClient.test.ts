@@ -136,6 +136,7 @@ describe('ApiClient Test Suite', () => {
         query: GetPublicKeyDocument,
         variables: {
           keyId,
+          keyFormats: undefined,
         },
       })
     })

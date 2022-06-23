@@ -116,10 +116,13 @@ export class ApiClient {
     return data.createPublicKeyForVirtualCards
   }
 
-  public async getPublicKey(keyId: string): Promise<PublicKey | undefined> {
+  public async getPublicKey(
+    keyId: string,
+    keyFormats?: KeyFormat[],
+  ): Promise<PublicKey | undefined> {
     const data = await this.performQuery<GetPublicKeyQuery>({
       query: GetPublicKeyDocument,
-      variables: { keyId },
+      variables: { keyId, keyFormats },
       fetchPolicy: 'network-only',
       calleeName: this.getPublicKey.name,
     })

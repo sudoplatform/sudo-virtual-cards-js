@@ -351,7 +351,10 @@ enum SortOrder {
 
 type Query {
   getVirtualCardsConfig: VirtualCardsConfig!
-  getPublicKeyForVirtualCards(keyId: String!): PublicKey
+  getPublicKeyForVirtualCards(
+    keyId: String!
+    keyFormats: [KeyFormat!]
+  ): PublicKey
   getPublicKeysForVirtualCards(
     limit: Int
     nextToken: String
@@ -371,10 +374,7 @@ type Query {
     nextToken: String
   ): ProvisionalCardConnection!
   getCard(id: ID!, keyId: String): SealedCard
-  listCards(
-    limit: Int
-    nextToken: String
-  ): SealedCardConnection!
+  listCards(limit: Int, nextToken: String): SealedCardConnection!
   getTransaction(id: ID!, keyId: String): SealedTransaction
   listTransactionsByCardId(
     cardId: ID!

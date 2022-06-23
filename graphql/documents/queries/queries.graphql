@@ -4,8 +4,8 @@ query GetVirtualCardsConfig {
   }
 }
 
-query GetPublicKey($keyId: String!) {
-  getPublicKeyForVirtualCards(keyId: $keyId) {
+query GetPublicKey($keyId: String!, $keyFormats: [KeyFormat!]) {
+  getPublicKeyForVirtualCards(keyId: $keyId, keyFormats: $keyFormats) {
     ...PublicKey
   }
 }
@@ -59,10 +59,7 @@ query GetProvisionalCard($id: ID!) {
   }
 }
 
-query ListProvisionalCards(
-  $limit: Int
-  $nextToken: String
-) {
+query ListProvisionalCards($limit: Int, $nextToken: String) {
   listProvisionalCards(limit: $limit, nextToken: $nextToken) {
     items {
       ...ProvisionalCard

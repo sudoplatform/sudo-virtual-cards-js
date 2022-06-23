@@ -332,6 +332,7 @@ export type QueryGetProvisionalCardArgs = {
 }
 
 export type QueryGetPublicKeyForVirtualCardsArgs = {
+  keyFormats?: InputMaybe<Array<KeyFormat>>
   keyId: Scalars['String']
 }
 
@@ -1266,6 +1267,7 @@ export type GetVirtualCardsConfigQuery = {
 
 export type GetPublicKeyQueryVariables = Exact<{
   keyId: Scalars['String']
+  keyFormats?: InputMaybe<Array<KeyFormat> | KeyFormat>
 }>
 
 export type GetPublicKeyQuery = {
@@ -2988,6 +2990,23 @@ export const GetPublicKeyDocument = {
             },
           },
         },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'keyFormats' },
+          },
+          type: {
+            kind: 'ListType',
+            type: {
+              kind: 'NonNullType',
+              type: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'KeyFormat' },
+              },
+            },
+          },
+        },
       ],
       selectionSet: {
         kind: 'SelectionSet',
@@ -3002,6 +3021,14 @@ export const GetPublicKeyDocument = {
                 value: {
                   kind: 'Variable',
                   name: { kind: 'Name', value: 'keyId' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'keyFormats' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'keyFormats' },
                 },
               },
             ],

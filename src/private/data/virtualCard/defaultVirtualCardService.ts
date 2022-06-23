@@ -466,7 +466,6 @@ export class DefaultVirtualCardService implements VirtualCardService {
       publicKey = await this.deviceKeyWorker.generateKeyPair()
       registerRequired = true
     } else {
-      // Key is found locally but need to check if registered remotely
       let keyFormat: KeyFormat
       switch (publicKey.format) {
         case PublicKeyFormat.SPKI:
@@ -476,26 +475,11 @@ export class DefaultVirtualCardService implements VirtualCardService {
           keyFormat = KeyFormat.RsaPublicKey
           break
       }
-      const { items: registeredKeys, nextToken } =
-        await this.appSync.getKeyRing({
-          keyRingId: publicKey.keyRingId,
-          keyFormats: [keyFormat],
-        })
-      if (registeredKeys.length) {
-        const keyIdMatches =
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          registeredKeys.find((key) => key.keyId === publicKey!.id) !==
-          undefined
-        const keyRingIdMatches =
-          registeredKeys.find(
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            (key) => key.keyRingId === publicKey!.keyRingId,
-          ) !== undefined
-        if (!keyIdMatches || !keyRingIdMatches) {
-          registerRequired = true
-        }
-      } else if (nextToken) {
-      } else {
+      // Key is found locally but need to check if registered remotely
+      const fetchedPublicKey = await this.appSync.getPublicKey(publicKey.id, [
+        keyFormat,
+      ])
+      if (!fetchedPublicKey) {
         registerRequired = true
       }
     }

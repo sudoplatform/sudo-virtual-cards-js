@@ -15,10 +15,7 @@ import {
 } from 'ts-mockito'
 import { v4 } from 'uuid'
 import { APIResultStatus } from '../../../../../src'
-import {
-  CardUpdateRequest,
-  KeyFormat,
-} from '../../../../../src/gen/graphqlTypes'
+import { CardUpdateRequest } from '../../../../../src/gen/graphqlTypes'
 import { ApiClient } from '../../../../../src/private/data/common/apiClient'
 import {
   DeviceKeyWorker,
@@ -941,12 +938,9 @@ describe('DefaultVirtualCardService Test Suite', () => {
 
     it('checks that key is registered when key locally exists', async () => {
       await instanceUnderTest.getPublicKeyOrRegisterNewKey()
-      verify(mockAppSync.getKeyRing(anything())).once()
-      const [args] = capture(mockAppSync.getKeyRing).first()
-      expect(args).toEqual<typeof args>({
-        keyRingId: ServiceDataFactory.deviceKey.keyRingId,
-        keyFormats: [KeyFormat.RsaPublicKey],
-      })
+      verify(mockAppSync.getPublicKey(anything(), anything())).once()
+      const [args] = capture(mockAppSync.getPublicKey).first()
+      expect(args).toEqual<typeof args>('dummyId')
     })
 
     it('registers newly created key when first created', async () => {
@@ -964,15 +958,9 @@ describe('DefaultVirtualCardService Test Suite', () => {
     })
 
     it('does not register when key is already registered', async () => {
-      when(mockAppSync.getKeyRing(anything())).thenResolve({
-        items: [
-          {
-            ...GraphQLDataFactory.publicKey,
-            keyId: ServiceDataFactory.deviceKey.id,
-            keyRingId: ServiceDataFactory.deviceKey.keyRingId,
-          },
-        ],
-      })
+      when(mockAppSync.getPublicKey(anything(), anything())).thenResolve(
+        GraphQLDataFactory.publicKey,
+      )
       await instanceUnderTest.getPublicKeyOrRegisterNewKey()
       verify(mockAppSync.createPublicKey(anything())).never()
     })

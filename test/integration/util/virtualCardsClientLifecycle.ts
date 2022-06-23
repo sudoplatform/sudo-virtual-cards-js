@@ -113,7 +113,7 @@ export const setupVirtualCardsClient = async (
       `virtualCards-JS-SDK-${v4()}`,
     )
     log.debug('username', { username })
-    const tokens = await userClient.signInWithKey()
+    await userClient.signInWithKey()
 
     const apiClientManager =
       DefaultApiClientManager.getInstance().setAuthClient(userClient)
