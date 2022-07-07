@@ -22,7 +22,8 @@ export class TransactionEntityTransformer {
       entity.type === TransactionType.Complete ||
       entity.type === TransactionType.Refund
     ) {
-      entity.settledAt = new Date(data.sortDateEpochMs)
+      // Before we had settledAt this information was available through sortDate
+      entity.settledAt = new Date(data.settledAtEpochMs ?? data.sortDateEpochMs)
     }
 
     return entity

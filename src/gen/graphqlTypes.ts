@@ -459,6 +459,7 @@ export type SealedTransaction = {
   keyId: Scalars['String']
   owner: Scalars['ID']
   sequenceId: Scalars['ID']
+  settledAtEpochMs?: Maybe<Scalars['String']>
   sortDateEpochMs: Scalars['Float']
   transactedAmount: SealedCurrencyAmountAttribute
   transactedAtEpochMs: Scalars['String']
@@ -730,6 +731,7 @@ export type SealedCardWithLastTransactionFragment = {
     sequenceId: string
     type: TransactionType
     transactedAtEpochMs: string
+    settledAtEpochMs?: string | null
     description: string
     declineReason?: string | null
     billedAmount: {
@@ -809,6 +811,7 @@ export type SealedTransactionFragment = {
   sequenceId: string
   type: TransactionType
   transactedAtEpochMs: string
+  settledAtEpochMs?: string | null
   description: string
   declineReason?: string | null
   billedAmount: {
@@ -1070,6 +1073,7 @@ export type UpdateVirtualCardMutation = {
       sequenceId: string
       type: TransactionType
       transactedAtEpochMs: string
+      settledAtEpochMs?: string | null
       description: string
       declineReason?: string | null
       billedAmount: {
@@ -1170,6 +1174,7 @@ export type CancelVirtualCardMutation = {
       sequenceId: string
       type: TransactionType
       transactedAtEpochMs: string
+      settledAtEpochMs?: string | null
       description: string
       declineReason?: string | null
       billedAmount: {
@@ -1562,6 +1567,7 @@ export type GetCardQuery = {
       sequenceId: string
       type: TransactionType
       transactedAtEpochMs: string
+      settledAtEpochMs?: string | null
       description: string
       declineReason?: string | null
       billedAmount: {
@@ -1666,6 +1672,7 @@ export type ListCardsQuery = {
         sequenceId: string
         type: TransactionType
         transactedAtEpochMs: string
+        settledAtEpochMs?: string | null
         description: string
         declineReason?: string | null
         billedAmount: {
@@ -1748,6 +1755,7 @@ export type GetTransactionQuery = {
     sequenceId: string
     type: TransactionType
     transactedAtEpochMs: string
+    settledAtEpochMs?: string | null
     description: string
     declineReason?: string | null
     billedAmount: {
@@ -1816,6 +1824,7 @@ export type ListTransactionsByCardIdQuery = {
       sequenceId: string
       type: TransactionType
       transactedAtEpochMs: string
+      settledAtEpochMs?: string | null
       description: string
       declineReason?: string | null
       billedAmount: {
@@ -2243,6 +2252,7 @@ export const SealedTransactionFragmentDoc = {
             kind: 'Field',
             name: { kind: 'Name', value: 'transactedAtEpochMs' },
           },
+          { kind: 'Field', name: { kind: 'Name', value: 'settledAtEpochMs' } },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'billedAmount' },

@@ -78,7 +78,7 @@ import {
 } from './typings/virtualCard'
 
 /**
- * Input for {@link SudoVirtualCardsClient.setupFundingSource}.
+ * Input for {@link SudoVirtualCardsClient#setupFundingSource}.
  *
  * @property {string} currency The ISO 4217 currency code that is being used for the setup.
  * @property {FundingSourceType} type The type of the funding source being setup.
@@ -89,7 +89,7 @@ export interface SetupFundingSourceInput {
 }
 
 /**
- * Input for the completion data of {@link SudoVirtualCardsClient.completeFundingSource}.
+ * Input for the completion data of {@link SudoVirtualCardsClient#completeFundingSource}.
  *
  * @property {string} provider Provider used to save the funding source information.
  * @property {string} paymentMethod Identifier of the Payment Method used.
@@ -293,7 +293,7 @@ export interface ListTransactionsByCardIdInput {
 }
 
 /**
- * Result for {@link SudoVirtualCardsClient.createKeyIfAbsent}
+ * Result for {@link SudoVirtualCardsClient#createKeysIfAbsent}
  *
  * @property {CreateKeyIfAbsentResult} symmetricKey
  *  Result of createKeysIfAbsent operation for the symmetric key
@@ -309,13 +309,13 @@ export interface CreateKeysIfAbsentResult {
  * Sudo Platform Virtual Cards client API
  *
  * All methods should be expected to be able to throw the following
- * errors defined in {@link "@sudoplatform/sudo-common"}:
+ * errors defined in `@sudoplatform/sudo-common`:
  *
- * @throws {@link NotSignedInError}
+ * @throws NotSignedInError
  *  User not signed in. Sign in before performing the operation.
- * @throws {@link AccountLockedError}
+ * @throws AccountLockedError
  *  Account has been locked. Contact support.
- * @throws {@link ServiceError}
+ * @throws ServiceError
  *  Transient error at the service. Try the operation again
  */
 export interface SudoVirtualCardsClient {
@@ -346,7 +346,7 @@ export interface SudoVirtualCardsClient {
    * Setup the funding source.
    * @param {SetupFundingSourceInput} input Parameters used to setup the provisional funding source.
    * @returns {ProvisionalFundingSource} The provisional funding source.
-   * @throws {@link InsufficientEntitlementsError}
+   * @throws InsufficientEntitlementsError
    *   User has insufficient entitlements to setup a new funding source.
    * @throws {@link VelocityExceededError}
    *   Configured maximum rate of attempts to add a funding source has
@@ -426,7 +426,7 @@ export interface SudoVirtualCardsClient {
    *   No funding source matching the specified ID could be found.
    * @throws {@link FundingSourceNotActiveError}
    *   The funding source matching the specified ID is not active.
-   * @throws {@link InsufficientEntitlementsError}
+   * @throws InsufficientEntitlementsError
    *   User has insufficient entitlements to setup a new virtual card.
    * @throws {@link VelocityExceededError}
    *   Configured maximum rate of attempts to add a virtual card has

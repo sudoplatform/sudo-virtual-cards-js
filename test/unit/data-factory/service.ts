@@ -105,6 +105,7 @@ export class ServiceDataFactory {
     transactedAmount: { currency: 'USD', amount: 100 },
     description: 'dummyDescription',
     transactedAtEpochMs: 100.0,
+    settledAtEpochMs: 120.0,
     detail: [
       {
         virtualCardAmount: { currency: 'USD', amount: 100 },

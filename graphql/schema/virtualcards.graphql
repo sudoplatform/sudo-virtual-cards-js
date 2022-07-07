@@ -187,6 +187,7 @@ type SealedTransaction {
   sequenceId: ID!
   type: TransactionType!
   transactedAtEpochMs: String!
+  settledAtEpochMs: String
   billedAmount: SealedCurrencyAmountAttribute!
   transactedAmount: SealedCurrencyAmountAttribute!
   description: String!

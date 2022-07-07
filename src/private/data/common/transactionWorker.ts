@@ -33,6 +33,7 @@ export interface TransactionUnsealed {
   transactedAmount: CurrencyAmountEntity
   description: string
   transactedAtEpochMs: number
+  settledAtEpochMs?: number
   declineReason?: DeclineReason
   detail?: {
     virtualCardAmount: CurrencyAmountEntity
@@ -163,6 +164,9 @@ export class DefaultTransactionWorker implements TransactionWorker {
         transaction.transactedAtEpochMs,
         'transactedAtEpochMs',
       ),
+      settledAtEpochMs: transaction.settledAtEpochMs
+        ? await unsealNumber(transaction.settledAtEpochMs, 'settledAtEpochMs')
+        : undefined,
       declineReason: transaction.declineReason
         ? await unsealDeclineReason(transaction.declineReason)
         : undefined,

@@ -29,6 +29,8 @@ export interface TransactionSealedAttributes {
   description: string
   transactedAtEpochMs: undefined
   transactedAt: Date
+  settledAtEpochMs?: undefined
+  settledAt: Date
   declineReason?: DeclineReason
   detail?: {
     virtualCardAmount: CurrencyAmountEntity
