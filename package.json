@@ -79,7 +79,7 @@
     "@sudoplatform/sudo-profiles": "^14.0.0",
     "@sudoplatform/sudo-secure-id-verification": "^5.0.0",
     "@sudoplatform/sudo-user": "^11.0.0",
-    "@sudoplatform/sudo-virtual-cards-simulator": "^2.0.1 || ^3.0.0",
+    "@sudoplatform/sudo-virtual-cards-simulator": "^3.0.0",
     "@sudoplatform/sudo-web-crypto-provider": "^6.0.0",
     "@types/jest": "^27.5.2",
     "@types/lodash": "^4.14.182",
