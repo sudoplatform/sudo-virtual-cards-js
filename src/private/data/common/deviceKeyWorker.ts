@@ -118,7 +118,7 @@ export class DefaultDeviceKeyWorker implements DeviceKeyWorker {
     }
 
     // Make sure we have the private key as well
-    const privateKeyId = await this.keyManager.doesPrivateKeyExists(keyPairId)
+    const privateKeyId = await this.keyManager.doesPrivateKeyExist(keyPairId)
     if (!privateKeyId) {
       return undefined
     }
@@ -149,7 +149,7 @@ export class DefaultDeviceKeyWorker implements DeviceKeyWorker {
     if (!keyId.length) {
       return undefined
     }
-    const exists = await this.keyManager.doesSymmetricKeyExists(keyId)
+    const exists = await this.keyManager.doesSymmetricKeyExist(keyId)
     if (!exists) {
       return undefined
     }
@@ -160,10 +160,10 @@ export class DefaultDeviceKeyWorker implements DeviceKeyWorker {
   async keyExists(id: string, type: KeyType): Promise<boolean> {
     switch (type) {
       case KeyType.SymmetricKey:
-        return await this.keyManager.doesSymmetricKeyExists(id)
+        return await this.keyManager.doesSymmetricKeyExist(id)
       case KeyType.PrivateKey:
       case KeyType.KeyPair:
-        return await this.keyManager.doesPrivateKeyExists(id)
+        return await this.keyManager.doesPrivateKeyExist(id)
     }
   }
 

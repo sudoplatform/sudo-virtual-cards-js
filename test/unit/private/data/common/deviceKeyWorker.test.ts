@@ -7,6 +7,7 @@ import {
   NotSignedInError,
   PublicKeyFormat,
   SudoKeyManager,
+  SymmetricEncryptionOptions,
 } from '@sudoplatform/sudo-common'
 import { SudoUserClient } from '@sudoplatform/sudo-user'
 import {
@@ -114,7 +115,7 @@ describe('DeviceKeyWorker Test Suite', () => {
       when(mockKeyManager.getPublicKey(keyPairId)).thenResolve(
         ServiceDataFactory.sudoCommonPublicKey,
       )
-      when(mockKeyManager.doesPrivateKeyExists(anything())).thenResolve(false)
+      when(mockKeyManager.doesPrivateKeyExist(anything())).thenResolve(false)
       when(mockUserClient.getSubject()).thenResolve('dummySubject')
 
       await expect(
@@ -123,9 +124,9 @@ describe('DeviceKeyWorker Test Suite', () => {
       verify(mockUserClient.getSubject()).once()
       verify(mockKeyManager.getPassword(anything())).once()
       verify(mockKeyManager.getPublicKey(anything())).once()
-      verify(mockKeyManager.doesPrivateKeyExists(anything())).once()
+      verify(mockKeyManager.doesPrivateKeyExist(anything())).once()
       const [actualPrivateKeyName] = capture(
-        mockKeyManager.doesPrivateKeyExists,
+        mockKeyManager.doesPrivateKeyExist,
       ).first()
       expect(actualPrivateKeyName).toEqual(keyPairId)
     })
@@ -137,7 +138,7 @@ describe('DeviceKeyWorker Test Suite', () => {
       when(mockKeyManager.getPublicKey(keyPairId)).thenResolve(
         ServiceDataFactory.sudoCommonPublicKey,
       )
-      when(mockKeyManager.doesPrivateKeyExists(anything())).thenResolve(true)
+      when(mockKeyManager.doesPrivateKeyExist(anything())).thenResolve(true)
       when(mockUserClient.getSubject()).thenResolve('dummySubject')
 
       const currentPublicKey = await instanceUnderTest.getCurrentPublicKey()
@@ -147,9 +148,9 @@ describe('DeviceKeyWorker Test Suite', () => {
       verify(mockUserClient.getSubject()).once()
       verify(mockKeyManager.getPassword(anything())).once()
       verify(mockKeyManager.getPublicKey(anything())).once()
-      verify(mockKeyManager.doesPrivateKeyExists(anything())).once()
+      verify(mockKeyManager.doesPrivateKeyExist(anything())).once()
       const [actualPrivateKeyName] = capture(
-        mockKeyManager.doesPrivateKeyExists,
+        mockKeyManager.doesPrivateKeyExist,
       ).first()
       expect(actualPrivateKeyName).toEqual(keyPairId)
 
@@ -171,58 +172,54 @@ describe('DeviceKeyWorker Test Suite', () => {
   })
   describe('keyExists', () => {
     it('returns false when keytype symmetric returns undefined', async () => {
-      when(mockKeyManager.doesSymmetricKeyExists(anything())).thenResolve(false)
+      when(mockKeyManager.doesSymmetricKeyExist(anything())).thenResolve(false)
 
       const keyName = 'symmetric-key'
       await expect(
         instanceUnderTest.keyExists(keyName, KeyType.SymmetricKey),
       ).resolves.toBeFalsy()
 
-      verify(mockKeyManager.doesSymmetricKeyExists(anything())).once()
-      const [actualName] = capture(
-        mockKeyManager.doesSymmetricKeyExists,
-      ).first()
+      verify(mockKeyManager.doesSymmetricKeyExist(anything())).once()
+      const [actualName] = capture(mockKeyManager.doesSymmetricKeyExist).first()
       expect(actualName).toEqual(keyName)
     })
 
     it('returns false when keytype keypair returns undefined', async () => {
-      when(mockKeyManager.doesPrivateKeyExists(anything())).thenResolve(false)
+      when(mockKeyManager.doesPrivateKeyExist(anything())).thenResolve(false)
 
       const keyName = 'key-pair'
       await expect(
         instanceUnderTest.keyExists(keyName, KeyType.KeyPair),
       ).resolves.toBeFalsy()
 
-      verify(mockKeyManager.doesPrivateKeyExists(anything())).once()
-      const [actualName] = capture(mockKeyManager.doesPrivateKeyExists).first()
+      verify(mockKeyManager.doesPrivateKeyExist(anything())).once()
+      const [actualName] = capture(mockKeyManager.doesPrivateKeyExist).first()
       expect(actualName).toEqual(keyName)
     })
 
     it('returns true when keytype keypair returns key', async () => {
-      when(mockKeyManager.doesPrivateKeyExists(anything())).thenResolve(true)
+      when(mockKeyManager.doesPrivateKeyExist(anything())).thenResolve(true)
 
       const keyName = 'key-pair'
       await expect(
         instanceUnderTest.keyExists(keyName, KeyType.KeyPair),
       ).resolves.toBeTruthy()
 
-      verify(mockKeyManager.doesPrivateKeyExists(anything())).once()
-      const [actualName] = capture(mockKeyManager.doesPrivateKeyExists).first()
+      verify(mockKeyManager.doesPrivateKeyExist(anything())).once()
+      const [actualName] = capture(mockKeyManager.doesPrivateKeyExist).first()
       expect(actualName).toEqual(keyName)
     })
 
     it('returns true when keytype symmetric returns key', async () => {
-      when(mockKeyManager.doesSymmetricKeyExists(anything())).thenResolve(true)
+      when(mockKeyManager.doesSymmetricKeyExist(anything())).thenResolve(true)
 
       const keyName = 'symmetric-key'
       await expect(
         instanceUnderTest.keyExists(keyName, KeyType.SymmetricKey),
       ).resolves.toBeTruthy()
 
-      verify(mockKeyManager.doesSymmetricKeyExists(anything())).once()
-      const [actualName] = capture(
-        mockKeyManager.doesSymmetricKeyExists,
-      ).first()
+      verify(mockKeyManager.doesSymmetricKeyExist(anything())).once()
+      const [actualName] = capture(mockKeyManager.doesSymmetricKeyExist).first()
       expect(actualName).toEqual(keyName)
     })
   })
@@ -243,28 +240,21 @@ describe('DeviceKeyWorker Test Suite', () => {
       expect(args).toStrictEqual<typeof args>(keyId)
     })
   })
+
   describe('unsealString', () => {
     beforeEach(() => {
       when(
         mockKeyManager.decryptWithPrivateKey(anything(), anything()),
-      ).thenResolve(new TextEncoder().encode('decryptedPriv'))
+      ).thenResolve(new TextEncoder().encode('decryptedPrivate'))
       when(
         mockKeyManager.decryptWithSymmetricKey(
           anything(),
           anything(),
-          objectContaining({
-            algorithm: EncryptionAlgorithm.AesCbcPkcs7Padding,
-          }),
-        ),
-      ).thenResolve(new TextEncoder().encode('decryptedSym'))
-      when(
-        mockKeyManager.decryptWithSymmetricKey(
-          anything(),
-          anything(),
-          objectContaining({}),
+          anything() as SymmetricEncryptionOptions,
         ),
       ).thenResolve(new TextEncoder().encode('decryptedSym'))
     })
+
     describe('keyType == KeyPair', () => {
       it('throws KeyNotFoundError if currentPublicKey returns undefined', async () => {
         const keyId = v4()
@@ -354,7 +344,7 @@ describe('DeviceKeyWorker Test Suite', () => {
           mockKeyManager.decryptWithSymmetricKey(
             anything(),
             anything(),
-            anything(),
+            anything() as SymmetricEncryptionOptions,
           ),
         ).once()
         const [cipherKey, encryptedData] = capture(
@@ -373,7 +363,7 @@ describe('DeviceKeyWorker Test Suite', () => {
           mockKeyManager.decryptWithSymmetricKeyName(
             anything(),
             anything(),
-            anything(),
+            anything() as SymmetricEncryptionOptions,
           ),
         ).thenResolve(new TextEncoder().encode('aa'))
       })
@@ -387,7 +377,7 @@ describe('DeviceKeyWorker Test Suite', () => {
           mockKeyManager.decryptWithSymmetricKeyName(
             anything(),
             anything(),
-            anything(),
+            anything() as SymmetricEncryptionOptions,
           ),
         ).once()
         const [actualKeyId, actualEncryptedB64] = capture(

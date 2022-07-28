@@ -262,5 +262,63 @@ describe('DefaultTransactionService Test Suite', () => {
         ],
       })
     })
+
+    it('succeeds when at least one instance of sealed transaction can be unsealed', async () => {
+      when(
+        mockAppSync.listTransactionsByCardId(anything(), anything()),
+      ).thenResolve({
+        items: [
+          { ...GraphQLDataFactory.sealedTransaction, id: '1', keyId: 'key-1' },
+          { ...GraphQLDataFactory.sealedTransaction, id: '1', keyId: 'key-2' },
+        ],
+      })
+      when(mockTransactionWorker.unsealTransaction(anything()))
+        .thenReject(new Error('failed to unseal key-1'))
+        .thenResolve({
+          ...ServiceDataFactory.transactionUnsealed,
+          id: '1',
+        })
+
+      await expect(
+        instanceUnderTest.listTransactionsByCardId({ cardId: '' }),
+      ).resolves.toEqual({
+        status: ListOperationResultStatus.Success,
+        nextToken: undefined,
+        items: [
+          {
+            ...EntityDataFactory.transaction,
+            id: '1',
+          },
+        ],
+      })
+    })
+
+    it('returns only a single instance of a transaction sealed with multiple keys', async () => {
+      when(
+        mockAppSync.listTransactionsByCardId(anything(), anything()),
+      ).thenResolve({
+        items: [
+          { ...GraphQLDataFactory.sealedTransaction, id: '1', keyId: 'key-1' },
+          { ...GraphQLDataFactory.sealedTransaction, id: '1', keyId: 'key-2' },
+        ],
+      })
+      when(mockTransactionWorker.unsealTransaction(anything())).thenResolve({
+        ...ServiceDataFactory.transactionUnsealed,
+        id: '1',
+      })
+
+      await expect(
+        instanceUnderTest.listTransactionsByCardId({ cardId: '' }),
+      ).resolves.toEqual({
+        status: ListOperationResultStatus.Success,
+        nextToken: undefined,
+        items: [
+          {
+            ...EntityDataFactory.transaction,
+            id: '1',
+          },
+        ],
+      })
+    })
   })
 })

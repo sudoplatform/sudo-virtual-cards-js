@@ -98,15 +98,31 @@ export class DefaultTransactionService implements TransactionService {
     }[] = []
     const sealedTransactionsById = _.groupBy(sealedTransactions, (t) => t.id)
     for (const sealedTransactions of Object.values(sealedTransactionsById)) {
+      // Succeed if we can unseal one of the sealed transactions
+      // for this ID and only report failures if we can't unseal any
+      // of them
+      const failedForId: {
+        item: Omit<TransactionUnsealed, keyof TransactionSealedAttributes>
+        cause: Error
+      }[] = []
+      let successForId: TransactionUnsealed | undefined = undefined
+
       for (const sealed of sealedTransactions) {
         try {
           const unsealed = await this.transactionWorker.unsealTransaction(
             sealed,
           )
-          success.push(unsealed)
+          successForId = unsealed
+          break
         } catch (e) {
-          failed.push({ item: sealed, cause: e as Error })
+          failedForId.push({ item: sealed, cause: e as Error })
         }
+      }
+
+      if (successForId) {
+        success.push(successForId)
+      } else {
+        failed.push(...failedForId)
       }
     }
     if (failed.length) {

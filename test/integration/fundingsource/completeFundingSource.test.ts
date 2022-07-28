@@ -5,6 +5,7 @@ import { v4 } from 'uuid'
 import {
   CreditCardNetwork,
   FundingSourceCompletionDataInvalidError,
+  FundingSourceNotSetupError,
   FundingSourceState,
   FundingSourceType,
   ProvisionalFundingSourceNotFoundError,
@@ -40,11 +41,62 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
         }),
       ).rejects.toThrow(ProvisionalFundingSourceNotFoundError)
     })
+
+    it('returns FundingSourceNotSetupError if setup intent not confirmed', async () => {
+      const provisionalCard = await instanceUnderTest.setupFundingSource({
+        currency: 'USD',
+        type: FundingSourceType.CreditCard,
+      })
+
+      await expect(
+        instanceUnderTest.completeFundingSource({
+          id: provisionalCard.id,
+          completionData: {
+            provider: 'stripe',
+            paymentMethod: 'dummyPaymentMethod',
+          },
+        }),
+      ).rejects.toThrow(FundingSourceNotSetupError)
+    })
+
     it('returns FundingSourceCompletionDataInvalidError if invalid completionData', async () => {
       const provisionalCard = await instanceUnderTest.setupFundingSource({
         currency: 'USD',
         type: FundingSourceType.CreditCard,
       })
+
+      const exp = new Date()
+      exp.setUTCMonth(exp.getUTCMonth() + 1)
+      exp.setUTCFullYear(exp.getUTCFullYear() + 1)
+      const paymentMethod = await stripe.paymentMethods.create({
+        type: 'card',
+        card: {
+          exp_month: exp.getUTCMonth(),
+          exp_year: exp.getUTCFullYear(),
+          number: '4242424242424242',
+          cvc: '123',
+        },
+        billing_details: {
+          address: {
+            line1: '222333 Peachtree Place',
+            city: 'Atlanta',
+            country: 'GA',
+            postal_code: '30318',
+            state: 'US',
+          },
+        },
+      })
+      const setupIntent = await stripe.setupIntents.confirm(
+        provisionalCard.provisioningData.intent,
+        {
+          payment_method: paymentMethod.id,
+          client_secret: provisionalCard.provisioningData.clientSecret,
+        } as Stripe.SetupIntentCreateParams,
+      )
+      if (!setupIntent.payment_method) {
+        throw 'Failed to get payment_method from setup intent'
+      }
+
       await expect(
         instanceUnderTest.completeFundingSource({
           id: provisionalCard.id,
@@ -55,11 +107,13 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
         }),
       ).rejects.toThrow(FundingSourceCompletionDataInvalidError)
     })
+
     it('returns successfully when correct setup data used', async () => {
       const provisionalCard = await instanceUnderTest.setupFundingSource({
         currency: 'USD',
         type: FundingSourceType.CreditCard,
       })
+
       const exp = new Date()
       exp.setUTCMonth(exp.getUTCMonth() + 1)
       exp.setUTCFullYear(exp.getUTCFullYear() + 1)
