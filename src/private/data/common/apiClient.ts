@@ -66,6 +66,9 @@ import {
   ListTransactionsByCardIdDocument,
   ListTransactionsByCardIdQuery,
   ListTransactionsByCardIdQueryVariables,
+  ListTransactionsDocument,
+  ListTransactionsQuery,
+  ListTransactionsQueryVariables,
   PaginatedPublicKey,
   ProvisionalCard,
   ProvisionalCardConnection,
@@ -326,6 +329,19 @@ export class ApiClient {
     return data.getTransaction ?? undefined
   }
 
+  async listTransactions(
+    input: ListTransactionsQueryVariables,
+    fetchPolicy: FetchPolicy = 'network-only',
+  ): Promise<SealedTransactionConnection> {
+    const data = await this.performQuery<ListTransactionsQuery>({
+      query: ListTransactionsDocument,
+      variables: input,
+      fetchPolicy,
+      calleeName: this.listTransactionsByCardId.name,
+    })
+    return data.listTransactions2
+  }
+
   async listTransactionsByCardId(
     input: ListTransactionsByCardIdQueryVariables,
     fetchPolicy: FetchPolicy = 'network-only',
@@ -336,7 +352,7 @@ export class ApiClient {
       fetchPolicy,
       calleeName: this.listTransactionsByCardId.name,
     })
-    return data.listTransactionsByCardId
+    return data.listTransactionsByCardId2
   }
 
   async performQuery<Q, QVariables = OperationVariables>({

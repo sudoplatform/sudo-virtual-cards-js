@@ -9,8 +9,7 @@ import { TransactionService } from '../../entities/transaction/transactionServic
 import { TransactionSealedAttributesUseCaseOutput } from './listTransactionsCommon'
 import { TransactionUseCaseOutput } from './outputs'
 
-interface ListTransactionsByCardIdUseCaseInput {
-  cardId: string
+interface ListTransactionsUseCaseInput {
   cachePolicy?: CachePolicy
   limit?: number
   nextToken?: string
@@ -18,22 +17,23 @@ interface ListTransactionsByCardIdUseCaseInput {
   sortOrder?: SortOrder
 }
 
-type ListTransactionsByCardIdUseCaseOutput = ListOperationResult<
+type ListTransactionsUseCaseOutput = ListOperationResult<
   TransactionUseCaseOutput,
   TransactionSealedAttributesUseCaseOutput
 >
-export class ListTransactionsByCardIdUseCase {
+
+export class ListTransactionsUseCase {
   constructor(
     private readonly transactionService: TransactionService,
     private readonly userService: SudoUserService,
   ) {}
 
   async execute(
-    input: ListTransactionsByCardIdUseCaseInput,
-  ): Promise<ListTransactionsByCardIdUseCaseOutput> {
+    input: ListTransactionsUseCaseInput,
+  ): Promise<ListTransactionsUseCaseOutput> {
     if (!(await this.userService.isSignedIn())) {
       throw new NotSignedInError()
     }
-    return await this.transactionService.listTransactionsByCardId(input)
+    return await this.transactionService.listTransactions(input)
   }
 }

@@ -89,6 +89,25 @@ query GetTransaction($id: ID!, $keyId: String) {
   }
 }
 
+query ListTransactions(
+  $limit: Int
+  $nextToken: String
+  $dateRange: DateRangeInput
+  $sortOrder: SortOrder
+) {
+  listTransactions2(
+    limit: $limit
+    nextToken: $nextToken
+    dateRange: $dateRange
+    sortOrder: $sortOrder
+  ) {
+    items {
+      ...SealedTransaction
+    }
+    nextToken
+  }
+}
+
 query ListTransactionsByCardId(
   $cardId: ID!
   $limit: Int
@@ -96,7 +115,7 @@ query ListTransactionsByCardId(
   $dateRange: DateRangeInput
   $sortOrder: SortOrder
 ) {
-  listTransactionsByCardId(
+  listTransactionsByCardId2(
     cardId: $cardId
     limit: $limit
     nextToken: $nextToken

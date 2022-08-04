@@ -308,7 +308,8 @@ export type Query = {
   listCards: SealedCardConnection
   listFundingSources: FundingSourceConnection
   listProvisionalCards: ProvisionalCardConnection
-  listTransactionsByCardId: SealedTransactionConnection
+  listTransactions2: SealedTransactionConnection
+  listTransactionsByCardId2: SealedTransactionConnection
 }
 
 export type QueryGetCardArgs = {
@@ -361,7 +362,14 @@ export type QueryListProvisionalCardsArgs = {
   nextToken?: InputMaybe<Scalars['String']>
 }
 
-export type QueryListTransactionsByCardIdArgs = {
+export type QueryListTransactions2Args = {
+  dateRange?: InputMaybe<DateRangeInput>
+  limit?: InputMaybe<Scalars['Int']>
+  nextToken?: InputMaybe<Scalars['String']>
+  sortOrder?: InputMaybe<SortOrder>
+}
+
+export type QueryListTransactionsByCardId2Args = {
   cardId: Scalars['ID']
   dateRange?: InputMaybe<DateRangeInput>
   limit?: InputMaybe<Scalars['Int']>
@@ -1797,6 +1805,75 @@ export type GetTransactionQuery = {
   } | null
 }
 
+export type ListTransactionsQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Int']>
+  nextToken?: InputMaybe<Scalars['String']>
+  dateRange?: InputMaybe<DateRangeInput>
+  sortOrder?: InputMaybe<SortOrder>
+}>
+
+export type ListTransactionsQuery = {
+  __typename?: 'Query'
+  listTransactions2: {
+    __typename?: 'SealedTransactionConnection'
+    nextToken?: string | null
+    items: Array<{
+      __typename?: 'SealedTransaction'
+      id: string
+      owner: string
+      version: number
+      createdAtEpochMs: number
+      updatedAtEpochMs: number
+      sortDateEpochMs: number
+      algorithm: string
+      keyId: string
+      cardId: string
+      sequenceId: string
+      type: TransactionType
+      transactedAtEpochMs: string
+      settledAtEpochMs?: string | null
+      description: string
+      declineReason?: string | null
+      billedAmount: {
+        __typename?: 'SealedCurrencyAmountAttribute'
+        currency: string
+        amount: string
+      }
+      transactedAmount: {
+        __typename?: 'SealedCurrencyAmountAttribute'
+        currency: string
+        amount: string
+      }
+      detail?: Array<{
+        __typename?: 'SealedTransactionDetailChargeAttribute'
+        fundingSourceId: string
+        description: string
+        virtualCardAmount: {
+          __typename?: 'SealedCurrencyAmountAttribute'
+          currency: string
+          amount: string
+        }
+        markup: {
+          __typename?: 'SealedMarkupAttribute'
+          percent: string
+          flat: string
+          minCharge?: string | null
+        }
+        markupAmount: {
+          __typename?: 'SealedCurrencyAmountAttribute'
+          currency: string
+          amount: string
+        }
+        fundingSourceAmount: {
+          __typename?: 'SealedCurrencyAmountAttribute'
+          currency: string
+          amount: string
+        }
+      }> | null
+    }>
+  }
+}
+
 export type ListTransactionsByCardIdQueryVariables = Exact<{
   cardId: Scalars['ID']
   limit?: InputMaybe<Scalars['Int']>
@@ -1807,7 +1884,7 @@ export type ListTransactionsByCardIdQueryVariables = Exact<{
 
 export type ListTransactionsByCardIdQuery = {
   __typename?: 'Query'
-  listTransactionsByCardId: {
+  listTransactionsByCardId2: {
     __typename?: 'SealedTransactionConnection'
     nextToken?: string | null
     items: Array<{
@@ -3737,6 +3814,122 @@ export const GetTransactionDocument = {
     ...SealedTransactionFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<GetTransactionQuery, GetTransactionQueryVariables>
+export const ListTransactionsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'ListTransactions' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'limit' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'nextToken' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'dateRange' },
+          },
+          type: {
+            kind: 'NamedType',
+            name: { kind: 'Name', value: 'DateRangeInput' },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'sortOrder' },
+          },
+          type: {
+            kind: 'NamedType',
+            name: { kind: 'Name', value: 'SortOrder' },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'listTransactions2' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'limit' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'limit' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'nextToken' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'nextToken' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'dateRange' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'dateRange' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'sortOrder' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'sortOrder' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'FragmentSpread',
+                        name: { kind: 'Name', value: 'SealedTransaction' },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'nextToken' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...SealedTransactionFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<
+  ListTransactionsQuery,
+  ListTransactionsQueryVariables
+>
 export const ListTransactionsByCardIdDocument = {
   kind: 'Document',
   definitions: [
@@ -3800,7 +3993,7 @@ export const ListTransactionsByCardIdDocument = {
         selections: [
           {
             kind: 'Field',
-            name: { kind: 'Name', value: 'listTransactionsByCardId' },
+            name: { kind: 'Name', value: 'listTransactionsByCardId2' },
             arguments: [
               {
                 kind: 'Argument',

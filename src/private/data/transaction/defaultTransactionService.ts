@@ -4,6 +4,7 @@ import {
 } from '@sudoplatform/sudo-common'
 import _ from 'lodash'
 import { DeclineReason } from '../../..'
+import { SealedTransaction } from '../../../gen/graphqlTypes'
 import {
   CurrencyAmountEntity,
   MarkupEntity,
@@ -13,6 +14,7 @@ import {
   TransactionService,
   TransactionServiceGetTransactionInput,
   TransactionServiceListTransactionsByCardIdInput,
+  TransactionServiceListTransactionsInput,
 } from '../../domain/entities/transaction/transactionService'
 import { ApiClient } from '../common/apiClient'
 import {
@@ -69,6 +71,33 @@ export class DefaultTransactionService implements TransactionService {
     return TransactionEntityTransformer.transform(unsealed)
   }
 
+  async listTransactions(
+    input: TransactionServiceListTransactionsInput,
+  ): Promise<
+    ListOperationResult<TransactionEntity, TransactionSealedAttributes>
+  > {
+    const fetchPolicy = input.cachePolicy
+      ? FetchPolicyTransformer.transformCachePolicy(input.cachePolicy)
+      : undefined
+    const dateRange = input.dateRange
+      ? DateRangeTransformer.transformToGraphQLInput(input.dateRange)
+      : undefined
+    const { items: sealedTransactions, nextToken: newNextToken } =
+      await this.appSync.listTransactions(
+        {
+          limit: input.limit,
+          nextToken: input.nextToken,
+          dateRange,
+          sortOrder: input.sortOrder,
+        },
+        fetchPolicy,
+      )
+
+    return this.unsealTransactions(
+      sealedTransactions,
+      newNextToken ?? undefined,
+    )
+  }
   async listTransactionsByCardId(
     input: TransactionServiceListTransactionsByCardIdInput,
   ): Promise<
@@ -91,6 +120,19 @@ export class DefaultTransactionService implements TransactionService {
         },
         fetchPolicy,
       )
+
+    return this.unsealTransactions(
+      sealedTransactions,
+      newNextToken ?? undefined,
+    )
+  }
+
+  private async unsealTransactions(
+    sealedTransactions: SealedTransaction[],
+    nextToken: string | undefined,
+  ): Promise<
+    ListOperationResult<TransactionEntity, TransactionSealedAttributes>
+  > {
     const success: TransactionUnsealed[] = []
     const failed: {
       item: Omit<TransactionUnsealed, keyof TransactionSealedAttributes>
@@ -128,7 +170,7 @@ export class DefaultTransactionService implements TransactionService {
     if (failed.length) {
       return {
         status: ListOperationResultStatus.Partial,
-        nextToken: newNextToken ?? undefined,
+        nextToken,
         items: success.map(TransactionEntityTransformer.transformSuccess),
         failed: failed.map(({ item, cause }) => ({
           item: TransactionEntityTransformer.transformFailure(item),
@@ -138,7 +180,7 @@ export class DefaultTransactionService implements TransactionService {
     } else {
       return {
         status: ListOperationResultStatus.Success,
-        nextToken: newNextToken ?? undefined,
+        nextToken,
         items: success.map(TransactionEntityTransformer.transformSuccess),
       }
     }

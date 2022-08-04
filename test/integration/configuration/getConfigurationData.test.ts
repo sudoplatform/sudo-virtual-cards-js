@@ -1,11 +1,6 @@
 import { DefaultLogger } from '@sudoplatform/sudo-common'
-import {
-  CardType,
-  CurrencyAmount,
-  CurrencyVelocity,
-  SudoVirtualCardsClient,
-  VirtualCardsConfig,
-} from '../../../src'
+import { Duration } from 'luxon'
+import { SudoVirtualCardsClient } from '../../../src'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
 describe('SudoVirtualCardsClient GetConfigurationData Test Suite', () => {
@@ -20,109 +15,28 @@ describe('SudoVirtualCardsClient GetConfigurationData Test Suite', () => {
   })
 
   describe('GetConfigurationData', () => {
-    const expectedMaxCardCreationVelocity = ['10/PT1H']
+    function verifyVelocity(s: string): void {
+      const elements = s.split('/')
+      expect(elements).toHaveLength(2)
 
-    const expectedMaxTransactionAmount: CurrencyAmount[] = [
-      {
-        currency: 'USD',
-        amount: 25000,
-      },
-    ]
+      const amount = Number(elements[0])
+      expect(amount).not.toEqual(Number.NaN)
+      expect(amount).toBeGreaterThanOrEqual(0)
 
-    const expectedMaxTransactionVelocity: CurrencyVelocity[] = [
-      {
-        currency: 'USD',
-        velocity: ['25000/P1D'],
-      },
-    ]
-
-    const expectedVirtualCardCurrencies = ['USD']
-
-    const expectedFundingSourceSupportInfo = [
-      {
-        __typename: 'FundingSourceSupportInfo',
-        detail: [
-          {
-            __typename: 'FundingSourceSupportDetail',
-            cardType: CardType.Credit,
-          },
-        ],
-        fundingSourceType: 'card',
-        network: 'AMEX',
-        providerType: 'stripe',
-      },
-      {
-        __typename: 'FundingSourceSupportInfo',
-        detail: [
-          {
-            __typename: 'FundingSourceSupportDetail',
-            cardType: CardType.Credit,
-          },
-        ],
-        fundingSourceType: 'card',
-        network: 'DINERS',
-        providerType: 'stripe',
-      },
-      {
-        __typename: 'FundingSourceSupportInfo',
-        detail: [
-          {
-            __typename: 'FundingSourceSupportDetail',
-            cardType: CardType.Credit,
-          },
-          {
-            __typename: 'FundingSourceSupportDetail',
-            cardType: CardType.Debit,
-          },
-        ],
-        fundingSourceType: 'card',
-        network: 'MASTERCARD',
-        providerType: 'stripe',
-      },
-      {
-        __typename: 'FundingSourceSupportInfo',
-        detail: [
-          {
-            __typename: 'FundingSourceSupportDetail',
-            cardType: CardType.Credit,
-          },
-          {
-            __typename: 'FundingSourceSupportDetail',
-            cardType: CardType.Debit,
-          },
-        ],
-        fundingSourceType: 'card',
-        network: 'VISA',
-        providerType: 'stripe',
-      },
-      {
-        __typename: 'FundingSourceSupportInfo',
-        detail: [
-          {
-            __typename: 'FundingSourceSupportDetail',
-            cardType: CardType.Credit,
-          },
-        ],
-        fundingSourceType: 'card',
-        network: 'DISCOVER',
-        providerType: 'stripe',
-      },
-    ]
+      const period = Duration.fromISO(elements[1])
+      expect(period.isValid).toEqual(true)
+    }
 
     it('returns expected result', async () => {
-      const expectedResult: VirtualCardsConfig = {
-        maxCardCreationVelocity: expectedMaxCardCreationVelocity,
-        maxFundingSourceFailureVelocity: [],
-        maxFundingSourceVelocity: [],
-        maxTransactionAmount: expectedMaxTransactionAmount,
-        maxTransactionVelocity: expectedMaxTransactionVelocity,
-        virtualCardCurrencies: expectedVirtualCardCurrencies,
-        fundingSourceSupportInfo: expectedFundingSourceSupportInfo,
-      }
+      const config = await instanceUnderTest.getVirtualCardsConfig()
 
-      await expect(instanceUnderTest.getVirtualCardsConfig()).resolves.toEqual(
-        expectedResult,
-      )
+      config.maxCardCreationVelocity.forEach(verifyVelocity)
+      config.maxFundingSourceFailureVelocity.forEach(verifyVelocity)
+      config.maxFundingSourceVelocity.forEach(verifyVelocity)
+      expect(config.maxTransactionAmount.length).toBeGreaterThanOrEqual(1)
+      expect(config.maxTransactionVelocity.length).toBeGreaterThanOrEqual(1)
+      expect(config.virtualCardCurrencies.length).toBeGreaterThanOrEqual(1)
+      expect(config.fundingSourceSupportInfo.length).toBeGreaterThanOrEqual(1)
     })
   })
 })

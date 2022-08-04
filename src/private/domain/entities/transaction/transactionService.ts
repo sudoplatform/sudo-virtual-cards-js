@@ -8,6 +8,14 @@ export interface TransactionServiceGetTransactionInput {
   cachePolicy?: CachePolicy
 }
 
+export interface TransactionServiceListTransactionsInput {
+  cachePolicy?: CachePolicy
+  limit?: number
+  nextToken?: string
+  dateRange?: DateRange
+  sortOrder?: SortOrder
+}
+
 export interface TransactionServiceListTransactionsByCardIdInput {
   cardId: string
   cachePolicy?: CachePolicy
@@ -21,6 +29,12 @@ export interface TransactionService {
   getTransaction(
     input: TransactionServiceGetTransactionInput,
   ): Promise<TransactionEntity | undefined>
+
+  listTransactions(
+    input: TransactionServiceListTransactionsInput,
+  ): Promise<
+    ListOperationResult<TransactionEntity, TransactionSealedAttributes>
+  >
 
   listTransactionsByCardId(
     input: TransactionServiceListTransactionsByCardIdInput,

@@ -19,7 +19,7 @@ export const getStripe = async (
     throw 'Missing api key'
   }
   return new Stripe(fsConfig.apiKey, {
-    apiVersion: '2020-08-27',
+    apiVersion: '2022-08-01',
     typescript: true,
   })
 }

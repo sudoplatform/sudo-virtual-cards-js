@@ -377,7 +377,13 @@ type Query {
   getCard(id: ID!, keyId: String): SealedCard
   listCards(limit: Int, nextToken: String): SealedCardConnection!
   getTransaction(id: ID!, keyId: String): SealedTransaction
-  listTransactionsByCardId(
+  listTransactions2(
+    limit: Int
+    nextToken: String
+    dateRange: DateRangeInput
+    sortOrder: SortOrder
+  ): SealedTransactionConnection!
+  listTransactionsByCardId2(
     cardId: ID!
     limit: Int
     nextToken: String

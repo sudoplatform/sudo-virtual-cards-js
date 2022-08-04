@@ -42,6 +42,7 @@ import { SetupFundingSourceUseCase } from '../private/domain/use-cases/fundingSo
 import { CreateKeysIfAbsentUseCase } from '../private/domain/use-cases/key/createKeysIfAbsent'
 import { GetTransactionUseCase } from '../private/domain/use-cases/transaction/getTransactionUseCase'
 import { ListTransactionsByCardIdUseCase } from '../private/domain/use-cases/transaction/listTransactionsByCardIdUseCase'
+import { ListTransactionsUseCase } from '../private/domain/use-cases/transaction/listTransactionsUseCase'
 import { CancelVirtualCardUseCase } from '../private/domain/use-cases/virtualCard/cancelVirtualCardUseCase'
 import { GetProvisionalCardUseCase } from '../private/domain/use-cases/virtualCard/getProvisionalCardUseCase'
 import { GetVirtualCardUseCase } from '../private/domain/use-cases/virtualCard/getVirtualCardUseCase'
@@ -276,12 +277,35 @@ export interface GetTransactionInput {
 }
 
 /**
+ * Input for {@link SudoVirtualCardsClient.listTransactions}
+ *
+ * @property {CachePolicy} cachePolicy Cache Policy to use to access transactions.
+ * @property {number} limit Number of transactions to return.
+ * @property {string} nextToken Paginated next token.
+ * @property {DateRange} dateRange
+ *    Inclusive start and end dates between which to search. Default: no date range
+ * @property {SortOrder} sortOrder
+ *    Sort order or results. Default: SortOrder.Asc
+ */
+export interface ListTransactionsInput {
+  cachePolicy?: CachePolicy
+  limit?: number
+  nextToken?: string
+  dateRange?: DateRange
+  sortOrder?: SortOrder
+}
+
+/**
  * Input for {@link SudoVirtualCardsClient.listTransactionsByCardId}
  *
  * @property {string} cardId Identifier of the card to list for related transactions.
  * @property {CachePolicy} cachePolicy Cache Policy to use to access transactions.
  * @property {number} limit Number of transactions to return.
  * @property {string} nextToken Paginated next token.
+ * @property {DateRange} dateRange
+ *    Inclusive start and end dates between which to search. Default: no date range
+ * @property {SortOrder} sortOrder
+ *    Sort order or results. Default: SortOrder.Asc
  */
 export interface ListTransactionsByCardIdInput {
   cardId: string
@@ -512,8 +536,20 @@ export interface SudoVirtualCardsClient {
   getTransaction(input: GetTransactionInput): Promise<Transaction | undefined>
 
   /**
-   * List transactions.
+   * List all of a user's transactions.
+   *
    * @param input Parameters used for list transactions.
+   *
+   * @returns {ListTransactionsResults} Results of the transaction list.
+   */
+  listTransactions(
+    input: ListTransactionsInput,
+  ): Promise<ListTransactionsResults>
+
+  /**
+   * List transactions for a virtual card.
+   *
+   * @param input Parameters used for listing a virtual card's transactions.
    *
    * @returns {ListTransactionsResults} Results of the transaction list.
    */
@@ -813,6 +849,18 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
   ): Promise<Transaction | undefined> {
     return this.serialise.runExclusive(async () => {
       const useCase = new GetTransactionUseCase(
+        this.transactionService,
+        this.sudoUserService,
+      )
+      return await useCase.execute(input)
+    })
+  }
+
+  async listTransactions(
+    input: ListTransactionsInput,
+  ): Promise<ListTransactionsResults> {
+    return this.serialise.runExclusive(async () => {
+      const useCase = new ListTransactionsUseCase(
         this.transactionService,
         this.sudoUserService,
       )
