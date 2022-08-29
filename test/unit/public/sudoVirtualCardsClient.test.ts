@@ -19,14 +19,6 @@ import {
   when,
 } from 'ts-mockito'
 import { v4 } from 'uuid'
-import {
-  APIResultStatus,
-  CreateKeysIfAbsentResult,
-  DefaultSudoVirtualCardsClient,
-  FundingSourceType,
-  SortOrder,
-  SudoVirtualCardsClient,
-} from '../../../src'
 import { ApiClient } from '../../../src/private/data/common/apiClient'
 import { SudoVirtualCardsClientPrivateOptions } from '../../../src/private/data/common/privateSudoVirtualCardsClientOptions'
 import { DefaultFundingSourceService } from '../../../src/private/data/fundingSource/defaultFundingSourceService'
@@ -48,6 +40,14 @@ import { ListProvisionalCardsUseCase } from '../../../src/private/domain/use-cas
 import { ListVirtualCardsUseCase } from '../../../src/private/domain/use-cases/virtualCard/listVirtualCardsUseCase'
 import { ProvisionVirtualCardUseCase } from '../../../src/private/domain/use-cases/virtualCard/provisionVirtualCardUseCase'
 import { UpdateVirtualCardUseCase } from '../../../src/private/domain/use-cases/virtualCard/updateVirtualCardUseCase'
+import {
+  CreateKeysIfAbsentResult,
+  DefaultSudoVirtualCardsClient,
+  SudoVirtualCardsClient,
+} from '../../../src/public/sudoVirtualCardsClient'
+import { APIResultStatus } from '../../../src/public/typings/apiResult'
+import { FundingSourceType } from '../../../src/public/typings/fundingSource'
+import { SortOrder } from '../../../src/public/typings/sortOrder'
 import { ApiDataFactory } from '../data-factory/api'
 import { EntityDataFactory } from '../data-factory/entity'
 
@@ -68,15 +68,11 @@ const JestMockDefaultFundingSourceService =
     typeof DefaultFundingSourceService
   >
 jest.mock('../../../src/private/data/common/apiClient')
+
 const JestMockApiClient = ApiClient as jest.MockedClass<typeof ApiClient>
 jest.mock('@sudoplatform/sudo-web-crypto-provider')
 const JestMockWebSudoCryptoProvider = WebSudoCryptoProvider as jest.MockedClass<
   typeof WebSudoCryptoProvider
->
-
-jest.mock('@sudoplatform/sudo-common/lib/sudoKeyManager')
-const JestMockSudoKeyManager = DefaultSudoKeyManager as jest.MockedClass<
-  typeof DefaultSudoKeyManager
 >
 
 // Use case Mocks
@@ -253,7 +249,6 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     JestMockDefaultFundingSourceService.mockClear()
     JestMockApiClient.mockClear()
     JestMockWebSudoCryptoProvider.mockClear()
-    JestMockSudoKeyManager.mockClear()
 
     JestMockCreateKeysIfAbsentUseCase.mockClear()
     JestMockSetupFundingSourceUseCase.mockClear()
@@ -277,9 +272,6 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       instance(mockFundingSourceService),
     )
     JestMockApiClient.mockImplementation(() => instance(mockApiClient))
-    JestMockSudoKeyManager.mockImplementation(() =>
-      instance(mockSudoKeyManager),
-    )
 
     JestMockCreateKeysIfAbsentUseCase.mockImplementation(() =>
       instance(mockCreateKeysIfAbsentUseCase),
@@ -339,9 +331,9 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     const options: SudoVirtualCardsClientPrivateOptions = {
       apiClient: instance(mockApiClient),
       sudoUserClient: instance(mockSudoUserClient),
+      sudoKeyManager: instance(mockSudoKeyManager),
     }
     instanceUnderTest = new DefaultSudoVirtualCardsClient(options)
-    mockSudoKeyManager
   })
 
   describe('constructor', () => {
@@ -381,33 +373,36 @@ describe('SudoVirtualCardsClient Test Suite', () => {
   })
 
   describe('getFundingSourceClientConfiguration', () => {
+    const result: string = Base64.encodeString(
+      JSON.stringify({
+        fundingSourceTypes: [
+          {
+            type: 'stripe',
+            version: 1,
+            apiKey: 'dummyApiKey',
+          },
+        ],
+      }),
+    )
+
     beforeEach(() => {
       when(
         mockGetFundingSourceClientConfigurationUseCase.execute(),
-      ).thenResolve(
-        Base64.encodeString(
-          JSON.stringify({
-            fundingSourceTypes: [
-              {
-                type: 'stripe',
-                version: 1,
-                apiKey: 'dummyApiKey',
-              },
-            ],
-          }),
-        ),
-      )
+      ).thenResolve(result)
     })
+
     it('generates use case', async () => {
       await instanceUnderTest.getFundingSourceClientConfiguration()
       expect(
         JestMockGetFundingSourceClientConfigurationUseCase,
       ).toHaveBeenCalledTimes(1)
     })
+
     it('calls use case as expected', async () => {
       await instanceUnderTest.getFundingSourceClientConfiguration()
       verify(mockGetFundingSourceClientConfigurationUseCase.execute()).once()
     })
+
     it('returns expected result', async () => {
       await expect(
         instanceUnderTest.getFundingSourceClientConfiguration(),

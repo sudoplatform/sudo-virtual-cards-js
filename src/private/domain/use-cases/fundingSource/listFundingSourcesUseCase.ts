@@ -1,6 +1,7 @@
 import {
   CachePolicy,
   DefaultLogger,
+  Logger,
   NotSignedInError,
 } from '@sudoplatform/sudo-common'
 import { CreditCardNetwork, FundingSourceState } from '../../../..'
@@ -47,11 +48,14 @@ interface ListFundingSourcesUseCaseOutput {
  * Application business logic for listing funding sources.
  */
 export class ListFundingSourcesUseCase {
-  private readonly log = new DefaultLogger(this.constructor.name)
+  private readonly log: Logger
+
   constructor(
     private readonly fundingSourceService: FundingSourceService,
     private readonly userService: SudoUserService,
-  ) {}
+  ) {
+    this.log = new DefaultLogger(this.constructor.name)
+  }
 
   async execute({
     cachePolicy,

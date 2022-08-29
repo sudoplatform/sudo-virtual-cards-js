@@ -1,8 +1,5 @@
 import { DefaultApiClientManager } from '@sudoplatform/sudo-api-client'
-import {
-  DefaultConfigurationManager,
-  DefaultLogger,
-} from '@sudoplatform/sudo-common'
+import { DefaultConfigurationManager, Logger } from '@sudoplatform/sudo-common'
 import {
   DefaultSudoEntitlementsClient,
   SudoEntitlementsClient,
@@ -100,7 +97,7 @@ interface SetupVirtualCardsClientOutput {
 }
 
 export const setupVirtualCardsClient = async (
-  log: DefaultLogger,
+  log: Logger,
 ): Promise<SetupVirtualCardsClientOutput> => {
   try {
     DefaultConfigurationManager.getInstance().setConfig(

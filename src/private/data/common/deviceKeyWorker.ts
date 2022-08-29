@@ -7,6 +7,7 @@ import {
   FatalError,
   IllegalArgumentError,
   KeyNotFoundError,
+  Logger,
   NotSignedInError,
   PublicKeyFormat,
   SudoKeyManager,
@@ -66,7 +67,7 @@ export interface DeviceKeyWorker {
 }
 
 export class DefaultDeviceKeyWorker implements DeviceKeyWorker {
-  private log = new DefaultLogger(this.constructor.name)
+  private readonly log: Logger
 
   private currentPublicKey: DeviceKey | undefined
 
@@ -76,7 +77,9 @@ export class DefaultDeviceKeyWorker implements DeviceKeyWorker {
   constructor(
     private readonly keyManager: SudoKeyManager,
     private readonly userClient: SudoUserClient,
-  ) {}
+  ) {
+    this.log = new DefaultLogger(this.constructor.name)
+  }
 
   async generateKeyPair(): Promise<DeviceKey> {
     const keyRingId = await this.getKeyRingId()

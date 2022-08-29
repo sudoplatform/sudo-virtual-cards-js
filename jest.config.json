@@ -1,4 +1,5 @@
 {
+  "preset": "ts-jest",
   "testEnvironment": "jsdom",
   "testMatch": ["<rootDir>/test/**/*.test.ts"],
   "testPathIgnorePatterns": ["/node_modules/", "/lib/"],
@@ -18,6 +19,11 @@
       "branches": 71.99,
       "functions": 73.3,
       "lines": 75.61
+    }
+  },
+  "globals": {
+    "ts-jest": {
+      "tsconfig": "./tsconfig.json"
     }
   }
 }

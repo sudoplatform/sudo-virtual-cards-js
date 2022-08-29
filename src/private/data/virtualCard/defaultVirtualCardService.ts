@@ -6,6 +6,7 @@ import {
   KeyNotFoundError,
   ListOperationResult,
   ListOperationResultStatus,
+  Logger,
   PublicKeyFormat,
   UnrecognizedAlgorithmError,
 } from '@sudoplatform/sudo-common'
@@ -102,13 +103,15 @@ export interface VirtualCardSealedAttributes {
 }
 
 export class DefaultVirtualCardService implements VirtualCardService {
-  private readonly log = new DefaultLogger(this.constructor.name)
+  private readonly log: Logger
 
   constructor(
     private readonly appSync: ApiClient,
     private readonly deviceKeyWorker: DeviceKeyWorker,
     private readonly transactionWorker: TransactionWorker,
-  ) {}
+  ) {
+    this.log = new DefaultLogger(this.constructor.name)
+  }
 
   async provisionVirtualCard(
     input: VirtualCardServiceProvisionVirtualCardInput,

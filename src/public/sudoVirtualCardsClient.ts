@@ -5,6 +5,7 @@ import {
   DefaultLogger,
   DefaultSudoKeyManager,
   ListOutput,
+  Logger,
   SudoCryptoProvider,
   SudoKeyManager,
 } from '@sudoplatform/sudo-common'
@@ -592,10 +593,13 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
   private readonly cryptoProvider: SudoCryptoProvider
   private readonly sudoUserClient: SudoUserClient
 
-  private readonly log = new DefaultLogger(this.constructor.name)
-  private readonly serialise = new Mutex()
+  private readonly log: Logger
+  private readonly serialise: Mutex
 
   public constructor(opts: SudoVirtualCardsClientOptions) {
+    this.log = new DefaultLogger(this.constructor.name)
+    this.serialise = new Mutex()
+
     const privateOptions = opts as
       | SudoVirtualCardsClientPrivateOptions
       | undefined
@@ -607,7 +611,9 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
         'SudoVirtualCardsClient',
         'com.sudoplatform.appservicename',
       )
-    this.keyManager = new DefaultSudoKeyManager(this.cryptoProvider)
+    this.keyManager =
+      privateOptions?.sudoKeyManager ??
+      new DefaultSudoKeyManager(this.cryptoProvider)
     this.deviceKeyWorker = new DefaultDeviceKeyWorker(
       this.keyManager,
       this.sudoUserClient,

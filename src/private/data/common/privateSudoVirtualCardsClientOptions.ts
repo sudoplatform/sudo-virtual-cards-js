@@ -1,3 +1,4 @@
+import { SudoKeyManager } from '@sudoplatform/sudo-common'
 import { SudoVirtualCardsClientOptions } from '../../..'
 import { ApiClient } from './apiClient'
 
@@ -8,4 +9,5 @@ import { ApiClient } from './apiClient'
 export interface SudoVirtualCardsClientPrivateOptions
   extends SudoVirtualCardsClientOptions {
   apiClient?: ApiClient
+  sudoKeyManager?: SudoKeyManager
 }

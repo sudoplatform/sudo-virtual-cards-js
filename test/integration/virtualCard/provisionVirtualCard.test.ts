@@ -83,36 +83,5 @@ describe('ProvisionVirtualCard Test Suite', () => {
         1000,
       )
     })
-
-    it('provision two cards', async () => {
-      if (!sudo.id) {
-        fail('no sudo id')
-      }
-      const fundingSource = await createFundingSource(instanceUnderTest, stripe)
-      const ownershipProof = await profilesClient.getOwnershipProof(
-        sudo.id,
-        'sudoplatform.virtual-cards.virtual-card',
-      )
-      const alias = v4()
-      const provisionInput = {
-        ownershipProofs: [ownershipProof],
-        fundingSourceId: fundingSource.id,
-        cardHolder: 'cardMaxPerSudo:null',
-        alias,
-        currency: 'USD',
-        billingAddress: {
-          addressLine1: '222333 Peachtree Place',
-          city: 'Atlanta',
-          state: 'GA',
-          postalCode: '30318',
-          country: 'US',
-        },
-      }
-      const results = await Promise.all([
-        instanceUnderTest.provisionVirtualCard(provisionInput),
-        instanceUnderTest.provisionVirtualCard(provisionInput),
-      ])
-      console.log({ results })
-    })
   })
 })

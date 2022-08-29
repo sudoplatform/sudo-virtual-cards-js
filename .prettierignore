@@ -1,3 +1,5 @@
 build/
 docs/
+cjs/
 lib/
+types/

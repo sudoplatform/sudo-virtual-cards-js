@@ -8,8 +8,8 @@ module.exports = {
       env: { node: true },
     },
     {
-      files: ['**/*.ts'],
-      plugins: ['@typescript-eslint', 'import', 'prettier'],
+      files: ['src/**/*.ts'],
+      plugins: ['@typescript-eslint', 'import', 'prettier', 'tree-shaking'],
       parser: '@typescript-eslint/parser',
       parserOptions: {
         project: './tsconfig.json',
@@ -54,6 +54,7 @@ module.exports = {
             ignoreStatic: true,
           },
         ],
+        'tree-shaking/no-side-effects-in-initialization': 'error'
       },
     },
     {
@@ -64,14 +65,12 @@ module.exports = {
     },
     {
       files: [
-        '**/*.spec.ts',
-        '**/test/**/*.ts',
-        'integration-tests/**/*.ts',
-        'src/utils/testing/**/*.ts',
+        'test/**/*.ts',
+        'jest.setup.ts'
       ],
       parser: '@typescript-eslint/parser',
       parserOptions: {
-        project: './tsconfig.json',
+        project: './tsconfig.test.json',
       },
       extends: [
         'plugin:@typescript-eslint/recommended',
@@ -83,8 +82,8 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-non-null-assertion': 'off',
         '@typescript-eslint/no-unsafe-call': 'off',
-        '@typescript-eslint/no-unsafe-argument': 'off',
         '@typescript-eslint/no-unsafe-assignment': 'off',
+        '@typescript-eslint/no-unsafe-argument': 'off',
         '@typescript-eslint/no-unsafe-member-access': 'off',
         '@typescript-eslint/restrict-plus-operands': 'off',
         '@typescript-eslint/restrict-template-expressions': 'off',
