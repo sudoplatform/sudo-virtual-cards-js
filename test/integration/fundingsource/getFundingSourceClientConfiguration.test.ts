@@ -1,5 +1,5 @@
 import { DefaultLogger } from '@sudoplatform/sudo-common'
-import { SudoVirtualCardsClient } from '../../../src'
+import { FundingSourceType, SudoVirtualCardsClient } from '../../../src'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
 describe('SudoVirtualCardsClient GetFundingSourceClientConfiguration Test Suite', () => {
@@ -17,9 +17,15 @@ describe('SudoVirtualCardsClient GetFundingSourceClientConfiguration Test Suite'
     it('returns expected result', async () => {
       const clientConfiguration =
         await instanceUnderTest.getFundingSourceClientConfiguration()
-      expect(clientConfiguration).toHaveLength(1)
-      expect(clientConfiguration[0].type).toStrictEqual('stripe')
-      expect(clientConfiguration[0].version).toStrictEqual(1)
+      expect(clientConfiguration.length).toBeGreaterThanOrEqual(1)
+
+      // For now, Stripe is mandatory
+      expect(clientConfiguration).toContainEqual({
+        type: 'stripe',
+        version: 1,
+        fundingSourceType: FundingSourceType.CreditCard,
+        apiKey: expect.stringMatching(/^pk_.*/),
+      })
     })
   })
 })
