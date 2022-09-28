@@ -1,5 +1,5 @@
 import { NotSignedInError } from '@sudoplatform/sudo-common'
-import { APIResult } from '../../../..'
+import { APIResult } from '../../../../public/typings/apiResult'
 import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
 import { VirtualCardService } from '../../entities/virtualCard/virtualCardService'
 import {

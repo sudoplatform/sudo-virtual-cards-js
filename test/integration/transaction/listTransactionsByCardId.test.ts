@@ -4,7 +4,6 @@ import {
 } from '@sudoplatform/sudo-common'
 import { Sudo, SudoProfilesClient } from '@sudoplatform/sudo-profiles'
 import { SudoVirtualCardsSimulatorClient } from '@sudoplatform/sudo-virtual-cards-simulator'
-import Stripe from 'stripe'
 import waitForExpect from 'wait-for-expect'
 import {
   SudoVirtualCardsClient,
@@ -12,6 +11,7 @@ import {
   TransactionType,
   VirtualCard,
 } from '../../../src'
+import { ProviderAPIs } from '../util/getProviderAPIs'
 import { provisionVirtualCard } from '../util/provisionVirtualCard'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
@@ -24,7 +24,7 @@ describe('ListTransactionsByCardId Test Suite', () => {
   let instanceUnderTest: SudoVirtualCardsClient
   let vcSimulator: SudoVirtualCardsSimulatorClient
   let profilesClient: SudoProfilesClient
-  let stripe: Stripe
+  let apis: ProviderAPIs
 
   let sudo: Sudo
   let card: VirtualCard
@@ -92,14 +92,14 @@ describe('ListTransactionsByCardId Test Suite', () => {
     instanceUnderTest = result.virtualCardsClient
     profilesClient = result.profilesClient
     sudo = result.sudo
-    stripe = result.stripe
+    apis = result.apis
     vcSimulator = result.virtualCardsSimulatorClient
 
     card = await provisionVirtualCard(
       instanceUnderTest,
       profilesClient,
       sudo,
-      stripe,
+      apis,
     )
     await setupTransactions()
   })

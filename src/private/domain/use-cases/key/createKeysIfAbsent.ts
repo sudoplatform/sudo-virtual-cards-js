@@ -1,5 +1,5 @@
 import { NotSignedInError } from '@sudoplatform/sudo-common'
-import { CreateKeysIfAbsentResult } from '../../../..'
+import { CreateKeysIfAbsentResult } from '../../../../public/typings/createKeysIfAbsentResult'
 import { KeyService } from '../../entities/key/keyService'
 import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
 

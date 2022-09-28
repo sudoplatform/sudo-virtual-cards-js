@@ -16,7 +16,6 @@ import {
   SealedCard,
   SealedCurrencyAmountAttribute,
   SealedTransaction,
-  StateReason,
   TransactionType,
   VirtualCardsConfig,
 } from '../../../src/gen/graphqlTypes'
@@ -37,11 +36,21 @@ export class GraphQLDataFactory {
     }),
   )
 
+  static readonly interactionDataErrorInfo = {
+    provisioningData: Base64.encodeString(
+      JSON.stringify({
+        provider: 'checkout',
+        version: 1,
+        type: 'CREDIT_CARD',
+        redirectUrl: 'https://some.com/url',
+      }),
+    ),
+  }
+
   static readonly provisionalFundingSource: ProvisionalFundingSource = {
     ...GraphQLDataFactory.commonProps,
     id: 'dummyFundingSourceId',
     state: ProvisionalFundingSourceState.Completed,
-    stateReason: StateReason.Unlocked,
     provisioningData: this.provisioningData,
   }
 

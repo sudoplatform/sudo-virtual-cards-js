@@ -1,5 +1,6 @@
 import { CachePolicy, ListOperationResult } from '@sudoplatform/sudo-common'
-import { DateRange, SortOrder } from '../../../..'
+import { DateRange } from '../../../../public/typings/dateRange'
+import { SortOrder } from '../../../../public/typings/sortOrder'
 import { TransactionSealedAttributes } from '../../../data/transaction/transactionSealedAttributes'
 import { TransactionEntity } from './transactionEntity'
 

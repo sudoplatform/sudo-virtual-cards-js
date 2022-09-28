@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Base64 } from '@sudoplatform/sudo-common'
+import { Base64, FatalError } from '@sudoplatform/sudo-common'
+import { FundingSourceType } from '../../../public'
 import { FundingSourceEntity } from '../../domain/entities/fundingSource/fundingSourceEntity'
 import {
   FundingSourceService,
@@ -9,6 +10,8 @@ import {
   FundingSourceServiceListFundingSourcesInput,
   FundingSourceServiceListFundingSourcesOutput,
   FundingSourceServiceSetupFundingSourceInput,
+  isFundingSourceServiceCheckoutCardCompletionData,
+  isFundingSourceServiceStripeCardCompletionData,
 } from '../../domain/entities/fundingSource/fundingSourceService'
 import { ProvisionalFundingSourceEntity } from '../../domain/entities/fundingSource/provisionalFundingSourceEntity'
 import { ApiClient } from '../common/apiClient'
@@ -30,10 +33,12 @@ export class DefaultFundingSourceService implements FundingSourceService {
   public async setupFundingSource({
     currency,
     type,
+    supportedProviders,
   }: FundingSourceServiceSetupFundingSourceInput): Promise<ProvisionalFundingSourceEntity> {
     const provisionalFundingSource = await this.appSync.setupFundingSource({
       currency,
       type,
+      supportedProviders,
     })
     return ProvisionalFundingSourceEntityTransformer.transformGraphQL(
       provisionalFundingSource,
@@ -45,13 +50,33 @@ export class DefaultFundingSourceService implements FundingSourceService {
     completionData,
     updateCardFundingSource,
   }: FundingSourceServiceCompleteFundingSourceInput): Promise<FundingSourceEntity> {
-    const encodedCompletionData = Base64.encodeString(
-      JSON.stringify({
-        provider: completionData.provider,
-        version: completionData.version,
-        payment_method: completionData.paymentMethod,
-      }),
-    )
+    let encodedCompletionData: string
+    const provider = completionData.provider
+    const type = completionData.type ?? FundingSourceType.CreditCard
+    if (isFundingSourceServiceStripeCardCompletionData(completionData)) {
+      encodedCompletionData = Base64.encodeString(
+        JSON.stringify({
+          provider,
+          version: 1,
+          type,
+          payment_method: completionData.paymentMethod,
+        }),
+      )
+    } else if (
+      isFundingSourceServiceCheckoutCardCompletionData(completionData)
+    ) {
+      encodedCompletionData = Base64.encodeString(
+        JSON.stringify({
+          provider,
+          version: 1,
+          type,
+          payment_token: completionData.paymentToken,
+        }),
+      )
+    } else {
+      throw new FatalError(`Unexpected provider: ${provider}:${type}`)
+    }
+
     const result = await this.appSync.completeFundingSource({
       id,
       completionData: encodedCompletionData,

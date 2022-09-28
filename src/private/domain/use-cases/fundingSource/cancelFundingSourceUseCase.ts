@@ -3,11 +3,15 @@ import {
   Logger,
   NotSignedInError,
 } from '@sudoplatform/sudo-common'
-import { CreditCardNetwork, FundingSourceState } from '../../../..'
+import {
+  CreditCardNetwork,
+  FundingSourceState,
+} from '../../../../public/typings/fundingSource'
 import { FundingSourceService } from '../../entities/fundingSource/fundingSourceService'
 import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
+import { FundingSourceType } from './completeFundingSourceUseCase'
 
-interface CancelFundingSourceUseCaseOutput {
+interface BaseCancelFundingSourceUseCaseOutput {
   id: string
   owner: string
   version: number
@@ -15,9 +19,17 @@ interface CancelFundingSourceUseCaseOutput {
   updatedAt: Date
   state: FundingSourceState
   currency: string
+}
+
+interface CancelCreditCardFundingSourceUseCaseOutput
+  extends BaseCancelFundingSourceUseCaseOutput {
+  type: FundingSourceType.CreditCard
   last4: string
   network: CreditCardNetwork
 }
+
+type CancelFundingSourceUseCaseOutput =
+  CancelCreditCardFundingSourceUseCaseOutput
 
 /**
  * Application business logic for cancelling a funding source.

@@ -3,7 +3,7 @@ import {
   Logger,
   NotSignedInError,
 } from '@sudoplatform/sudo-common'
-import { FundingSourceSupportInfo } from '../../../..'
+import { FundingSourceSupportInfo } from '../../../../public/typings/config'
 import { VirtualCardsConfigService } from '../../entities/configuration/virtualCardsConfigService'
 import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
 import { CurrencyAmountEntity } from '../../entities/transaction/transactionEntity'

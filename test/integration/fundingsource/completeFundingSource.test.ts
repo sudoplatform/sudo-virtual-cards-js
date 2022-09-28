@@ -1,18 +1,28 @@
 import { DefaultLogger } from '@sudoplatform/sudo-common'
 import { SudoUserClient } from '@sudoplatform/sudo-user'
-import Stripe from 'stripe'
 import { v4 } from 'uuid'
 import {
+  CompleteFundingSourceCompletionDataInput,
   CreditCardNetwork,
+  FundingSource,
   FundingSourceCompletionDataInvalidError,
   FundingSourceNotSetupError,
+  FundingSourceRequiresUserInteractionError,
   FundingSourceState,
   FundingSourceType,
+  isCheckoutCardProvisionalFundingSourceInteractionData,
+  isCheckoutCardProvisionalFundingSourceProvisioningData,
+  isStripeCardProvisionalFundingSourceProvisioningData,
   ProvisionalFundingSourceNotFoundError,
   SudoVirtualCardsClient,
 } from '../../../src'
 import { uuidV4Regex } from '../../utility/uuidV4Regex'
-import { getStripe } from '../util/getStripe'
+import {
+  confirmStripeSetupIntent,
+  generateCheckoutPaymentToken,
+  getTestCard,
+} from '../util/createFundingSource'
+import { ProviderAPIs } from '../util/getProviderAPIs'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
 describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
@@ -20,147 +30,297 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
   const log = new DefaultLogger('SudoVirtualCardsClientIntegrationTests')
   let instanceUnderTest: SudoVirtualCardsClient
   let userClient: SudoUserClient
-  let stripe: Stripe
+  let apis: ProviderAPIs
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const result = await setupVirtualCardsClient(log)
     instanceUnderTest = result.virtualCardsClient
     userClient = result.userClient
-    stripe = await getStripe(instanceUnderTest)
+    apis = result.apis
   })
 
+  const dummyCompletionDataForProvider: Record<
+    string,
+    CompleteFundingSourceCompletionDataInput
+  > = {
+    stripe: {
+      provider: 'stripe',
+      paymentMethod: 'dummyPaymentMethod',
+    },
+    checkout: {
+      provider: 'checkout',
+      type: FundingSourceType.CreditCard,
+      paymentToken: 'dummyPaymentToken',
+    },
+  }
+
   describe('CompleteFundingSource', () => {
-    it('returns ProvisionalFundingSourceNotFoundError if invalid id', async () => {
-      await expect(
-        instanceUnderTest.completeFundingSource({
-          id: v4(),
-          completionData: {
-            provider: 'stripe',
-            paymentMethod: 'dummyPaymentMethod',
-          },
-        }),
-      ).rejects.toThrow(ProvisionalFundingSourceNotFoundError)
+    describe.each`
+      provider
+      ${'stripe'}
+      ${'checkout'}
+    `(
+      'for provider $provider',
+      ({ provider }: { provider: keyof ProviderAPIs }) => {
+        let skip = false
+        beforeAll(() => {
+          // Since we determine availability of provider
+          // asynchronously we can't use that knowledge
+          // to control the set of providers we iterate
+          // over so we have to use a flag
+          if (!apis[provider]) {
+            console.warn(
+              `No API available for provider ${provider}. Skipping tests.`,
+            )
+            skip = true
+          }
+        })
+
+        it('returns ProvisionalFundingSourceNotFoundError if invalid id', async () => {
+          if (skip) return
+
+          await expect(
+            instanceUnderTest.completeFundingSource({
+              id: v4(),
+              completionData: dummyCompletionDataForProvider[provider],
+            }),
+          ).rejects.toThrow(ProvisionalFundingSourceNotFoundError)
+        })
+
+        it('returns FundingSourceCompletionDataInvalidError if invalid completionData', async () => {
+          if (skip) return
+
+          const provisionalCard = await instanceUnderTest.setupFundingSource({
+            currency: 'USD',
+            type: FundingSourceType.CreditCard,
+            supportedProviders: [provider],
+          })
+
+          const card = getTestCard(provider)
+          if (
+            apis.stripe &&
+            isStripeCardProvisionalFundingSourceProvisioningData(
+              provisionalCard.provisioningData,
+            )
+          ) {
+            const stripe = apis.stripe
+            const setupIntent = await confirmStripeSetupIntent(
+              stripe,
+              card,
+              provisionalCard.provisioningData,
+            )
+            if (!setupIntent.payment_method) {
+              throw 'Failed to get payment_method from setup intent'
+            }
+          } else if (
+            apis.checkout &&
+            isCheckoutCardProvisionalFundingSourceProvisioningData(
+              provisionalCard.provisioningData,
+            )
+          ) {
+            await generateCheckoutPaymentToken(
+              apis.checkout,
+              card,
+              provisionalCard.provisioningData,
+            )
+          } else {
+            fail(
+              'No API defined for provider or provisioning data does not match known provider',
+            )
+          }
+
+          await expect(
+            instanceUnderTest.completeFundingSource({
+              id: provisionalCard.id,
+              completionData: dummyCompletionDataForProvider[provider],
+            }),
+          ).rejects.toThrow(FundingSourceCompletionDataInvalidError)
+        })
+
+        it('returns successfully when correct setup data used', async () => {
+          if (skip) return
+
+          const provisionalCard = await instanceUnderTest.setupFundingSource({
+            currency: 'USD',
+            type: FundingSourceType.CreditCard,
+            supportedProviders: [provider],
+          })
+
+          const card = getTestCard(provider)
+          let completionData: CompleteFundingSourceCompletionDataInput
+          if (
+            isStripeCardProvisionalFundingSourceProvisioningData(
+              provisionalCard.provisioningData,
+            )
+          ) {
+            const stripe = apis.stripe
+            const setupIntent = await confirmStripeSetupIntent(
+              stripe,
+              card,
+              provisionalCard.provisioningData,
+            )
+            if (typeof setupIntent.payment_method !== 'string') {
+              throw 'Failed to get payment_method from setup intent'
+            }
+            completionData = {
+              provider: 'stripe',
+              type: FundingSourceType.CreditCard,
+              paymentMethod: setupIntent.payment_method,
+            }
+          } else if (
+            apis.checkout &&
+            isCheckoutCardProvisionalFundingSourceProvisioningData(
+              provisionalCard.provisioningData,
+            )
+          ) {
+            const paymentToken = await generateCheckoutPaymentToken(
+              apis.checkout,
+              card,
+              provisionalCard.provisioningData,
+            )
+            completionData = {
+              provider: 'checkout',
+              type: FundingSourceType.CreditCard,
+              paymentToken,
+            }
+          } else {
+            fail('unrecognized provisioning data')
+          }
+
+          await expect(
+            instanceUnderTest.completeFundingSource({
+              id: provisionalCard.id,
+              completionData,
+            }),
+          ).resolves.toMatchObject({
+            currency: 'USD',
+            id: expect.stringMatching(uuidV4Regex('vc-fnd')),
+            owner: await userClient.getSubject(),
+            version: 1,
+            last4: card.last4,
+            network: CreditCardNetwork.Visa,
+            state: FundingSourceState.Active,
+          })
+        })
+      },
+    )
+
+    // Stripe specific tests
+    describe('for provider stripe', () => {
+      let skip = false
+      beforeAll(() => {
+        // Since we determine availability of provider
+        // asynchronously we can't use that knowledge
+        // to control the set of providers we iterate
+        // over so we have to use a flag
+        if (!apis.stripe) {
+          console.warn(`No API available for provider stripe. Skipping tests.`)
+          skip = true
+        }
+      })
+
+      it('returns FundingSourceNotSetupError if setup intent not confirmed', async () => {
+        if (skip) return
+
+        const provisionalCard = await instanceUnderTest.setupFundingSource({
+          currency: 'USD',
+          type: FundingSourceType.CreditCard,
+          supportedProviders: ['stripe'],
+        })
+
+        await expect(
+          instanceUnderTest.completeFundingSource({
+            id: provisionalCard.id,
+            completionData: dummyCompletionDataForProvider.stripe,
+          }),
+        ).rejects.toThrow(FundingSourceNotSetupError)
+      })
     })
 
-    it('returns FundingSourceNotSetupError if setup intent not confirmed', async () => {
-      const provisionalCard = await instanceUnderTest.setupFundingSource({
-        currency: 'USD',
-        type: FundingSourceType.CreditCard,
+    // Checkout specific tests
+    describe('for provider checkout', () => {
+      let skip = false
+      beforeAll(() => {
+        // Since we determine availability of provider
+        // asynchronously we can't use that knowledge
+        // to control the set of providers we iterate
+        // over so we have to use a flag
+        if (!apis.checkout) {
+          console.warn(
+            `No API available for provider checkout. Skipping tests.`,
+          )
+          skip = true
+        }
       })
 
-      await expect(
-        instanceUnderTest.completeFundingSource({
-          id: provisionalCard.id,
-          completionData: {
-            provider: 'stripe',
-            paymentMethod: 'dummyPaymentMethod',
-          },
-        }),
-      ).rejects.toThrow(FundingSourceNotSetupError)
-    })
+      it('should throw a valid FundingSourceRequiresUserInteractionError for a card requiring 3DS authentication', async () => {
+        if (skip) return
 
-    it('returns FundingSourceCompletionDataInvalidError if invalid completionData', async () => {
-      const provisionalCard = await instanceUnderTest.setupFundingSource({
-        currency: 'USD',
-        type: FundingSourceType.CreditCard,
-      })
+        const provisionalFundingSource =
+          await instanceUnderTest.setupFundingSource({
+            currency: 'USD',
+            type: FundingSourceType.CreditCard,
+            supportedProviders: ['checkout'],
+          })
 
-      const exp = new Date()
-      exp.setUTCMonth(exp.getUTCMonth() + 1)
-      exp.setUTCFullYear(exp.getUTCFullYear() + 1)
-      const paymentMethod = await stripe.paymentMethods.create({
-        type: 'card',
-        card: {
-          exp_month: exp.getUTCMonth(),
-          exp_year: exp.getUTCFullYear(),
-          number: '4242424242424242',
-          cvc: '123',
-        },
-        billing_details: {
-          address: {
-            line1: '222333 Peachtree Place',
-            city: 'Atlanta',
-            country: 'GA',
-            postal_code: '30318',
-            state: 'US',
-          },
-        },
-      })
-      const setupIntent = await stripe.setupIntents.confirm(
-        provisionalCard.provisioningData.intent,
-        {
-          payment_method: paymentMethod.id,
-          client_secret: provisionalCard.provisioningData.clientSecret,
-        } as Stripe.SetupIntentCreateParams,
-      )
-      if (!setupIntent.payment_method) {
-        throw 'Failed to get payment_method from setup intent'
-      }
+        if (
+          !apis.checkout ||
+          !isCheckoutCardProvisionalFundingSourceProvisioningData(
+            provisionalFundingSource.provisioningData,
+          )
+        ) {
+          fail('No checkout provider or provisioning data is not for checkout')
+        }
 
-      await expect(
-        instanceUnderTest.completeFundingSource({
-          id: provisionalCard.id,
-          completionData: {
-            provider: 'stripe',
-            paymentMethod: 'dummyPaymentMethod',
-          },
-        }),
-      ).rejects.toThrow(FundingSourceCompletionDataInvalidError)
-    })
+        const card = getTestCard('checkout', 'Visa-3DS2-1')
 
-    it('returns successfully when correct setup data used', async () => {
-      const provisionalCard = await instanceUnderTest.setupFundingSource({
-        currency: 'USD',
-        type: FundingSourceType.CreditCard,
-      })
+        const paymentToken = await generateCheckoutPaymentToken(
+          apis.checkout,
+          card,
+          provisionalFundingSource.provisioningData,
+        )
+        const completionData: CompleteFundingSourceCompletionDataInput = {
+          provider: 'checkout',
+          type: FundingSourceType.CreditCard,
+          paymentToken,
+        }
 
-      const exp = new Date()
-      exp.setUTCMonth(exp.getUTCMonth() + 1)
-      exp.setUTCFullYear(exp.getUTCFullYear() + 1)
-      const paymentMethod = await stripe.paymentMethods.create({
-        type: 'card',
-        card: {
-          exp_month: exp.getUTCMonth(),
-          exp_year: exp.getUTCFullYear(),
-          number: '4242424242424242',
-          cvc: '123',
-        },
-        billing_details: {
-          address: {
-            line1: '222333 Peachtree Place',
-            city: 'Atlanta',
-            country: 'GA',
-            postal_code: '30318',
-            state: 'US',
-          },
-        },
-      })
-      const setupIntent = await stripe.setupIntents.confirm(
-        provisionalCard.provisioningData.intent,
-        {
-          payment_method: paymentMethod.id,
-          client_secret: provisionalCard.provisioningData.clientSecret,
-        } as Stripe.SetupIntentCreateParams,
-      )
-      if (!setupIntent.payment_method) {
-        throw 'Failed to get payment_method from setup intent'
-      }
-      await expect(
-        instanceUnderTest.completeFundingSource({
-          id: provisionalCard.id,
-          completionData: {
-            provider: 'stripe',
-            paymentMethod: setupIntent.payment_method.toString(),
-          },
-        }),
-      ).resolves.toMatchObject({
-        currency: 'USD',
-        id: expect.stringMatching(uuidV4Regex('vc-fnd')),
-        owner: await userClient.getSubject(),
-        version: 1,
-        last4: '4242',
-        network: CreditCardNetwork.Visa,
-        state: FundingSourceState.Active,
+        let caught: Error | undefined
+        let completed: FundingSource | undefined
+        try {
+          completed = await instanceUnderTest.completeFundingSource({
+            id: provisionalFundingSource.id,
+            completionData,
+          })
+        } catch (err) {
+          caught = err as Error
+        }
+
+        expect(completed).toBeUndefined()
+        expect(caught).toBeDefined()
+        expect(caught).toBeInstanceOf(FundingSourceRequiresUserInteractionError)
+        const requiresInteractionError =
+          caught as FundingSourceRequiresUserInteractionError
+        expect(
+          isCheckoutCardProvisionalFundingSourceInteractionData(
+            requiresInteractionError.interactionData,
+          ),
+        ).toEqual(true)
+        if (
+          !isCheckoutCardProvisionalFundingSourceInteractionData(
+            requiresInteractionError.interactionData,
+          )
+        ) {
+          fail(
+            'interactionData unexpectedly not for checkout card funding source',
+          )
+        }
+        expect(requiresInteractionError.interactionData).toEqual({
+          provider: 'checkout',
+          type: FundingSourceType.CreditCard,
+          version: 1,
+          redirectUrl: expect.stringMatching(/^https:\/\/.*/),
+        })
       })
     })
   })

@@ -20,8 +20,6 @@ import {
 } from '../../../gen/graphqlTypes'
 import { APIResult, APIResultStatus } from '../../../public/typings/apiResult'
 import { Metadata } from '../../../public/typings/metadata'
-import { CardState } from '../../../public/typings/virtualCard'
-import { TransactionEntity } from '../../domain/entities/transaction/transactionEntity'
 import { ProvisionalVirtualCardEntity } from '../../domain/entities/virtualCard/provisionalVirtualCardEntity'
 import { VirtualCardEntity } from '../../domain/entities/virtualCard/virtualCardEntity'
 import {
@@ -36,72 +34,21 @@ import {
 } from '../../domain/entities/virtualCard/virtualCardService'
 import { ApiClient } from '../common/apiClient'
 import { DeviceKey, DeviceKeyWorker, KeyType } from '../common/deviceKeyWorker'
-import {
-  TransactionUnsealed,
-  TransactionWorker,
-} from '../common/transactionWorker'
+import { TransactionWorker } from '../common/transactionWorker'
 import { FetchPolicyTransformer } from '../common/transformer/fetchPolicyTransformer'
 import { ProvisionalVirtualCardEntityTransformer } from './transformer/provisionalVirtualCardEntityTransformer'
 import { VirtualCardEntityTransformer } from './transformer/virtualCardEntityTransformer'
-
-interface VirtualCardBillingAddress {
-  addressLine1: string
-  addressLine2?: string
-  city: string
-  state: string
-  postalCode: string
-  country: string
-}
-
-interface VirtualCardExpiry {
-  mm: string
-  yyyy: string
-}
-
-export interface VirtualCardUnsealed {
-  id: string
-  owner: string
-  version: number
-  createdAtEpochMs: number
-  updatedAtEpochMs: number
-  owners: {
-    id: string
-    issuer: string
-  }[]
-  fundingSourceId: string
-  currency: string
-  state: CardState
-  activeToEpochMs: number
-  cancelledAtEpochMs?: number | null
-  last4: string
-  cardHolder: string
-  alias?: string
-  pan: string
-  csc: string
-  billingAddress?: VirtualCardBillingAddress
-  expiry: VirtualCardExpiry
-  lastTransaction?: TransactionUnsealed
-  metadata?: Metadata
-}
-
-export type ProvisionalCardUnsealed = Omit<ProvisionalCard, 'card'> & {
-  card?: VirtualCardUnsealed | undefined
-}
+import {
+  ProvisionalCardUnsealed,
+  VirtualCardBillingAddress,
+  VirtualCardExpiry,
+  VirtualCardSealedAttributes,
+  VirtualCardUnsealed,
+} from './virtualCardSealedAttributes'
 
 /**
  * Used to omit from the {@link ListOperationResult}.
  */
-export interface VirtualCardSealedAttributes {
-  cardHolder: string
-  alias: string
-  pan: string
-  csc: string
-  billingAddress?: VirtualCardBillingAddress
-  expiry: VirtualCardExpiry
-  lastTransaction?: TransactionEntity
-  metadata?: Metadata
-}
-
 export class DefaultVirtualCardService implements VirtualCardService {
   private readonly log: Logger
 

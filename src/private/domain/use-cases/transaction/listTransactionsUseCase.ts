@@ -3,7 +3,8 @@ import {
   ListOperationResult,
   NotSignedInError,
 } from '@sudoplatform/sudo-common'
-import { DateRange, SortOrder } from '../../../..'
+import { DateRange } from '../../../../public/typings/dateRange'
+import { SortOrder } from '../../../../public/typings/sortOrder'
 import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
 import { TransactionService } from '../../entities/transaction/transactionService'
 import { TransactionSealedAttributesUseCaseOutput } from './listTransactionsCommon'

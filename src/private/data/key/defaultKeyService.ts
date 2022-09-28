@@ -1,6 +1,6 @@
 import { PublicKeyFormat } from '@sudoplatform/sudo-common'
-import { CreateKeyIfAbsentResult } from '../../..'
 import { KeyFormat } from '../../../gen/graphqlTypes'
+import { CreateKeyIfAbsentResult } from '../../../public/typings/createKeysIfAbsentResult'
 import { KeyService } from '../../domain/entities/key/keyService'
 import { ApiClient } from '../common/apiClient'
 import { DeviceKeyWorker } from '../common/deviceKeyWorker'

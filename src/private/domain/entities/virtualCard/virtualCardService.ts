@@ -1,7 +1,7 @@
 import { CachePolicy, ListOperationResult } from '@sudoplatform/sudo-common'
-import { APIResult } from '../../../..'
+import { APIResult } from '../../../../public/typings/apiResult'
 import { Metadata } from '../../../../public/typings/metadata'
-import { VirtualCardSealedAttributes } from '../../../data/virtualCard/defaultVirtualCardService'
+import { VirtualCardSealedAttributes } from '../../../data/virtualCard/virtualCardSealedAttributes'
 import { ProvisionalVirtualCardEntity } from './provisionalVirtualCardEntity'
 import { VirtualCardEntity } from './virtualCardEntity'
 

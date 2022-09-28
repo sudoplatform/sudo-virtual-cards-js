@@ -1,5 +1,5 @@
-import { DateRange } from '../../../..'
 import { DateRangeInput } from '../../../../gen/graphqlTypes'
+import { DateRange } from '../../../../public/typings/dateRange'
 
 export class DateRangeTransformer {
   static transformToGraphQLInput(api: DateRange): DateRangeInput {

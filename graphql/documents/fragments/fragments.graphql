@@ -31,7 +31,6 @@ fragment ProvisionalFundingSource on ProvisionalFundingSource {
   updatedAtEpochMs
   provisioningData
   state
-  stateReason
 }
 
 fragment FundingSource on CreditCardFundingSource {

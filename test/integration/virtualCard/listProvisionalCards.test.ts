@@ -3,13 +3,13 @@ import {
   ListOperationResultStatus,
 } from '@sudoplatform/sudo-common'
 import { Sudo, SudoProfilesClient } from '@sudoplatform/sudo-profiles'
-import Stripe from 'stripe'
 import {
   ProvisionalVirtualCard,
   SudoVirtualCardsClient,
   VirtualCard,
 } from '../../../src'
-import { createFundingSource } from '../util/createFundingSource'
+import { createCardFundingSource } from '../util/createFundingSource'
+import { ProviderAPIs } from '../util/getProviderAPIs'
 import { provisionVirtualCard } from '../util/provisionVirtualCard'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
@@ -19,26 +19,29 @@ describe('ListProvisionalCards Test Suite', () => {
   let instanceUnderTest: SudoVirtualCardsClient
   let profilesClient: SudoProfilesClient
   let sudo: Sudo
-  let stripe: Stripe
+  let apis: ProviderAPIs
 
   beforeAll(async () => {
     const result = await setupVirtualCardsClient(log)
     instanceUnderTest = result.virtualCardsClient
     profilesClient = result.profilesClient
     sudo = result.sudo
-    stripe = result.stripe
+    apis = result.apis
   })
 
   describe('listProvisionalCards', () => {
     let cards: VirtualCard[] = []
     beforeAll(async () => {
-      const fundingSource = await createFundingSource(instanceUnderTest, stripe)
+      const fundingSource = await createCardFundingSource(
+        instanceUnderTest,
+        apis,
+      )
       const provisionCardFn = async (): Promise<VirtualCard> => {
         return await provisionVirtualCard(
           instanceUnderTest,
           profilesClient,
           sudo,
-          stripe,
+          apis,
           {
             fundingSourceId: fundingSource.id,
           },

@@ -1,4 +1,4 @@
-import { DeclineReason } from '../../../..'
+import { DeclineReason } from '../../../../public/typings/transaction'
 
 export interface CurrencyAmountUseCaseOutput {
   currency: string

@@ -1,4 +1,4 @@
-import { ProvisioningState } from '../../../..'
+import { ProvisioningState } from '../../../../public/typings/provisionalCard'
 import { VirtualCardEntity } from './virtualCardEntity'
 
 /**

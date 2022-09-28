@@ -1,4 +1,7 @@
-import { DeclineReason, TransactionType } from '../../../..'
+import {
+  DeclineReason,
+  TransactionType,
+} from '../../../../public/typings/transaction'
 
 export interface TransactionEntity {
   id: string

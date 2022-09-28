@@ -1,5 +1,5 @@
 import { SudoKeyManager } from '@sudoplatform/sudo-common'
-import { SudoVirtualCardsClientOptions } from '../../..'
+import { SudoVirtualCardsClientOptions } from '../../../public/typings/sudoVirtualCardsClientOptions'
 import { ApiClient } from './apiClient'
 
 /**

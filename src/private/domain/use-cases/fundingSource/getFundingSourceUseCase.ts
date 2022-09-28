@@ -4,7 +4,11 @@ import {
   Logger,
   NotSignedInError,
 } from '@sudoplatform/sudo-common'
-import { CreditCardNetwork, FundingSourceState } from '../../../..'
+import {
+  CreditCardNetwork,
+  FundingSourceState,
+  FundingSourceType,
+} from '../../../../public/typings/fundingSource'
 import { FundingSourceService } from '../../entities/fundingSource/fundingSourceService'
 import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
 
@@ -20,17 +24,26 @@ interface GetFundingSourceUseCaseInput {
   cachePolicy?: CachePolicy
 }
 
-interface GetFundingSourceUseCaseOutput {
+interface BaseGetFundingSourceUseCaseOutput {
   id: string
   owner: string
   version: number
   createdAt: Date
   updatedAt: Date
+  type: FundingSourceType
   state: FundingSourceState
   currency: string
+}
+
+export interface GetCreditCardFundingSourceUseCaseOutput
+  extends BaseGetFundingSourceUseCaseOutput {
+  type: FundingSourceType.CreditCard
   last4: string
   network: CreditCardNetwork
 }
+
+export type GetFundingSourceUseCaseOutput =
+  GetCreditCardFundingSourceUseCaseOutput
 
 /**
  * Application business logic for retrieving a funding source.

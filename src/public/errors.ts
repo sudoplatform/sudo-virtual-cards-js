@@ -1,3 +1,5 @@
+import { ProvisionalFundingSourceInteractionData } from './typings/fundingSource'
+
 class VirtualCardsError extends Error {
   constructor(msg?: string) {
     super(msg)
@@ -133,6 +135,24 @@ export class IdentityVerificationNotVerifiedError extends VirtualCardsError {
  */
 export class VelocityExceededError extends VirtualCardsError {
   constructor(msg?: string) {
+    super(msg)
+  }
+}
+
+/**
+ * Thrown on calls to {@link SudoVirtualCardsClient.completeFundingSource} when
+ * additional authentication interaction is required before funding source
+ * provisioning can complete.
+ *
+ * @property {string} interactionData
+ *  Funding source provider specific data required continue the funding
+ *  source provisioning process.
+ */
+export class FundingSourceRequiresUserInteractionError extends VirtualCardsError {
+  constructor(
+    public readonly interactionData: ProvisionalFundingSourceInteractionData,
+    msg?: string,
+  ) {
     super(msg)
   }
 }

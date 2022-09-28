@@ -1,7 +1,7 @@
-import { TransactionType } from '../../../../public'
+import { TransactionType } from '../../../../public/typings/transaction'
 import { TransactionEntity } from '../../../domain/entities/transaction/transactionEntity'
 import { TransactionUnsealed } from '../../common/transactionWorker'
-import { TransactionSealedAttributes } from '../defaultTransactionService'
+import { TransactionSealedAttributes } from '../transactionSealedAttributes'
 
 export class TransactionEntityTransformer {
   static transform(data: TransactionUnsealed): TransactionEntity {

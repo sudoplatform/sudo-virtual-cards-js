@@ -27,7 +27,6 @@ import { NormalizedCacheObject } from 'apollo-cache-inmemory'
 import AWSAppSyncClient, { AUTH_TYPE } from 'aws-appsync'
 import * as fs from 'fs'
 import * as t from 'io-ts'
-import { Stripe } from 'stripe'
 import { v4 } from 'uuid'
 import {
   DefaultSudoVirtualCardsClient,
@@ -37,7 +36,7 @@ import { ApiClient } from '../../../src/private/data/common/apiClient'
 import { SudoVirtualCardsClientPrivateOptions } from '../../../src/private/data/common/privateSudoVirtualCardsClientOptions'
 import { createSudo } from './createSudo'
 import { EntitlementsBuilder } from './entitlements'
-import { getStripe } from './getStripe'
+import { getProviderAPIs, ProviderAPIs } from './getProviderAPIs'
 
 export const sudoIssuer = 'sudoplatform.sudoservice'
 
@@ -93,7 +92,7 @@ interface SetupVirtualCardsClientOutput {
   entitlementsClient: SudoEntitlementsClient
   identityVerificationClient: SudoSecureIdVerificationClient
   profilesClient: SudoProfilesClient
-  stripe: Stripe
+  apis: ProviderAPIs
 }
 
 export const setupVirtualCardsClient = async (
@@ -172,7 +171,7 @@ export const setupVirtualCardsClient = async (
       identityVerificationClient,
       profilesClient,
       sudo,
-      stripe: await getStripe(virtualCardsClient),
+      apis: await getProviderAPIs(virtualCardsClient),
     }
   } catch (err) {
     log.error(`${setupVirtualCardsClient.name} FAILED`)

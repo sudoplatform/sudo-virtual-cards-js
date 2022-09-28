@@ -1,4 +1,7 @@
-import { ProvisionalFundingSourceState, StateReason } from '../../../..'
+import {
+  FundingSourceType,
+  ProvisionalFundingSourceState,
+} from '../../../../public/typings/fundingSource'
 
 export interface ProvisionalFundingSourceEntity {
   id: string
@@ -6,7 +9,7 @@ export interface ProvisionalFundingSourceEntity {
   version: number
   createdAt: Date
   updatedAt: Date
+  type: FundingSourceType
   state: ProvisionalFundingSourceState
-  stateReason: StateReason
   provisioningData: string
 }

@@ -52,12 +52,9 @@ import { ListVirtualCardsUseCase } from '../private/domain/use-cases/virtualCard
 import { ProvisionVirtualCardUseCase } from '../private/domain/use-cases/virtualCard/provisionVirtualCardUseCase'
 import { UpdateVirtualCardUseCase } from '../private/domain/use-cases/virtualCard/updateVirtualCardUseCase'
 import { VirtualCardsServiceConfigNotFoundError } from './errors'
-import {
-  APIResult,
-  CreateKeyIfAbsentResult,
-  ProvisionalVirtualCard,
-} from './typings'
+import { APIResult } from './typings/apiResult'
 import { VirtualCardsConfig } from './typings/config'
+import { CreateKeysIfAbsentResult } from './typings/createKeysIfAbsentResult'
 import { DateRange } from './typings/dateRange'
 import {
   FundingSource,
@@ -71,7 +68,9 @@ import {
   ListVirtualCardsResults,
 } from './typings/listOperationResult'
 import { Metadata } from './typings/metadata'
+import { ProvisionalVirtualCard } from './typings/provisionalCard'
 import { SortOrder } from './typings/sortOrder'
+import { SudoVirtualCardsClientOptions } from './typings/sudoVirtualCardsClientOptions'
 import { Transaction } from './typings/transaction'
 import {
   BillingAddress,
@@ -84,25 +83,56 @@ import {
  *
  * @property {string} currency The ISO 4217 currency code that is being used for the setup.
  * @property {FundingSourceType} type The type of the funding source being setup.
+ * @property {string[]} supportedProviders
+ *   Names of providers supported by the client. Will default to the default
+ *   provider for the funding source type depending on configuration of the
+ *   service.
  */
 export interface SetupFundingSourceInput {
   currency: string
   type: FundingSourceType
+  supportedProviders?: string[]
 }
 
 /**
  * Input for the completion data of {@link SudoVirtualCardsClient#completeFundingSource}.
  *
  * @property {string} provider Provider used to save the funding source information.
+ * @property {FundingSourceType.CreditCard} type
+ *   Funding source provider type. Must be CreditCard if provided.
+ *   Optional for backwards compatibility.
  * @property {string} paymentMethod Identifier of the Payment Method used.
  */
-export interface CompleteFundingSourceStripeCompletionDataInput {
+export interface CompleteFundingSourceStripeCardCompletionDataInput {
   provider: 'stripe'
+  type?: FundingSourceType.CreditCard
   paymentMethod: string
 }
 
+/**
+ * Alias for CompleteFundingSourceStripeCardCompletionDataInput
+ *
+ * @deprecated Use CompleteFundingSourceStripeCardCompletionDataInput
+ */
+export type CompleteFundingSourceStripeCompletionDataInput =
+  CompleteFundingSourceStripeCardCompletionDataInput
+
+/**
+ * Input for the completion data of {@link SudoVirtualCardsClient#completeFundingSource}.
+ *
+ * @property {string} provider Provider used to save the funding source information.
+ * @property {FundingSourceType.CreditCard} type Funding source provider type. Must be CreditCard.
+ * @property {string} paymentToken Identifier of the payment token to be used.
+ */
+export interface CompleteFundingSourceCheckoutCardCompletionDataInput {
+  provider: 'checkout'
+  type: FundingSourceType.CreditCard
+  paymentToken: string
+}
+
 export type CompleteFundingSourceCompletionDataInput =
-  CompleteFundingSourceStripeCompletionDataInput
+  | CompleteFundingSourceCheckoutCardCompletionDataInput
+  | CompleteFundingSourceStripeCardCompletionDataInput
 
 /**
  * Input for {@link SudoVirtualCardsClient.completeFundingSource}.
@@ -318,19 +348,6 @@ export interface ListTransactionsByCardIdInput {
 }
 
 /**
- * Result for {@link SudoVirtualCardsClient#createKeysIfAbsent}
- *
- * @property {CreateKeyIfAbsentResult} symmetricKey
- *  Result of createKeysIfAbsent operation for the symmetric key
- * @property {CreateKeyIfAbsentResult} keyPair
- *  Result of createKeysIfAbsent operation for the key pair
- */
-export interface CreateKeysIfAbsentResult {
-  symmetricKey: CreateKeyIfAbsentResult
-  keyPair: CreateKeyIfAbsentResult
-}
-
-/**
  * Sudo Platform Virtual Cards client API
  *
  * All methods should be expected to be able to throw the following
@@ -361,16 +378,19 @@ export interface SudoVirtualCardsClient {
   /**
    * Get the funding source client configuration.
    *
-   * @returns {ProvisionalFundingSource} The configuration of the client funding source data.
+   * @returns {FundingSourceClientConfiguration} The configuration of the client funding source data.
    */
   getFundingSourceClientConfiguration(): Promise<
     FundingSourceClientConfiguration[]
   >
 
   /**
-   * Setup the funding source.
+   * Initiate provisioning of a new funding source.
+   *
    * @param {SetupFundingSourceInput} input Parameters used to setup the provisional funding source.
+   *
    * @returns {ProvisionalFundingSource} The provisional funding source.
+   *
    * @throws InsufficientEntitlementsError
    *   User has insufficient entitlements to setup a new funding source.
    * @throws {@link VelocityExceededError}
@@ -383,9 +403,12 @@ export interface SudoVirtualCardsClient {
   ): Promise<ProvisionalFundingSource>
 
   /**
-   * Complete a provisional funding source.
+   * Complete provisioning of a funding source.
+   *
    * @param {CompleteFundingSourceInput} input Parameters used to complete the funding source.
+   *
    * @returns {FundingSource} The funding source to be provisioned.
+   *
    * @throws {@link DuplicateFundingSourceError}
    *  User already has an active funding source matching the funding
    *  source being created.
@@ -401,6 +424,10 @@ export interface SudoVirtualCardsClient {
    * @throws {@link UnacceptableFundingSourceError}
    *  The funding source provided is not acceptable for use to fund virtual
    *  card transactions.
+   * @throws {@link FundingSourceRequiresUserInteractionError}
+   *  The funding source requires additional user interaction for provisioning
+   *  can complete. The error's provisioningData property contains
+   *  provider specific data to be used in this process.
    */
   completeFundingSource(
     input: CompleteFundingSourceInput,
@@ -410,6 +437,7 @@ export interface SudoVirtualCardsClient {
    * Get a funding source identified by id.
    *
    * @param {GetFundingSourceInput} input Parameters used to retrieve a funding source.
+   *
    * @returns {FundingSource | undefined} The funding source identified by id or undefined if the funding source
    *  cannot be found.
    *
@@ -444,9 +472,11 @@ export interface SudoVirtualCardsClient {
 
   /**
    * Provision a virtual card.
+   *
    * @param {ProvisionVirtualCardInput} input Parameters used to provision a virtual card.
    *
-   * @returns {ProvisionalFundingSource} The card that is being provisioned. Please poll the card via the list methods to access the card.
+   * @returns {ProvisionalVirtualCard} The card that is being provisioned. Please poll the card via the list methods to access the card.
+   *
    * @throws {@link FundingSourceNotFoundError}
    *   No funding source matching the specified ID could be found.
    * @throws {@link FundingSourceNotActiveError}
@@ -571,14 +601,6 @@ export interface SudoVirtualCardsClient {
   reset(): Promise<void>
 }
 
-export type SudoVirtualCardsClientOptions = {
-  /** Sudo User client to use. No default */
-  sudoUserClient: SudoUserClient
-
-  /** SudoCryptoProvider to use. Default is to create a WebSudoCryptoProvider */
-  sudoCryptoProvider?: SudoCryptoProvider
-}
-
 export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
   private readonly apiClient: ApiClient
   private readonly configurationDataService: DefaultVirtualCardsConfigService
@@ -698,10 +720,7 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
         this.fundingSourceService,
         this.sudoUserClient,
       )
-      return await useCase.execute({
-        ...input,
-        completionData: { ...input.completionData, version: 1 },
-      })
+      return await useCase.execute(input)
     })
   }
 

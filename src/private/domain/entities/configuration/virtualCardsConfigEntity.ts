@@ -1,4 +1,4 @@
-import { FundingSourceSupportInfo } from '../../../..'
+import { FundingSourceSupportInfo } from '../../../../public/typings/config'
 import { CurrencyAmountEntity } from '../transaction/transactionEntity'
 
 export interface CurrencyVelocityEntity {

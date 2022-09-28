@@ -262,7 +262,6 @@ export type ProvisionalFundingSource = CommonObject & {
   owner: Scalars['ID']
   provisioningData: Scalars['ID']
   state: ProvisionalFundingSourceState
-  stateReason: StateReason
   updatedAtEpochMs: Scalars['Float']
   version: Scalars['Int']
 }
@@ -494,24 +493,13 @@ export type SealedTransactionDetailChargeAttribute = {
 
 export type SetupFundingSourceRequest = {
   currency: Scalars['String']
+  supportedProviders?: InputMaybe<Array<Scalars['String']>>
   type: FundingSourceType
 }
 
 export enum SortOrder {
   Asc = 'ASC',
   Desc = 'DESC',
-}
-
-export enum StateReason {
-  Admin = 'ADMIN',
-  Deletion = 'DELETION',
-  Entitlement = 'ENTITLEMENT',
-  Locked = 'LOCKED',
-  Processing = 'PROCESSING',
-  Suspicious = 'SUSPICIOUS',
-  Unknown = 'UNKNOWN',
-  Unlocked = 'UNLOCKED',
-  User = 'USER',
 }
 
 export enum TransactionType {
@@ -575,7 +563,6 @@ export type ProvisionalFundingSourceFragment = {
   updatedAtEpochMs: number
   provisioningData: string
   state: ProvisionalFundingSourceState
-  stateReason: StateReason
 }
 
 export type FundingSourceFragment = {
@@ -940,7 +927,6 @@ export type SetupFundingSourceMutation = {
     updatedAtEpochMs: number
     provisioningData: string
     state: ProvisionalFundingSourceState
-    stateReason: StateReason
   }
 }
 
@@ -2025,7 +2011,6 @@ export const ProvisionalFundingSourceFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'provisioningData' } },
           { kind: 'Field', name: { kind: 'Name', value: 'state' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'stateReason' } },
         ],
       },
     },

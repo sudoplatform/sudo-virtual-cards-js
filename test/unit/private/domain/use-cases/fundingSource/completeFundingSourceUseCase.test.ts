@@ -38,7 +38,7 @@ describe('CompleteFundingSourceUseCase Test Suite', () => {
       await expect(
         instanceUnderTest.execute({
           id: 'dummyId',
-          completionData: { provider: '', version: 1, paymentMethod: '' },
+          completionData: { provider: 'stripe', paymentMethod: '' },
         }),
       ).rejects.toThrow(NotSignedInError)
     })
@@ -46,7 +46,7 @@ describe('CompleteFundingSourceUseCase Test Suite', () => {
     it('calls FundingSourceService completeFundingSource', async () => {
       await instanceUnderTest.execute({
         id: 'dummyId',
-        completionData: { provider: '', version: 1, paymentMethod: '' },
+        completionData: { provider: 'stripe', paymentMethod: '' },
       })
       verify(mockFundingSourceService.completeFundingSource(anything())).once()
       const [args] = capture(
@@ -54,7 +54,7 @@ describe('CompleteFundingSourceUseCase Test Suite', () => {
       ).first()
       expect(args).toStrictEqual<typeof args>({
         id: 'dummyId',
-        completionData: { provider: '', version: 1, paymentMethod: '' },
+        completionData: { provider: 'stripe', paymentMethod: '' },
       })
     })
 
@@ -65,7 +65,7 @@ describe('CompleteFundingSourceUseCase Test Suite', () => {
       await expect(
         instanceUnderTest.execute({
           id: 'dummyId',
-          completionData: { provider: '', version: 1, paymentMethod: '' },
+          completionData: { provider: 'stripe', paymentMethod: '' },
         }),
       ).resolves.toStrictEqual(EntityDataFactory.fundingSource)
     })

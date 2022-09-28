@@ -1,8 +1,11 @@
 import { CachePolicy, DefaultLogger } from '@sudoplatform/sudo-common'
-import Stripe from 'stripe'
 import { v4 } from 'uuid'
 import { SudoVirtualCardsClient } from '../../../src'
-import { createFundingSource } from '../util/createFundingSource'
+import {
+  CardProviderName,
+  createCardFundingSource,
+} from '../util/createFundingSource'
+import { ProviderAPIs } from '../util/getProviderAPIs'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
 describe('SudoVirtualCardsClient GetFundingSource Test Suite', () => {
@@ -10,32 +13,63 @@ describe('SudoVirtualCardsClient GetFundingSource Test Suite', () => {
   const log = new DefaultLogger('SudoVirtualCardsClientIntegrationTests')
 
   let instanceUnderTest: SudoVirtualCardsClient
-  let stripe: Stripe
+  let apis: ProviderAPIs
 
   describe('GetFundingSource', () => {
-    beforeEach(async () => {
+    beforeAll(async () => {
       const result = await setupVirtualCardsClient(log)
       instanceUnderTest = result.virtualCardsClient
-      stripe = result.stripe
+      apis = result.apis
     })
 
-    it('returns expected result', async () => {
-      const fundingSource = await createFundingSource(instanceUnderTest, stripe)
-      await expect(
-        instanceUnderTest.getFundingSource({
-          id: fundingSource.id,
-          cachePolicy: CachePolicy.RemoteOnly,
-        }),
-      ).resolves.toStrictEqual(fundingSource)
-    })
+    describe.each`
+      provider
+      ${'stripe'}
+      ${'checkout'}
+    `(
+      'for provider $provider',
+      ({ provider }: { provider: CardProviderName }) => {
+        let skip = false
+        beforeAll(() => {
+          // Since we determine availability of provider
+          // asynchronously we can't use that knowledge
+          // to control the set of providers we iterate
+          // over so we have to use a flag
+          if (!apis[provider]) {
+            console.warn(
+              `No API available for provider ${provider}. Skipping tests.`,
+            )
+            skip = true
+          }
+        })
 
-    it('returns undefined for non-existent funding source', async () => {
-      await expect(
-        instanceUnderTest.getFundingSource({
-          id: v4(),
-          cachePolicy: CachePolicy.RemoteOnly,
-        }),
-      ).resolves.toBeUndefined()
-    })
+        it('returns expected result', async () => {
+          if (skip) return
+
+          const fundingSource = await createCardFundingSource(
+            instanceUnderTest,
+            apis,
+            { supportedProviders: [provider] },
+          )
+          await expect(
+            instanceUnderTest.getFundingSource({
+              id: fundingSource.id,
+              cachePolicy: CachePolicy.RemoteOnly,
+            }),
+          ).resolves.toStrictEqual(fundingSource)
+        })
+
+        it('returns undefined for non-existent funding source', async () => {
+          if (skip) return
+
+          await expect(
+            instanceUnderTest.getFundingSource({
+              id: v4(),
+              cachePolicy: CachePolicy.RemoteOnly,
+            }),
+          ).resolves.toBeUndefined()
+        })
+      },
+    )
   })
 })

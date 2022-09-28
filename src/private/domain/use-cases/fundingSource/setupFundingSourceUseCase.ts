@@ -1,5 +1,5 @@
 import { NotSignedInError } from '@sudoplatform/sudo-common'
-import { ProvisionalFundingSourceState, StateReason } from '../../../..'
+import { ProvisionalFundingSourceState } from '../../../../public/typings/fundingSource'
 import { FundingSourceService } from '../../entities/fundingSource/fundingSourceService'
 import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
 
@@ -10,6 +10,7 @@ export enum FundingSourceType {
 interface SetupFundingSourceUseCaseInput {
   type: FundingSourceType
   currency: string
+  supportedProviders?: string[]
 }
 
 interface SetupFundingSourceUseCaseOutput {
@@ -18,8 +19,8 @@ interface SetupFundingSourceUseCaseOutput {
   version: number
   createdAt: Date
   updatedAt: Date
+  type: FundingSourceType
   state: ProvisionalFundingSourceState
-  stateReason: StateReason
   provisioningData: string
 }
 
@@ -32,6 +33,7 @@ export class SetupFundingSourceUseCase {
   async execute({
     type,
     currency,
+    supportedProviders,
   }: SetupFundingSourceUseCaseInput): Promise<SetupFundingSourceUseCaseOutput> {
     if (!(await this.userService.isSignedIn())) {
       throw new NotSignedInError()
@@ -39,6 +41,7 @@ export class SetupFundingSourceUseCase {
     return await this.fundingSourceService.setupFundingSource({
       type,
       currency,
+      supportedProviders,
     })
   }
 }

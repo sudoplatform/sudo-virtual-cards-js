@@ -1,16 +1,47 @@
 import { CachePolicy } from '@sudoplatform/sudo-common'
-import { FundingSourceType } from '../../../..'
+import { FundingSourceType } from '../../../../public/typings/fundingSource'
 import { FundingSourceEntity } from './fundingSourceEntity'
 import { ProvisionalFundingSourceEntity } from './provisionalFundingSourceEntity'
 
 export interface FundingSourceServiceSetupFundingSourceInput {
   type: FundingSourceType
   currency: string
+  supportedProviders?: string[]
+}
+
+export interface FundingSourceServiceStripeCardCompletionData {
+  provider: 'stripe'
+  type?: FundingSourceType.CreditCard
+  paymentMethod: string
+}
+export interface FundingSourceServiceCheckoutCardCompletionData {
+  provider: 'checkout'
+  type: FundingSourceType.CreditCard
+  paymentToken: string
+}
+
+export type FundingSourceServiceCompletionData =
+  | FundingSourceServiceStripeCardCompletionData
+  | FundingSourceServiceCheckoutCardCompletionData
+
+export function isFundingSourceServiceStripeCardCompletionData(
+  d: FundingSourceServiceCompletionData,
+): d is FundingSourceServiceStripeCardCompletionData {
+  return (
+    d.provider === 'stripe' &&
+    (d.type === undefined || d.type === FundingSourceType.CreditCard)
+  )
+}
+
+export function isFundingSourceServiceCheckoutCardCompletionData(
+  d: FundingSourceServiceCompletionData,
+): d is FundingSourceServiceCheckoutCardCompletionData {
+  return d.provider === 'checkout' && d.type === FundingSourceType.CreditCard
 }
 
 export interface FundingSourceServiceCompleteFundingSourceInput {
   id: string
-  completionData: { provider: string; version: number; paymentMethod: string }
+  completionData: FundingSourceServiceCompletionData
   updateCardFundingSource?: boolean
 }
 

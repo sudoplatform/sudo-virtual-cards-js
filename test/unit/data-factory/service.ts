@@ -1,9 +1,9 @@
 import { PublicKey, PublicKeyFormat } from '@sudoplatform/sudo-common'
-import { CardState } from '../../../src'
 import { TransactionType } from '../../../src/gen/graphqlTypes'
 import { DeviceKey } from '../../../src/private/data/common/deviceKeyWorker'
 import { TransactionUnsealed } from '../../../src/private/data/common/transactionWorker'
-import { VirtualCardUnsealed } from '../../../src/private/data/virtualCard/defaultVirtualCardService'
+import { VirtualCardUnsealed } from '../../../src/private/data/virtualCard/virtualCardSealedAttributes'
+import { CardState } from '../../../src/public/typings/virtualCard'
 
 export class ServiceDataFactory {
   static readonly sudoCommonPublicKey: PublicKey = {

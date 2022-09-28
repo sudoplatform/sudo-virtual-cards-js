@@ -1,4 +1,4 @@
-import { CardState } from '../../../..'
+import { CardState } from '../../../../public/typings/virtualCard'
 import { VirtualCardBillingAddress } from './virtualCardBillingAddress'
 
 export interface VirtualCardUseCaseOutput {

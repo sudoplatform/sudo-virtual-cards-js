@@ -1,21 +1,15 @@
-import { Base64 } from '@sudoplatform/sudo-common'
-import { ProvisionalFundingSource } from '../../../..'
+import { ProvisionalFundingSource } from '../../../../public/typings/fundingSource'
 import { ProvisionalFundingSourceEntity } from '../../../domain/entities/fundingSource/provisionalFundingSourceEntity'
-
-interface StripeProvisionalFundingSourceProvisioningData {
-  version: number
-  provider: 'stripe'
-  client_secret: string
-  intent: string
-}
+import { decodeProvisionalFundingSourceProvisioningData } from '../../fundingSourceProviderData/provisioningData'
 
 export class ProvisionalFundingSourceApiTransformer {
   static transformEntity(
     entity: ProvisionalFundingSourceEntity,
   ): ProvisionalFundingSource {
-    const provisioningData = JSON.parse(
-      Base64.decodeString(entity.provisioningData),
-    ) as StripeProvisionalFundingSourceProvisioningData
+    const provisioningData = decodeProvisionalFundingSourceProvisioningData(
+      entity.provisioningData,
+    )
+
     return {
       id: entity.id,
       owner: entity.owner,
@@ -23,13 +17,8 @@ export class ProvisionalFundingSourceApiTransformer {
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       state: entity.state,
-      stateReason: entity.stateReason,
-      provisioningData: {
-        version: provisioningData.version,
-        provider: provisioningData.provider,
-        clientSecret: provisioningData.client_secret,
-        intent: provisioningData.intent,
-      },
+      type: entity.type,
+      provisioningData,
     }
   }
 }

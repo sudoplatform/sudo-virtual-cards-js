@@ -41,11 +41,11 @@ import { ListVirtualCardsUseCase } from '../../../src/private/domain/use-cases/v
 import { ProvisionVirtualCardUseCase } from '../../../src/private/domain/use-cases/virtualCard/provisionVirtualCardUseCase'
 import { UpdateVirtualCardUseCase } from '../../../src/private/domain/use-cases/virtualCard/updateVirtualCardUseCase'
 import {
-  CreateKeysIfAbsentResult,
   DefaultSudoVirtualCardsClient,
   SudoVirtualCardsClient,
 } from '../../../src/public/sudoVirtualCardsClient'
 import { APIResultStatus } from '../../../src/public/typings/apiResult'
+import { CreateKeysIfAbsentResult } from '../../../src/public/typings/createKeysIfAbsentResult'
 import { FundingSourceType } from '../../../src/public/typings/fundingSource'
 import { SortOrder } from '../../../src/public/typings/sortOrder'
 import { ApiDataFactory } from '../data-factory/api'
@@ -474,7 +474,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       const [args] = capture(mockCompleteFundingSourceUseCase.execute).first()
       expect(args).toEqual<typeof args>({
         id,
-        completionData: { provider: 'stripe', version: 1, paymentMethod: '' },
+        completionData: { provider: 'stripe', paymentMethod: '' },
       })
     })
     it('returns expected result', async () => {

@@ -1,6 +1,5 @@
 import { CachePolicy } from '@sudoplatform/sudo-common'
 import { Sudo, SudoProfilesClient } from '@sudoplatform/sudo-profiles'
-import Stripe from 'stripe'
 import { v4 } from 'uuid'
 import {
   BillingAddress,
@@ -10,7 +9,8 @@ import {
   VirtualCard,
 } from '../../../src'
 import { delay } from '../../utility/delay'
-import { createFundingSource } from './createFundingSource'
+import { createCardFundingSource } from './createFundingSource'
+import { ProviderAPIs } from './getProviderAPIs'
 
 const optBillingAddress: BillingAddress = {
   addressLine1: '222333 Peachtree Place',
@@ -24,7 +24,7 @@ export const provisionVirtualCard = async (
   virtualCardsClient: SudoVirtualCardsClient,
   profilesClient: SudoProfilesClient,
   sudo: Sudo,
-  stripe?: Stripe,
+  apis: ProviderAPIs,
   options?: {
     alias?: string
     fundingSourceId?: string
@@ -46,17 +46,12 @@ export const provisionVirtualCard = async (
 
   let fundingSourceId
   if (!options?.fundingSourceId) {
-    if (!stripe) {
-      throw new Error(
-        'Stripe must be included if no fundingSourceId is included',
-      )
-    }
-    const { id } = await createFundingSource(virtualCardsClient, stripe)
+    const { id } = await createCardFundingSource(virtualCardsClient, apis)
     fundingSourceId = id
   } else {
     fundingSourceId = options.fundingSourceId
   }
-  const ownershipProofs = []
+  const ownershipProofs: string[] = []
   if (!options?.ownershipProofs) {
     if (!sudo.id) {
       throw new Error('sudo with id required')

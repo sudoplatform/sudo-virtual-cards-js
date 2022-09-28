@@ -11,12 +11,14 @@ import {
   FundingSourceNotActiveError,
   FundingSourceNotFoundError,
   FundingSourceNotSetupError,
+  FundingSourceRequiresUserInteractionError,
   FundingSourceStateError,
   IdentityVerificationNotVerifiedError,
   ProvisionalFundingSourceNotFoundError,
   UnacceptableFundingSourceError,
   VelocityExceededError,
 } from '../../../../public/errors'
+import { decodeProvisionalFundingSourceInteractionData } from '../../fundingSourceProviderData/interactionData'
 
 export class ErrorTransformer {
   static toClientError(error: AppSyncError): Error {
@@ -45,6 +47,13 @@ export class ErrorTransformer {
         return new CardStateError(error.message)
       case 'sudoplatform.virtual-cards.VelocityExceededError':
         return new VelocityExceededError(error.message)
+      case 'sudoplatform.virtual-cards.FundingSourceRequiresUserInteractionError': {
+        const interactionData = decodeProvisionalFundingSourceInteractionData(
+          error.errorInfo,
+        )
+        return new FundingSourceRequiresUserInteractionError(interactionData)
+      }
+
       case 'sudoplatform.IdentityVerificationNotVerifiedError':
         return new IdentityVerificationNotVerifiedError(error.message)
       default:

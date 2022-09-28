@@ -3,7 +3,7 @@ import {
   ListOperationResult,
   NotSignedInError,
 } from '@sudoplatform/sudo-common'
-import { ProvisioningState } from '../../../..'
+import { ProvisioningState } from '../../../../public/typings/provisionalCard'
 import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
 import { VirtualCardService } from '../../entities/virtualCard/virtualCardService'
 import { VirtualCardUseCaseOutput } from './outputs'

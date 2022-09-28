@@ -4,11 +4,11 @@ import {
   CurrencyAmount,
   FundingSource,
   FundingSourceState,
+  FundingSourceType,
   ProvisionalFundingSource,
   ProvisionalFundingSourceState,
   ProvisionalVirtualCard,
   ProvisioningState,
-  StateReason,
   Transaction,
   TransactionType,
   VirtualCard,
@@ -24,14 +24,15 @@ export class ApiDataFactory {
   static readonly provisionalFundingSource: ProvisionalFundingSource = {
     ...this.commonProps,
     id: 'dummyFundingSourceId',
+    type: FundingSourceType.CreditCard,
     provisioningData: {
       version: 1,
       provider: 'stripe',
+      type: FundingSourceType.CreditCard,
       clientSecret: 'dummyClientSecret',
       intent: 'dummyIntent',
     },
     state: ProvisionalFundingSourceState.Completed,
-    stateReason: StateReason.Unlocked,
   }
 
   static readonly fundingSource: FundingSource = {
@@ -41,6 +42,7 @@ export class ApiDataFactory {
     last4: 'dummyLast4',
     network: CreditCardNetwork.Visa,
     state: FundingSourceState.Active,
+    type: FundingSourceType.CreditCard,
   }
 
   static readonly provisionalVirtualCard: ProvisionalVirtualCard = {

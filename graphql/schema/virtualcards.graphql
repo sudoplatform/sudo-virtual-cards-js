@@ -121,7 +121,6 @@ type ProvisionalFundingSource implements CommonObject {
   createdAtEpochMs: Float!
   updatedAtEpochMs: Float!
   state: ProvisionalFundingSourceState!
-  stateReason: StateReason!
   provisioningData: ID!
 }
 
@@ -257,18 +256,6 @@ enum FundingSourceState {
   INACTIVE
 }
 
-enum StateReason {
-  USER
-  ADMIN
-  ENTITLEMENT
-  LOCKED
-  UNLOCKED
-  SUSPICIOUS
-  PROCESSING
-  DELETION
-  UNKNOWN
-}
-
 enum FundingSourceType {
   CREDIT_CARD
 }
@@ -282,6 +269,7 @@ enum ProvisioningState {
 input SetupFundingSourceRequest {
   type: FundingSourceType!
   currency: String!
+  supportedProviders: [String!]
 }
 
 input CompleteFundingSourceRequest {

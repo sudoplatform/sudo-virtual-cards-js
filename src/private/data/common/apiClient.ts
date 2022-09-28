@@ -98,7 +98,9 @@ export class ApiClient {
 
     const clientManager =
       apiClientManager ?? DefaultApiClientManager.getInstance()
-    this.client = clientManager.getClient({ disableOffline: true })
+    this.client = clientManager.getClient({
+      disableOffline: true,
+    })
   }
 
   public async getVirtualCardsConfig(): Promise<VirtualCardsConfig> {

@@ -7,7 +7,6 @@ import {
   SimulatorMerchant,
   SudoVirtualCardsSimulatorClient,
 } from '@sudoplatform/sudo-virtual-cards-simulator'
-import Stripe from 'stripe'
 import waitForExpect from 'wait-for-expect'
 import {
   SudoVirtualCardsClient,
@@ -15,7 +14,8 @@ import {
   TransactionType,
   VirtualCard,
 } from '../../../src'
-import { createFundingSource } from '../util/createFundingSource'
+import { createCardFundingSource } from '../util/createFundingSource'
+import { ProviderAPIs } from '../util/getProviderAPIs'
 import { provisionVirtualCard } from '../util/provisionVirtualCard'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
@@ -29,7 +29,7 @@ describe('ListVirtualCards Test Suite', () => {
   let profilesClient: SudoProfilesClient
   let vcSimulator: SudoVirtualCardsSimulatorClient
   let sudo: Sudo
-  let stripe: Stripe
+  let apis: ProviderAPIs
   let merchant: SimulatorMerchant
   let beforeEachComplete = false
 
@@ -39,7 +39,7 @@ describe('ListVirtualCards Test Suite', () => {
     profilesClient = result.profilesClient
     vcSimulator = result.virtualCardsSimulatorClient
     sudo = result.sudo
-    stripe = result.stripe
+    apis = result.apis
     const merchants = await vcSimulator.listSimulatorMerchants()
 
     const usdApprovingMerchant = merchants.find(
@@ -68,13 +68,16 @@ describe('ListVirtualCards Test Suite', () => {
     }
 
     beforeAll(async () => {
-      const fundingSource = await createFundingSource(instanceUnderTest, stripe)
+      const fundingSource = await createCardFundingSource(
+        instanceUnderTest,
+        apis,
+      )
       const provisionCardFn = async (): Promise<VirtualCard> => {
         return await provisionVirtualCard(
           instanceUnderTest,
           profilesClient,
           sudo,
-          stripe,
+          apis,
           {
             fundingSourceId: fundingSource.id,
           },

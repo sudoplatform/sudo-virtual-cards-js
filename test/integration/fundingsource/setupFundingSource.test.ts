@@ -1,9 +1,9 @@
 import { DefaultLogger } from '@sudoplatform/sudo-common'
 import { SudoUserClient } from '@sudoplatform/sudo-user'
 import {
+  FundingSourceClientConfiguration,
   FundingSourceType,
   ProvisionalFundingSourceState,
-  StateReason,
   SudoVirtualCardsClient,
 } from '../../../src'
 import { uuidV4Regex } from '../../utility/uuidV4Regex'
@@ -14,11 +14,16 @@ describe('SudoVirtualCardsClient SetupFundingSource Test Suite', () => {
   const log = new DefaultLogger('SudoVirtualCardsClientIntegrationTests')
   let instanceUnderTest: SudoVirtualCardsClient
   let userClient: SudoUserClient
+  let fsClientConfig: FundingSourceClientConfiguration[]
+  let defaultFsClientConfig: FundingSourceClientConfiguration
 
   beforeEach(async () => {
     const result = await setupVirtualCardsClient(log)
     instanceUnderTest = result.virtualCardsClient
     userClient = result.userClient
+    fsClientConfig =
+      await instanceUnderTest.getFundingSourceClientConfiguration()
+    defaultFsClientConfig = fsClientConfig[0]
   })
 
   describe('SetupFundingSource', () => {
@@ -32,13 +37,13 @@ describe('SudoVirtualCardsClient SetupFundingSource Test Suite', () => {
         owner: await userClient.getSubject(),
         version: 1,
         state: ProvisionalFundingSourceState.Provisioning,
-        stateReason: StateReason.Processing,
       })
       expect(result.provisioningData).toMatchObject({
         version: 1,
-        provider: 'stripe',
+        provider: defaultFsClientConfig.type,
       })
     })
+
     it('throws an error', async () => {
       await expect(
         instanceUnderTest.setupFundingSource({
@@ -46,6 +51,31 @@ describe('SudoVirtualCardsClient SetupFundingSource Test Suite', () => {
           type: FundingSourceType.CreditCard,
         }),
       ).rejects.toThrow()
+    })
+
+    describe('checkout specific tests', () => {
+      it('should return a checkout provisional funding source', async () => {
+        const checkoutCardFsConfig = fsClientConfig.find(
+          (config) =>
+            config.type === 'checkout' &&
+            config.fundingSourceType === FundingSourceType.CreditCard,
+        )
+        if (!checkoutCardFsConfig) {
+          return
+        }
+
+        const result = await instanceUnderTest.setupFundingSource({
+          currency: 'USD',
+          type: FundingSourceType.CreditCard,
+          supportedProviders: ['checkout'],
+        })
+
+        expect(result.provisioningData).toMatchObject({
+          version: 1,
+          provider: checkoutCardFsConfig.type,
+          type: FundingSourceType.CreditCard,
+        })
+      })
     })
   })
 })

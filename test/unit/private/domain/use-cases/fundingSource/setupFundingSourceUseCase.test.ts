@@ -55,7 +55,7 @@ describe('SetupFundingSourceUseCase Test Suite', () => {
       const [args] = capture(
         mockFundingSourceService.setupFundingSource,
       ).first()
-      expect(args).toStrictEqual<typeof args>({
+      expect(args).toEqual<typeof args>({
         type: FundingSourceType.CreditCard,
         currency: 'dummyCurrency',
       })
@@ -70,7 +70,7 @@ describe('SetupFundingSourceUseCase Test Suite', () => {
           type: FundingSourceType.CreditCard,
           currency: 'dummyCurrency',
         }),
-      ).resolves.toStrictEqual(EntityDataFactory.provisionalFundingSource)
+      ).resolves.toEqual(EntityDataFactory.provisionalFundingSource)
     })
   })
 })

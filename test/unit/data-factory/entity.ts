@@ -1,15 +1,5 @@
 import { Base64 } from '@sudoplatform/sudo-common'
-import {
-  CardState,
-  CardType,
-  CreditCardNetwork,
-  FundingSourceState,
-  ProvisionalFundingSourceState,
-  ProvisioningState,
-  StateReason,
-  TransactionType,
-  VirtualCard,
-} from '../../../src'
+import { VirtualCard } from '../../../src'
 import { VirtualCardsConfigEntity } from '../../../src/private/domain/entities/configuration/virtualCardsConfigEntity'
 import { FundingSourceEntity } from '../../../src/private/domain/entities/fundingSource/fundingSourceEntity'
 import { ProvisionalFundingSourceEntity } from '../../../src/private/domain/entities/fundingSource/provisionalFundingSourceEntity'
@@ -18,6 +8,16 @@ import {
   TransactionEntity,
 } from '../../../src/private/domain/entities/transaction/transactionEntity'
 import { ProvisionalVirtualCardEntity } from '../../../src/private/domain/entities/virtualCard/provisionalVirtualCardEntity'
+import { CardType } from '../../../src/public/typings/config'
+import {
+  CreditCardNetwork,
+  FundingSourceState,
+  FundingSourceType,
+  ProvisionalFundingSourceState,
+} from '../../../src/public/typings/fundingSource'
+import { ProvisioningState } from '../../../src/public/typings/provisionalCard'
+import { TransactionType } from '../../../src/public/typings/transaction'
+import { CardState } from '../../../src/public/typings/virtualCard'
 
 export class EntityDataFactory {
   private static readonly commonProps = {
@@ -26,6 +26,7 @@ export class EntityDataFactory {
     createdAt: new Date(1.0),
     updatedAt: new Date(2.0),
   }
+
   private static readonly provisioningData = Base64.encodeString(
     JSON.stringify({
       version: 1,
@@ -34,12 +35,13 @@ export class EntityDataFactory {
       intent: 'dummyIntent',
     }),
   )
+
   static readonly provisionalFundingSource: ProvisionalFundingSourceEntity = {
     ...this.commonProps,
     id: 'dummyFundingSourceId',
     provisioningData: this.provisioningData,
     state: ProvisionalFundingSourceState.Completed,
-    stateReason: StateReason.Unlocked,
+    type: FundingSourceType.CreditCard,
   }
 
   static readonly fundingSource: FundingSourceEntity = {
@@ -49,6 +51,7 @@ export class EntityDataFactory {
     last4: 'dummyLast4',
     network: CreditCardNetwork.Visa,
     state: FundingSourceState.Active,
+    type: FundingSourceType.CreditCard,
   }
 
   static readonly provisionalVirtualCard: ProvisionalVirtualCardEntity = {

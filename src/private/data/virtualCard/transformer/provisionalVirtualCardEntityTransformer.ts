@@ -1,5 +1,5 @@
 import { ProvisionalVirtualCardEntity } from '../../../domain/entities/virtualCard/provisionalVirtualCardEntity'
-import { ProvisionalCardUnsealed } from '../defaultVirtualCardService'
+import { ProvisionalCardUnsealed } from '../virtualCardSealedAttributes'
 import { VirtualCardEntityTransformer } from './virtualCardEntityTransformer'
 
 export class ProvisionalVirtualCardEntityTransformer {

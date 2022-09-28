@@ -3,13 +3,8 @@ import {
   ListOperationResultStatus,
 } from '@sudoplatform/sudo-common'
 import _ from 'lodash'
-import { DeclineReason } from '../../..'
 import { SealedTransaction } from '../../../gen/graphqlTypes'
-import {
-  CurrencyAmountEntity,
-  MarkupEntity,
-  TransactionEntity,
-} from '../../domain/entities/transaction/transactionEntity'
+import { TransactionEntity } from '../../domain/entities/transaction/transactionEntity'
 import {
   TransactionService,
   TransactionServiceGetTransactionInput,
@@ -23,26 +18,8 @@ import {
 } from '../common/transactionWorker'
 import { DateRangeTransformer } from '../common/transformer/dateRangeTransformer'
 import { FetchPolicyTransformer } from '../common/transformer/fetchPolicyTransformer'
+import { TransactionSealedAttributes } from './transactionSealedAttributes'
 import { TransactionEntityTransformer } from './transformer/TransactionEntityTransformer'
-
-export interface TransactionSealedAttributes {
-  billedAmount: CurrencyAmountEntity
-  transactedAmount: CurrencyAmountEntity
-  description: string
-  transactedAtEpochMs: undefined
-  transactedAt: Date
-  settledAtEpochMs?: undefined
-  settledAt: Date
-  declineReason?: DeclineReason
-  detail?: {
-    virtualCardAmount: CurrencyAmountEntity
-    markup: MarkupEntity
-    markupAmount: CurrencyAmountEntity
-    fundingSourceAmount: CurrencyAmountEntity
-    fundingSourceId: string
-    description: string
-  }[]
-}
 
 export class DefaultTransactionService implements TransactionService {
   constructor(

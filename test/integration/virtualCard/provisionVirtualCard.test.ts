@@ -1,6 +1,5 @@
 import { CachePolicy, DefaultLogger } from '@sudoplatform/sudo-common'
 import { Sudo, SudoProfilesClient } from '@sudoplatform/sudo-profiles'
-import Stripe from 'stripe'
 import { v4 } from 'uuid'
 import waitForExpect from 'wait-for-expect'
 import {
@@ -9,7 +8,8 @@ import {
   ProvisionVirtualCardInput,
   SudoVirtualCardsClient,
 } from '../../../src'
-import { createFundingSource } from '../util/createFundingSource'
+import { createCardFundingSource } from '../util/createFundingSource'
+import { ProviderAPIs } from '../util/getProviderAPIs'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
 describe('ProvisionVirtualCard Test Suite', () => {
@@ -18,14 +18,14 @@ describe('ProvisionVirtualCard Test Suite', () => {
   let instanceUnderTest: SudoVirtualCardsClient
   let profilesClient: SudoProfilesClient
   let sudo: Sudo
-  let stripe: Stripe
+  let apis: ProviderAPIs
 
   beforeEach(async () => {
     const result = await setupVirtualCardsClient(log)
     instanceUnderTest = result.virtualCardsClient
     profilesClient = result.profilesClient
     sudo = result.sudo
-    stripe = result.stripe
+    apis = result.apis
   })
 
   describe('provisionVirtualCard', () => {
@@ -33,7 +33,10 @@ describe('ProvisionVirtualCard Test Suite', () => {
       if (!sudo.id) {
         fail('no sudo id')
       }
-      const fundingSource = await createFundingSource(instanceUnderTest, stripe)
+      const fundingSource = await createCardFundingSource(
+        instanceUnderTest,
+        apis,
+      )
       const ownershipProof = await profilesClient.getOwnershipProof(
         sudo.id,
         'sudoplatform.virtual-cards.virtual-card',

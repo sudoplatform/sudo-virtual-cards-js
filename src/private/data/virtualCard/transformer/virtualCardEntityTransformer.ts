@@ -3,7 +3,7 @@ import { TransactionEntityTransformer } from '../../transaction/transformer/Tran
 import {
   VirtualCardSealedAttributes,
   VirtualCardUnsealed,
-} from '../defaultVirtualCardService'
+} from '../virtualCardSealedAttributes'
 
 export class VirtualCardEntityTransformer {
   static transform(data: VirtualCardUnsealed): VirtualCardEntity {

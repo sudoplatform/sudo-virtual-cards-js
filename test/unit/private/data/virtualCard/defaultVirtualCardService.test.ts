@@ -22,10 +22,8 @@ import {
   UnsealInput,
 } from '../../../../../src/private/data/common/deviceKeyWorker'
 import { TransactionWorker } from '../../../../../src/private/data/common/transactionWorker'
-import {
-  DefaultVirtualCardService,
-  VirtualCardSealedAttributes,
-} from '../../../../../src/private/data/virtualCard/defaultVirtualCardService'
+import { DefaultVirtualCardService } from '../../../../../src/private/data/virtualCard/defaultVirtualCardService'
+import { VirtualCardSealedAttributes } from '../../../../../src/private/data/virtualCard/virtualCardSealedAttributes'
 import { ProvisionalVirtualCardEntity } from '../../../../../src/private/domain/entities/virtualCard/provisionalVirtualCardEntity'
 import {
   VirtualCardBillingAddressEntity,

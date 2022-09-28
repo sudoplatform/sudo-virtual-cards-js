@@ -1,6 +1,6 @@
 import { Owner } from '@sudoplatform/sudo-common'
-import { CardState } from '../../../..'
 import { Metadata } from '../../../../public/typings/metadata'
+import { CardState } from '../../../../public/typings/virtualCard'
 import { TransactionEntity } from '../transaction/transactionEntity'
 
 /**

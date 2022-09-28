@@ -1,8 +1,8 @@
 import { DefaultLogger } from '@sudoplatform/sudo-common'
 import { Sudo, SudoProfilesClient } from '@sudoplatform/sudo-profiles'
-import Stripe from 'stripe'
 import waitForExpect from 'wait-for-expect'
 import { SudoVirtualCardsClient } from '../../../src/public/sudoVirtualCardsClient'
+import { ProviderAPIs } from '../util/getProviderAPIs'
 import { provisionVirtualCard } from '../util/provisionVirtualCard'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
@@ -15,7 +15,7 @@ describe('createKeysIfAbsent integration tests', () => {
   let instanceUnderTest: SudoVirtualCardsClient
   let profilesClient: SudoProfilesClient
   let sudo: Sudo
-  let stripe: Stripe
+  let apis: ProviderAPIs
   let beforeEachComplete = false
 
   beforeEach(async () => {
@@ -23,7 +23,7 @@ describe('createKeysIfAbsent integration tests', () => {
     instanceUnderTest = result.virtualCardsClient
     profilesClient = result.profilesClient
     sudo = result.sudo
-    stripe = result.stripe
+    apis = result.apis
 
     beforeEachComplete = true
   })
@@ -44,7 +44,7 @@ describe('createKeysIfAbsent integration tests', () => {
   it('should not create keys if they have been created due to virtual cards operation that needs them', async () => {
     expectSetupComplete()
 
-    await provisionVirtualCard(instanceUnderTest, profilesClient, sudo, stripe)
+    await provisionVirtualCard(instanceUnderTest, profilesClient, sudo, apis)
 
     await expect(instanceUnderTest.createKeysIfAbsent()).resolves.toEqual({
       symmetricKey: { created: false, keyId: expect.any(String) },

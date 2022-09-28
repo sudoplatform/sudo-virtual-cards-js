@@ -1,13 +1,13 @@
 import { CachePolicy, DefaultLogger } from '@sudoplatform/sudo-common'
 import { Sudo, SudoProfilesClient } from '@sudoplatform/sudo-profiles'
-import Stripe from 'stripe'
 import {
   FundingSource,
   FundingSourceState,
   SudoVirtualCardsClient,
   VirtualCard,
 } from '../../../src'
-import { createFundingSource } from '../util/createFundingSource'
+import { createCardFundingSource } from '../util/createFundingSource'
+import { ProviderAPIs } from '../util/getProviderAPIs'
 import { provisionVirtualCard } from '../util/provisionVirtualCard'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
@@ -17,14 +17,14 @@ describe('UpdateVirtualCardFundingSource Test Suite', () => {
   let instanceUnderTest: SudoVirtualCardsClient
   let profilesClient: SudoProfilesClient
   let sudo: Sudo
-  let stripe: Stripe
+  let apis: ProviderAPIs
 
   beforeEach(async () => {
     const result = await setupVirtualCardsClient(log)
     instanceUnderTest = result.virtualCardsClient
     profilesClient = result.profilesClient
     sudo = result.sudo
-    stripe = result.stripe
+    apis = result.apis
   })
 
   describe('updateVirtualCardFundingSource', () => {
@@ -35,7 +35,7 @@ describe('UpdateVirtualCardFundingSource Test Suite', () => {
         instanceUnderTest,
         profilesClient,
         sudo,
-        stripe,
+        apis,
       )
     })
     afterEach(async () => {
@@ -58,9 +58,9 @@ describe('UpdateVirtualCardFundingSource Test Suite', () => {
       expect(cancelled.state).toEqual(FundingSourceState.Inactive)
 
       // Create new funding source
-      const newFundingSource = await createFundingSource(
+      const newFundingSource = await createCardFundingSource(
         instanceUnderTest,
-        stripe,
+        apis,
       )
 
       fundingSourcesToCancel.push(newFundingSource)
@@ -88,9 +88,9 @@ describe('UpdateVirtualCardFundingSource Test Suite', () => {
       expect(cancelled.state).toEqual(FundingSourceState.Inactive)
 
       // Create new funding source
-      const newFundingSource = await createFundingSource(
+      const newFundingSource = await createCardFundingSource(
         instanceUnderTest,
-        stripe,
+        apis,
         {
           updateCardFundingSource: true,
         },
@@ -121,9 +121,9 @@ describe('UpdateVirtualCardFundingSource Test Suite', () => {
       expect(cancelled.state).toEqual(FundingSourceState.Inactive)
 
       // Create new funding source
-      const newFundingSource = await createFundingSource(
+      const newFundingSource = await createCardFundingSource(
         instanceUnderTest,
-        stripe,
+        apis,
         {
           updateCardFundingSource: false,
         },

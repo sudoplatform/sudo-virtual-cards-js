@@ -12,6 +12,7 @@ import { v4 } from 'uuid'
 import { FundingSourceType } from '../../../../../src'
 import { ApiClient } from '../../../../../src/private/data/common/apiClient'
 import { DefaultFundingSourceService } from '../../../../../src/private/data/fundingSource/defaultFundingSourceService'
+import { FundingSourceServiceCompletionData } from '../../../../../src/private/domain/entities/fundingSource/fundingSourceService'
 import { EntityDataFactory } from '../../../data-factory/entity'
 import { GraphQLDataFactory } from '../../../data-factory/graphQl'
 
@@ -41,7 +42,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
       })
       await expect(
         instanceUnderTest.getFundingSourceClientConfiguration(),
-      ).resolves.toStrictEqual(data)
+      ).resolves.toEqual(data)
     })
   })
   describe('setupFundingSource', () => {
@@ -59,7 +60,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
       verify(mockAppSync.setupFundingSource(anything())).once()
       const [args] = capture(mockAppSync.setupFundingSource).first()
 
-      expect(args).toStrictEqual<typeof args>({
+      expect(args).toEqual<typeof args>({
         currency: 'dummyCurrency',
         type: FundingSourceType.CreditCard,
       })
@@ -73,7 +74,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
           currency: 'dummyCurrency',
           type: FundingSourceType.CreditCard,
         }),
-      ).resolves.toStrictEqual(EntityDataFactory.provisionalFundingSource)
+      ).resolves.toEqual(EntityDataFactory.provisionalFundingSource)
     })
   })
 
@@ -85,26 +86,34 @@ describe('DefaultFundingSourceService Test Suite', () => {
     })
 
     it('calls appSync', async () => {
-      const completionData = { provider: v4(), version: 1, paymentMethod: v4() }
+      const completionData: FundingSourceServiceCompletionData = {
+        provider: 'stripe',
+        paymentMethod: v4(),
+      }
       await instanceUnderTest.completeFundingSource({
         id: 'dummyId',
-        completionData: completionData,
+        completionData,
       })
       verify(mockAppSync.completeFundingSource(anything())).once()
       const [args] = capture(mockAppSync.completeFundingSource).first()
 
-      expect(args).toStrictEqual<typeof args>({
+      expect(args).toEqual<typeof args>({
         id: 'dummyId',
-        completionData: Base64.encodeString(
-          JSON.stringify({
-            provider: completionData.provider,
-            version: completionData.version,
-            payment_method: completionData.paymentMethod,
-          }),
-        ),
+        completionData: expect.any(String),
         updateCardFundingSource: undefined,
       })
+
+      const decodedActualCompletionData = JSON.parse(
+        Base64.decodeString(args.completionData),
+      )
+      expect(decodedActualCompletionData).toEqual({
+        provider: completionData.provider,
+        type: FundingSourceType.CreditCard,
+        version: 1,
+        payment_method: completionData.paymentMethod,
+      })
     })
+
     it('returns appsync data', async () => {
       when(mockAppSync.completeFundingSource(anything())).thenResolve(
         GraphQLDataFactory.fundingSource,
@@ -112,9 +121,9 @@ describe('DefaultFundingSourceService Test Suite', () => {
       await expect(
         instanceUnderTest.completeFundingSource({
           id: 'dummyId',
-          completionData: { provider: '', version: 1, paymentMethod: '' },
+          completionData: { provider: 'stripe', paymentMethod: '' },
         }),
-      ).resolves.toStrictEqual(EntityDataFactory.fundingSource)
+      ).resolves.toEqual(EntityDataFactory.fundingSource)
     })
   })
   describe('getFundingSource', () => {
@@ -129,8 +138,8 @@ describe('DefaultFundingSourceService Test Suite', () => {
       })
       verify(mockAppSync.getFundingSource(anything(), anything())).once()
       const [idArg, policyArg] = capture(mockAppSync.getFundingSource).first()
-      expect(idArg).toStrictEqual<typeof idArg>(id)
-      expect(policyArg).toStrictEqual<typeof policyArg>('cache-only')
+      expect(idArg).toEqual<typeof idArg>(id)
+      expect(policyArg).toEqual<typeof policyArg>('cache-only')
       expect(result).toEqual(EntityDataFactory.fundingSource)
     })
 
@@ -145,8 +154,8 @@ describe('DefaultFundingSourceService Test Suite', () => {
       })
       verify(mockAppSync.getFundingSource(anything(), anything())).once()
       const [idArg, policyArg] = capture(mockAppSync.getFundingSource).first()
-      expect(idArg).toStrictEqual<typeof idArg>(id)
-      expect(policyArg).toStrictEqual<typeof policyArg>('cache-only')
+      expect(idArg).toEqual<typeof idArg>(id)
+      expect(policyArg).toEqual<typeof policyArg>('cache-only')
       expect(result).toEqual(undefined)
     })
 
@@ -184,8 +193,8 @@ describe('DefaultFundingSourceService Test Suite', () => {
         mockAppSync.listFundingSources(anything(), anything(), anything()),
       ).once()
       const [policyArg] = capture(mockAppSync.listFundingSources).first()
-      expect(policyArg).toStrictEqual<typeof policyArg>('cache-only')
-      expect(result).toStrictEqual({
+      expect(policyArg).toEqual<typeof policyArg>('cache-only')
+      expect(result).toEqual({
         fundingSources: [EntityDataFactory.fundingSource],
         nextToken: undefined,
       })
@@ -205,7 +214,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
           instanceUnderTest.listFundingSources({
             cachePolicy,
           }),
-        ).resolves.toStrictEqual({
+        ).resolves.toEqual({
           fundingSources: [EntityDataFactory.fundingSource],
           nextToken: undefined,
         })
@@ -224,9 +233,9 @@ describe('DefaultFundingSourceService Test Suite', () => {
       const result = await instanceUnderTest.cancelFundingSource({
         id: EntityDataFactory.fundingSource.id,
       })
-      expect(result).toStrictEqual(EntityDataFactory.fundingSource)
+      expect(result).toEqual(EntityDataFactory.fundingSource)
       const [inputArgs] = capture(mockAppSync.cancelFundingSource).first()
-      expect(inputArgs).toStrictEqual<typeof inputArgs>({
+      expect(inputArgs).toEqual<typeof inputArgs>({
         id: EntityDataFactory.fundingSource.id,
       })
       verify(mockAppSync.cancelFundingSource(anything())).once()
