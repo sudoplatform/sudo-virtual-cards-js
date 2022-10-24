@@ -15,6 +15,7 @@ import {
   isStripeCardProvisionalFundingSourceProvisioningData,
   ProvisionalFundingSourceNotFoundError,
   SudoVirtualCardsClient,
+  UnacceptableFundingSourceError,
 } from '../../../src'
 import { uuidV4Regex } from '../../utility/uuidV4Regex'
 import {
@@ -321,6 +322,54 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
           version: 1,
           redirectUrl: expect.stringMatching(/^https:\/\/.*/),
         })
+      })
+
+      it('should throw an UnacceptableFundingSourceError for a card failing AVS check', async () => {
+        if (skip) return
+
+        const provisionalFundingSource =
+          await instanceUnderTest.setupFundingSource({
+            currency: 'USD',
+            type: FundingSourceType.CreditCard,
+            supportedProviders: ['checkout'],
+          })
+
+        if (
+          !apis.checkout ||
+          !isCheckoutCardProvisionalFundingSourceProvisioningData(
+            provisionalFundingSource.provisioningData,
+          )
+        ) {
+          fail('No checkout provider or provisioning data is not for checkout')
+        }
+
+        const card = getTestCard('checkout', 'BadAddress')
+
+        const paymentToken = await generateCheckoutPaymentToken(
+          apis.checkout,
+          card,
+          provisionalFundingSource.provisioningData,
+        )
+        const completionData: CompleteFundingSourceCompletionDataInput = {
+          provider: 'checkout',
+          type: FundingSourceType.CreditCard,
+          paymentToken,
+        }
+
+        let caught: Error | undefined
+        let completed: FundingSource | undefined
+        try {
+          completed = await instanceUnderTest.completeFundingSource({
+            id: provisionalFundingSource.id,
+            completionData,
+          })
+        } catch (err) {
+          caught = err as Error
+        }
+
+        expect(completed).toBeUndefined()
+        expect(caught).toBeDefined()
+        expect(caught).toBeInstanceOf(UnacceptableFundingSourceError)
       })
     })
   })

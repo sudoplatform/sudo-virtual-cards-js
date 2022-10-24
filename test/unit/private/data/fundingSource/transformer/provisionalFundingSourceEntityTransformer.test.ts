@@ -4,12 +4,19 @@ import { GraphQLDataFactory } from '../../../../data-factory/graphQl'
 
 describe('ProvisionalFundingSourceEntityTransformer Test Suite', () => {
   describe('ProvisionalFundingSourceEntityTransformer', () => {
-    it('successfully transforms graphQL to entity format', () => {
-      expect(
-        ProvisionalFundingSourceEntityTransformer.transformGraphQL(
-          GraphQLDataFactory.provisionalFundingSource,
-        ),
-      ).toStrictEqual(EntityDataFactory.provisionalFundingSource)
-    })
+    it.each`
+      type              | graphQlType                                               | entityType
+      ${'credit card'}  | ${GraphQLDataFactory.provisionalFundingSource}            | ${EntityDataFactory.provisionalFundingSource}
+      ${'bank account'} | ${GraphQLDataFactory.provisionalBankAccountFundingSource} | ${EntityDataFactory.provisionalBankAccountFundingSource}
+    `(
+      'successfully transforms provisional $type funding source graphQL to entity format',
+      ({ graphQlType, entityType }) => {
+        expect(
+          ProvisionalFundingSourceEntityTransformer.transformGraphQL(
+            graphQlType,
+          ),
+        ).toStrictEqual(entityType)
+      },
+    )
   })
 })

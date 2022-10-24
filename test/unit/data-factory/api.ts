@@ -35,6 +35,19 @@ export class ApiDataFactory {
     state: ProvisionalFundingSourceState.Completed,
   }
 
+  static readonly provisionalBankAccountFundingSource: ProvisionalFundingSource =
+    {
+      ...this.commonProps,
+      id: 'dummyFundingSourceId',
+      type: FundingSourceType.BankAccount,
+      provisioningData: {
+        version: 1,
+        provider: 'checkout',
+        type: FundingSourceType.BankAccount,
+      },
+      state: ProvisionalFundingSourceState.Completed,
+    }
+
   static readonly fundingSource: FundingSource = {
     ...this.commonProps,
     id: 'dummyFundingSourceId',

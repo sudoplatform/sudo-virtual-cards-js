@@ -27,7 +27,18 @@ const CheckoutCardProvisionalFundingSourceProvisioningDataProperties = {
 
 const CheckoutCardProvisionalFundingSourceProvisioningDataCodec = t.type(
   CheckoutCardProvisionalFundingSourceProvisioningDataProperties,
-  'CheckoutProvisionalFundingSourceProvisioningData',
+  'CheckoutCardProvisionalFundingSourceProvisioningData',
+)
+
+const CheckoutBankAccountProvisionalFundingSourceProvisioningDataProperties = {
+  provider: t.literal('checkout'),
+  version: t.literal(1),
+  type: t.literal('BANK_ACCOUNT'),
+}
+
+const CheckoutBankAccountProvisionalFundingSourceProvisioningDataCodec = t.type(
+  CheckoutBankAccountProvisionalFundingSourceProvisioningDataProperties,
+  'CheckoutBankAccountProvisionalFundingSourceProvisioningData',
 )
 
 const StripeCardProvisionalFundingSourceProvisioningDataRequiredProperties = {
@@ -57,6 +68,7 @@ const StripeCardProvisionalFundingSourceProvisioningDataCodec = t.intersection(
 const ProvisionalFundingSourceProvisioningDataCodec = t.union(
   [
     CheckoutCardProvisionalFundingSourceProvisioningDataCodec,
+    CheckoutBankAccountProvisionalFundingSourceProvisioningDataCodec,
     StripeCardProvisionalFundingSourceProvisioningDataCodec,
     BaseProvisionalFundingSourceProvisioningDataCodec,
   ],
@@ -124,6 +136,14 @@ export function decodeProvisionalFundingSourceProvisioningData(
       provider: decoded.provider,
       version: decoded.version,
       type: FundingSourceType.CreditCard,
+    }
+  } else if (
+    CheckoutBankAccountProvisionalFundingSourceProvisioningDataCodec.is(decoded)
+  ) {
+    return {
+      provider: decoded.provider,
+      version: decoded.version,
+      type: FundingSourceType.BankAccount,
     }
   } else {
     throw new FatalError(

@@ -54,6 +54,7 @@ export type CompleteFundingSourceUseCaseOutput =
 
 export enum FundingSourceType {
   CreditCard = 'CREDIT_CARD',
+  BankAccount = 'BANK_ACCOUNT',
 }
 
 export class CompleteFundingSourceUseCase {

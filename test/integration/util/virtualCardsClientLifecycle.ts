@@ -43,14 +43,20 @@ export const sudoIssuer = 'sudoplatform.sudoservice'
 const configFile = 'config/sudoplatformconfig.json'
 const registerKeyFile = 'config/register_key.private'
 const registerKeyIdFile = 'config/register_key.id'
-
 const registerKey =
   process.env.REGISTER_KEY?.trim() ||
   fs.readFileSync(registerKeyFile).toString()
 const registerKeyId =
   process.env.REGISTER_KEY_ID?.trim() ||
   fs.readFileSync(registerKeyIdFile).toString().trim()
-const adminApiKey = process.env.ADMIN_API_KEY?.trim() || 'IAM'
+
+const adminApiKeyFile = 'config/api.key'
+let adminApiKey: string | undefined
+if (fs.existsSync(adminApiKeyFile)) {
+  adminApiKey = fs.readFileSync(adminApiKeyFile).toString().trim()
+} else {
+  adminApiKey = process.env.ADMIN_API_KEY?.trim() || 'IAM'
+}
 
 const testAuthenticationProvider = new TESTAuthenticationProvider(
   'vc-js-test',
@@ -99,6 +105,10 @@ export const setupVirtualCardsClient = async (
   log: Logger,
 ): Promise<SetupVirtualCardsClientOutput> => {
   try {
+    if (!adminApiKey) {
+      throw new Error('ADMIN_API_KEY must be set')
+    }
+
     DefaultConfigurationManager.getInstance().setConfig(
       fs.readFileSync(configFile).toString(),
     )
@@ -116,13 +126,17 @@ export const setupVirtualCardsClient = async (
     const apiClient = new ApiClient(apiClientManager)
     const entitlementsClient = new DefaultSudoEntitlementsClient(userClient)
     const entitlementsAdminClient = new DefaultSudoEntitlementsAdminClient(
-      adminApiKey ?? 'IAM',
+      adminApiKey,
     )
     await new EntitlementsBuilder()
       .setEntitlementsClient(entitlementsClient)
       .setEntitlementsAdminClient(entitlementsAdminClient)
       .setLogger(log)
       .apply()
+      .catch((err) => {
+        console.log('Error applying entitlements', { err })
+        throw err
+      })
     const profilesClient = new DefaultSudoProfilesClient({
       sudoUserClient: userClient,
     })

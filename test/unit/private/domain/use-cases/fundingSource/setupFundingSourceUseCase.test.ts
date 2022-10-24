@@ -46,31 +46,48 @@ describe('SetupFundingSourceUseCase Test Suite', () => {
       ).rejects.toThrow(NotSignedInError)
     })
 
-    it('calls FundingSourceService setupFundingSource', async () => {
-      await instanceUnderTest.execute({
-        type: FundingSourceType.CreditCard,
-        currency: 'dummyCurrency',
-      })
-      verify(mockFundingSourceService.setupFundingSource(anything())).once()
-      const [args] = capture(
-        mockFundingSourceService.setupFundingSource,
-      ).first()
-      expect(args).toEqual<typeof args>({
-        type: FundingSourceType.CreditCard,
-        currency: 'dummyCurrency',
-      })
-    })
-
-    it('returns FundingSourceService result', async () => {
-      when(mockFundingSourceService.setupFundingSource(anything())).thenResolve(
-        EntityDataFactory.provisionalFundingSource,
-      )
-      await expect(
-        instanceUnderTest.execute({
-          type: FundingSourceType.CreditCard,
+    it.each`
+      type
+      ${FundingSourceType.CreditCard}
+      ${FundingSourceType.BankAccount}
+    `(
+      'calls FundingSourceService setupFundingSource for $type input',
+      async ({ type }) => {
+        await instanceUnderTest.execute({
+          type,
           currency: 'dummyCurrency',
-        }),
-      ).resolves.toEqual(EntityDataFactory.provisionalFundingSource)
-    })
+        })
+        verify(mockFundingSourceService.setupFundingSource(anything())).once()
+        const [args] = capture(
+          mockFundingSourceService.setupFundingSource,
+        ).first()
+        expect(args).toEqual<typeof args>({
+          type,
+          currency: 'dummyCurrency',
+        })
+      },
+    )
+
+    it.each`
+      type
+      ${FundingSourceType.CreditCard}
+      ${FundingSourceType.BankAccount}
+    `(
+      'returns FundingSourceService result for $type input',
+      async ({ type }) => {
+        when(
+          mockFundingSourceService.setupFundingSource(anything()),
+        ).thenResolve({ ...EntityDataFactory.provisionalFundingSource, type })
+        await expect(
+          instanceUnderTest.execute({
+            type,
+            currency: 'dummyCurrency',
+          }),
+        ).resolves.toEqual({
+          ...EntityDataFactory.provisionalFundingSource,
+          type,
+        })
+      },
+    )
   })
 })

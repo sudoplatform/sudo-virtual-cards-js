@@ -1,6 +1,7 @@
 import { Base64, FatalError } from '@sudoplatform/sudo-common'
 import { decodeProvisionalFundingSourceProvisioningData } from '../../../../../src/private/data/fundingSourceProviderData/provisioningData'
 import {
+  CheckoutBankAccountProvisionalFundingSourceProvisioningData,
   CheckoutCardProvisionalFundingSourceProvisioningData,
   FundingSourceType,
   StripeCardProvisionalFundingSourceProvisioningData,
@@ -253,6 +254,29 @@ describe('Provisioning Data Test Suite', () => {
           expect(caught?.message).toEqual(
             'provisional funding source provisioning data cannot be decoded: Unrecognized funding source type: checkout:2:CREDIT_CARD',
           )
+        })
+      })
+
+      describe('and type bankAccount', () => {
+        const checkoutBankAccountDataDecoded: CheckoutBankAccountProvisionalFundingSourceProvisioningData =
+          {
+            provider: 'checkout',
+            version: 1,
+            type: FundingSourceType.BankAccount,
+          }
+        const checkoutBankAccountData = {
+          provider: 'checkout',
+          version: 1,
+          type: 'BANK_ACCOUNT',
+        }
+
+        const checkoutDataString = JSON.stringify(checkoutBankAccountData)
+        const checkoutDataEncoded = Base64.encodeString(checkoutDataString)
+
+        it('should decode provisioning data with correct type', () => {
+          expect(
+            decodeProvisionalFundingSourceProvisioningData(checkoutDataEncoded),
+          ).toEqual(checkoutBankAccountDataDecoded)
         })
       })
     })

@@ -36,6 +36,15 @@ export class EntityDataFactory {
     }),
   )
 
+  private static readonly bankAccountProvisioningData = Base64.encodeString(
+    JSON.stringify({
+      provider: 'checkout',
+      version: 1,
+      type: 'BANK_ACCOUNT',
+      linkToken: 'link_token',
+    }),
+  )
+
   static readonly provisionalFundingSource: ProvisionalFundingSourceEntity = {
     ...this.commonProps,
     id: 'dummyFundingSourceId',
@@ -43,6 +52,15 @@ export class EntityDataFactory {
     state: ProvisionalFundingSourceState.Completed,
     type: FundingSourceType.CreditCard,
   }
+
+  static readonly provisionalBankAccountFundingSource: ProvisionalFundingSourceEntity =
+    {
+      ...this.commonProps,
+      id: 'dummyFundingSourceId',
+      provisioningData: this.bankAccountProvisioningData,
+      state: ProvisionalFundingSourceState.Completed,
+      type: FundingSourceType.BankAccount,
+    }
 
   static readonly fundingSource: FundingSourceEntity = {
     ...this.commonProps,

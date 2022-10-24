@@ -5,6 +5,7 @@ import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
 
 export enum FundingSourceType {
   CreditCard = 'CREDIT_CARD',
+  BankAccount = 'BANK_ACCOUNT',
 }
 
 interface SetupFundingSourceUseCaseInput {

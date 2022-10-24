@@ -34,9 +34,18 @@ export interface CheckoutCardFundingSourceClientConfiguration
   apiKey: string
 }
 
+export interface CheckoutBankAccountFundingSourceClientConfiguration
+  extends BaseFundingSourceClientConfiguration {
+  type: 'checkout'
+  fundingSourceType: FundingSourceType.BankAccount
+  version: number
+  apiKey: string
+}
+
 export type FundingSourceClientConfiguration =
   | StripeCardFundingSourceClientConfiguration
   | CheckoutCardFundingSourceClientConfiguration
+  | CheckoutBankAccountFundingSourceClientConfiguration
 
   // Allow this so that future additions are not breaking. Consumers
   // must handle the "unknown" case.
@@ -57,6 +66,15 @@ export function isCheckoutCardFundingSourceClientConfiguration(
   return (
     config.type === 'checkout' &&
     config.fundingSourceType === FundingSourceType.CreditCard
+  )
+}
+
+export function isCheckoutBankAccountFundingSourceClientConfiguration(
+  config: FundingSourceClientConfiguration,
+): config is CheckoutBankAccountFundingSourceClientConfiguration {
+  return (
+    config.type === 'checkout' &&
+    config.fundingSourceType === FundingSourceType.BankAccount
   )
 }
 
@@ -138,11 +156,11 @@ export type StripeProvisionalFundingSourceProvisioningData =
   StripeCardProvisionalFundingSourceProvisioningData
 
 /**
- * Provisioning data for Checkout provisional funding source.
+ * Provisioning data for Checkout card provisional funding source.
  *
  * @property {'checkout'} provider Provider of the provisioning data.
  * @property {1} version Version of the format of the provisioning data.
- * @property {FundingSourceType.CreditCard} type Type of funding source provider
+ * @property {FundingSourceType.CreditCard} type Type of funding source provider.
  */
 export interface CheckoutCardProvisionalFundingSourceProvisioningData {
   provider: 'checkout'
@@ -150,9 +168,23 @@ export interface CheckoutCardProvisionalFundingSourceProvisioningData {
   type: FundingSourceType.CreditCard
 }
 
+/**
+ * Provisioning data for Checkout bank account provisional funding source.
+ *
+ * @property {'checkout'} provider Provider of the provisioning data.
+ * @property {1} version Version of the format of the provisioning data.
+ * @property {FundingSourceType.BankAccount} type Type of funding source provider.
+ */
+export interface CheckoutBankAccountProvisionalFundingSourceProvisioningData {
+  provider: 'checkout'
+  version: 1
+  type: FundingSourceType.BankAccount
+}
+
 export type ProvisionalFundingSourceProvisioningData =
   | StripeCardProvisionalFundingSourceProvisioningData
   | CheckoutCardProvisionalFundingSourceProvisioningData
+  | CheckoutBankAccountProvisionalFundingSourceProvisioningData
   | BaseProvisionalFundingSourceProvisioningData
 
 export function isStripeCardProvisionalFundingSourceProvisioningData(
@@ -171,6 +203,16 @@ export function isCheckoutCardProvisionalFundingSourceProvisioningData(
   return (
     data.provider === 'checkout' &&
     data.type === FundingSourceType.CreditCard &&
+    data.version === 1
+  )
+}
+
+export function isCheckoutBankAccountProvisionalFundingSourceProvisioningData(
+  data: ProvisionalFundingSourceProvisioningData,
+): data is CheckoutBankAccountProvisionalFundingSourceProvisioningData {
+  return (
+    data.provider === 'checkout' &&
+    data.type === FundingSourceType.BankAccount &&
     data.version === 1
   )
 }
@@ -216,14 +258,14 @@ export function isCheckoutCardProvisionalFundingSourceInteractionData(
 /**
  * The Sudo Platform SDK representation of a funding source.
  *
- * @interface FundingSource
- * @property {string} id Unique identifier of the funding source.
- * @property {string} owner Identifier of the user that owns the funding source.
- * @property {number} version Version of this entity.
- * @property {number} createdAt Date when the funding source was created.
- * @property {number} updatedAt Date when the funding source was last updated.
+ * @interface ProvisionalFundingSource
+ * @property {string} id Unique identifier of the provisional funding source.
+ * @property {string} owner Identifier of the user that owns the provisional funding source.
+ * @property {number} version Current version of the provisional funding source.
+ * @property {number} createdAt Date when the provisional funding source was created.
+ * @property {number} updatedAt Date when the provisional funding source was last updated.
  * @property {ProvisionalFundingSourceState} state The provisional funding source state.
- * @property {string} provisioningData The currency of the funding source.
+ * @property {string} provisioningData Provisioning data provided by the funding source provider.
  */
 export interface ProvisionalFundingSource {
   id: string
@@ -297,6 +339,7 @@ export enum FundingSourceState {
  */
 export enum FundingSourceType {
   CreditCard = 'CREDIT_CARD',
+  BankAccount = 'BANK_ACCOUNT',
 }
 
 /**

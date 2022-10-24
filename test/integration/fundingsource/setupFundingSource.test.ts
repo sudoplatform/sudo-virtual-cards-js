@@ -54,7 +54,7 @@ describe('SudoVirtualCardsClient SetupFundingSource Test Suite', () => {
     })
 
     describe('checkout specific tests', () => {
-      it('should return a checkout provisional funding source', async () => {
+      it('should return a checkout card provisional funding source', async () => {
         const checkoutCardFsConfig = fsClientConfig.find(
           (config) =>
             config.type === 'checkout' &&
@@ -74,6 +74,29 @@ describe('SudoVirtualCardsClient SetupFundingSource Test Suite', () => {
           version: 1,
           provider: checkoutCardFsConfig.type,
           type: FundingSourceType.CreditCard,
+        })
+      })
+
+      it('should return a checkout bank account provisional funding source', async () => {
+        const checkoutBankAccountFsConfig = fsClientConfig.find(
+          (config) =>
+            config.type === 'checkout' &&
+            config.fundingSourceType === FundingSourceType.BankAccount,
+        )
+        if (!checkoutBankAccountFsConfig) {
+          return
+        }
+
+        const result = await instanceUnderTest.setupFundingSource({
+          currency: 'USD',
+          type: FundingSourceType.BankAccount,
+          supportedProviders: ['checkout'],
+        })
+
+        expect(result.provisioningData).toMatchObject({
+          version: 1,
+          provider: checkoutBankAccountFsConfig.type,
+          type: FundingSourceType.BankAccount,
         })
       })
     })

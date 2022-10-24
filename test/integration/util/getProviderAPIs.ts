@@ -2,6 +2,7 @@ import { FatalError } from '@sudoplatform/sudo-common'
 import { Checkout } from 'checkout-sdk-node'
 import Stripe from 'stripe'
 import {
+  isCheckoutBankAccountFundingSourceClientConfiguration,
   isCheckoutCardFundingSourceClientConfiguration,
   isStripeCardFundingSourceClientConfiguration,
   SudoVirtualCardsClient,
@@ -25,7 +26,10 @@ export const getProviderAPIs = async (
         apiVersion: '2022-08-01',
         typescript: true,
       })
-    } else if (isCheckoutCardFundingSourceClientConfiguration(fsConfig)) {
+    } else if (
+      isCheckoutCardFundingSourceClientConfiguration(fsConfig) ||
+      isCheckoutBankAccountFundingSourceClientConfiguration(fsConfig)
+    ) {
       checkout = new Checkout(undefined, {
         pk: fsConfig.apiKey,
       })
@@ -34,7 +38,7 @@ export const getProviderAPIs = async (
 
   if (!stripe) {
     throw new FatalError(
-      'Stripe is manadatory provider but no client configuration found',
+      'Stripe is mandatory provider but no client configuration found',
     )
   }
 

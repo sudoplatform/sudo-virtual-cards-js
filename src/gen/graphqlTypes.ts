@@ -174,6 +174,7 @@ export type FundingSourceSupportInfo = {
 }
 
 export enum FundingSourceType {
+  BankAccount = 'BANK_ACCOUNT',
   CreditCard = 'CREDIT_CARD',
 }
 

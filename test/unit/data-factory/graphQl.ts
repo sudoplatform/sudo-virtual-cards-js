@@ -35,6 +35,14 @@ export class GraphQLDataFactory {
       intent: 'dummyIntent',
     }),
   )
+  private static readonly bankAccountProvisioningData = Base64.encodeString(
+    JSON.stringify({
+      provider: 'checkout',
+      version: 1,
+      type: 'BANK_ACCOUNT',
+      linkToken: 'link_token',
+    }),
+  )
 
   static readonly interactionDataErrorInfo = {
     provisioningData: Base64.encodeString(
@@ -53,6 +61,14 @@ export class GraphQLDataFactory {
     state: ProvisionalFundingSourceState.Completed,
     provisioningData: this.provisioningData,
   }
+
+  static readonly provisionalBankAccountFundingSource: ProvisionalFundingSource =
+    {
+      ...GraphQLDataFactory.commonProps,
+      id: 'dummyFundingSourceId',
+      state: ProvisionalFundingSourceState.Completed,
+      provisioningData: this.bankAccountProvisioningData,
+    }
 
   static readonly fundingSource: FundingSource = {
     ...GraphQLDataFactory.commonProps,

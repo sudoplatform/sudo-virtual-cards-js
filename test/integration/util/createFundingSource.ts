@@ -19,11 +19,56 @@ export function isCardProviderName(s: string): s is CardProviderName {
   return (CardProviderNames as readonly string[]).includes(s)
 }
 
+export interface TestCardBillingAddressProperties {
+  addressLine1: string
+  addressLine2?: string
+  city?: string
+  state?: string
+  postalCode?: string
+  country?: string
+}
+
+export class TestCardBillingAddress {
+  public readonly addressLine1: string
+  public readonly addressLine2?: string
+  public readonly city: string
+  public readonly state: string
+  public readonly postalCode: string
+  public readonly country: string
+
+  public constructor({
+    addressLine1,
+    addressLine2 = undefined,
+    city = 'Atlanta',
+    state = 'GA',
+    postalCode = '30318',
+    country = 'US',
+  }: TestCardBillingAddressProperties) {
+    this.addressLine1 = addressLine1
+    this.addressLine2 = addressLine2
+    this.city = city
+    this.state = state
+    this.postalCode = postalCode
+    this.country = country
+  }
+}
+
+export const DefaultTestCardBillingAddress: Record<
+  CardProviderName,
+  TestCardBillingAddress
+> = {
+  stripe: new TestCardBillingAddress({
+    addressLine1: '222333 Peachtree Place',
+  }),
+  checkout: new TestCardBillingAddress({ addressLine1: 'Test_Y' }),
+}
+
 export const TestCardNames = [
   'Visa-3DS2-1',
   'Visa-3DS2-2',
   'Visa-No3DS-1',
   'MC-No3DS-1',
+  'BadAddress',
 ] as const
 export type TestCardName = typeof TestCardNames[number]
 
@@ -31,6 +76,7 @@ export type TestCard = {
   number: string
   cvv: string
   last4: string
+  address: TestCardBillingAddress
 }
 
 /**
@@ -43,21 +89,32 @@ export const CheckoutTestCards: Record<TestCardName, TestCard | undefined> = {
     number: '4242424242424242',
     cvv: '100',
     last4: '4242',
+    address: DefaultTestCardBillingAddress['checkout'],
   },
   'Visa-3DS2-2': {
     number: '4543474002249996',
     cvv: '956',
     last4: '9996',
+    address: DefaultTestCardBillingAddress['checkout'],
   },
   'Visa-No3DS-1': {
     number: '4532432452900131',
     cvv: '257',
     last4: '0131',
+    address: DefaultTestCardBillingAddress['checkout'],
   },
   'MC-No3DS-1': {
     number: '5183683001544411',
     cvv: '100',
     last4: '4411',
+    address: DefaultTestCardBillingAddress['checkout'],
+  },
+  BadAddress: {
+    number: '4532432452900131',
+    cvv: '257',
+    last4: '0131',
+    // See https://www.checkout.com/docs/testing/avs-check-testing
+    address: new TestCardBillingAddress({ addressLine1: 'Test_N' }),
   },
 }
 
@@ -71,17 +128,26 @@ export const StripeTestCards: Record<TestCardName, TestCard | undefined> = {
     number: '4000000000003220',
     cvv: '123',
     last4: '3220',
+    address: DefaultTestCardBillingAddress['stripe'],
   },
   'Visa-3DS2-2': undefined,
   'Visa-No3DS-1': {
     number: '4242424242424242',
     cvv: '123',
     last4: '4242',
+    address: DefaultTestCardBillingAddress['stripe'],
   },
   'MC-No3DS-1': {
     number: '5555555555554444',
     cvv: '123',
     last4: '4444',
+    address: DefaultTestCardBillingAddress['stripe'],
+  },
+  BadAddress: {
+    number: '4000000000000010',
+    cvv: '123',
+    last4: '0010',
+    address: DefaultTestCardBillingAddress['stripe'],
   },
 }
 
@@ -123,11 +189,12 @@ export async function confirmStripeSetupIntent(
     },
     billing_details: {
       address: {
-        line1: '222333 Peachtree Place',
-        city: 'Atlanta',
-        country: 'GA',
-        postal_code: '30318',
-        state: 'US',
+        line1: card.address.addressLine1,
+        line2: card.address.addressLine2,
+        city: card.address.city,
+        country: card.address.country,
+        postal_code: card.address.postalCode,
+        state: card.address.state,
       },
     },
   })
@@ -160,11 +227,12 @@ export async function generateCheckoutPaymentToken(
     expiry_year: exp.getUTCFullYear(),
     name: 'John Smith',
     billing_address: {
-      address_line1: '222333 Peachtree Place',
-      city: 'Atlanta',
-      state: 'GA',
-      zip: '30318',
-      country: 'US',
+      address_line1: card.address.addressLine1,
+      address_line2: card.address.addressLine2,
+      city: card.address.city,
+      state: card.address.state,
+      zip: card.address.postalCode,
+      country: card.address.country,
     },
   })) as { token?: string } | undefined
   if (!token?.token) {
