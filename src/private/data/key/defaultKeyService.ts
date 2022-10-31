@@ -47,20 +47,10 @@ export class DefaultKeyService implements KeyService {
           break
       }
 
-      let nextToken: string | undefined = undefined
-      let alreadyRegistered = false
-      do {
-        const result = await this.appSync.getKeyRing({
-          keyRingId: publicKey.keyRingId,
-          keyFormats: [keyFormat],
-        })
-
-        alreadyRegistered =
-          result.items.find((key) => key.keyId === keyId) !== undefined
-        nextToken = result.nextToken ?? undefined
-      } while (!alreadyRegistered && nextToken)
-
-      registerRequired = !alreadyRegistered
+      const fetchedKey = await this.appSync.getPublicKey(keyId, [keyFormat])
+      if (fetchedKey === undefined) {
+        registerRequired = true
+      }
     }
 
     if (registerRequired) {

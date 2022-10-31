@@ -109,32 +109,26 @@ describe('DefaultKeyService test suite', () => {
       verify(mockDeviceKeyWorker.generateKeyPair()).never()
     })
 
-    it('should not create new key pair nor register it if current key pair is present and registered in paginated key ring', async () => {
+    it('should not create new key pair nor register it if current key pair is present and registered in key ring', async () => {
       when(mockDeviceKeyWorker.getCurrentPublicKey()).thenResolve(publicKey)
-      when(mockApiClient.getKeyRing(anything())).thenResolve(
-        { items: [], nextToken: 'next-token' },
-        {
-          items: [
-            {
-              id: v4(),
-              keyId: keyPairId,
-              keyRingId,
-              algorithm: publicKey.algorithm,
-              createdAtEpochMs: now.getTime(),
-              updatedAtEpochMs: now.getTime(),
-              version: 1,
-              owner,
-              publicKey: 'blah',
-            },
-          ],
-        },
-      )
+      when(mockApiClient.getPublicKey(anything(), anything())).thenResolve({
+        __typename: 'PublicKey',
+        algorithm: '',
+        createdAtEpochMs: 1,
+        id: '',
+        keyId: '',
+        keyRingId: '',
+        owner: '',
+        publicKey: '',
+        updatedAtEpochMs: 1,
+        version: 1,
+      })
       await expect(
         instanceUnderTest.createAndRegisterKeyPairIfAbsent(),
       ).resolves.toEqual({ created: false, keyId: keyPairId })
 
       verify(mockDeviceKeyWorker.getCurrentPublicKey()).once()
-      verify(mockApiClient.getKeyRing(anything())).twice()
+      verify(mockApiClient.getPublicKey(anything(), anything())).once()
 
       verify(mockApiClient.createPublicKey(anything())).never()
 
@@ -145,9 +139,9 @@ describe('DefaultKeyService test suite', () => {
 
     it('should register public key if current key pair is present but not registered', async () => {
       when(mockDeviceKeyWorker.getCurrentPublicKey()).thenResolve(publicKey)
-      when(mockApiClient.getKeyRing(anything())).thenResolve({
-        items: [],
-      })
+      when(mockApiClient.getPublicKey(anything(), anything())).thenResolve(
+        undefined,
+      )
       await expect(
         instanceUnderTest.createAndRegisterKeyPairIfAbsent(),
       ).resolves.toEqual({ created: false, keyId: keyPairId })
