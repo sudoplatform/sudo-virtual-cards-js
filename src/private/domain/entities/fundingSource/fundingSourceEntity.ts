@@ -1,3 +1,4 @@
+import { CardType } from '../../../../public/typings/cardType'
 import {
   CreditCardNetwork,
   FundingSourceState,
@@ -22,6 +23,7 @@ export interface CreditCardFundingSourceEntity extends BaseFundingSourceEntity {
   type: FundingSourceType.CreditCard
   last4: string
   network: CreditCardNetwork
+  cardType: CardType
 }
 
 export type FundingSourceEntity = CreditCardFundingSourceEntity

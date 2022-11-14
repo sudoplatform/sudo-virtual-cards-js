@@ -1,5 +1,6 @@
 import {
   CardState,
+  CardType,
   CreditCardNetwork,
   CurrencyAmount,
   FundingSource,
@@ -56,6 +57,7 @@ export class ApiDataFactory {
     network: CreditCardNetwork.Visa,
     state: FundingSourceState.Active,
     type: FundingSourceType.CreditCard,
+    cardType: CardType.Credit,
   }
 
   static readonly provisionalVirtualCard: ProvisionalVirtualCard = {

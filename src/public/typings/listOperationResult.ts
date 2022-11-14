@@ -1,5 +1,5 @@
 import { ListOperationResult } from '@sudoplatform/sudo-common'
-import { ProvisionalVirtualCard } from '.'
+import { ProvisionalVirtualCard } from './provisionalCard'
 import { Transaction } from './transaction'
 import { VirtualCard, VirtualCardSealedAttributes } from './virtualCard'
 

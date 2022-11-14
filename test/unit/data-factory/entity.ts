@@ -8,7 +8,7 @@ import {
   TransactionEntity,
 } from '../../../src/private/domain/entities/transaction/transactionEntity'
 import { ProvisionalVirtualCardEntity } from '../../../src/private/domain/entities/virtualCard/provisionalVirtualCardEntity'
-import { CardType } from '../../../src/public/typings/config'
+import { CardType } from '../../../src/public/typings/cardType'
 import {
   CreditCardNetwork,
   FundingSourceState,
@@ -70,6 +70,7 @@ export class EntityDataFactory {
     network: CreditCardNetwork.Visa,
     state: FundingSourceState.Active,
     type: FundingSourceType.CreditCard,
+    cardType: CardType.Credit,
   }
 
   static readonly provisionalVirtualCard: ProvisionalVirtualCardEntity = {

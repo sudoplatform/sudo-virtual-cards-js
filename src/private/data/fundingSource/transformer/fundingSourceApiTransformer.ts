@@ -20,6 +20,7 @@ export class FundingSourceAPITransformer {
         currency: entity.currency,
         type: entity.type,
         last4: entity.last4,
+        cardType: entity.cardType,
         network: entity.network,
         state: entity.state,
         version: entity.version,

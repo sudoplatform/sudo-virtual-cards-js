@@ -3,6 +3,7 @@ import {
   Logger,
   NotSignedInError,
 } from '@sudoplatform/sudo-common'
+import { CardType } from '../../../../public/typings/cardType'
 import {
   CreditCardNetwork,
   FundingSourceState,
@@ -47,6 +48,7 @@ interface CompleteCreditCardFundingSourceUseCaseOutput
   type: FundingSourceType.CreditCard
   last4: string
   network: CreditCardNetwork
+  cardType: CardType
 }
 
 export type CompleteFundingSourceUseCaseOutput =

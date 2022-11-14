@@ -1,3 +1,5 @@
+import { CardType } from './cardType'
+
 export interface BaseFundingSourceClientConfiguration {
   type: string
   fundingSourceType: FundingSourceType
@@ -107,6 +109,7 @@ export interface CreditCardFundingSource extends BaseFundingSource {
   type: FundingSourceType.CreditCard
   last4: string
   network: CreditCardNetwork
+  cardType: CardType
 }
 
 export type FundingSource = CreditCardFundingSource

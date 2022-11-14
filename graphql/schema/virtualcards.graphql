@@ -31,6 +31,7 @@ enum CardType {
   CREDIT
   DEBIT
   PREPAID
+  OTHER
 }
 
 type FundingSourceSupportDetail {
@@ -110,6 +111,7 @@ type CreditCardFundingSource implements CommonObject {
   currency: String!
   last4: String!
   network: CreditCardNetwork!
+  cardType: CardType!
 }
 
 union FundingSource = CreditCardFundingSource

@@ -77,6 +77,7 @@ export class GraphQLDataFactory {
     last4: 'dummyLast4',
     network: CreditCardNetwork.Visa,
     state: FundingSourceState.Active,
+    cardType: CardType.Credit,
   }
 
   static readonly fundingSourceConnection: FundingSourceConnection = {

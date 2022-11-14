@@ -66,6 +66,7 @@ export enum CardState {
 export enum CardType {
   Credit = 'CREDIT',
   Debit = 'DEBIT',
+  Other = 'OTHER',
   Prepaid = 'PREPAID',
 }
 
@@ -103,6 +104,7 @@ export type CreatePublicKeyInput = {
 
 export type CreditCardFundingSource = CommonObject & {
   __typename?: 'CreditCardFundingSource'
+  cardType: CardType
   createdAtEpochMs: Scalars['Float']
   currency: Scalars['String']
   id: Scalars['ID']
@@ -577,6 +579,7 @@ export type FundingSourceFragment = {
   currency: string
   last4: string
   network: CreditCardNetwork
+  cardType: CardType
 }
 
 export type SealedAttributeFragment = {
@@ -948,6 +951,7 @@ export type CompleteFundingSourceMutation = {
     currency: string
     last4: string
     network: CreditCardNetwork
+    cardType: CardType
   }
 }
 
@@ -968,6 +972,7 @@ export type CancelFundingSourceMutation = {
     currency: string
     last4: string
     network: CreditCardNetwork
+    cardType: CardType
   }
 }
 
@@ -1370,6 +1375,7 @@ export type GetFundingSourceQuery = {
     currency: string
     last4: string
     network: CreditCardNetwork
+    cardType: CardType
   } | null
 }
 
@@ -1394,6 +1400,7 @@ export type ListFundingSourcesQuery = {
       currency: string
       last4: string
       network: CreditCardNetwork
+      cardType: CardType
     }>
   }
 }
@@ -2039,6 +2046,7 @@ export const FundingSourceFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'currency' } },
           { kind: 'Field', name: { kind: 'Name', value: 'last4' } },
           { kind: 'Field', name: { kind: 'Name', value: 'network' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'cardType' } },
         ],
       },
     },

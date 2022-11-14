@@ -11,13 +11,8 @@
  * @property {ProviderCardFundingSourceSupportDetail[]} fundingSourceSupportInfo Funding source support info.
  */
 
-import { CurrencyAmount } from '.'
-
-export enum CardType {
-  Credit = 'CREDIT',
-  Debit = 'DEBIT',
-  Prepaid = 'PREPAID',
-}
+import { CardType } from './cardType'
+import { CurrencyAmount } from './currencyAmount'
 
 export interface FundingSourceSupportDetail {
   cardType: CardType

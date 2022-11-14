@@ -1,6 +1,7 @@
 import { Checkout } from 'checkout-sdk-node'
 import Stripe from 'stripe'
 import {
+  CardType,
   CheckoutCardProvisionalFundingSourceProvisioningData,
   CompleteFundingSourceCompletionDataInput,
   FundingSource,
@@ -76,6 +77,7 @@ export type TestCard = {
   number: string
   cvv: string
   last4: string
+  cardType: CardType
   address: TestCardBillingAddress
 }
 
@@ -90,24 +92,28 @@ export const CheckoutTestCards: Record<TestCardName, TestCard | undefined> = {
     cvv: '100',
     last4: '4242',
     address: DefaultTestCardBillingAddress['checkout'],
+    cardType: CardType.Credit,
   },
   'Visa-3DS2-2': {
     number: '4543474002249996',
     cvv: '956',
     last4: '9996',
     address: DefaultTestCardBillingAddress['checkout'],
+    cardType: CardType.Credit,
   },
   'Visa-No3DS-1': {
     number: '4532432452900131',
     cvv: '257',
     last4: '0131',
     address: DefaultTestCardBillingAddress['checkout'],
+    cardType: CardType.Credit,
   },
   'MC-No3DS-1': {
-    number: '5183683001544411',
+    number: '5352151570003404',
     cvv: '100',
-    last4: '4411',
+    last4: '3404',
     address: DefaultTestCardBillingAddress['checkout'],
+    cardType: CardType.Debit,
   },
   BadAddress: {
     number: '4532432452900131',
@@ -115,6 +121,7 @@ export const CheckoutTestCards: Record<TestCardName, TestCard | undefined> = {
     last4: '0131',
     // See https://www.checkout.com/docs/testing/avs-check-testing
     address: new TestCardBillingAddress({ addressLine1: 'Test_N' }),
+    cardType: CardType.Credit,
   },
 }
 
@@ -129,6 +136,7 @@ export const StripeTestCards: Record<TestCardName, TestCard | undefined> = {
     cvv: '123',
     last4: '3220',
     address: DefaultTestCardBillingAddress['stripe'],
+    cardType: CardType.Credit,
   },
   'Visa-3DS2-2': undefined,
   'Visa-No3DS-1': {
@@ -136,18 +144,21 @@ export const StripeTestCards: Record<TestCardName, TestCard | undefined> = {
     cvv: '123',
     last4: '4242',
     address: DefaultTestCardBillingAddress['stripe'],
+    cardType: CardType.Credit,
   },
   'MC-No3DS-1': {
     number: '5555555555554444',
     cvv: '123',
     last4: '4444',
     address: DefaultTestCardBillingAddress['stripe'],
+    cardType: CardType.Credit,
   },
   BadAddress: {
     number: '4000000000000010',
     cvv: '123',
     last4: '0010',
     address: DefaultTestCardBillingAddress['stripe'],
+    cardType: CardType.Credit,
   },
 }
 
@@ -304,9 +315,13 @@ export const createCardFundingSource = async (
     throw new Error('Unsupported funding source type')
   }
 
-  return await virtualCardsClient.completeFundingSource({
+  const fundingSource = await virtualCardsClient.completeFundingSource({
     id: provisionalCard.id,
     completionData,
     updateCardFundingSource: options?.updateCardFundingSource,
   })
+  expect(fundingSource.last4).toEqual(card.last4)
+  expect(fundingSource.cardType).toEqual(card.cardType)
+
+  return fundingSource
 }
