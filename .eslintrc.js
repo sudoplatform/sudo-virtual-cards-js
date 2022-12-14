@@ -68,6 +68,7 @@ module.exports = {
         'test/**/*.ts',
         'jest.setup.ts'
       ],
+      plugins: [ "jest" ],
       parser: '@typescript-eslint/parser',
       parserOptions: {
         project: './tsconfig.test.json',
@@ -88,6 +89,11 @@ module.exports = {
         '@typescript-eslint/restrict-plus-operands': 'off',
         '@typescript-eslint/restrict-template-expressions': 'off',
         '@typescript-eslint/unbound-method': 'off',
+        'jest/no-disabled-tests': 'warn',
+        'jest/no-focused-tests': 'error',
+        'jest/no-identical-title': 'error',
+        'jest/prefer-to-have-length': 'warn',
+        'jest/valid-expect': 'error'
       },
     },
   ],

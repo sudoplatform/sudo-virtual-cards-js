@@ -1,4 +1,6 @@
 export * from './apiResult'
+export * from './authorizationText'
+export * from './bankAccountType'
 export * from './cardType'
 export * from './config'
 export * from './createKeysIfAbsentResult'

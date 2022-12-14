@@ -1,7 +1,10 @@
 import { Base64, EncryptionAlgorithm } from '@sudoplatform/sudo-common'
+import { BankAccountType } from '../../../src'
 import {
+  BankAccountFundingSource,
   CardState,
   CardType,
+  CreditCardFundingSource,
   CreditCardNetwork,
   FundingSource,
   FundingSourceConnection,
@@ -40,7 +43,27 @@ export class GraphQLDataFactory {
       provider: 'checkout',
       version: 1,
       type: 'BANK_ACCOUNT',
-      linkToken: 'link_token',
+      plaidLinkToken: {
+        link_token: 'link_token',
+        expiration: 'expiration',
+        request_id: 'request_id',
+      },
+      authorizationText: [
+        {
+          content: 'authorization-text-0',
+          contentType: 'authorization-text-0-content-type',
+          language: 'authorization-text-0-language',
+          hash: 'authorization-text-0-hash',
+          hashAlgorithm: 'authorization-text-0-hash-algorithm',
+        },
+        {
+          content: 'authorization-text-1',
+          contentType: 'authorization-text-1-content-type',
+          language: 'authorization-text-1-language',
+          hash: 'authorization-text-1-hash',
+          hashAlgorithm: 'authorization-text-1-hash-algorithm',
+        },
+      ],
     }),
   )
 
@@ -70,8 +93,9 @@ export class GraphQLDataFactory {
       provisioningData: this.bankAccountProvisioningData,
     }
 
-  static readonly fundingSource: FundingSource = {
+  static readonly creditCardfundingSource: CreditCardFundingSource = {
     ...GraphQLDataFactory.commonProps,
+    __typename: 'CreditCardFundingSource',
     id: 'dummyFundingSourceId',
     currency: 'dummyCurrency',
     last4: 'dummyLast4',
@@ -80,8 +104,29 @@ export class GraphQLDataFactory {
     cardType: CardType.Credit,
   }
 
+  static readonly defaultFundingSource: FundingSource =
+    this.creditCardfundingSource
+
+  static readonly bankAccountfundingSource: BankAccountFundingSource = {
+    ...GraphQLDataFactory.commonProps,
+    __typename: 'BankAccountFundingSource',
+    id: 'dummyFundingSourceId',
+    currency: 'dummyCurrency',
+    state: FundingSourceState.Active,
+    bankAccountType: BankAccountType.Savings,
+    authorization: {
+      content: 'dummyAuthorizationContent',
+      contentType: 'dummyAuthorizationContentType',
+      algorithm: 'dummyAuthorizationAlgorithm',
+      signature: 'dummyAuthorizationSignature',
+      data: 'dummyAuthorizationData',
+      keyId: 'dummyAuthorizationKeyId',
+      language: 'dummyAuthorizationLanguage',
+    },
+  }
+
   static readonly fundingSourceConnection: FundingSourceConnection = {
-    items: [GraphQLDataFactory.fundingSource],
+    items: [GraphQLDataFactory.defaultFundingSource],
     nextToken: undefined,
   }
 

@@ -1,5 +1,5 @@
 import { Base64 } from '@sudoplatform/sudo-common'
-import { VirtualCard } from '../../../src'
+import { BankAccountType, VirtualCard } from '../../../src'
 import { VirtualCardsConfigEntity } from '../../../src/private/domain/entities/configuration/virtualCardsConfigEntity'
 import { FundingSourceEntity } from '../../../src/private/domain/entities/fundingSource/fundingSourceEntity'
 import { ProvisionalFundingSourceEntity } from '../../../src/private/domain/entities/fundingSource/provisionalFundingSourceEntity'
@@ -41,7 +41,27 @@ export class EntityDataFactory {
       provider: 'checkout',
       version: 1,
       type: 'BANK_ACCOUNT',
-      linkToken: 'link_token',
+      plaidLinkToken: {
+        link_token: 'link_token',
+        expiration: 'expiration',
+        request_id: 'request_id',
+      },
+      authorizationText: [
+        {
+          content: 'authorization-text-0',
+          contentType: 'authorization-text-0-content-type',
+          language: 'authorization-text-0-language',
+          hash: 'authorization-text-0-hash',
+          hashAlgorithm: 'authorization-text-0-hash-algorithm',
+        },
+        {
+          content: 'authorization-text-1',
+          contentType: 'authorization-text-1-content-type',
+          language: 'authorization-text-1-language',
+          hash: 'authorization-text-1-hash',
+          hashAlgorithm: 'authorization-text-1-hash-algorithm',
+        },
+      ],
     }),
   )
 
@@ -62,7 +82,7 @@ export class EntityDataFactory {
       type: FundingSourceType.BankAccount,
     }
 
-  static readonly fundingSource: FundingSourceEntity = {
+  static readonly creditCardFundingSource: FundingSourceEntity = {
     ...this.commonProps,
     id: 'dummyFundingSourceId',
     currency: 'dummyCurrency',
@@ -71,6 +91,17 @@ export class EntityDataFactory {
     state: FundingSourceState.Active,
     type: FundingSourceType.CreditCard,
     cardType: CardType.Credit,
+  }
+
+  static readonly defaultFundingSource = this.creditCardFundingSource
+
+  static readonly bankAccountFundingSource: FundingSourceEntity = {
+    ...this.commonProps,
+    id: 'dummyFundingSourceId',
+    currency: 'dummyCurrency',
+    state: FundingSourceState.Active,
+    type: FundingSourceType.BankAccount,
+    bankAccountType: BankAccountType.Savings,
   }
 
   static readonly provisionalVirtualCard: ProvisionalVirtualCardEntity = {

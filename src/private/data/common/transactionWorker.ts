@@ -84,7 +84,7 @@ export class DefaultTransactionWorker implements TransactionWorker {
     ): Promise<number> => {
       const unsealed = await unseal(encrypted)
       const numUnsealed = parseInt(unsealed)
-      if (numUnsealed === NaN) {
+      if (Number.isNaN(numUnsealed)) {
         throw new FatalError(
           `Invalid data when unsealing an expected number - property: ${
             name ?? 'unknown'

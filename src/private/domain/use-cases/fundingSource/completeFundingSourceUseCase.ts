@@ -3,6 +3,8 @@ import {
   Logger,
   NotSignedInError,
 } from '@sudoplatform/sudo-common'
+import { AuthorizationText } from '../../../../public'
+import { BankAccountType } from '../../../../public/typings/bankAccountType'
 import { CardType } from '../../../../public/typings/cardType'
 import {
   CreditCardNetwork,
@@ -16,15 +18,24 @@ interface CompleteFundingSourceUseCaseStripeCompletionData {
   type?: FundingSourceType.CreditCard
   paymentMethod: string
 }
-interface CompleteFundingSourceUseCaseCheckoutCompletionData {
+interface CompleteFundingSourceUseCaseCheckoutCardCompletionData {
   provider: 'checkout'
   type: FundingSourceType.CreditCard
   paymentToken: string
 }
 
+interface CompleteFundingSourceUseCaseCheckoutBankAccountCompletionData {
+  provider: 'checkout'
+  type: FundingSourceType.BankAccount
+  publicToken: string
+  accountId: string
+  authorizationText: AuthorizationText
+}
+
 type CompleteFundingSourceUseCaseCompletionData =
   | CompleteFundingSourceUseCaseStripeCompletionData
-  | CompleteFundingSourceUseCaseCheckoutCompletionData
+  | CompleteFundingSourceUseCaseCheckoutCardCompletionData
+  | CompleteFundingSourceUseCaseCheckoutBankAccountCompletionData
 
 interface CompleteFundingSourceUseCaseInput {
   id: string
@@ -51,8 +62,15 @@ interface CompleteCreditCardFundingSourceUseCaseOutput
   cardType: CardType
 }
 
+interface CompleteBankAccountFundingSourceUseCaseOutput
+  extends BaseCompleteFundingSourceUseCaseOutput {
+  type: FundingSourceType.BankAccount
+  bankAccountType: BankAccountType
+}
+
 export type CompleteFundingSourceUseCaseOutput =
-  CompleteCreditCardFundingSourceUseCaseOutput
+  | CompleteCreditCardFundingSourceUseCaseOutput
+  | CompleteBankAccountFundingSourceUseCaseOutput
 
 export enum FundingSourceType {
   CreditCard = 'CREDIT_CARD',

@@ -7,9 +7,9 @@ describe('FundingSourceApiTransformer Test Suite', () => {
     it('successfully transforms entity to api format', () => {
       expect(
         FundingSourceAPITransformer.transformEntity(
-          EntityDataFactory.fundingSource,
+          EntityDataFactory.defaultFundingSource,
         ),
-      ).toStrictEqual(ApiDataFactory.fundingSource)
+      ).toStrictEqual(ApiDataFactory.defaultFundingSource)
     })
   })
 })

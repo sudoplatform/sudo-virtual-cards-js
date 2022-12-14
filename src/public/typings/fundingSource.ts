@@ -1,3 +1,5 @@
+import { AuthorizationText } from './authorizationText'
+import { BankAccountType } from './bankAccountType'
 import { CardType } from './cardType'
 
 export interface BaseFundingSourceClientConfiguration {
@@ -112,7 +114,12 @@ export interface CreditCardFundingSource extends BaseFundingSource {
   cardType: CardType
 }
 
-export type FundingSource = CreditCardFundingSource
+export interface BankAccountFundingSource extends BaseFundingSource {
+  type: FundingSourceType.BankAccount
+  bankAccountType: BankAccountType
+}
+
+export type FundingSource = CreditCardFundingSource | BankAccountFundingSource
 
 export function isCreditCardFundingSource(
   fundingSource: FundingSource,
@@ -177,11 +184,18 @@ export interface CheckoutCardProvisionalFundingSourceProvisioningData {
  * @property {'checkout'} provider Provider of the provisioning data.
  * @property {1} version Version of the format of the provisioning data.
  * @property {FundingSourceType.BankAccount} type Type of funding source provider.
+ * @property {string} linkToken Plaid Link link token for use in initializing Plaid Link
+ * @property {AuthorizationText[]} authorizationText
+ *   Array of different content type representations of the same agreement in the language
+ *   most closely matching the language specified in the call to
+ *   {@link SudoVirtualCardsClient.setupFundingSource}
  */
 export interface CheckoutBankAccountProvisionalFundingSourceProvisioningData {
   provider: 'checkout'
   version: 1
   type: FundingSourceType.BankAccount
+  linkToken: string
+  authorizationText: AuthorizationText[]
 }
 
 export type ProvisionalFundingSourceProvisioningData =

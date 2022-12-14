@@ -4,6 +4,7 @@ import {
   CardType,
   CheckoutCardProvisionalFundingSourceProvisioningData,
   CompleteFundingSourceCompletionDataInput,
+  CreditCardFundingSource,
   FundingSource,
   FundingSourceType,
   isCheckoutCardProvisionalFundingSourceProvisioningData,
@@ -315,11 +316,12 @@ export const createCardFundingSource = async (
     throw new Error('Unsupported funding source type')
   }
 
-  const fundingSource = await virtualCardsClient.completeFundingSource({
+  const fundingSource = (await virtualCardsClient.completeFundingSource({
     id: provisionalCard.id,
     completionData,
     updateCardFundingSource: options?.updateCardFundingSource,
-  })
+  })) as CreditCardFundingSource
+
   expect(fundingSource.last4).toEqual(card.last4)
   expect(fundingSource.cardType).toEqual(card.cardType)
 

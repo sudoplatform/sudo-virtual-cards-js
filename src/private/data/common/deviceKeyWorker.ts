@@ -10,6 +10,7 @@ import {
   Logger,
   NotSignedInError,
   PublicKeyFormat,
+  SignatureAlgorithm,
   SudoKeyManager,
 } from '@sudoplatform/sudo-common'
 import { SudoUserClient } from '@sudoplatform/sudo-user'
@@ -37,10 +38,17 @@ export interface UnsealInput {
 }
 
 export interface SealInput {
-  string: string
+  plainText: string
   keyId: string
   keyType: KeyType
   algorithm?: EncryptionAlgorithm
+}
+
+export interface SignInput {
+  plainText: string
+  keyId: string
+  keyType: KeyType
+  algorithm?: SignatureAlgorithm
 }
 
 const SECRET_KEY_ID_KEY = 'vc-secret-key'
@@ -64,6 +72,8 @@ export interface DeviceKeyWorker {
   sealString(input: SealInput): Promise<string>
 
   unsealString(input: UnsealInput): Promise<string>
+
+  signString(input: SignInput): Promise<string>
 }
 
 export class DefaultDeviceKeyWorker implements DeviceKeyWorker {
@@ -210,7 +220,7 @@ export class DefaultDeviceKeyWorker implements DeviceKeyWorker {
   async sealString({
     keyId,
     keyType,
-    string,
+    plainText: string,
     algorithm,
   }: SealInput): Promise<string> {
     switch (keyType) {
@@ -222,8 +232,23 @@ export class DefaultDeviceKeyWorker implements DeviceKeyWorker {
       case KeyType.SymmetricKey:
         return await this.sealStringWithSymmetricKeyId({
           symmetricKeyId: keyId,
-          string,
+          plainText: string,
           algorithm,
+        })
+    }
+  }
+
+  public async signString(input: SignInput): Promise<string> {
+    switch (input.keyType) {
+      case KeyType.SymmetricKey:
+        throw new IllegalArgumentError('Key type must not be symmetric')
+
+      case KeyType.PrivateKey:
+      case KeyType.KeyPair:
+        return this.signStringWithPrivateKeyId({
+          keyPairId: input.keyId,
+          plainText: input.plainText,
+          algorithm: input.algorithm,
         })
     }
   }
@@ -315,16 +340,42 @@ export class DefaultDeviceKeyWorker implements DeviceKeyWorker {
     }
   }
 
+  private async signStringWithPrivateKeyId({
+    keyPairId,
+    plainText,
+    algorithm,
+  }: {
+    keyPairId: string
+    plainText: string
+    algorithm?: SignatureAlgorithm
+  }): Promise<string> {
+    const data = Buffer.fromString(plainText)
+
+    try {
+      const signature = await this.keyManager.generateSignatureWithPrivateKey(
+        keyPairId,
+        data,
+        { algorithm },
+      )
+
+      return Base64.encode(signature)
+    } catch (err) {
+      const message = 'Could not sign string'
+      this.log.error(message, { err })
+      throw err
+    }
+  }
+
   private async sealStringWithSymmetricKeyId({
     symmetricKeyId,
-    string,
+    plainText,
     algorithm,
   }: {
     symmetricKeyId: string
-    string: string
+    plainText: string
     algorithm?: EncryptionAlgorithm
   }): Promise<string> {
-    const unsealedBuffer = Buffer.fromString(string)
+    const unsealedBuffer = Buffer.fromString(plainText)
     let sealedBuffer: ArrayBuffer
     try {
       const options = algorithm ? { algorithm } : {}

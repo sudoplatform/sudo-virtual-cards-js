@@ -1,4 +1,5 @@
 import { CachePolicy } from '@sudoplatform/sudo-common'
+import { AuthorizationText } from '../../../../public'
 import { FundingSourceType } from '../../../../public/typings/fundingSource'
 import { FundingSourceEntity } from './fundingSourceEntity'
 import { ProvisionalFundingSourceEntity } from './provisionalFundingSourceEntity'
@@ -20,9 +21,18 @@ export interface FundingSourceServiceCheckoutCardCompletionData {
   paymentToken: string
 }
 
+export interface FundingSourceServiceCheckoutBankAccountCompletionData {
+  provider: 'checkout'
+  type: FundingSourceType.BankAccount
+  publicToken: string
+  accountId: string
+  authorizationText: AuthorizationText
+}
+
 export type FundingSourceServiceCompletionData =
   | FundingSourceServiceStripeCardCompletionData
   | FundingSourceServiceCheckoutCardCompletionData
+  | FundingSourceServiceCheckoutBankAccountCompletionData
 
 export function isFundingSourceServiceStripeCardCompletionData(
   d: FundingSourceServiceCompletionData,
@@ -37,6 +47,12 @@ export function isFundingSourceServiceCheckoutCardCompletionData(
   d: FundingSourceServiceCompletionData,
 ): d is FundingSourceServiceCheckoutCardCompletionData {
   return d.provider === 'checkout' && d.type === FundingSourceType.CreditCard
+}
+
+export function isFundingSourceServiceCheckoutBankAccountCompletionData(
+  d: FundingSourceServiceCompletionData,
+): d is FundingSourceServiceCheckoutBankAccountCompletionData {
+  return d.provider === 'checkout' && d.type === FundingSourceType.BankAccount
 }
 
 export interface FundingSourceServiceCompleteFundingSourceInput {

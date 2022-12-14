@@ -261,22 +261,127 @@ describe('Provisioning Data Test Suite', () => {
         const checkoutBankAccountDataDecoded: CheckoutBankAccountProvisionalFundingSourceProvisioningData =
           {
             provider: 'checkout',
-            version: 1,
             type: FundingSourceType.BankAccount,
+            version: 1,
+            linkToken: 'link_token',
+            authorizationText: [
+              {
+                content: 'authorization-text-0',
+                contentType: 'authorization-text-0-content-type',
+                language: 'authorization-text-0-language',
+                hash: 'authorization-text-0-hash',
+                hashAlgorithm: 'authorization-text-0-hash-algorithm',
+              },
+              {
+                content: 'authorization-text-1',
+                contentType: 'authorization-text-1-content-type',
+                language: 'authorization-text-1-language',
+                hash: 'authorization-text-1-hash',
+                hashAlgorithm: 'authorization-text-1-hash-algorithm',
+              },
+            ],
           }
+
         const checkoutBankAccountData = {
           provider: 'checkout',
           version: 1,
           type: 'BANK_ACCOUNT',
+          plaidLinkToken: {
+            link_token: 'link_token',
+            expiration: 'expiration',
+            request_id: 'request_id',
+          },
+          authorizationText: [
+            {
+              content: 'authorization-text-0',
+              contentType: 'authorization-text-0-content-type',
+              language: 'authorization-text-0-language',
+              hash: 'authorization-text-0-hash',
+              hashAlgorithm: 'authorization-text-0-hash-algorithm',
+            },
+            {
+              content: 'authorization-text-1',
+              contentType: 'authorization-text-1-content-type',
+              language: 'authorization-text-1-language',
+              hash: 'authorization-text-1-hash',
+              hashAlgorithm: 'authorization-text-1-hash-algorithm',
+            },
+          ],
         }
 
-        const checkoutDataString = JSON.stringify(checkoutBankAccountData)
-        const checkoutDataEncoded = Base64.encodeString(checkoutDataString)
+        const checkoutBankAccountDataString = JSON.stringify(
+          checkoutBankAccountData,
+        )
+        const checkoutBankAccountDataEncoded = Base64.encodeString(
+          checkoutBankAccountDataString,
+        )
+
+        const checkoutBankAccountDataWrongType = {
+          ...checkoutBankAccountData,
+          type: 'CRAZY_COIN',
+        }
+
+        const checkoutBankAccountDataWrongTypeString = JSON.stringify(
+          checkoutBankAccountDataWrongType,
+        )
+        const checkoutBankAccountDataWrongTypeEncoded = Base64.encodeString(
+          checkoutBankAccountDataWrongTypeString,
+        )
+
+        const checkoutBankAccountDataWrongVersion = {
+          ...checkoutBankAccountData,
+          version: 2,
+        }
+
+        const checkoutBankAccountDataWrongVersionString = JSON.stringify(
+          checkoutBankAccountDataWrongVersion,
+        )
+        const checkoutBankAccountDataWrongVersionEncoded = Base64.encodeString(
+          checkoutBankAccountDataWrongVersionString,
+        )
 
         it('should decode provisioning data with correct type', () => {
           expect(
-            decodeProvisionalFundingSourceProvisioningData(checkoutDataEncoded),
+            decodeProvisionalFundingSourceProvisioningData(
+              checkoutBankAccountDataEncoded,
+            ),
           ).toEqual(checkoutBankAccountDataDecoded)
+        })
+
+        it('should throw a FatalError if provisioning data has unrecognized type', () => {
+          let caught: Error | undefined
+          let decoded: any
+          try {
+            decoded = decodeProvisionalFundingSourceProvisioningData(
+              checkoutBankAccountDataWrongTypeEncoded,
+            )
+          } catch (err) {
+            caught = err as Error
+          }
+          expect(decoded).toBeUndefined()
+          expect(caught).toBeDefined()
+          expect(caught).toBeInstanceOf(FatalError)
+          expect(caught?.message).toEqual(
+            'provisional funding source provisioning data cannot be decoded: Unrecognized funding source type: checkout:1:CRAZY_COIN',
+          )
+        })
+
+        it('should throw a FatalError if provisioning data has unrecognized version', () => {
+          let caught: Error | undefined
+          let decoded: any
+          try {
+            decoded = decodeProvisionalFundingSourceProvisioningData(
+              checkoutBankAccountDataWrongVersionEncoded,
+            )
+          } catch (err) {
+            caught = err as Error
+          }
+          expect(decoded).toBeUndefined()
+          expect(caught).toBeDefined()
+          expect(caught).toBeInstanceOf(FatalError)
+          expect(caught?.message).toEqual(
+            'provisional funding source provisioning data cannot be decoded: Unrecognized funding source type: checkout:2:BANK_ACCOUNT',
+          )
         })
       })
     })

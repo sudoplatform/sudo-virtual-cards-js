@@ -1,0 +1,33 @@
+{
+  "__schema": {
+    "types": [
+      {
+        "kind": "INTERFACE",
+        "name": "CommonObject",
+        "possibleTypes": [
+          {
+            "name": "BankAccountFundingSource"
+          },
+          {
+            "name": "CreditCardFundingSource"
+          },
+          {
+            "name": "ProvisionalFundingSource"
+          }
+        ]
+      },
+      {
+        "kind": "UNION",
+        "name": "FundingSource",
+        "possibleTypes": [
+          {
+            "name": "BankAccountFundingSource"
+          },
+          {
+            "name": "CreditCardFundingSource"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -467,7 +467,7 @@ export class DefaultVirtualCardService implements VirtualCardService {
 
     const serialisedMetadata = JSON.stringify(metadata)
     const sealedMetadata = await this.deviceKeyWorker.sealString({
-      string: serialisedMetadata,
+      plainText: serialisedMetadata,
       keyId: secretKeyId,
       keyType: KeyType.SymmetricKey,
       algorithm: EncryptionAlgorithm.AesCbcPkcs7Padding,

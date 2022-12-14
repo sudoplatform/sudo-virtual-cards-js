@@ -12,9 +12,9 @@ describe('FundingSourceEntityTransformer Test Suite', () => {
     it('successfully transforms graphql to entity format', () => {
       expect(
         FundingSourceEntityTransformer.transformGraphQL(
-          GraphQLDataFactory.fundingSource,
+          GraphQLDataFactory.defaultFundingSource,
         ),
-      ).toStrictEqual(EntityDataFactory.fundingSource)
+      ).toStrictEqual(EntityDataFactory.defaultFundingSource)
     })
   })
 

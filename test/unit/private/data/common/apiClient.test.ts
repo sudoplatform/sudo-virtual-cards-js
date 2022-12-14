@@ -319,14 +319,14 @@ describe('ApiClient Test Suite', () => {
     it('performs successfully', async () => {
       when(mockClient.query(anything())).thenResolve({
         data: {
-          getFundingSource: GraphQLDataFactory.fundingSource,
+          getFundingSource: GraphQLDataFactory.defaultFundingSource,
         },
       } as any)
       const id = v4()
       const fetchPolicy = 'cache-only'
       await expect(
         instanceUnderTest.getFundingSource(id, fetchPolicy),
-      ).resolves.toStrictEqual(GraphQLDataFactory.fundingSource)
+      ).resolves.toStrictEqual(GraphQLDataFactory.defaultFundingSource)
       verify(mockClient.query(anything())).once()
       const [args] = capture(mockClient.query as any).first()
       expect(args).toStrictEqual({
@@ -363,7 +363,7 @@ describe('ApiClient Test Suite', () => {
       when(mockClient.query(anything())).thenResolve({
         data: {
           listFundingSources: {
-            items: [GraphQLDataFactory.fundingSource],
+            items: [GraphQLDataFactory.defaultFundingSource],
             nextToken: undefined,
           },
         },
@@ -374,7 +374,7 @@ describe('ApiClient Test Suite', () => {
       await expect(
         instanceUnderTest.listFundingSources(fetchPolicy, limit, nextToken),
       ).resolves.toStrictEqual({
-        items: [GraphQLDataFactory.fundingSource],
+        items: [GraphQLDataFactory.defaultFundingSource],
         nextToken: undefined,
       })
       verify(mockClient.query(anything())).once()
@@ -464,7 +464,7 @@ describe('ApiClient Test Suite', () => {
     it('performs successfully', async () => {
       when(mockClient.mutate(anything())).thenResolve({
         data: {
-          completeFundingSource: GraphQLDataFactory.fundingSource,
+          completeFundingSource: GraphQLDataFactory.defaultFundingSource,
         },
       } as any)
       const completionData = v4()
@@ -474,7 +474,7 @@ describe('ApiClient Test Suite', () => {
           completionData,
           id,
         }),
-      ).resolves.toStrictEqual(GraphQLDataFactory.fundingSource)
+      ).resolves.toStrictEqual(GraphQLDataFactory.defaultFundingSource)
       verify(mockClient.mutate(anything())).once()
       const [args] = capture(mockClient.mutate as any).first()
       expect(args).toStrictEqual({
@@ -516,7 +516,7 @@ describe('ApiClient Test Suite', () => {
     it('performs successfully', async () => {
       when(mockClient.mutate(anything())).thenResolve({
         data: {
-          cancelFundingSource: GraphQLDataFactory.fundingSource,
+          cancelFundingSource: GraphQLDataFactory.defaultFundingSource,
         },
       } as any)
       const id = v4()
@@ -524,7 +524,7 @@ describe('ApiClient Test Suite', () => {
         instanceUnderTest.cancelFundingSource({
           id,
         }),
-      ).resolves.toStrictEqual(GraphQLDataFactory.fundingSource)
+      ).resolves.toStrictEqual(GraphQLDataFactory.defaultFundingSource)
       verify(mockClient.mutate(anything())).once()
       const [args] = capture(mockClient.mutate as any).first()
       expect(args).toStrictEqual({

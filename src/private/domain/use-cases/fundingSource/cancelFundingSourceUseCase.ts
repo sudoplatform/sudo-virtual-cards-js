@@ -3,6 +3,7 @@ import {
   Logger,
   NotSignedInError,
 } from '@sudoplatform/sudo-common'
+import { BankAccountType } from '../../../../public/typings/bankAccountType'
 import { CardType } from '../../../../public/typings/cardType'
 import {
   CreditCardNetwork,
@@ -30,8 +31,15 @@ interface CancelCreditCardFundingSourceUseCaseOutput
   cardType: CardType
 }
 
+interface CancelBankAccountFundingSourceUseCaseOutput
+  extends BaseCancelFundingSourceUseCaseOutput {
+  type: FundingSourceType.BankAccount
+  bankAccountType: BankAccountType
+}
+
 type CancelFundingSourceUseCaseOutput =
-  CancelCreditCardFundingSourceUseCaseOutput
+  | CancelCreditCardFundingSourceUseCaseOutput
+  | CancelBankAccountFundingSourceUseCaseOutput
 
 /**
  * Application business logic for cancelling a funding source.

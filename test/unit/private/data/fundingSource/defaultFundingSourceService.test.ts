@@ -1,4 +1,9 @@
-import { Base64, CachePolicy } from '@sudoplatform/sudo-common'
+import {
+  Base64,
+  CachePolicy,
+  KeyNotFoundError,
+  PublicKeyFormat,
+} from '@sudoplatform/sudo-common'
 import {
   anything,
   capture,
@@ -9,8 +14,9 @@ import {
   when,
 } from 'ts-mockito'
 import { v4 } from 'uuid'
-import { FundingSourceType } from '../../../../../src'
+import { AuthorizationText, FundingSourceType } from '../../../../../src'
 import { ApiClient } from '../../../../../src/private/data/common/apiClient'
+import { DeviceKeyWorker } from '../../../../../src/private/data/common/deviceKeyWorker'
 import { DefaultFundingSourceService } from '../../../../../src/private/data/fundingSource/defaultFundingSourceService'
 import { FundingSourceServiceCompletionData } from '../../../../../src/private/domain/entities/fundingSource/fundingSourceService'
 import { EntityDataFactory } from '../../../data-factory/entity'
@@ -18,11 +24,25 @@ import { GraphQLDataFactory } from '../../../data-factory/graphQl'
 
 describe('DefaultFundingSourceService Test Suite', () => {
   const mockAppSync = mock<ApiClient>()
+  const mockDeviceKeyWorker = mock<DeviceKeyWorker>()
+
   let instanceUnderTest: DefaultFundingSourceService
 
   beforeEach(() => {
     reset(mockAppSync)
-    instanceUnderTest = new DefaultFundingSourceService(instance(mockAppSync))
+    reset(mockDeviceKeyWorker)
+    instanceUnderTest = new DefaultFundingSourceService(
+      instance(mockAppSync),
+      instance(mockDeviceKeyWorker),
+    )
+
+    when(mockDeviceKeyWorker.getCurrentPublicKey()).thenResolve({
+      id: 'key-id',
+      keyRingId: 'key-ring-id',
+      algorithm: 'key-algorithm',
+      data: 'key-data',
+      format: PublicKeyFormat.SPKI,
+    })
   })
 
   describe('getFundingSourceClientConfiguration', () => {
@@ -52,84 +72,208 @@ describe('DefaultFundingSourceService Test Suite', () => {
       )
     })
 
-    it('calls appSync', async () => {
+    it.each`
+      name              | type
+      ${'credit card'}  | ${FundingSourceType.CreditCard}
+      ${'bank account'} | ${FundingSourceType.BankAccount}
+    `('calls appSync for $name', async ({ type }) => {
       await instanceUnderTest.setupFundingSource({
         currency: 'dummyCurrency',
-        type: FundingSourceType.CreditCard,
+        type,
       })
       verify(mockAppSync.setupFundingSource(anything())).once()
       const [args] = capture(mockAppSync.setupFundingSource).first()
 
       expect(args).toEqual<typeof args>({
         currency: 'dummyCurrency',
-        type: FundingSourceType.CreditCard,
+        type,
       })
     })
-    it('returns appsync data', async () => {
-      when(mockAppSync.setupFundingSource(anything())).thenResolve(
-        GraphQLDataFactory.provisionalFundingSource,
-      )
+
+    it.each`
+      name              | type
+      ${'credit card'}  | ${FundingSourceType.CreditCard}
+      ${'bank account'} | ${FundingSourceType.BankAccount}
+    `('returns appsync data for $name', async ({ type }) => {
       await expect(
         instanceUnderTest.setupFundingSource({
           currency: 'dummyCurrency',
-          type: FundingSourceType.CreditCard,
+          type,
         }),
       ).resolves.toEqual(EntityDataFactory.provisionalFundingSource)
     })
   })
 
   describe('completeFundingSource', () => {
-    beforeEach(() => {
-      when(mockAppSync.completeFundingSource(anything())).thenResolve(
-        GraphQLDataFactory.fundingSource,
-      )
-    })
+    describe('for bank account', () => {
+      const now = new Date()
+      const signature = 'authorization-text-signature'
+      beforeEach(() => {
+        when(mockAppSync.completeFundingSource(anything())).thenResolve(
+          GraphQLDataFactory.bankAccountfundingSource,
+        )
 
-    it('calls appSync', async () => {
-      const completionData: FundingSourceServiceCompletionData = {
-        provider: 'stripe',
-        paymentMethod: v4(),
-      }
-      await instanceUnderTest.completeFundingSource({
-        id: 'dummyId',
-        completionData,
-      })
-      verify(mockAppSync.completeFundingSource(anything())).once()
-      const [args] = capture(mockAppSync.completeFundingSource).first()
+        jest.useFakeTimers('modern').setSystemTime(now)
 
-      expect(args).toEqual<typeof args>({
-        id: 'dummyId',
-        completionData: expect.any(String),
-        updateCardFundingSource: undefined,
+        when(mockDeviceKeyWorker.signString(anything())).thenResolve(signature)
       })
 
-      const decodedActualCompletionData = JSON.parse(
-        Base64.decodeString(args.completionData),
-      )
-      expect(decodedActualCompletionData).toEqual({
-        provider: completionData.provider,
-        type: FundingSourceType.CreditCard,
-        version: 1,
-        payment_method: completionData.paymentMethod,
+      afterEach(() => {
+        jest.useRealTimers()
       })
-    })
 
-    it('returns appsync data', async () => {
-      when(mockAppSync.completeFundingSource(anything())).thenResolve(
-        GraphQLDataFactory.fundingSource,
-      )
-      await expect(
-        instanceUnderTest.completeFundingSource({
+      it('calls appSync', async () => {
+        const authorizationText: AuthorizationText = {
+          content: 'authorizationText',
+          contentType: 'authorizationTextContentType',
+          language: 'authorizationTextLanguage',
+          hash: 'authorizationTextHash',
+          hashAlgorithm: 'authorizationTextHashAlgorithm',
+        }
+
+        const completionData: FundingSourceServiceCompletionData = {
+          provider: 'checkout',
+          type: FundingSourceType.BankAccount,
+          publicToken: 'public-token',
+          accountId: 'account-id',
+          authorizationText,
+        }
+        await instanceUnderTest.completeFundingSource({
           id: 'dummyId',
-          completionData: { provider: 'stripe', paymentMethod: '' },
-        }),
-      ).resolves.toEqual(EntityDataFactory.fundingSource)
+          completionData,
+        })
+        verify(mockAppSync.completeFundingSource(anything())).once()
+        const [args] = capture(mockAppSync.completeFundingSource).first()
+
+        expect(args).toEqual<typeof args>({
+          id: 'dummyId',
+          completionData: expect.any(String),
+          updateCardFundingSource: undefined,
+        })
+
+        const decodedActualCompletionData = JSON.parse(
+          Base64.decodeString(args.completionData),
+        )
+        expect(decodedActualCompletionData).toEqual({
+          provider: completionData.provider,
+          type: FundingSourceType.BankAccount,
+          version: 1,
+          public_token: completionData.publicToken,
+          account_id: completionData.accountId,
+          authorizationTextSignature: {
+            algorithm: 'RSASignatureSSAPKCS15SHA256',
+            data: `{"hash":"${authorizationText.hash}","hashAlgorithm":"${
+              authorizationText.hashAlgorithm
+            }","signedAt":"${now.toISOString()}","account":"account-id"}`,
+            keyId: 'key-id',
+            signature,
+          },
+        })
+      })
+
+      it('returns appsync data', async () => {
+        await expect(
+          instanceUnderTest.completeFundingSource({
+            id: 'dummyId',
+            completionData: {
+              provider: 'checkout',
+              type: FundingSourceType.BankAccount,
+              publicToken: 'public-token',
+              accountId: 'account-id',
+              authorizationText: {
+                content: 'authorizationText',
+                contentType: 'authorizationTextContentType',
+                language: 'authorizationTextLanguage',
+                hash: 'authorizationTextHash',
+                hashAlgorithm: 'authorizationTextHashAlgorithm',
+              },
+            },
+          }),
+        ).resolves.toEqual(EntityDataFactory.bankAccountFundingSource)
+      })
+
+      it('throws KeyNotFoundError if no current registered public key', async () => {
+        when(mockDeviceKeyWorker.getCurrentPublicKey()).thenResolve(undefined)
+
+        const authorizationText: AuthorizationText = {
+          content: 'authorizationText',
+          contentType: 'authorizationTextContentType',
+          language: 'authorizationTextLanguage',
+          hash: 'authorizationTextHash',
+          hashAlgorithm: 'authorizationTextHashAlgorithm',
+        }
+
+        const completionData: FundingSourceServiceCompletionData = {
+          provider: 'checkout',
+          type: FundingSourceType.BankAccount,
+          publicToken: 'public-token',
+          accountId: 'account-id',
+          authorizationText,
+        }
+        await expect(
+          instanceUnderTest.completeFundingSource({
+            id: 'dummyId',
+            completionData,
+          }),
+        ).rejects.toEqual(new KeyNotFoundError())
+
+        verify(mockAppSync.completeFundingSource(anything())).never()
+      })
+    })
+
+    describe('for credit card', () => {
+      beforeEach(() => {
+        when(mockAppSync.completeFundingSource(anything())).thenResolve(
+          GraphQLDataFactory.defaultFundingSource,
+        )
+      })
+
+      it('calls appSync', async () => {
+        const completionData: FundingSourceServiceCompletionData = {
+          provider: 'stripe',
+          paymentMethod: v4(),
+        }
+        await instanceUnderTest.completeFundingSource({
+          id: 'dummyId',
+          completionData,
+        })
+        verify(mockAppSync.completeFundingSource(anything())).once()
+        const [args] = capture(mockAppSync.completeFundingSource).first()
+
+        expect(args).toEqual<typeof args>({
+          id: 'dummyId',
+          completionData: expect.any(String),
+          updateCardFundingSource: undefined,
+        })
+
+        const decodedActualCompletionData = JSON.parse(
+          Base64.decodeString(args.completionData),
+        )
+        expect(decodedActualCompletionData).toEqual({
+          provider: completionData.provider,
+          type: FundingSourceType.CreditCard,
+          version: 1,
+          payment_method: completionData.paymentMethod,
+        })
+      })
+
+      it('returns appsync data', async () => {
+        when(mockAppSync.completeFundingSource(anything())).thenResolve(
+          GraphQLDataFactory.defaultFundingSource,
+        )
+        await expect(
+          instanceUnderTest.completeFundingSource({
+            id: 'dummyId',
+            completionData: { provider: 'stripe', paymentMethod: '' },
+          }),
+        ).resolves.toEqual(EntityDataFactory.defaultFundingSource)
+      })
     })
   })
   describe('getFundingSource', () => {
     it('calls appsync correctly', async () => {
       when(mockAppSync.getFundingSource(anything(), anything())).thenResolve(
-        GraphQLDataFactory.fundingSource,
+        GraphQLDataFactory.defaultFundingSource,
       )
       const id = v4()
       const result = await instanceUnderTest.getFundingSource({
@@ -140,7 +284,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
       const [idArg, policyArg] = capture(mockAppSync.getFundingSource).first()
       expect(idArg).toEqual<typeof idArg>(id)
       expect(policyArg).toEqual<typeof policyArg>('cache-only')
-      expect(result).toEqual(EntityDataFactory.fundingSource)
+      expect(result).toEqual(EntityDataFactory.defaultFundingSource)
     })
 
     it('calls appsync correctly with undefined result', async () => {
@@ -167,7 +311,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
       'returns transformed result when calling $test',
       async ({ cachePolicy }) => {
         when(mockAppSync.getFundingSource(anything(), anything())).thenResolve(
-          GraphQLDataFactory.fundingSource,
+          GraphQLDataFactory.defaultFundingSource,
         )
         const id = v4()
         await expect(
@@ -175,7 +319,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
             id,
             cachePolicy,
           }),
-        ).resolves.toEqual(EntityDataFactory.fundingSource)
+        ).resolves.toEqual(EntityDataFactory.defaultFundingSource)
         verify(mockAppSync.getFundingSource(anything(), anything())).once()
       },
     )
@@ -195,7 +339,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
       const [policyArg] = capture(mockAppSync.listFundingSources).first()
       expect(policyArg).toEqual<typeof policyArg>('cache-only')
       expect(result).toEqual({
-        fundingSources: [EntityDataFactory.fundingSource],
+        fundingSources: [EntityDataFactory.defaultFundingSource],
         nextToken: undefined,
       })
     })
@@ -215,7 +359,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
             cachePolicy,
           }),
         ).resolves.toEqual({
-          fundingSources: [EntityDataFactory.fundingSource],
+          fundingSources: [EntityDataFactory.defaultFundingSource],
           nextToken: undefined,
         })
         verify(
@@ -228,15 +372,15 @@ describe('DefaultFundingSourceService Test Suite', () => {
   describe('cancelFundingSource', () => {
     it('calls appsync correctly', async () => {
       when(mockAppSync.cancelFundingSource(anything())).thenResolve(
-        GraphQLDataFactory.fundingSource,
+        GraphQLDataFactory.defaultFundingSource,
       )
       const result = await instanceUnderTest.cancelFundingSource({
-        id: EntityDataFactory.fundingSource.id,
+        id: EntityDataFactory.defaultFundingSource.id,
       })
-      expect(result).toEqual(EntityDataFactory.fundingSource)
+      expect(result).toEqual(EntityDataFactory.defaultFundingSource)
       const [inputArgs] = capture(mockAppSync.cancelFundingSource).first()
       expect(inputArgs).toEqual<typeof inputArgs>({
-        id: EntityDataFactory.fundingSource.id,
+        id: EntityDataFactory.defaultFundingSource.id,
       })
       verify(mockAppSync.cancelFundingSource(anything())).once()
     })

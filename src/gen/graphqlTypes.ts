@@ -39,6 +39,25 @@ export type AddressInput = {
   state: Scalars['String']
 }
 
+export type BankAccountFundingSource = CommonObject & {
+  __typename?: 'BankAccountFundingSource'
+  authorization: SignedAuthorizationText
+  bankAccountType: BankAccountType
+  createdAtEpochMs: Scalars['Float']
+  currency: Scalars['String']
+  id: Scalars['ID']
+  owner: Scalars['ID']
+  state: FundingSourceState
+  updatedAtEpochMs: Scalars['Float']
+  version: Scalars['Int']
+}
+
+export enum BankAccountType {
+  Checking = 'CHECKING',
+  Other = 'OTHER',
+  Savings = 'SAVINGS',
+}
+
 export type CardCancelRequest = {
   id: Scalars['ID']
   keyId?: InputMaybe<Scalars['String']>
@@ -144,7 +163,7 @@ export type DateRangeInput = {
   startDateEpochMs: Scalars['Float']
 }
 
-export type FundingSource = CreditCardFundingSource
+export type FundingSource = BankAccountFundingSource | CreditCardFundingSource
 
 export type FundingSourceClientConfiguration = {
   __typename?: 'FundingSourceClientConfiguration'
@@ -496,8 +515,20 @@ export type SealedTransactionDetailChargeAttribute = {
 
 export type SetupFundingSourceRequest = {
   currency: Scalars['String']
+  language?: InputMaybe<Scalars['String']>
   supportedProviders?: InputMaybe<Array<Scalars['String']>>
   type: FundingSourceType
+}
+
+export type SignedAuthorizationText = {
+  __typename?: 'SignedAuthorizationText'
+  algorithm: Scalars['String']
+  content: Scalars['String']
+  contentType: Scalars['String']
+  data: Scalars['String']
+  keyId: Scalars['String']
+  language: Scalars['String']
+  signature: Scalars['String']
 }
 
 export enum SortOrder {
@@ -568,7 +599,7 @@ export type ProvisionalFundingSourceFragment = {
   state: ProvisionalFundingSourceState
 }
 
-export type FundingSourceFragment = {
+export type CreditCardFundingSourceFragment = {
   __typename?: 'CreditCardFundingSource'
   id: string
   owner: string
@@ -581,6 +612,68 @@ export type FundingSourceFragment = {
   network: CreditCardNetwork
   cardType: CardType
 }
+
+export type BankAccountFundingSourceFragment = {
+  __typename?: 'BankAccountFundingSource'
+  id: string
+  owner: string
+  version: number
+  createdAtEpochMs: number
+  updatedAtEpochMs: number
+  state: FundingSourceState
+  currency: string
+  bankAccountType: BankAccountType
+  authorization: {
+    __typename?: 'SignedAuthorizationText'
+    language: string
+    content: string
+    contentType: string
+    signature: string
+    keyId: string
+    algorithm: string
+    data: string
+  }
+}
+
+type FundingSource_BankAccountFundingSource_Fragment = {
+  __typename?: 'BankAccountFundingSource'
+  id: string
+  owner: string
+  version: number
+  createdAtEpochMs: number
+  updatedAtEpochMs: number
+  state: FundingSourceState
+  currency: string
+  bankAccountType: BankAccountType
+  authorization: {
+    __typename?: 'SignedAuthorizationText'
+    language: string
+    content: string
+    contentType: string
+    signature: string
+    keyId: string
+    algorithm: string
+    data: string
+  }
+}
+
+type FundingSource_CreditCardFundingSource_Fragment = {
+  __typename?: 'CreditCardFundingSource'
+  id: string
+  owner: string
+  version: number
+  createdAtEpochMs: number
+  updatedAtEpochMs: number
+  state: FundingSourceState
+  currency: string
+  last4: string
+  network: CreditCardNetwork
+  cardType: CardType
+}
+
+export type FundingSourceFragment =
+  | FundingSource_BankAccountFundingSource_Fragment
+  | FundingSource_CreditCardFundingSource_Fragment
 
 export type SealedAttributeFragment = {
   __typename?: 'SealedAttribute'
@@ -940,19 +1033,41 @@ export type CompleteFundingSourceMutationVariables = Exact<{
 
 export type CompleteFundingSourceMutation = {
   __typename?: 'Mutation'
-  completeFundingSource: {
-    __typename?: 'CreditCardFundingSource'
-    id: string
-    owner: string
-    version: number
-    createdAtEpochMs: number
-    updatedAtEpochMs: number
-    state: FundingSourceState
-    currency: string
-    last4: string
-    network: CreditCardNetwork
-    cardType: CardType
-  }
+  completeFundingSource:
+    | {
+        __typename?: 'BankAccountFundingSource'
+        id: string
+        owner: string
+        version: number
+        createdAtEpochMs: number
+        updatedAtEpochMs: number
+        state: FundingSourceState
+        currency: string
+        bankAccountType: BankAccountType
+        authorization: {
+          __typename?: 'SignedAuthorizationText'
+          language: string
+          content: string
+          contentType: string
+          signature: string
+          keyId: string
+          algorithm: string
+          data: string
+        }
+      }
+    | {
+        __typename?: 'CreditCardFundingSource'
+        id: string
+        owner: string
+        version: number
+        createdAtEpochMs: number
+        updatedAtEpochMs: number
+        state: FundingSourceState
+        currency: string
+        last4: string
+        network: CreditCardNetwork
+        cardType: CardType
+      }
 }
 
 export type CancelFundingSourceMutationVariables = Exact<{
@@ -961,19 +1076,41 @@ export type CancelFundingSourceMutationVariables = Exact<{
 
 export type CancelFundingSourceMutation = {
   __typename?: 'Mutation'
-  cancelFundingSource: {
-    __typename?: 'CreditCardFundingSource'
-    id: string
-    owner: string
-    version: number
-    createdAtEpochMs: number
-    updatedAtEpochMs: number
-    state: FundingSourceState
-    currency: string
-    last4: string
-    network: CreditCardNetwork
-    cardType: CardType
-  }
+  cancelFundingSource:
+    | {
+        __typename?: 'BankAccountFundingSource'
+        id: string
+        owner: string
+        version: number
+        createdAtEpochMs: number
+        updatedAtEpochMs: number
+        state: FundingSourceState
+        currency: string
+        bankAccountType: BankAccountType
+        authorization: {
+          __typename?: 'SignedAuthorizationText'
+          language: string
+          content: string
+          contentType: string
+          signature: string
+          keyId: string
+          algorithm: string
+          data: string
+        }
+      }
+    | {
+        __typename?: 'CreditCardFundingSource'
+        id: string
+        owner: string
+        version: number
+        createdAtEpochMs: number
+        updatedAtEpochMs: number
+        state: FundingSourceState
+        currency: string
+        last4: string
+        network: CreditCardNetwork
+        cardType: CardType
+      }
 }
 
 export type ProvisionVirtualCardMutationVariables = Exact<{
@@ -1364,19 +1501,42 @@ export type GetFundingSourceQueryVariables = Exact<{
 
 export type GetFundingSourceQuery = {
   __typename?: 'Query'
-  getFundingSource?: {
-    __typename?: 'CreditCardFundingSource'
-    id: string
-    owner: string
-    version: number
-    createdAtEpochMs: number
-    updatedAtEpochMs: number
-    state: FundingSourceState
-    currency: string
-    last4: string
-    network: CreditCardNetwork
-    cardType: CardType
-  } | null
+  getFundingSource?:
+    | {
+        __typename?: 'BankAccountFundingSource'
+        id: string
+        owner: string
+        version: number
+        createdAtEpochMs: number
+        updatedAtEpochMs: number
+        state: FundingSourceState
+        currency: string
+        bankAccountType: BankAccountType
+        authorization: {
+          __typename?: 'SignedAuthorizationText'
+          language: string
+          content: string
+          contentType: string
+          signature: string
+          keyId: string
+          algorithm: string
+          data: string
+        }
+      }
+    | {
+        __typename?: 'CreditCardFundingSource'
+        id: string
+        owner: string
+        version: number
+        createdAtEpochMs: number
+        updatedAtEpochMs: number
+        state: FundingSourceState
+        currency: string
+        last4: string
+        network: CreditCardNetwork
+        cardType: CardType
+      }
+    | null
 }
 
 export type ListFundingSourcesQueryVariables = Exact<{
@@ -1389,19 +1549,42 @@ export type ListFundingSourcesQuery = {
   listFundingSources: {
     __typename?: 'FundingSourceConnection'
     nextToken?: string | null
-    items: Array<{
-      __typename?: 'CreditCardFundingSource'
-      id: string
-      owner: string
-      version: number
-      createdAtEpochMs: number
-      updatedAtEpochMs: number
-      state: FundingSourceState
-      currency: string
-      last4: string
-      network: CreditCardNetwork
-      cardType: CardType
-    }>
+    items: Array<
+      | {
+          __typename?: 'BankAccountFundingSource'
+          id: string
+          owner: string
+          version: number
+          createdAtEpochMs: number
+          updatedAtEpochMs: number
+          state: FundingSourceState
+          currency: string
+          bankAccountType: BankAccountType
+          authorization: {
+            __typename?: 'SignedAuthorizationText'
+            language: string
+            content: string
+            contentType: string
+            signature: string
+            keyId: string
+            algorithm: string
+            data: string
+          }
+        }
+      | {
+          __typename?: 'CreditCardFundingSource'
+          id: string
+          owner: string
+          version: number
+          createdAtEpochMs: number
+          updatedAtEpochMs: number
+          state: FundingSourceState
+          currency: string
+          last4: string
+          network: CreditCardNetwork
+          cardType: CardType
+        }
+    >
   }
 }
 
@@ -2024,12 +2207,12 @@ export const ProvisionalFundingSourceFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<ProvisionalFundingSourceFragment, unknown>
-export const FundingSourceFragmentDoc = {
+export const CreditCardFundingSourceFragmentDoc = {
   kind: 'Document',
   definitions: [
     {
       kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'FundingSource' },
+      name: { kind: 'Name', value: 'CreditCardFundingSource' },
       typeCondition: {
         kind: 'NamedType',
         name: { kind: 'Name', value: 'CreditCardFundingSource' },
@@ -2050,6 +2233,76 @@ export const FundingSourceFragmentDoc = {
         ],
       },
     },
+  ],
+} as unknown as DocumentNode<CreditCardFundingSourceFragment, unknown>
+export const BankAccountFundingSourceFragmentDoc = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'BankAccountFundingSource' },
+      typeCondition: {
+        kind: 'NamedType',
+        name: { kind: 'Name', value: 'BankAccountFundingSource' },
+      },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'version' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'currency' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'bankAccountType' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'authorization' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'language' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'content' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'contentType' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'signature' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'keyId' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'algorithm' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'data' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<BankAccountFundingSourceFragment, unknown>
+export const FundingSourceFragmentDoc = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'FundingSource' },
+      typeCondition: {
+        kind: 'NamedType',
+        name: { kind: 'Name', value: 'FundingSource' },
+      },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'FragmentSpread',
+            name: { kind: 'Name', value: 'CreditCardFundingSource' },
+          },
+          {
+            kind: 'FragmentSpread',
+            name: { kind: 'Name', value: 'BankAccountFundingSource' },
+          },
+        ],
+      },
+    },
+    ...CreditCardFundingSourceFragmentDoc.definitions,
+    ...BankAccountFundingSourceFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<FundingSourceFragment, unknown>
 export const OwnerFragmentDoc = {

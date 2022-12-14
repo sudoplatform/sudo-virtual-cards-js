@@ -4,6 +4,7 @@ import {
   Logger,
   NotSignedInError,
 } from '@sudoplatform/sudo-common'
+import { BankAccountType } from '../../../../public/typings/bankAccountType'
 import { CardType } from '../../../../public/typings/cardType'
 import {
   CreditCardNetwork,
@@ -44,8 +45,15 @@ export interface GetCreditCardFundingSourceUseCaseOutput
   cardType: CardType
 }
 
+export interface GetBankAccountFundingSourceUseCaseOutput
+  extends BaseGetFundingSourceUseCaseOutput {
+  type: FundingSourceType.BankAccount
+  bankAccountType: BankAccountType
+}
+
 export type GetFundingSourceUseCaseOutput =
-  GetCreditCardFundingSourceUseCaseOutput
+  | GetCreditCardFundingSourceUseCaseOutput
+  | GetBankAccountFundingSourceUseCaseOutput
 
 /**
  * Application business logic for retrieving a funding source.

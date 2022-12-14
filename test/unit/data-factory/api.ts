@@ -1,4 +1,5 @@
 import {
+  BankAccountType,
   CardState,
   CardType,
   CreditCardNetwork,
@@ -45,11 +46,28 @@ export class ApiDataFactory {
         version: 1,
         provider: 'checkout',
         type: FundingSourceType.BankAccount,
+        linkToken: 'link_token',
+        authorizationText: [
+          {
+            content: 'authorization-text-0',
+            contentType: 'authorization-text-0-content-type',
+            language: 'authorization-text-0-language',
+            hash: 'authorization-text-0-hash',
+            hashAlgorithm: 'authorization-text-0-hash-algorithm',
+          },
+          {
+            content: 'authorization-text-1',
+            contentType: 'authorization-text-1-content-type',
+            language: 'authorization-text-1-language',
+            hash: 'authorization-text-1-hash',
+            hashAlgorithm: 'authorization-text-1-hash-algorithm',
+          },
+        ],
       },
       state: ProvisionalFundingSourceState.Completed,
     }
 
-  static readonly fundingSource: FundingSource = {
+  static readonly creditCardFundingSource: FundingSource = {
     ...this.commonProps,
     id: 'dummyFundingSourceId',
     currency: 'dummyCurrency',
@@ -58,6 +76,17 @@ export class ApiDataFactory {
     state: FundingSourceState.Active,
     type: FundingSourceType.CreditCard,
     cardType: CardType.Credit,
+  }
+
+  static readonly defaultFundingSource = this.creditCardFundingSource
+
+  static readonly bankAccountFundingSource: FundingSource = {
+    ...this.commonProps,
+    id: 'dummyFundingSourceId',
+    currency: 'dummyCurrency',
+    state: FundingSourceState.Active,
+    type: FundingSourceType.BankAccount,
+    bankAccountType: BankAccountType.Savings,
   }
 
   static readonly provisionalVirtualCard: ProvisionalVirtualCard = {

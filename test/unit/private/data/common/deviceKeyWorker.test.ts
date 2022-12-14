@@ -3,9 +3,11 @@ import {
   DecodeError,
   EncryptionAlgorithm,
   FatalError,
+  IllegalArgumentError,
   KeyNotFoundError,
   NotSignedInError,
   PublicKeyFormat,
+  SignatureAlgorithm,
   SudoKeyManager,
   SymmetricEncryptionOptions,
 } from '@sudoplatform/sudo-common'
@@ -35,6 +37,10 @@ describe('DeviceKeyWorker Test Suite', () => {
   let instanceUnderTest: DeviceKeyWorker
   const mockKeyManager = mock<SudoKeyManager>()
   const mockUserClient = mock<SudoUserClient>()
+
+  function uint8ArrayFromString(s: string): Uint8Array {
+    return Uint8Array.from(Buffer.from(s).values())
+  }
 
   beforeEach(() => {
     reset(mockKeyManager)
@@ -305,7 +311,7 @@ describe('DeviceKeyWorker Test Suite', () => {
             anything(),
             objectContaining({
               algorithm: EncryptionAlgorithm.AesCbcPkcs7Padding,
-            }),
+            }) as SymmetricEncryptionOptions,
           ),
         ).thenReject(error)
         await expect(
@@ -406,5 +412,73 @@ describe('DeviceKeyWorker Test Suite', () => {
         ).rejects.toThrow(error)
       })
     })
+  })
+
+  describe('signString', () => {
+    const keyId = 'key-id'
+    const stringToSign = 'string-to-sign'
+    const bufferToSign = uint8ArrayFromString(stringToSign)
+    const signatureString = 'signature'
+    const signature = uint8ArrayFromString(signatureString)
+    const signatureBase64 = Base64.encode(signature)
+
+    it.each`
+      keyType               | keyTypeName
+      ${KeyType.KeyPair}    | ${'KeyPair'}
+      ${KeyType.PrivateKey} | ${'PrivateKey'}
+    `(
+      'signs a string with key type $keyTypeName',
+      async ({ keyType }: { keyType: KeyType }) => {
+        when(
+          mockKeyManager.generateSignatureWithPrivateKey(
+            anything(),
+            anything(),
+            anything(),
+          ),
+        ).thenResolve(signature)
+
+        await expect(
+          instanceUnderTest.signString({
+            plainText: stringToSign,
+            keyId,
+            keyType,
+            algorithm: SignatureAlgorithm.RsaPkcs15Sha256,
+          }),
+        ).resolves.toEqual(signatureBase64)
+
+        verify(
+          mockKeyManager.generateSignatureWithPrivateKey(
+            anything(),
+            anything(),
+            anything(),
+          ),
+        ).once()
+        const [actualName, actualData, actualOptions] = capture(
+          mockKeyManager.generateSignatureWithPrivateKey,
+        ).first()
+        expect(actualName).toEqual(keyId)
+        expect(actualData).toEqual(bufferToSign)
+        expect(actualOptions).toEqual({
+          algorithm: SignatureAlgorithm.RsaPkcs15Sha256,
+        })
+      },
+    )
+
+    it.each`
+      keyType                 | keyTypeName
+      ${KeyType.SymmetricKey} | ${'SymmetricKey'}
+    `(
+      'throws an IllegalArgumentError for key type $keyTypeName',
+      async ({ keyType }: { keyType: KeyType }) => {
+        await expect(
+          instanceUnderTest.signString({
+            plainText: stringToSign,
+            keyId,
+            keyType,
+            algorithm: SignatureAlgorithm.RsaPkcs15Sha256,
+          }),
+        ).rejects.toBeInstanceOf(IllegalArgumentError)
+      },
+    )
   })
 })

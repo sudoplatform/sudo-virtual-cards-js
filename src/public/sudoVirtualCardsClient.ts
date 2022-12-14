@@ -52,6 +52,7 @@ import { ListVirtualCardsUseCase } from '../private/domain/use-cases/virtualCard
 import { ProvisionVirtualCardUseCase } from '../private/domain/use-cases/virtualCard/provisionVirtualCardUseCase'
 import { UpdateVirtualCardUseCase } from '../private/domain/use-cases/virtualCard/updateVirtualCardUseCase'
 import { VirtualCardsServiceConfigNotFoundError } from './errors'
+import { AuthorizationText } from './typings'
 import { APIResult } from './typings/apiResult'
 import { VirtualCardsConfig } from './typings/config'
 import { CreateKeysIfAbsentResult } from './typings/createKeysIfAbsentResult'
@@ -87,11 +88,20 @@ import {
  *   Names of providers supported by the client. Will default to the default
  *   provider for the funding source type depending on configuration of the
  *   service.
+ * @property {string} language
+ *   Some funding source types require presentation of end-user language
+ *   specific agreements. This property allows the client application
+ *   to specify the user's preferred language. If such presentation is
+ *   required and has no translation in the requested language or no
+ *   preferred language is specified, the default translation will be
+ *   presented. The default is a property of service instance
+ *   configuration. The value is an RFC 5646 language tag e.g. en-US.
  */
 export interface SetupFundingSourceInput {
   currency: string
   type: FundingSourceType
   supportedProviders?: string[]
+  language?: string
 }
 
 /**
@@ -130,8 +140,26 @@ export interface CompleteFundingSourceCheckoutCardCompletionDataInput {
   paymentToken: string
 }
 
+/**
+ * Input for the completion data of {@link SudoVirtualCardsClient#completeFundingSource}.
+ *
+ * @property {string} provider Provider used to save the funding source information.
+ * @property {FundingSourceType.BankAccount} type Funding source provider type. Must be BankAccount.
+ * @property {string} publicToken Token to be exchanged in order to perform bank account operations.
+ * @property {string} accountId Identifier of the bank account to be used.
+ * @property {AuthorizationText} authorizationText Authorization text presented to and agreed to by the user
+ */
+export interface CompleteFundingSourceCheckoutBankAccountCompletionDataInput {
+  provider: 'checkout'
+  type: FundingSourceType.BankAccount
+  publicToken: string
+  accountId: string
+  authorizationText: AuthorizationText
+}
+
 export type CompleteFundingSourceCompletionDataInput =
   | CompleteFundingSourceCheckoutCardCompletionDataInput
+  | CompleteFundingSourceCheckoutBankAccountCompletionDataInput
   | CompleteFundingSourceStripeCardCompletionDataInput
 
 /**
@@ -649,7 +677,10 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
     this.configurationDataService = new DefaultVirtualCardsConfigService(
       this.apiClient,
     )
-    this.fundingSourceService = new DefaultFundingSourceService(this.apiClient)
+    this.fundingSourceService = new DefaultFundingSourceService(
+      this.apiClient,
+      this.deviceKeyWorker,
+    )
     this.virtualCardService = new DefaultVirtualCardService(
       this.apiClient,
       this.deviceKeyWorker,

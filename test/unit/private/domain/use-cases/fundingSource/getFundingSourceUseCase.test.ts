@@ -43,7 +43,7 @@ describe('GetFundingSourceUseCase', () => {
     it('completes successfully', async () => {
       const id = v4()
       when(mockFundingSourceService.getFundingSource(anything())).thenResolve(
-        EntityDataFactory.fundingSource,
+        EntityDataFactory.defaultFundingSource,
       )
       const result = await instanceUnderTest.execute({
         id,
@@ -57,7 +57,7 @@ describe('GetFundingSourceUseCase', () => {
         id,
         cachePolicy: CachePolicy.CacheOnly,
       })
-      expect(result).toStrictEqual(EntityDataFactory.fundingSource)
+      expect(result).toStrictEqual(EntityDataFactory.defaultFundingSource)
     })
 
     it('completes successfully with undefined result', async () => {

@@ -454,7 +454,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
   describe('completeFundingSource', () => {
     beforeEach(() => {
       when(mockCompleteFundingSourceUseCase.execute(anything())).thenResolve(
-        EntityDataFactory.fundingSource,
+        EntityDataFactory.defaultFundingSource,
       )
     })
     it('generates use case', async () => {
@@ -464,7 +464,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       })
       expect(JestMockCompleteFundingSourceUseCase).toHaveBeenCalledTimes(1)
     })
-    it('calls use case as expected', async () => {
+    it('calls use case as expected for credit card', async () => {
       const id = v4()
       await instanceUnderTest.completeFundingSource({
         id,
@@ -477,20 +477,80 @@ describe('SudoVirtualCardsClient Test Suite', () => {
         completionData: { provider: 'stripe', paymentMethod: '' },
       })
     })
-    it('returns expected result', async () => {
+    it('calls use case as expected for bank account', async () => {
+      const id = v4()
+      await instanceUnderTest.completeFundingSource({
+        id,
+        completionData: {
+          provider: 'checkout',
+          type: FundingSourceType.BankAccount,
+          publicToken: '',
+          accountId: '',
+          authorizationText: {
+            content: 'authorizationText',
+            contentType: 'authorizationTextContentType',
+            language: 'authorizationTextLanguage',
+            hash: 'authorizationTextHash',
+            hashAlgorithm: 'authorizationTextHashAlgorithm',
+          },
+        },
+      })
+      verify(mockCompleteFundingSourceUseCase.execute(anything())).once()
+      const [args] = capture(mockCompleteFundingSourceUseCase.execute).first()
+      expect(args).toEqual<typeof args>({
+        id,
+        completionData: {
+          provider: 'checkout',
+          type: FundingSourceType.BankAccount,
+          publicToken: '',
+          accountId: '',
+          authorizationText: {
+            content: 'authorizationText',
+            contentType: 'authorizationTextContentType',
+            language: 'authorizationTextLanguage',
+            hash: 'authorizationTextHash',
+            hashAlgorithm: 'authorizationTextHashAlgorithm',
+          },
+        },
+      })
+    })
+    it('returns expected result for credit card', async () => {
       await expect(
         instanceUnderTest.completeFundingSource({
           id: '',
           completionData: { provider: 'stripe', paymentMethod: '' },
         }),
-      ).resolves.toEqual(ApiDataFactory.fundingSource)
+      ).resolves.toEqual(ApiDataFactory.defaultFundingSource)
+    })
+    it('returns expected result for bank account', async () => {
+      when(mockCompleteFundingSourceUseCase.execute(anything())).thenResolve(
+        EntityDataFactory.bankAccountFundingSource,
+      )
+      await expect(
+        instanceUnderTest.completeFundingSource({
+          id: '',
+          completionData: {
+            provider: 'checkout',
+            type: FundingSourceType.BankAccount,
+            publicToken: '',
+            accountId: '',
+            authorizationText: {
+              content: 'authorizationText',
+              contentType: 'authorizationTextContentType',
+              language: 'authorizationTextLanguage',
+              hash: 'authorizationTextHash',
+              hashAlgorithm: 'authorizationTextHashAlgorithm',
+            },
+          },
+        }),
+      ).resolves.toEqual(ApiDataFactory.bankAccountFundingSource)
     })
   })
 
   describe('getFundingSource', () => {
     beforeEach(() => {
       when(mockGetFundingSourceUseCase.execute(anything())).thenResolve(
-        EntityDataFactory.fundingSource,
+        EntityDataFactory.defaultFundingSource,
       )
       when(mockSudoUserClient.isSignedIn()).thenResolve(true)
     })
@@ -526,14 +586,14 @@ describe('SudoVirtualCardsClient Test Suite', () => {
           id: '',
           cachePolicy: CachePolicy.CacheOnly,
         }),
-      ).resolves.toEqual(ApiDataFactory.fundingSource)
+      ).resolves.toEqual(ApiDataFactory.defaultFundingSource)
     })
   })
 
   describe('listFundingSources', () => {
     beforeEach(() => {
       when(mockListFundingSourcesUseCase.execute(anything())).thenResolve({
-        fundingSources: [EntityDataFactory.fundingSource],
+        fundingSources: [EntityDataFactory.defaultFundingSource],
         nextToken: 'nextToken',
       })
       when(mockSudoUserClient.isSignedIn()).thenResolve(true)
@@ -582,7 +642,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
           cachePolicy: CachePolicy.CacheOnly,
         }),
       ).resolves.toEqual({
-        items: [ApiDataFactory.fundingSource],
+        items: [ApiDataFactory.defaultFundingSource],
         nextToken: 'nextToken',
       })
     })
@@ -591,7 +651,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
   describe('cancelFundingSource', () => {
     beforeEach(() => {
       when(mockCancelFundingSourceUseCase.execute(anything())).thenResolve(
-        EntityDataFactory.fundingSource,
+        EntityDataFactory.defaultFundingSource,
       )
       when(mockSudoUserClient.isSignedIn()).thenResolve(true)
     })
@@ -608,7 +668,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     })
     it('returns expected result', async () => {
       await expect(instanceUnderTest.cancelFundingSource('')).resolves.toEqual(
-        ApiDataFactory.fundingSource,
+        ApiDataFactory.defaultFundingSource,
       )
     })
   })

@@ -1,5 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Base64, FatalError } from '@sudoplatform/sudo-common'
+import {
+  Base64,
+  FatalError,
+  KeyNotFoundError,
+  SignatureAlgorithm,
+} from '@sudoplatform/sudo-common'
 import { FundingSourceType } from '../../../public'
 import { FundingSourceEntity } from '../../domain/entities/fundingSource/fundingSourceEntity'
 import {
@@ -10,11 +15,13 @@ import {
   FundingSourceServiceListFundingSourcesInput,
   FundingSourceServiceListFundingSourcesOutput,
   FundingSourceServiceSetupFundingSourceInput,
+  isFundingSourceServiceCheckoutBankAccountCompletionData,
   isFundingSourceServiceCheckoutCardCompletionData,
   isFundingSourceServiceStripeCardCompletionData,
 } from '../../domain/entities/fundingSource/fundingSourceService'
 import { ProvisionalFundingSourceEntity } from '../../domain/entities/fundingSource/provisionalFundingSourceEntity'
 import { ApiClient } from '../common/apiClient'
+import { DeviceKeyWorker, KeyType } from '../common/deviceKeyWorker'
 import { FetchPolicyTransformer } from '../common/transformer/fetchPolicyTransformer'
 import { FundingSourceEntityTransformer } from './transformer/fundingSourceEntityTransformer'
 import { ProvisionalFundingSourceEntityTransformer } from './transformer/provisionalFundingSourceEntityTransformer'
@@ -24,7 +31,10 @@ export interface FundingSourceSetup {
 }
 
 export class DefaultFundingSourceService implements FundingSourceService {
-  constructor(private readonly appSync: ApiClient) {}
+  constructor(
+    private readonly appSync: ApiClient,
+    private readonly deviceKeyWorker: DeviceKeyWorker,
+  ) {}
 
   async getFundingSourceClientConfiguration(): Promise<string> {
     return (await this.appSync.getFundingSourceClientConfiguration()).data
@@ -71,6 +81,45 @@ export class DefaultFundingSourceService implements FundingSourceService {
           version: 1,
           type,
           payment_token: completionData.paymentToken,
+        }),
+      )
+    } else if (
+      isFundingSourceServiceCheckoutBankAccountCompletionData(completionData)
+    ) {
+      const publicKey = await this.deviceKeyWorker.getCurrentPublicKey()
+      if (!publicKey) {
+        throw new KeyNotFoundError()
+      }
+
+      const signedAt = new Date()
+      const authorizationTextSignatureData = {
+        hash: completionData.authorizationText.hash,
+        hashAlgorithm: completionData.authorizationText.hashAlgorithm,
+        signedAt,
+        account: completionData.accountId,
+      }
+      const data = JSON.stringify(authorizationTextSignatureData)
+      const signature = await this.deviceKeyWorker.signString({
+        plainText: data,
+        keyId: publicKey.id,
+        keyType: KeyType.PrivateKey,
+        algorithm: SignatureAlgorithm.RsaPkcs15Sha256,
+      })
+      const authorizationTextSignature = {
+        data,
+        algorithm: 'RSASignatureSSAPKCS15SHA256',
+        keyId: publicKey.id,
+        signature,
+      }
+
+      encodedCompletionData = Base64.encodeString(
+        JSON.stringify({
+          provider,
+          version: 1,
+          type,
+          public_token: completionData.publicToken,
+          account_id: completionData.accountId,
+          authorizationTextSignature,
         }),
       )
     } else {

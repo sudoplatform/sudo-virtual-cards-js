@@ -39,16 +39,16 @@ describe('CancelFundingSourceUseCase Test Suite', () => {
     it('completes successfully with valid input', async () => {
       when(
         mockFundingSourceService.cancelFundingSource(anything()),
-      ).thenResolve(EntityDataFactory.fundingSource)
+      ).thenResolve(EntityDataFactory.defaultFundingSource)
       const result = await instanceUnderTest.execute(
-        EntityDataFactory.fundingSource.id,
+        EntityDataFactory.defaultFundingSource.id,
       )
-      expect(result).toStrictEqual(EntityDataFactory.fundingSource)
+      expect(result).toStrictEqual(EntityDataFactory.defaultFundingSource)
       const [inputArgs] = capture(
         mockFundingSourceService.cancelFundingSource,
       ).first()
       expect(inputArgs).toStrictEqual<typeof inputArgs>({
-        id: EntityDataFactory.fundingSource.id,
+        id: EntityDataFactory.defaultFundingSource.id,
       })
       verify(mockFundingSourceService.cancelFundingSource(anything())).once()
     })

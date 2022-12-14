@@ -10,7 +10,11 @@ import {
   Logger,
   UnknownGraphQLError,
 } from '@sudoplatform/sudo-common'
-import { NormalizedCacheObject } from 'apollo-cache-inmemory'
+import {
+  InMemoryCache,
+  IntrospectionFragmentMatcher,
+  NormalizedCacheObject,
+} from 'apollo-cache-inmemory'
 import {
   FetchPolicy,
   MutationOptions,
@@ -18,6 +22,7 @@ import {
 } from 'apollo-client/core/watchQueryOptions'
 import { ApolloError } from 'apollo-client/errors/ApolloError'
 import AWSAppSyncClient from 'aws-appsync'
+import * as introspectionQueryResultData from '../../../gen/fragmentTypes.json'
 import {
   CancelFundingSourceDocument,
   CancelFundingSourceMutation,
@@ -98,8 +103,14 @@ export class ApiClient {
 
     const clientManager =
       apiClientManager ?? DefaultApiClientManager.getInstance()
+    const fragmentMatcher = new IntrospectionFragmentMatcher({
+      introspectionQueryResultData,
+    })
+    const cache = new InMemoryCache({ fragmentMatcher })
     this.client = clientManager.getClient({
       disableOffline: true,
+      cache,
+      configNamespace: 'vcService',
     })
   }
 

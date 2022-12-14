@@ -30,10 +30,32 @@ const CheckoutCardProvisionalFundingSourceProvisioningDataCodec = t.type(
   'CheckoutCardProvisionalFundingSourceProvisioningData',
 )
 
+const PlaidLinkTokenProps = {
+  link_token: t.string,
+  expiration: t.string,
+  request_id: t.string,
+}
+const PlaidLinkTokenCodec = t.type(PlaidLinkTokenProps, 'PlaidLinkToken')
+
+const AuthorizationTextProperties = {
+  language: t.string,
+  content: t.string,
+  contentType: t.string,
+  hash: t.string,
+  hashAlgorithm: t.string,
+}
+
+const AuthorizationTextCodec = t.type(
+  AuthorizationTextProperties,
+  'AuthorizationText',
+)
+
 const CheckoutBankAccountProvisionalFundingSourceProvisioningDataProperties = {
   provider: t.literal('checkout'),
   version: t.literal(1),
   type: t.literal('BANK_ACCOUNT'),
+  plaidLinkToken: PlaidLinkTokenCodec,
+  authorizationText: t.array(AuthorizationTextCodec),
 }
 
 const CheckoutBankAccountProvisionalFundingSourceProvisioningDataCodec = t.type(
@@ -144,6 +166,8 @@ export function decodeProvisionalFundingSourceProvisioningData(
       provider: decoded.provider,
       version: decoded.version,
       type: FundingSourceType.BankAccount,
+      linkToken: decoded.plaidLinkToken.link_token,
+      authorizationText: decoded.authorizationText,
     }
   } else {
     throw new FatalError(

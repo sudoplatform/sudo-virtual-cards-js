@@ -4,6 +4,7 @@ import {
   Logger,
   NotSignedInError,
 } from '@sudoplatform/sudo-common'
+import { BankAccountType } from '../../../../public/typings/bankAccountType'
 import { CardType } from '../../../../public/typings/cardType'
 import {
   CreditCardNetwork,
@@ -53,8 +54,15 @@ interface ListFundingSourcesUseCaseOutputCreditCardItem
   cardType: CardType
 }
 
+interface ListFundingSourcesUseCaseOutputBankAccountItem
+  extends BaseListFundingSourcesUseCaseOutputItem {
+  type: FundingSourceType.BankAccount
+  bankAccountType: BankAccountType
+}
+
 type ListFundingSourcesUseCaseOutputItem =
-  ListFundingSourcesUseCaseOutputCreditCardItem
+  | ListFundingSourcesUseCaseOutputCreditCardItem
+  | ListFundingSourcesUseCaseOutputBankAccountItem
 
 interface ListFundingSourcesUseCaseOutput {
   fundingSources: Array<ListFundingSourcesUseCaseOutputItem>

@@ -10,6 +10,7 @@ import {
   FundingSourceRequiresUserInteractionError,
   FundingSourceState,
   FundingSourceType,
+  isCheckoutBankAccountProvisionalFundingSourceProvisioningData,
   isCheckoutCardProvisionalFundingSourceInteractionData,
   isCheckoutCardProvisionalFundingSourceProvisioningData,
   isStripeCardProvisionalFundingSourceProvisioningData,
@@ -53,9 +54,99 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
       type: FundingSourceType.CreditCard,
       paymentToken: 'dummyPaymentToken',
     },
+    checkoutBankAccount: {
+      provider: 'checkout',
+      type: FundingSourceType.BankAccount,
+      accountId: 'dummyAccountId',
+      publicToken: 'dummyPublicToken',
+      authorizationText: {
+        language: 'en-US',
+        content: 'authorization-text-content',
+        contentType: 'authorization-text-content-type',
+        hash: 'authorization-text-hash',
+        hashAlgorithm: 'authorization-text-hash-algorithm',
+      },
+    },
   }
 
   describe('CompleteFundingSource', () => {
+    describe('for checkout bank account provider', () => {
+      let skip = false
+      beforeAll(() => {
+        // Since we determine availability of provider
+        // asynchronously we can't use that knowledge
+        // to control the set of providers we iterate
+        // over so we have to use a flag
+        if (!apis['checkout']) {
+          console.warn(
+            `No API available for provider 'checkout'. Skipping tests.`,
+          )
+          skip = true
+        }
+      })
+
+      it('returns ProvisionalFundingSourceNotFoundError if invalid id', async () => {
+        if (skip) return
+
+        await instanceUnderTest.createKeysIfAbsent()
+
+        await expect(
+          instanceUnderTest.completeFundingSource({
+            id: v4(),
+            completionData:
+              dummyCompletionDataForProvider['checkoutBankAccount'],
+          }),
+        ).rejects.toThrow(ProvisionalFundingSourceNotFoundError)
+      })
+
+      it.each`
+        name             | accountId      | publicToken
+        ${'accountId'}   | ${''}          | ${'publicToken'}
+        ${'publicToken'} | ${'accountId'} | ${''}
+      `(
+        'returns FundingSourceCompletionDataInvalidError if empty $name in completionData',
+        async ({ accountId, publicToken }) => {
+          if (skip) return
+          await instanceUnderTest.createKeysIfAbsent()
+
+          const provisionalFundingSource =
+            await instanceUnderTest.setupFundingSource({
+              currency: 'USD',
+              type: FundingSourceType.BankAccount,
+              supportedProviders: ['checkout'],
+            })
+
+          const provisioningData = provisionalFundingSource.provisioningData
+          if (
+            !isCheckoutBankAccountProvisionalFundingSourceProvisioningData(
+              provisioningData,
+            )
+          ) {
+            throw new Error('Unexpected provisioning data type')
+          }
+          expect(
+            provisioningData.authorizationText.length,
+          ).toBeGreaterThanOrEqual(1)
+
+          const checkoutBankAccountCompletionData: CompleteFundingSourceCompletionDataInput =
+            {
+              provider: 'checkout',
+              type: FundingSourceType.BankAccount,
+              accountId,
+              publicToken,
+              authorizationText: provisioningData.authorizationText[0],
+            }
+
+          await expect(
+            instanceUnderTest.completeFundingSource({
+              id: provisionalFundingSource.id,
+              completionData: checkoutBankAccountCompletionData,
+            }),
+          ).rejects.toThrow(FundingSourceCompletionDataInvalidError)
+        },
+      )
+    })
+
     describe.each`
       provider
       ${'stripe'}

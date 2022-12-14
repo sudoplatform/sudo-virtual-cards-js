@@ -23,7 +23,7 @@ export const getProviderAPIs = async (
   for (const fsConfig of config) {
     if (isStripeCardFundingSourceClientConfiguration(fsConfig)) {
       stripe = new Stripe(fsConfig.apiKey, {
-        apiVersion: '2022-08-01',
+        apiVersion: '2022-11-15',
         typescript: true,
       })
     } else if (

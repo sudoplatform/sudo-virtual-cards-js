@@ -41,7 +41,7 @@ describe('ListFundingSourcesUseCase Test Suite', () => {
     it('completes successfully', async () => {
       when(mockFundingSourceService.listFundingSources(anything())).thenResolve(
         {
-          fundingSources: [EntityDataFactory.fundingSource],
+          fundingSources: [EntityDataFactory.defaultFundingSource],
         },
       )
       const result = await instanceUnderTest.execute({
@@ -57,14 +57,14 @@ describe('ListFundingSourcesUseCase Test Suite', () => {
         nextToken: undefined,
       })
       expect(result).toStrictEqual({
-        fundingSources: [EntityDataFactory.fundingSource],
+        fundingSources: [EntityDataFactory.defaultFundingSource],
       })
     })
 
     it('completes successfully with empty result items', async () => {
       when(mockFundingSourceService.listFundingSources(anything())).thenResolve(
         {
-          fundingSources: [EntityDataFactory.fundingSource],
+          fundingSources: [EntityDataFactory.defaultFundingSource],
         },
       )
       const result = await instanceUnderTest.execute({
@@ -80,7 +80,7 @@ describe('ListFundingSourcesUseCase Test Suite', () => {
         nextToken: undefined,
       })
       expect(result).toStrictEqual({
-        fundingSources: [EntityDataFactory.fundingSource],
+        fundingSources: [EntityDataFactory.defaultFundingSource],
       })
     })
   })
