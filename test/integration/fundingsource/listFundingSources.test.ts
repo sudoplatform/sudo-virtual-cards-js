@@ -84,11 +84,11 @@ describe('SudoVirtualCardsClient ListFundingSources Test Suite', () => {
         })
 
         it('returns expected result when limit specified', async () => {
-          await createCardFundingSource(instanceUnderTest, apis, {
+          const fs1 = await createCardFundingSource(instanceUnderTest, apis, {
             testCard: 'Visa-No3DS-1',
             supportedProviders: [provider],
           })
-          await createCardFundingSource(instanceUnderTest, apis, {
+          const fs2 = await createCardFundingSource(instanceUnderTest, apis, {
             testCard: 'MC-No3DS-1',
             supportedProviders: [provider],
           })
@@ -99,6 +99,18 @@ describe('SudoVirtualCardsClient ListFundingSources Test Suite', () => {
           })
           expect(result.items).toHaveLength(1)
           expect(result.nextToken).toBeTruthy()
+          expect([fs1, fs2]).toContainEqual(result.items[0])
+
+          const result2 = await instanceUnderTest.listFundingSources({
+            cachePolicy: CachePolicy.RemoteOnly,
+            limit: 1,
+            nextToken: result.nextToken,
+          })
+          expect(result2.items).toHaveLength(1)
+          expect(result2.nextToken).toBeUndefined()
+          expect([fs1, fs2]).toContainEqual(result2.items[0])
+
+          expect(result.items[0]).not.toEqual(result2.items[0])
         })
       },
     )

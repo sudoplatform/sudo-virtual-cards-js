@@ -13,11 +13,6 @@ generates:
       - typescript
       - typescript-operations
       - typed-document-node
-  src/gen/fragmentTypes.json:
-    plugins:
-      - fragment-matcher
-    config:
-      apolloClientVersion: 2
 hooks:
   afterAllFileWrite:
     - prettier --write

@@ -66,11 +66,6 @@ fragment BankAccountFundingSource on BankAccountFundingSource {
   }
 }
 
-fragment FundingSource on FundingSource {
-  ...CreditCardFundingSource
-  ...BankAccountFundingSource
-}
-
 fragment SealedAttribute on SealedAttribute {
   keyId
   algorithm

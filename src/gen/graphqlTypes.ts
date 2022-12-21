@@ -39,18 +39,19 @@ export type AddressInput = {
   state: Scalars['String']
 }
 
-export type BankAccountFundingSource = CommonObject & {
-  __typename?: 'BankAccountFundingSource'
-  authorization: SignedAuthorizationText
-  bankAccountType: BankAccountType
-  createdAtEpochMs: Scalars['Float']
-  currency: Scalars['String']
-  id: Scalars['ID']
-  owner: Scalars['ID']
-  state: FundingSourceState
-  updatedAtEpochMs: Scalars['Float']
-  version: Scalars['Int']
-}
+export type BankAccountFundingSource = CommonFundingSource &
+  CommonObject & {
+    __typename?: 'BankAccountFundingSource'
+    authorization: SignedAuthorizationText
+    bankAccountType: BankAccountType
+    createdAtEpochMs: Scalars['Float']
+    currency: Scalars['String']
+    id: Scalars['ID']
+    owner: Scalars['ID']
+    state: FundingSourceState
+    updatedAtEpochMs: Scalars['Float']
+    version: Scalars['Int']
+  }
 
 export enum BankAccountType {
   Checking = 'CHECKING',
@@ -99,6 +100,16 @@ export type CardUpdateRequest = {
   metadata?: InputMaybe<SealedAttributeInput>
 }
 
+export type CommonFundingSource = {
+  createdAtEpochMs: Scalars['Float']
+  currency: Scalars['String']
+  id: Scalars['ID']
+  owner: Scalars['ID']
+  state: FundingSourceState
+  updatedAtEpochMs: Scalars['Float']
+  version: Scalars['Int']
+}
+
 export type CommonObject = {
   createdAtEpochMs: Scalars['Float']
   id: Scalars['ID']
@@ -121,19 +132,20 @@ export type CreatePublicKeyInput = {
   publicKey: Scalars['String']
 }
 
-export type CreditCardFundingSource = CommonObject & {
-  __typename?: 'CreditCardFundingSource'
-  cardType: CardType
-  createdAtEpochMs: Scalars['Float']
-  currency: Scalars['String']
-  id: Scalars['ID']
-  last4: Scalars['String']
-  network: CreditCardNetwork
-  owner: Scalars['ID']
-  state: FundingSourceState
-  updatedAtEpochMs: Scalars['Float']
-  version: Scalars['Int']
-}
+export type CreditCardFundingSource = CommonFundingSource &
+  CommonObject & {
+    __typename?: 'CreditCardFundingSource'
+    cardType: CardType
+    createdAtEpochMs: Scalars['Float']
+    currency: Scalars['String']
+    id: Scalars['ID']
+    last4: Scalars['String']
+    network: CreditCardNetwork
+    owner: Scalars['ID']
+    state: FundingSourceState
+    updatedAtEpochMs: Scalars['Float']
+    version: Scalars['Int']
+  }
 
 export enum CreditCardNetwork {
   Amex = 'AMEX',
@@ -634,46 +646,6 @@ export type BankAccountFundingSourceFragment = {
     data: string
   }
 }
-
-type FundingSource_BankAccountFundingSource_Fragment = {
-  __typename?: 'BankAccountFundingSource'
-  id: string
-  owner: string
-  version: number
-  createdAtEpochMs: number
-  updatedAtEpochMs: number
-  state: FundingSourceState
-  currency: string
-  bankAccountType: BankAccountType
-  authorization: {
-    __typename?: 'SignedAuthorizationText'
-    language: string
-    content: string
-    contentType: string
-    signature: string
-    keyId: string
-    algorithm: string
-    data: string
-  }
-}
-
-type FundingSource_CreditCardFundingSource_Fragment = {
-  __typename?: 'CreditCardFundingSource'
-  id: string
-  owner: string
-  version: number
-  createdAtEpochMs: number
-  updatedAtEpochMs: number
-  state: FundingSourceState
-  currency: string
-  last4: string
-  network: CreditCardNetwork
-  cardType: CardType
-}
-
-export type FundingSourceFragment =
-  | FundingSource_BankAccountFundingSource_Fragment
-  | FundingSource_CreditCardFundingSource_Fragment
 
 export type SealedAttributeFragment = {
   __typename?: 'SealedAttribute'
@@ -2277,34 +2249,6 @@ export const BankAccountFundingSourceFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<BankAccountFundingSourceFragment, unknown>
-export const FundingSourceFragmentDoc = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'FundingSource' },
-      typeCondition: {
-        kind: 'NamedType',
-        name: { kind: 'Name', value: 'FundingSource' },
-      },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          {
-            kind: 'FragmentSpread',
-            name: { kind: 'Name', value: 'CreditCardFundingSource' },
-          },
-          {
-            kind: 'FragmentSpread',
-            name: { kind: 'Name', value: 'BankAccountFundingSource' },
-          },
-        ],
-      },
-    },
-    ...CreditCardFundingSourceFragmentDoc.definitions,
-    ...BankAccountFundingSourceFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<FundingSourceFragment, unknown>
 export const OwnerFragmentDoc = {
   kind: 'Document',
   definitions: [
@@ -3017,8 +2961,42 @@ export const CompleteFundingSourceDocument = {
               kind: 'SelectionSet',
               selections: [
                 {
-                  kind: 'FragmentSpread',
-                  name: { kind: 'Name', value: 'FundingSource' },
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'CreditCardFundingSource' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'FragmentSpread',
+                        name: {
+                          kind: 'Name',
+                          value: 'CreditCardFundingSource',
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'BankAccountFundingSource' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'FragmentSpread',
+                        name: {
+                          kind: 'Name',
+                          value: 'BankAccountFundingSource',
+                        },
+                      },
+                    ],
+                  },
                 },
               ],
             },
@@ -3026,7 +3004,8 @@ export const CompleteFundingSourceDocument = {
         ],
       },
     },
-    ...FundingSourceFragmentDoc.definitions,
+    ...CreditCardFundingSourceFragmentDoc.definitions,
+    ...BankAccountFundingSourceFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<
   CompleteFundingSourceMutation,
@@ -3075,8 +3054,42 @@ export const CancelFundingSourceDocument = {
               kind: 'SelectionSet',
               selections: [
                 {
-                  kind: 'FragmentSpread',
-                  name: { kind: 'Name', value: 'FundingSource' },
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'CreditCardFundingSource' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'FragmentSpread',
+                        name: {
+                          kind: 'Name',
+                          value: 'CreditCardFundingSource',
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'BankAccountFundingSource' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'FragmentSpread',
+                        name: {
+                          kind: 'Name',
+                          value: 'BankAccountFundingSource',
+                        },
+                      },
+                    ],
+                  },
                 },
               ],
             },
@@ -3084,7 +3097,8 @@ export const CancelFundingSourceDocument = {
         ],
       },
     },
-    ...FundingSourceFragmentDoc.definitions,
+    ...CreditCardFundingSourceFragmentDoc.definitions,
+    ...BankAccountFundingSourceFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<
   CancelFundingSourceMutation,
@@ -3627,8 +3641,42 @@ export const GetFundingSourceDocument = {
               kind: 'SelectionSet',
               selections: [
                 {
-                  kind: 'FragmentSpread',
-                  name: { kind: 'Name', value: 'FundingSource' },
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'CreditCardFundingSource' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'FragmentSpread',
+                        name: {
+                          kind: 'Name',
+                          value: 'CreditCardFundingSource',
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'BankAccountFundingSource' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'FragmentSpread',
+                        name: {
+                          kind: 'Name',
+                          value: 'BankAccountFundingSource',
+                        },
+                      },
+                    ],
+                  },
                 },
               ],
             },
@@ -3636,7 +3684,8 @@ export const GetFundingSourceDocument = {
         ],
       },
     },
-    ...FundingSourceFragmentDoc.definitions,
+    ...CreditCardFundingSourceFragmentDoc.definitions,
+    ...BankAccountFundingSourceFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<
   GetFundingSourceQuery,
@@ -3701,8 +3750,48 @@ export const ListFundingSourcesDocument = {
                     kind: 'SelectionSet',
                     selections: [
                       {
-                        kind: 'FragmentSpread',
-                        name: { kind: 'Name', value: 'FundingSource' },
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                          kind: 'NamedType',
+                          name: {
+                            kind: 'Name',
+                            value: 'CreditCardFundingSource',
+                          },
+                        },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'FragmentSpread',
+                              name: {
+                                kind: 'Name',
+                                value: 'CreditCardFundingSource',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                          kind: 'NamedType',
+                          name: {
+                            kind: 'Name',
+                            value: 'BankAccountFundingSource',
+                          },
+                        },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'FragmentSpread',
+                              name: {
+                                kind: 'Name',
+                                value: 'BankAccountFundingSource',
+                              },
+                            },
+                          ],
+                        },
                       },
                     ],
                   },
@@ -3714,7 +3803,8 @@ export const ListFundingSourcesDocument = {
         ],
       },
     },
-    ...FundingSourceFragmentDoc.definitions,
+    ...CreditCardFundingSourceFragmentDoc.definitions,
+    ...BankAccountFundingSourceFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<
   ListFundingSourcesQuery,

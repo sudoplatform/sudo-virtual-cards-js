@@ -6,6 +6,16 @@ interface CommonObject {
   updatedAtEpochMs: Float!
 }
 
+interface CommonFundingSource  {
+  id: ID!
+  owner: ID!
+  version: Int!
+  createdAtEpochMs: Float!
+  updatedAtEpochMs: Float!
+  state: FundingSourceState!
+  currency: String!
+}
+
 enum KeyFormat {
   # PKCS#1 RSA Public Key
   RSA_PUBLIC_KEY
@@ -107,7 +117,7 @@ type SealedCardConnection {
   nextToken: String
 }
 
-type CreditCardFundingSource implements CommonObject {
+type CreditCardFundingSource implements CommonObject & CommonFundingSource {
   id: ID!
   owner: ID!
   version: Int!
@@ -130,7 +140,7 @@ type SignedAuthorizationText {
   language: String!
 }
 
-type BankAccountFundingSource implements CommonObject {
+type BankAccountFundingSource implements CommonObject & CommonFundingSource {
   id: ID!
   owner: ID!
   version: Int!
