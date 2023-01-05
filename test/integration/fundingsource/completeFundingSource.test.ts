@@ -93,8 +93,7 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
         await expect(
           instanceUnderTest.completeFundingSource({
             id: v4(),
-            completionData:
-              dummyCompletionDataForProvider['checkoutBankAccount'],
+            completionData: dummyCompletionDataForProvider['checkout'],
           }),
         ).rejects.toThrow(ProvisionalFundingSourceNotFoundError)
       })

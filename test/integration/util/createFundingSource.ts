@@ -231,11 +231,12 @@ export async function generateCheckoutPaymentToken(
   const exp = new Date()
   exp.setUTCFullYear(exp.getUTCFullYear() + 1)
 
+  // getUTCMonth is indexed at 0, so + 1 is essential.
   const token = (await checkout.tokens.request({
     type: 'card',
     number: card.number,
     cvv: card.cvv,
-    expiry_month: exp.getUTCMonth(),
+    expiry_month: exp.getUTCMonth() + 1,
     expiry_year: exp.getUTCFullYear(),
     name: 'John Smith',
     billing_address: {
