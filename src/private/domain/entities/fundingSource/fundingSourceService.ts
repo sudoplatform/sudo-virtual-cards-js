@@ -26,6 +26,7 @@ export interface FundingSourceServiceCheckoutBankAccountCompletionData {
   type: FundingSourceType.BankAccount
   publicToken: string
   accountId: string
+  institutionId: string
   authorizationText: AuthorizationText
 }
 

@@ -23,6 +23,13 @@ fragment Owner on Owner {
   issuer
 }
 
+fragment SealedAttribute on SealedAttribute {
+  keyId
+  algorithm
+  plainTextType
+  base64EncodedSealedData
+}
+
 fragment ProvisionalFundingSource on ProvisionalFundingSource {
   id
   owner
@@ -64,13 +71,13 @@ fragment BankAccountFundingSource on BankAccountFundingSource {
     algorithm
     data  
   }
-}
-
-fragment SealedAttribute on SealedAttribute {
-  keyId
-  algorithm
-  plainTextType
-  base64EncodedSealedData
+  last4
+  institutionName {
+    ...SealedAttribute
+  }
+  institutionLogo {
+    ...SealedAttribute
+  }
 }
 
 fragment ProvisionalCard on ProvisionalCard {

@@ -1,8 +1,4 @@
-import {
-  EncryptionAlgorithm,
-  FatalError,
-  UnrecognizedAlgorithmError,
-} from '@sudoplatform/sudo-common'
+import { FatalError } from '@sudoplatform/sudo-common'
 import {
   SealedCurrencyAmountAttribute,
   SealedTransaction,
@@ -18,6 +14,7 @@ import {
   TransactionDetailChargeEntity,
 } from '../../domain/entities/transaction/transactionEntity'
 import { DeviceKeyWorker, KeyType } from './deviceKeyWorker'
+import { AlgorithmTransformer } from './transformer/algorithmTransformer'
 
 export interface TransactionUnsealed {
   id: string
@@ -57,19 +54,10 @@ export class DefaultTransactionWorker implements TransactionWorker {
   async unsealTransaction(
     transaction: SealedTransaction,
   ): Promise<TransactionUnsealed> {
-    let algorithm: EncryptionAlgorithm
-    switch (transaction.algorithm) {
-      case 'AES/CBC/PKCS7Padding':
-        algorithm = EncryptionAlgorithm.AesCbcPkcs7Padding
-        break
-      case 'RSAEncryptionOAEPAESCBC':
-        algorithm = EncryptionAlgorithm.RsaOaepSha1
-        break
-      default:
-        throw new UnrecognizedAlgorithmError(
-          `Encryption Algorithm not supported: ${transaction.algorithm}`,
-        )
-    }
+    const algorithm = AlgorithmTransformer.toEncryptionAlgorithm(
+      KeyType.PrivateKey,
+      transaction.algorithm,
+    )
     const unseal = async (encrypted: string): Promise<string> => {
       return await this.deviceKeyWorker.unsealString({
         encrypted,

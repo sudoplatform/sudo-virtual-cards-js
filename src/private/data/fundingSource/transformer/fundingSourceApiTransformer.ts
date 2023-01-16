@@ -38,6 +38,9 @@ export class FundingSourceAPITransformer {
         ...commonProps,
         type: FundingSourceType.BankAccount,
         bankAccountType: entity.bankAccountType,
+        last4: entity.last4,
+        institutionName: entity.institutionName,
+        institutionLogo: entity.institutionLogo,
       }
       return transformed
     }

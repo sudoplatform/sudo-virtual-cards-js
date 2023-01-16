@@ -102,6 +102,12 @@ export class EntityDataFactory {
     state: FundingSourceState.Active,
     type: FundingSourceType.BankAccount,
     bankAccountType: BankAccountType.Savings,
+    last4: '1234',
+    institutionName: 'dummyInstitutionName',
+    institutionLogo: {
+      type: 'image/png',
+      data: 'dummyInstitutionLogo',
+    },
   }
 
   static readonly provisionalVirtualCard: ProvisionalVirtualCardEntity = {

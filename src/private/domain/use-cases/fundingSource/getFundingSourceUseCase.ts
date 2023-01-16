@@ -49,6 +49,12 @@ export interface GetBankAccountFundingSourceUseCaseOutput
   extends BaseGetFundingSourceUseCaseOutput {
   type: FundingSourceType.BankAccount
   bankAccountType: BankAccountType
+  last4: string
+  institutionName: string
+  institutionLogo?: {
+    type: string
+    data: string
+  }
 }
 
 export type GetFundingSourceUseCaseOutput =

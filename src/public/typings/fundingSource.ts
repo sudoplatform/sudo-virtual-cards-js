@@ -83,9 +83,9 @@ export function isCheckoutBankAccountFundingSourceClientConfiguration(
 }
 
 /**
- * The Sudo Platform SDK representation of a funding source.
+ * The Sudo Platform SDK representation of common attributes of a funding source.
  *
- * @interface FundingSource
+ * @interface BaseFundingSource
  * @property {string} id Unique identifier of the funding source.
  * @property {string} owner Identifier of the user that owns the funding source.
  * @property {number} version Version of this entity.
@@ -107,16 +107,45 @@ export interface BaseFundingSource {
   currency: string
 }
 
+/**
+ * The Sudo Platform SDK representation of attributes of a credit or debit card
+ * funding source.
+ *
+ * @interface CreditCardFundingSource
+ * @property {CardType} cardType The type of card
+ * @property {string} last4 The last 4 digits of the card number.
+ * @property {CreditCardNetwork} network The funding source credit card network.
+ */
 export interface CreditCardFundingSource extends BaseFundingSource {
   type: FundingSourceType.CreditCard
+  cardType: CardType
   last4: string
   network: CreditCardNetwork
-  cardType: CardType
 }
 
+/**
+ * The Sudo Platform SDK representation of attributes of a bank account
+ * funding source.
+ *
+ * @interface BankAccountFundingSource
+ * @property {BankAccountType} bankAccountType The type of bank account
+ * @property {string} last4 The last 4 digits of the bank account number.
+ * @property {string} institutionName
+ *   The name of the institution at which the bank account is held.
+ * @property {string} institutionLogo.type
+ *   Mime type of institution logo if any
+ * @property {string} institutionLogo.data
+ *   Base64 encoded image data of institution logo if any
+ */
 export interface BankAccountFundingSource extends BaseFundingSource {
   type: FundingSourceType.BankAccount
   bankAccountType: BankAccountType
+  last4: string
+  institutionName: string
+  institutionLogo?: {
+    type: string
+    data: string
+  }
 }
 
 export type FundingSource = CreditCardFundingSource | BankAccountFundingSource

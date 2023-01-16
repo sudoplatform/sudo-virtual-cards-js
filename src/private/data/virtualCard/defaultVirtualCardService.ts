@@ -35,6 +35,7 @@ import {
 import { ApiClient } from '../common/apiClient'
 import { DeviceKey, DeviceKeyWorker, KeyType } from '../common/deviceKeyWorker'
 import { TransactionWorker } from '../common/transactionWorker'
+import { AlgorithmTransformer } from '../common/transformer/algorithmTransformer'
 import { FetchPolicyTransformer } from '../common/transformer/fetchPolicyTransformer'
 import { ProvisionalVirtualCardEntityTransformer } from './transformer/provisionalVirtualCardEntityTransformer'
 import { VirtualCardEntityTransformer } from './transformer/virtualCardEntityTransformer'
@@ -488,14 +489,10 @@ export class DefaultVirtualCardService implements VirtualCardService {
       return undefined
     }
 
-    let algorithm: EncryptionAlgorithm
-    switch (metadata.algorithm) {
-      case 'AES/CBC/PKCS7Padding':
-        algorithm = EncryptionAlgorithm.AesCbcPkcs7Padding
-        break
-      default:
-        throw new UnrecognizedAlgorithmError(metadata.algorithm)
-    }
+    const algorithm = AlgorithmTransformer.toEncryptionAlgorithm(
+      KeyType.SymmetricKey,
+      metadata.algorithm,
+    )
 
     const unsealedMetadata = await this.deviceKeyWorker.unsealString({
       encrypted: metadata.base64EncodedSealedData,

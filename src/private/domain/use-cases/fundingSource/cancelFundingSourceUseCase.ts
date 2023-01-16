@@ -35,6 +35,12 @@ interface CancelBankAccountFundingSourceUseCaseOutput
   extends BaseCancelFundingSourceUseCaseOutput {
   type: FundingSourceType.BankAccount
   bankAccountType: BankAccountType
+  last4: string
+  institutionName: string
+  institutionLogo?: {
+    type: string
+    data: string
+  }
 }
 
 type CancelFundingSourceUseCaseOutput =

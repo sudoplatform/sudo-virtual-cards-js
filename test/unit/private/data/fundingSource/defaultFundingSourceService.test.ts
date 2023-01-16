@@ -16,7 +16,10 @@ import {
 import { v4 } from 'uuid'
 import { AuthorizationText, FundingSourceType } from '../../../../../src'
 import { ApiClient } from '../../../../../src/private/data/common/apiClient'
-import { DeviceKeyWorker } from '../../../../../src/private/data/common/deviceKeyWorker'
+import {
+  DeviceKeyWorker,
+  UnsealInput,
+} from '../../../../../src/private/data/common/deviceKeyWorker'
 import { DefaultFundingSourceService } from '../../../../../src/private/data/fundingSource/defaultFundingSourceService'
 import { FundingSourceServiceCompletionData } from '../../../../../src/private/domain/entities/fundingSource/fundingSourceService'
 import { EntityDataFactory } from '../../../data-factory/entity'
@@ -43,6 +46,22 @@ describe('DefaultFundingSourceService Test Suite', () => {
       data: 'key-data',
       format: PublicKeyFormat.SPKI,
     })
+
+    when(mockDeviceKeyWorker.unsealString(anything())).thenCall(
+      (input: UnsealInput) => {
+        switch (input.encrypted) {
+          case 'sealed-dummyInstitutionName':
+            return 'dummyInstitutionName'
+          case 'sealed-dummyInstitutionLogo':
+            return JSON.stringify({
+              type: 'image/png',
+              data: 'dummyInstitutionLogo',
+            })
+          default:
+            return `unknown sealed input: ${input.encrypted}`
+        }
+      },
+    )
   })
 
   describe('getFundingSourceClientConfiguration', () => {
@@ -136,6 +155,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
           type: FundingSourceType.BankAccount,
           publicToken: 'public-token',
           accountId: 'account-id',
+          institutionId: 'institution-id',
           authorizationText,
         }
         await instanceUnderTest.completeFundingSource({
@@ -158,8 +178,10 @@ describe('DefaultFundingSourceService Test Suite', () => {
           provider: completionData.provider,
           type: FundingSourceType.BankAccount,
           version: 1,
+          keyId: 'key-id',
           public_token: completionData.publicToken,
           account_id: completionData.accountId,
+          institution_id: completionData.institutionId,
           authorizationTextSignature: {
             algorithm: 'RSASignatureSSAPKCS15SHA256',
             data: `{"hash":"${authorizationText.hash}","hashAlgorithm":"${
@@ -180,6 +202,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
               type: FundingSourceType.BankAccount,
               publicToken: 'public-token',
               accountId: 'account-id',
+              institutionId: 'institution-id',
               authorizationText: {
                 content: 'authorizationText',
                 contentType: 'authorizationTextContentType',
@@ -208,6 +231,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
           type: FundingSourceType.BankAccount,
           publicToken: 'public-token',
           accountId: 'account-id',
+          institutionId: 'institution-id',
           authorizationText,
         }
         await expect(
@@ -270,10 +294,15 @@ describe('DefaultFundingSourceService Test Suite', () => {
       })
     })
   })
+
   describe('getFundingSource', () => {
-    it('calls appsync correctly', async () => {
+    it.each`
+      graphql                                        | entity
+      ${GraphQLDataFactory.creditCardfundingSource}  | ${EntityDataFactory.creditCardFundingSource}
+      ${GraphQLDataFactory.bankAccountfundingSource} | ${EntityDataFactory.bankAccountFundingSource}
+    `('calls appsync correctly: $entity.type', async ({ graphql, entity }) => {
       when(mockAppSync.getFundingSource(anything(), anything())).thenResolve(
-        GraphQLDataFactory.defaultFundingSource,
+        graphql,
       )
       const id = v4()
       const result = await instanceUnderTest.getFundingSource({
@@ -284,7 +313,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
       const [idArg, policyArg] = capture(mockAppSync.getFundingSource).first()
       expect(idArg).toEqual<typeof idArg>(id)
       expect(policyArg).toEqual<typeof policyArg>('cache-only')
-      expect(result).toEqual(EntityDataFactory.defaultFundingSource)
+      expect(result).toEqual(entity)
     })
 
     it('calls appsync correctly with undefined result', async () => {
@@ -339,7 +368,10 @@ describe('DefaultFundingSourceService Test Suite', () => {
       const [policyArg] = capture(mockAppSync.listFundingSources).first()
       expect(policyArg).toEqual<typeof policyArg>('cache-only')
       expect(result).toEqual({
-        fundingSources: [EntityDataFactory.defaultFundingSource],
+        fundingSources: [
+          EntityDataFactory.creditCardFundingSource,
+          EntityDataFactory.bankAccountFundingSource,
+        ],
         nextToken: undefined,
       })
     })
@@ -359,7 +391,10 @@ describe('DefaultFundingSourceService Test Suite', () => {
             cachePolicy,
           }),
         ).resolves.toEqual({
-          fundingSources: [EntityDataFactory.defaultFundingSource],
+          fundingSources: [
+            EntityDataFactory.creditCardFundingSource,
+            EntityDataFactory.bankAccountFundingSource,
+          ],
           nextToken: undefined,
         })
         verify(
@@ -370,17 +405,19 @@ describe('DefaultFundingSourceService Test Suite', () => {
   })
 
   describe('cancelFundingSource', () => {
-    it('calls appsync correctly', async () => {
-      when(mockAppSync.cancelFundingSource(anything())).thenResolve(
-        GraphQLDataFactory.defaultFundingSource,
-      )
+    it.each`
+      graphql                                        | entity
+      ${GraphQLDataFactory.creditCardfundingSource}  | ${EntityDataFactory.creditCardFundingSource}
+      ${GraphQLDataFactory.bankAccountfundingSource} | ${EntityDataFactory.bankAccountFundingSource}
+    `('calls appsync correctly: $entity.type', async ({ graphql, entity }) => {
+      when(mockAppSync.cancelFundingSource(anything())).thenResolve(graphql)
       const result = await instanceUnderTest.cancelFundingSource({
-        id: EntityDataFactory.defaultFundingSource.id,
+        id: entity.id,
       })
-      expect(result).toEqual(EntityDataFactory.defaultFundingSource)
+      expect(result).toEqual(entity)
       const [inputArgs] = capture(mockAppSync.cancelFundingSource).first()
       expect(inputArgs).toEqual<typeof inputArgs>({
-        id: EntityDataFactory.defaultFundingSource.id,
+        id: entity.id,
       })
       verify(mockAppSync.cancelFundingSource(anything())).once()
     })

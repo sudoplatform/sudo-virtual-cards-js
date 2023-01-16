@@ -61,7 +61,7 @@ describe('DefaultTransactionWorker test suite', () => {
       }),
     ).rejects.toEqual(
       new UnrecognizedAlgorithmError(
-        'Encryption Algorithm not supported: something',
+        'Asymmetric encryption algorithm not supported: something',
       ),
     )
     verify(mockDeviceKeyWorker.unsealString(anything())).never()
@@ -69,7 +69,6 @@ describe('DefaultTransactionWorker test suite', () => {
 
   it.each`
     algorithm                    | expected
-    ${'AES/CBC/PKCS7Padding'}    | ${EncryptionAlgorithm.AesCbcPkcs7Padding}
     ${'RSAEncryptionOAEPAESCBC'} | ${EncryptionAlgorithm.RsaOaepSha1}
   `(
     'should return expected result with $algorithm',

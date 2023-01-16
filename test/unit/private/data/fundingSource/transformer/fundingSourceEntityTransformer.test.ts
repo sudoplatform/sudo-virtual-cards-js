@@ -9,13 +9,18 @@ import { GraphQLDataFactory } from '../../../../data-factory/graphQl'
 
 describe('FundingSourceEntityTransformer Test Suite', () => {
   describe('FundingSourceEntityTransformer', () => {
-    it('successfully transforms graphql to entity format', () => {
-      expect(
-        FundingSourceEntityTransformer.transformGraphQL(
-          GraphQLDataFactory.defaultFundingSource,
-        ),
-      ).toStrictEqual(EntityDataFactory.defaultFundingSource)
-    })
+    it.each`
+      graphql                                                | entity
+      ${GraphQLDataFactory.creditCardfundingSource}          | ${EntityDataFactory.creditCardFundingSource}
+      ${GraphQLDataFactory.bankAccountfundingSourceUnsealed} | ${EntityDataFactory.bankAccountFundingSource}
+    `(
+      'successfully transforms graphql to entity format: $entity.type',
+      ({ graphql, entity }) => {
+        expect(
+          FundingSourceEntityTransformer.transformGraphQL(graphql),
+        ).toStrictEqual(entity)
+      },
+    )
   })
 
   describe('CardTypeTransformer', () => {

@@ -58,6 +58,7 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
       provider: 'checkout',
       type: FundingSourceType.BankAccount,
       accountId: 'dummyAccountId',
+      institutionId: 'dummyInstitutionId',
       publicToken: 'dummyPublicToken',
       authorizationText: {
         language: 'en-US',
@@ -98,13 +99,17 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
         ).rejects.toThrow(ProvisionalFundingSourceNotFoundError)
       })
 
+      /*
+       * Will add additional case once server side changes are deployed:
+       *  ${'institutionId'} | ${'accountId'} | ${''}              | ${'publicToken'}
+       */
       it.each`
-        name             | accountId      | publicToken
-        ${'accountId'}   | ${''}          | ${'publicToken'}
-        ${'publicToken'} | ${'accountId'} | ${''}
+        name             | accountId      | institutionId      | publicToken
+        ${'accountId'}   | ${''}          | ${'institutionId'} | ${'publicToken'}
+        ${'publicToken'} | ${'accountId'} | ${'institutionId'} | ${''}
       `(
         'returns FundingSourceCompletionDataInvalidError if empty $name in completionData',
-        async ({ accountId, publicToken }) => {
+        async ({ accountId, institutionId, publicToken }) => {
           if (skip) return
           await instanceUnderTest.createKeysIfAbsent()
 
@@ -132,6 +137,7 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
               provider: 'checkout',
               type: FundingSourceType.BankAccount,
               accountId,
+              institutionId,
               publicToken,
               authorizationText: provisioningData.authorizationText[0],
             }

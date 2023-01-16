@@ -484,8 +484,9 @@ describe('SudoVirtualCardsClient Test Suite', () => {
         completionData: {
           provider: 'checkout',
           type: FundingSourceType.BankAccount,
-          publicToken: '',
-          accountId: '',
+          publicToken: 'publicToken',
+          accountId: 'accountId',
+          institutionId: 'institutionId',
           authorizationText: {
             content: 'authorizationText',
             contentType: 'authorizationTextContentType',
@@ -502,8 +503,9 @@ describe('SudoVirtualCardsClient Test Suite', () => {
         completionData: {
           provider: 'checkout',
           type: FundingSourceType.BankAccount,
-          publicToken: '',
-          accountId: '',
+          publicToken: 'publicToken',
+          accountId: 'accountId',
+          institutionId: 'institutionId',
           authorizationText: {
             content: 'authorizationText',
             contentType: 'authorizationTextContentType',
@@ -514,6 +516,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
         },
       })
     })
+
     it('returns expected result for credit card', async () => {
       await expect(
         instanceUnderTest.completeFundingSource({
@@ -522,6 +525,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
         }),
       ).resolves.toEqual(ApiDataFactory.defaultFundingSource)
     })
+
     it('returns expected result for bank account', async () => {
       when(mockCompleteFundingSourceUseCase.execute(anything())).thenResolve(
         EntityDataFactory.bankAccountFundingSource,
@@ -532,8 +536,9 @@ describe('SudoVirtualCardsClient Test Suite', () => {
           completionData: {
             provider: 'checkout',
             type: FundingSourceType.BankAccount,
-            publicToken: '',
-            accountId: '',
+            publicToken: 'publicToken',
+            accountId: 'accountId',
+            institutionId: 'institutionId',
             authorizationText: {
               content: 'authorizationText',
               contentType: 'authorizationTextContentType',

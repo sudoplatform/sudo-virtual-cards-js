@@ -150,6 +150,9 @@ type BankAccountFundingSource implements CommonObject & CommonFundingSource {
   currency: String!
   bankAccountType: BankAccountType!
   authorization: SignedAuthorizationText!
+  last4: String!
+  institutionName: SealedAttribute!
+  institutionLogo: SealedAttribute
 }
 
 union FundingSource = CreditCardFundingSource | BankAccountFundingSource

@@ -147,6 +147,7 @@ export interface CompleteFundingSourceCheckoutCardCompletionDataInput {
  * @property {FundingSourceType.BankAccount} type Funding source provider type. Must be BankAccount.
  * @property {string} publicToken Token to be exchanged in order to perform bank account operations.
  * @property {string} accountId Identifier of the bank account to be used.
+ * @property {string} institutionId Identifier of the institution at which account to be used is held.
  * @property {AuthorizationText} authorizationText Authorization text presented to and agreed to by the user
  */
 export interface CompleteFundingSourceCheckoutBankAccountCompletionDataInput {
@@ -154,6 +155,7 @@ export interface CompleteFundingSourceCheckoutBankAccountCompletionDataInput {
   type: FundingSourceType.BankAccount
   publicToken: string
   accountId: string
+  institutionId: string
   authorizationText: AuthorizationText
 }
 

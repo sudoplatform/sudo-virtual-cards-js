@@ -47,6 +47,9 @@ export type BankAccountFundingSource = CommonFundingSource &
     createdAtEpochMs: Scalars['Float']
     currency: Scalars['String']
     id: Scalars['ID']
+    institutionLogo?: Maybe<SealedAttribute>
+    institutionName: SealedAttribute
+    last4: Scalars['String']
     owner: Scalars['ID']
     state: FundingSourceState
     updatedAtEpochMs: Scalars['Float']
@@ -600,6 +603,14 @@ export type PaginatedPublicKeyFragment = {
 
 export type OwnerFragment = { __typename?: 'Owner'; id: string; issuer: string }
 
+export type SealedAttributeFragment = {
+  __typename?: 'SealedAttribute'
+  keyId: string
+  algorithm: string
+  plainTextType: string
+  base64EncodedSealedData: string
+}
+
 export type ProvisionalFundingSourceFragment = {
   __typename?: 'ProvisionalFundingSource'
   id: string
@@ -635,6 +646,7 @@ export type BankAccountFundingSourceFragment = {
   state: FundingSourceState
   currency: string
   bankAccountType: BankAccountType
+  last4: string
   authorization: {
     __typename?: 'SignedAuthorizationText'
     language: string
@@ -645,14 +657,20 @@ export type BankAccountFundingSourceFragment = {
     algorithm: string
     data: string
   }
-}
-
-export type SealedAttributeFragment = {
-  __typename?: 'SealedAttribute'
-  keyId: string
-  algorithm: string
-  plainTextType: string
-  base64EncodedSealedData: string
+  institutionName: {
+    __typename?: 'SealedAttribute'
+    keyId: string
+    algorithm: string
+    plainTextType: string
+    base64EncodedSealedData: string
+  }
+  institutionLogo?: {
+    __typename?: 'SealedAttribute'
+    keyId: string
+    algorithm: string
+    plainTextType: string
+    base64EncodedSealedData: string
+  } | null
 }
 
 export type ProvisionalCardFragment = {
@@ -1016,6 +1034,7 @@ export type CompleteFundingSourceMutation = {
         state: FundingSourceState
         currency: string
         bankAccountType: BankAccountType
+        last4: string
         authorization: {
           __typename?: 'SignedAuthorizationText'
           language: string
@@ -1026,6 +1045,20 @@ export type CompleteFundingSourceMutation = {
           algorithm: string
           data: string
         }
+        institutionName: {
+          __typename?: 'SealedAttribute'
+          keyId: string
+          algorithm: string
+          plainTextType: string
+          base64EncodedSealedData: string
+        }
+        institutionLogo?: {
+          __typename?: 'SealedAttribute'
+          keyId: string
+          algorithm: string
+          plainTextType: string
+          base64EncodedSealedData: string
+        } | null
       }
     | {
         __typename?: 'CreditCardFundingSource'
@@ -1059,6 +1092,7 @@ export type CancelFundingSourceMutation = {
         state: FundingSourceState
         currency: string
         bankAccountType: BankAccountType
+        last4: string
         authorization: {
           __typename?: 'SignedAuthorizationText'
           language: string
@@ -1069,6 +1103,20 @@ export type CancelFundingSourceMutation = {
           algorithm: string
           data: string
         }
+        institutionName: {
+          __typename?: 'SealedAttribute'
+          keyId: string
+          algorithm: string
+          plainTextType: string
+          base64EncodedSealedData: string
+        }
+        institutionLogo?: {
+          __typename?: 'SealedAttribute'
+          keyId: string
+          algorithm: string
+          plainTextType: string
+          base64EncodedSealedData: string
+        } | null
       }
     | {
         __typename?: 'CreditCardFundingSource'
@@ -1484,6 +1532,7 @@ export type GetFundingSourceQuery = {
         state: FundingSourceState
         currency: string
         bankAccountType: BankAccountType
+        last4: string
         authorization: {
           __typename?: 'SignedAuthorizationText'
           language: string
@@ -1494,6 +1543,20 @@ export type GetFundingSourceQuery = {
           algorithm: string
           data: string
         }
+        institutionName: {
+          __typename?: 'SealedAttribute'
+          keyId: string
+          algorithm: string
+          plainTextType: string
+          base64EncodedSealedData: string
+        }
+        institutionLogo?: {
+          __typename?: 'SealedAttribute'
+          keyId: string
+          algorithm: string
+          plainTextType: string
+          base64EncodedSealedData: string
+        } | null
       }
     | {
         __typename?: 'CreditCardFundingSource'
@@ -1532,6 +1595,7 @@ export type ListFundingSourcesQuery = {
           state: FundingSourceState
           currency: string
           bankAccountType: BankAccountType
+          last4: string
           authorization: {
             __typename?: 'SignedAuthorizationText'
             language: string
@@ -1542,6 +1606,20 @@ export type ListFundingSourcesQuery = {
             algorithm: string
             data: string
           }
+          institutionName: {
+            __typename?: 'SealedAttribute'
+            keyId: string
+            algorithm: string
+            plainTextType: string
+            base64EncodedSealedData: string
+          }
+          institutionLogo?: {
+            __typename?: 'SealedAttribute'
+            keyId: string
+            algorithm: string
+            plainTextType: string
+            base64EncodedSealedData: string
+          } | null
         }
       | {
           __typename?: 'CreditCardFundingSource'
@@ -2207,6 +2285,31 @@ export const CreditCardFundingSourceFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<CreditCardFundingSourceFragment, unknown>
+export const SealedAttributeFragmentDoc = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'SealedAttribute' },
+      typeCondition: {
+        kind: 'NamedType',
+        name: { kind: 'Name', value: 'SealedAttribute' },
+      },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'keyId' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'algorithm' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'plainTextType' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'base64EncodedSealedData' },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<SealedAttributeFragment, unknown>
 export const BankAccountFundingSourceFragmentDoc = {
   kind: 'Document',
   definitions: [
@@ -2244,9 +2347,37 @@ export const BankAccountFundingSourceFragmentDoc = {
               ],
             },
           },
+          { kind: 'Field', name: { kind: 'Name', value: 'last4' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'institutionName' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'FragmentSpread',
+                  name: { kind: 'Name', value: 'SealedAttribute' },
+                },
+              ],
+            },
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'institutionLogo' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'FragmentSpread',
+                  name: { kind: 'Name', value: 'SealedAttribute' },
+                },
+              ],
+            },
+          },
         ],
       },
     },
+    ...SealedAttributeFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<BankAccountFundingSourceFragment, unknown>
 export const OwnerFragmentDoc = {
@@ -2313,31 +2444,6 @@ export const SealedExpiryAttributeFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<SealedExpiryAttributeFragment, unknown>
-export const SealedAttributeFragmentDoc = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'SealedAttribute' },
-      typeCondition: {
-        kind: 'NamedType',
-        name: { kind: 'Name', value: 'SealedAttribute' },
-      },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          { kind: 'Field', name: { kind: 'Name', value: 'keyId' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'algorithm' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'plainTextType' } },
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'base64EncodedSealedData' },
-          },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<SealedAttributeFragment, unknown>
 export const SealedCardFragmentDoc = {
   kind: 'Document',
   definitions: [

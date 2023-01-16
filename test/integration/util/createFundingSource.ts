@@ -16,7 +16,7 @@ import { ProviderAPIs } from './getProviderAPIs'
 
 export const CardProviderNames = ['stripe', 'checkout'] as const
 
-export type CardProviderName = typeof CardProviderNames[number]
+export type CardProviderName = (typeof CardProviderNames)[number]
 export function isCardProviderName(s: string): s is CardProviderName {
   return (CardProviderNames as readonly string[]).includes(s)
 }
@@ -72,7 +72,7 @@ export const TestCardNames = [
   'MC-No3DS-1',
   'BadAddress',
 ] as const
-export type TestCardName = typeof TestCardNames[number]
+export type TestCardName = (typeof TestCardNames)[number]
 
 export type TestCard = {
   number: string

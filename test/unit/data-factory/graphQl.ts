@@ -22,6 +22,10 @@ import {
   TransactionType,
   VirtualCardsConfig,
 } from '../../../src/gen/graphqlTypes'
+import {
+  BankAccountFundingSourceUnsealed,
+  FundingSourceUnsealed,
+} from '../../../src/private/data/fundingSource/fundingSourceSealedAttributes'
 
 export class GraphQLDataFactory {
   private static readonly commonProps = {
@@ -107,6 +111,9 @@ export class GraphQLDataFactory {
   static readonly defaultFundingSource: FundingSource =
     this.creditCardfundingSource
 
+  static readonly defaultFundingSourceUnsealed: FundingSourceUnsealed =
+    this.creditCardfundingSource
+
   static readonly bankAccountfundingSource: BankAccountFundingSource = {
     ...GraphQLDataFactory.commonProps,
     __typename: 'BankAccountFundingSource',
@@ -123,12 +130,53 @@ export class GraphQLDataFactory {
       keyId: 'dummyAuthorizationKeyId',
       language: 'dummyAuthorizationLanguage',
     },
+    last4: '1234',
+    institutionName: {
+      algorithm: 'RSAEncryptionOAEPAESCBC',
+      plainTextType: 'string',
+      keyId: 'dummyKeyId',
+      base64EncodedSealedData: 'sealed-dummyInstitutionName',
+    },
+    institutionLogo: {
+      algorithm: 'RSAEncryptionOAEPAESCBC',
+      plainTextType: 'json-string',
+      keyId: 'dummyKeyId',
+      base64EncodedSealedData: 'sealed-dummyInstitutionLogo',
+    },
   }
 
   static readonly fundingSourceConnection: FundingSourceConnection = {
-    items: [GraphQLDataFactory.defaultFundingSource],
+    items: [
+      GraphQLDataFactory.creditCardfundingSource,
+      GraphQLDataFactory.bankAccountfundingSource,
+    ],
     nextToken: undefined,
   }
+
+  static readonly bankAccountfundingSourceUnsealed: BankAccountFundingSourceUnsealed =
+    {
+      ...GraphQLDataFactory.commonProps,
+      __typename: 'BankAccountFundingSource',
+      id: 'dummyFundingSourceId',
+      currency: 'dummyCurrency',
+      state: FundingSourceState.Active,
+      bankAccountType: BankAccountType.Savings,
+      authorization: {
+        content: 'dummyAuthorizationContent',
+        contentType: 'dummyAuthorizationContentType',
+        algorithm: 'dummyAuthorizationAlgorithm',
+        signature: 'dummyAuthorizationSignature',
+        data: 'dummyAuthorizationData',
+        keyId: 'dummyAuthorizationKeyId',
+        language: 'dummyAuthorizationLanguage',
+      },
+      last4: '1234',
+      institutionName: 'dummyInstitutionName',
+      institutionLogo: {
+        type: 'image/png',
+        data: 'dummyInstitutionLogo',
+      },
+    }
 
   static readonly provisionalCard: ProvisionalCard = {
     ...this.commonProps,

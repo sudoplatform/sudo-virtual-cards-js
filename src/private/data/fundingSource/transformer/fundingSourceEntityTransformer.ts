@@ -1,16 +1,13 @@
 import { FatalError } from '@sudoplatform/sudo-common'
-import {
-  BankAccountType,
-  CardType,
-  FundingSource,
-} from '../../../../gen/graphqlTypes'
+import { BankAccountType, CardType } from '../../../../gen/graphqlTypes'
 import { BankAccountType as BankAccountTypeEntity } from '../../../../public/typings/bankAccountType'
 import { CardType as CardTypeEntity } from '../../../../public/typings/cardType'
 import { FundingSourceType } from '../../../../public/typings/fundingSource'
 import { FundingSourceEntity } from '../../../domain/entities/fundingSource/fundingSourceEntity'
+import { FundingSourceUnsealed } from '../fundingSourceSealedAttributes'
 
 export class FundingSourceEntityTransformer {
-  static transformGraphQL(data: FundingSource): FundingSourceEntity {
+  static transformGraphQL(data: FundingSourceUnsealed): FundingSourceEntity {
     const commonProps = {
       id: data.id,
       owner: data.owner,
@@ -36,6 +33,9 @@ export class FundingSourceEntityTransformer {
           bankAccountType: BankAccountTypeTransformer.transformGraphQL(
             data.bankAccountType,
           ),
+          last4: data.last4,
+          institutionName: data.institutionName,
+          institutionLogo: data.institutionLogo,
         }
       default:
         throw new FatalError('Unrecognized funding source type')

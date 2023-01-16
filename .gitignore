@@ -10,3 +10,4 @@ yarn-error.log
 yalc.lock
 build
 .vscode/launch.json
+package.json.old

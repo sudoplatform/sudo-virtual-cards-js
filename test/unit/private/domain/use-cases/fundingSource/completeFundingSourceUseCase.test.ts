@@ -86,8 +86,9 @@ describe('CompleteFundingSourceUseCase Test Suite', () => {
             completionData: {
               provider: 'checkout',
               type: FundingSourceType.BankAccount,
-              publicToken: '',
-              accountId: '',
+              publicToken: 'publicToken',
+              accountId: 'accountId',
+              institutionId: 'institutionId',
               authorizationText: {
                 language: 'authorization-text-language',
                 content: 'authorization-text',
@@ -106,8 +107,9 @@ describe('CompleteFundingSourceUseCase Test Suite', () => {
           completionData: {
             provider: 'checkout',
             type: FundingSourceType.BankAccount,
-            publicToken: '',
-            accountId: '',
+            publicToken: 'publicToken',
+            accountId: 'accountId',
+            institutionId: 'institutionId',
             authorizationText: {
               language: 'authorization-text-language',
               content: 'authorization-text',
@@ -128,8 +130,9 @@ describe('CompleteFundingSourceUseCase Test Suite', () => {
           completionData: {
             provider: 'checkout',
             type: FundingSourceType.BankAccount,
-            publicToken: '',
-            accountId: '',
+            publicToken: 'publicToken',
+            accountId: 'accountId',
+            institutionId: 'institutionId',
             authorizationText: {
               language: 'authorization-text-language',
               content: 'authorization-text',
@@ -151,8 +154,9 @@ describe('CompleteFundingSourceUseCase Test Suite', () => {
             completionData: {
               provider: 'checkout',
               type: FundingSourceType.BankAccount,
-              publicToken: '',
-              accountId: '',
+              publicToken: 'publicToken',
+              accountId: 'accountId',
+              institutionId: 'institutionId',
               authorizationText: {
                 language: 'authorization-text-language',
                 content: 'authorization-text',
