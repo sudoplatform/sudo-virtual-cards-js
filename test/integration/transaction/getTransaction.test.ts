@@ -12,7 +12,7 @@ import {
   Transaction,
   VirtualCard,
 } from '../../../src'
-import { ProviderAPIs } from '../util/getProviderAPIs'
+import { FundingSourceProviders } from '../util/getFundingSourceProviders'
 import { provisionVirtualCard } from '../util/provisionVirtualCard'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
@@ -22,7 +22,7 @@ describe('GetTransaction Test Suite', () => {
   let instanceUnderTest: SudoVirtualCardsClient
   let vcSimulator: SudoVirtualCardsSimulatorClient
   let profilesClient: SudoProfilesClient
-  let apis: ProviderAPIs
+  let fundingSourceProviders: FundingSourceProviders
 
   let sudo: Sudo
   let card: VirtualCard
@@ -34,14 +34,14 @@ describe('GetTransaction Test Suite', () => {
     instanceUnderTest = result.virtualCardsClient
     profilesClient = result.profilesClient
     sudo = result.sudo
-    apis = result.apis
+    fundingSourceProviders = result.fundingSourceProviders
     vcSimulator = result.virtualCardsSimulatorClient
 
     card = await provisionVirtualCard(
       instanceUnderTest,
       profilesClient,
       sudo,
-      apis,
+      fundingSourceProviders,
     )
     const merchant = (await vcSimulator.listSimulatorMerchants())[0]
     await vcSimulator.simulateAuthorization({

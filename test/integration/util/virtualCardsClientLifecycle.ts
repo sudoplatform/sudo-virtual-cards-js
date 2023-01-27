@@ -36,7 +36,10 @@ import { ApiClient } from '../../../src/private/data/common/apiClient'
 import { SudoVirtualCardsClientPrivateOptions } from '../../../src/private/data/common/privateSudoVirtualCardsClientOptions'
 import { createSudo } from './createSudo'
 import { EntitlementsBuilder } from './entitlements'
-import { getProviderAPIs, ProviderAPIs } from './getProviderAPIs'
+import {
+  FundingSourceProviders,
+  getFundingSourceProviders,
+} from './getFundingSourceProviders'
 
 export const sudoIssuer = 'sudoplatform.sudoservice'
 
@@ -98,7 +101,7 @@ interface SetupVirtualCardsClientOutput {
   entitlementsClient: SudoEntitlementsClient
   identityVerificationClient: SudoSecureIdVerificationClient
   profilesClient: SudoProfilesClient
-  apis: ProviderAPIs
+  fundingSourceProviders: FundingSourceProviders
 }
 
 export const setupVirtualCardsClient = async (
@@ -185,7 +188,9 @@ export const setupVirtualCardsClient = async (
       identityVerificationClient,
       profilesClient,
       sudo,
-      apis: await getProviderAPIs(virtualCardsClient),
+      fundingSourceProviders: await getFundingSourceProviders(
+        virtualCardsClient,
+      ),
     }
   } catch (err) {
     log.error(`${setupVirtualCardsClient.name} FAILED`)

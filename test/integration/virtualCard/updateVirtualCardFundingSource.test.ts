@@ -7,7 +7,7 @@ import {
   VirtualCard,
 } from '../../../src'
 import { createCardFundingSource } from '../util/createFundingSource'
-import { ProviderAPIs } from '../util/getProviderAPIs'
+import { FundingSourceProviders } from '../util/getFundingSourceProviders'
 import { provisionVirtualCard } from '../util/provisionVirtualCard'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
@@ -17,14 +17,14 @@ describe('UpdateVirtualCardFundingSource Test Suite', () => {
   let instanceUnderTest: SudoVirtualCardsClient
   let profilesClient: SudoProfilesClient
   let sudo: Sudo
-  let apis: ProviderAPIs
+  let fundingSourceProviders: FundingSourceProviders
 
   beforeEach(async () => {
     const result = await setupVirtualCardsClient(log)
     instanceUnderTest = result.virtualCardsClient
     profilesClient = result.profilesClient
     sudo = result.sudo
-    apis = result.apis
+    fundingSourceProviders = result.fundingSourceProviders
   })
 
   describe('updateVirtualCardFundingSource', () => {
@@ -35,7 +35,7 @@ describe('UpdateVirtualCardFundingSource Test Suite', () => {
         instanceUnderTest,
         profilesClient,
         sudo,
-        apis,
+        fundingSourceProviders,
       )
     })
     afterEach(async () => {
@@ -60,7 +60,7 @@ describe('UpdateVirtualCardFundingSource Test Suite', () => {
       // Create new funding source
       const newFundingSource = await createCardFundingSource(
         instanceUnderTest,
-        apis,
+        fundingSourceProviders,
       )
 
       fundingSourcesToCancel.push(newFundingSource)
@@ -90,7 +90,7 @@ describe('UpdateVirtualCardFundingSource Test Suite', () => {
       // Create new funding source
       const newFundingSource = await createCardFundingSource(
         instanceUnderTest,
-        apis,
+        fundingSourceProviders,
         {
           updateCardFundingSource: true,
         },
@@ -123,7 +123,7 @@ describe('UpdateVirtualCardFundingSource Test Suite', () => {
       // Create new funding source
       const newFundingSource = await createCardFundingSource(
         instanceUnderTest,
-        apis,
+        fundingSourceProviders,
         {
           updateCardFundingSource: false,
         },

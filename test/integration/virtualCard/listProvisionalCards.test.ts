@@ -9,7 +9,7 @@ import {
   VirtualCard,
 } from '../../../src'
 import { createCardFundingSource } from '../util/createFundingSource'
-import { ProviderAPIs } from '../util/getProviderAPIs'
+import { FundingSourceProviders } from '../util/getFundingSourceProviders'
 import { provisionVirtualCard } from '../util/provisionVirtualCard'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
@@ -19,14 +19,14 @@ describe('ListProvisionalCards Test Suite', () => {
   let instanceUnderTest: SudoVirtualCardsClient
   let profilesClient: SudoProfilesClient
   let sudo: Sudo
-  let apis: ProviderAPIs
+  let fundingSourceProviders: FundingSourceProviders
 
   beforeAll(async () => {
     const result = await setupVirtualCardsClient(log)
     instanceUnderTest = result.virtualCardsClient
     profilesClient = result.profilesClient
     sudo = result.sudo
-    apis = result.apis
+    fundingSourceProviders = result.fundingSourceProviders
   })
 
   describe('listProvisionalCards', () => {
@@ -34,14 +34,14 @@ describe('ListProvisionalCards Test Suite', () => {
     beforeAll(async () => {
       const fundingSource = await createCardFundingSource(
         instanceUnderTest,
-        apis,
+        fundingSourceProviders,
       )
       const provisionCardFn = async (): Promise<VirtualCard> => {
         return await provisionVirtualCard(
           instanceUnderTest,
           profilesClient,
           sudo,
-          apis,
+          fundingSourceProviders,
           {
             fundingSourceId: fundingSource.id,
           },

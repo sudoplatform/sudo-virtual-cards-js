@@ -2,43 +2,50 @@ import { DefaultLogger } from '@sudoplatform/sudo-common'
 import {
   FundingSourceNotFoundError,
   FundingSourceState,
+  FundingSourceType,
   SudoVirtualCardsClient,
 } from '../../../src'
-import {
-  CardProviderName,
-  createCardFundingSource,
-} from '../util/createFundingSource'
-import { ProviderAPIs } from '../util/getProviderAPIs'
+import { createCardFundingSource } from '../util/createFundingSource'
+import { FundingSourceProviders } from '../util/getFundingSourceProviders'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
 describe('SudoVirtualCardsClient CancelFundingSource Test Suite', () => {
   jest.setTimeout(240000)
   const log = new DefaultLogger('SudoVirtualCardsClientIntegrationTests')
   let instanceUnderTest: SudoVirtualCardsClient
-  let apis: ProviderAPIs
+  let fundingSourceProviders: FundingSourceProviders
 
   beforeAll(async () => {
     const result = await setupVirtualCardsClient(log)
     instanceUnderTest = result.virtualCardsClient
-    apis = result.apis
+    fundingSourceProviders = result.fundingSourceProviders
   })
 
   describe('CancelFundingSource', () => {
     describe.each`
-      provider
-      ${'stripe'}
+      provider      | type                            | providerEnabled
+      ${'stripe'}   | ${FundingSourceType.CreditCard} | ${'stripeCardEnabled'}
+      ${'checkout'} | ${FundingSourceType.CreditCard} | ${'checkoutCardEnabled'}
     `(
-      'for provider $provider',
-      ({ provider }: { provider: CardProviderName }) => {
+      'for $type provider $provider',
+      ({
+        provider,
+        type,
+        providerEnabled,
+      }: {
+        provider: keyof FundingSourceProviders['apis']
+        type: FundingSourceType
+        providerEnabled: keyof Omit<FundingSourceProviders, 'apis'>
+      }) => {
         let skip = false
         beforeAll(() => {
           // Since we determine availability of provider
           // asynchronously we can't use that knowledge
           // to control the set of providers we iterate
           // over so we have to use a flag
-          if (!apis[provider]) {
+          if (!fundingSourceProviders[providerEnabled]) {
             console.warn(
-              `No API available for provider ${provider}. Skipping tests.`,
+              `${type} provider ${provider} not enabled. Skipping tests.`,
             )
             skip = true
           }
@@ -49,7 +56,7 @@ describe('SudoVirtualCardsClient CancelFundingSource Test Suite', () => {
 
           const fundingSource = await createCardFundingSource(
             instanceUnderTest,
-            apis,
+            fundingSourceProviders,
             {
               supportedProviders: [provider],
             },

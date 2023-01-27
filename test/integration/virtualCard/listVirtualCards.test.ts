@@ -15,7 +15,7 @@ import {
   VirtualCard,
 } from '../../../src'
 import { createCardFundingSource } from '../util/createFundingSource'
-import { ProviderAPIs } from '../util/getProviderAPIs'
+import { FundingSourceProviders } from '../util/getFundingSourceProviders'
 import { provisionVirtualCard } from '../util/provisionVirtualCard'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
@@ -29,7 +29,7 @@ describe('ListVirtualCards Test Suite', () => {
   let profilesClient: SudoProfilesClient
   let vcSimulator: SudoVirtualCardsSimulatorClient
   let sudo: Sudo
-  let apis: ProviderAPIs
+  let fundingSourceProviders: FundingSourceProviders
   let merchant: SimulatorMerchant
   let beforeEachComplete = false
 
@@ -39,7 +39,7 @@ describe('ListVirtualCards Test Suite', () => {
     profilesClient = result.profilesClient
     vcSimulator = result.virtualCardsSimulatorClient
     sudo = result.sudo
-    apis = result.apis
+    fundingSourceProviders = result.fundingSourceProviders
     const merchants = await vcSimulator.listSimulatorMerchants()
 
     const usdApprovingMerchant = merchants.find(
@@ -70,14 +70,14 @@ describe('ListVirtualCards Test Suite', () => {
     beforeAll(async () => {
       const fundingSource = await createCardFundingSource(
         instanceUnderTest,
-        apis,
+        fundingSourceProviders,
       )
       const provisionCardFn = async (): Promise<VirtualCard> => {
         return await provisionVirtualCard(
           instanceUnderTest,
           profilesClient,
           sudo,
-          apis,
+          fundingSourceProviders,
           {
             fundingSourceId: fundingSource.id,
           },

@@ -10,7 +10,7 @@ import {
 } from '../../../src'
 import { delay } from '../../utility/delay'
 import { createCardFundingSource } from './createFundingSource'
-import { ProviderAPIs } from './getProviderAPIs'
+import { FundingSourceProviders } from './getFundingSourceProviders'
 
 const optBillingAddress: BillingAddress = {
   addressLine1: '222333 Peachtree Place',
@@ -24,7 +24,7 @@ export const provisionVirtualCard = async (
   virtualCardsClient: SudoVirtualCardsClient,
   profilesClient: SudoProfilesClient,
   sudo: Sudo,
-  apis: ProviderAPIs,
+  fundingSourceProviders: FundingSourceProviders,
   options?: {
     alias?: string
     fundingSourceId?: string
@@ -46,7 +46,10 @@ export const provisionVirtualCard = async (
 
   let fundingSourceId
   if (!options?.fundingSourceId) {
-    const { id } = await createCardFundingSource(virtualCardsClient, apis)
+    const { id } = await createCardFundingSource(
+      virtualCardsClient,
+      fundingSourceProviders,
+    )
     fundingSourceId = id
   } else {
     fundingSourceId = options.fundingSourceId

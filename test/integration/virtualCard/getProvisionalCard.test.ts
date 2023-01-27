@@ -2,7 +2,7 @@ import { CachePolicy, DefaultLogger } from '@sudoplatform/sudo-common'
 import { Sudo, SudoProfilesClient } from '@sudoplatform/sudo-profiles'
 import { v4 } from 'uuid'
 import { SudoVirtualCardsClient, VirtualCard } from '../../../src'
-import { ProviderAPIs } from '../util/getProviderAPIs'
+import { FundingSourceProviders } from '../util/getFundingSourceProviders'
 import { provisionVirtualCard } from '../util/provisionVirtualCard'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
@@ -12,14 +12,14 @@ describe('GetProvisionalCard Test Suite', () => {
   let instanceUnderTest: SudoVirtualCardsClient
   let profilesClient: SudoProfilesClient
   let sudo: Sudo
-  let apis: ProviderAPIs
+  let fundingSourceProviders: FundingSourceProviders
 
   beforeEach(async () => {
     const result = await setupVirtualCardsClient(log)
     instanceUnderTest = result.virtualCardsClient
     profilesClient = result.profilesClient
     sudo = result.sudo
-    apis = result.apis
+    fundingSourceProviders = result.fundingSourceProviders
   })
 
   describe('getProvisionalCard', () => {
@@ -29,7 +29,7 @@ describe('GetProvisionalCard Test Suite', () => {
         instanceUnderTest,
         profilesClient,
         sudo,
-        apis,
+        fundingSourceProviders,
       )
     })
     it('returns expected output', async () => {

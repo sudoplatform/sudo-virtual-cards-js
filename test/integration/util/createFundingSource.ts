@@ -12,7 +12,7 @@ import {
   StripeCardProvisionalFundingSourceProvisioningData,
   SudoVirtualCardsClient,
 } from '../../../src'
-import { ProviderAPIs } from './getProviderAPIs'
+import { FundingSourceProviders } from './getFundingSourceProviders'
 
 export const CardProviderNames = ['stripe', 'checkout'] as const
 
@@ -256,7 +256,7 @@ export async function generateCheckoutPaymentToken(
 
 export const createCardFundingSource = async (
   virtualCardsClient: SudoVirtualCardsClient,
-  apis: ProviderAPIs,
+  fundingSourceProviders: FundingSourceProviders,
   options?: {
     testCard?: TestCardName
     currency?: string
@@ -285,7 +285,7 @@ export const createCardFundingSource = async (
   let completionData: CompleteFundingSourceCompletionDataInput
   if (isStripeCardProvisionalFundingSourceProvisioningData(provisioningData)) {
     const setupIntent = await confirmStripeSetupIntent(
-      apis.stripe,
+      fundingSourceProviders.apis.stripe,
       card,
       provisioningData,
     )
@@ -300,11 +300,11 @@ export const createCardFundingSource = async (
   } else if (
     isCheckoutCardProvisionalFundingSourceProvisioningData(provisioningData)
   ) {
-    if (!apis.checkout) {
+    if (!fundingSourceProviders.apis.checkout) {
       throw new Error('No checkout API but provisioning data is for checkout')
     }
     const token = await generateCheckoutPaymentToken(
-      apis.checkout,
+      fundingSourceProviders.apis.checkout,
       card,
       provisioningData,
     )

@@ -42,9 +42,9 @@
     "types"
   ],
   "peerDependencies": {
-    "@sudoplatform/sudo-api-client": "^12.2.1",
+    "@sudoplatform/sudo-api-client": "^13.0.0",
     "@sudoplatform/sudo-common": "^8.3.0",
-    "@sudoplatform/sudo-user": "^12.1.0",
+    "@sudoplatform/sudo-user": "^12.2.3",
     "@sudoplatform/sudo-web-crypto-provider": "^8.0.0"
   },
   "dependencies": {
@@ -58,7 +58,7 @@
     "monocle-ts": "^2.3.13",
     "newtype-ts": "^0.3.5",
     "redux": "^4.2.0",
-    "tslib": "^2.4.1"
+    "tslib": "^2.5.0"
   },
   "resolutions": {
     "apollo-client": "^2.6.10",
@@ -75,13 +75,13 @@
     "@graphql-codegen/typescript": "^2.8.7",
     "@graphql-codegen/typescript-operations": "^2.5.12",
     "@graphql-typed-document-node/apollo-client-2": "^1.0.0",
-    "@sudoplatform/sudo-api-client": "^12.2.1",
+    "@sudoplatform/sudo-api-client": "^13.0.0",
     "@sudoplatform/sudo-common": "^8.3.0",
-    "@sudoplatform/sudo-entitlements": "^14.0.0",
+    "@sudoplatform/sudo-entitlements": "^15.0.1",
     "@sudoplatform/sudo-entitlements-admin": "^11.1.0",
-    "@sudoplatform/sudo-profiles": "^15.0.0",
-    "@sudoplatform/sudo-secure-id-verification": "^6.0.0",
-    "@sudoplatform/sudo-user": "^12.2.2",
+    "@sudoplatform/sudo-profiles": "^16.0.0",
+    "@sudoplatform/sudo-secure-id-verification": "^7.0.0",
+    "@sudoplatform/sudo-user": "^12.2.3",
     "@sudoplatform/sudo-virtual-cards-simulator": "^4.0.1",
     "@sudoplatform/sudo-web-crypto-provider": "^8.0.0",
     "@types/jest": "^27.5.2",
@@ -89,14 +89,14 @@
     "@types/luxon": "^3.2.0",
     "@types/node": "^16.18.11",
     "@types/uuid": "^9.0.0",
-    "@typescript-eslint/eslint-plugin": "^5.48.1",
-    "@typescript-eslint/parser": "^5.48.1",
+    "@typescript-eslint/eslint-plugin": "^5.49.0",
+    "@typescript-eslint/parser": "^5.49.0",
     "apollo-client": "^2.6.10",
-    "checkout-sdk-node": "^2.0.3",
+    "checkout-sdk-node": "^2.1.1",
     "concurrently": "^7.5.0",
-    "eslint": "^8.31.0",
+    "eslint": "^8.32.0",
     "eslint-config-prettier": "^8.6.0",
-    "eslint-plugin-import": "^2.27.4",
+    "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-jest": "^27.2.1",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-tree-shaking": "^1.10.0",
@@ -105,9 +105,9 @@
     "jest": "^27.5.1",
     "luxon": "^3.2.1",
     "madge": "^5.0.1",
-    "prettier": "^2.8.2",
+    "prettier": "^2.8.3",
     "prettier-plugin-organize-imports": "^3.2.2",
-    "stripe": "^11.6.0",
+    "stripe": "^11.8.0",
     "subscriptions-transport-ws": "^0.11.0",
     "ts-jest": "^27.1.5",
     "ts-mockito": "^2.6.1",
@@ -118,26 +118,14 @@
     "wait-for-expect": "^3.0.2",
     "websocket": "^1.0.34"
   },
-  "auditSuppressions": {
-    "1085292": 1674081817,
-    "1085291": 1674081829,
-    "1085261": 1674081835,
-    "1085251": 1674081843,
-    "1085311": 1674081852,
-    "1088341": 1674696248,
-    "1087848": 1674696255,
-    "1085403": 1674696263,
-    "1085321": 1674696270,
-    "1088370": 1674730182
-  },
   "outdatedSuppressions": {
     "major": {
-      "@types/jest": 1676238328,
-      "@types/node": 1676238328,
-      "graphql": 1676238328,
-      "jest": 1676238329,
-      "node-fetch": 1676238330,
-      "ts-jest": 1676238330
+      "@types/jest": 1677357644,
+      "@types/node": 1677357644,
+      "graphql": 1677357645,
+      "jest": 1677357645,
+      "node-fetch": 1677357646,
+      "ts-jest": 1677357646
     }
   }
 }

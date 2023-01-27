@@ -9,7 +9,7 @@ import {
   SudoVirtualCardsClient,
 } from '../../../src'
 import { createCardFundingSource } from '../util/createFundingSource'
-import { ProviderAPIs } from '../util/getProviderAPIs'
+import { FundingSourceProviders } from '../util/getFundingSourceProviders'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
 describe('ProvisionVirtualCard Test Suite', () => {
@@ -18,14 +18,14 @@ describe('ProvisionVirtualCard Test Suite', () => {
   let instanceUnderTest: SudoVirtualCardsClient
   let profilesClient: SudoProfilesClient
   let sudo: Sudo
-  let apis: ProviderAPIs
+  let fundingSourceProviders: FundingSourceProviders
 
   beforeEach(async () => {
     const result = await setupVirtualCardsClient(log)
     instanceUnderTest = result.virtualCardsClient
     profilesClient = result.profilesClient
     sudo = result.sudo
-    apis = result.apis
+    fundingSourceProviders = result.fundingSourceProviders
   })
 
   describe('provisionVirtualCard', () => {
@@ -35,7 +35,7 @@ describe('ProvisionVirtualCard Test Suite', () => {
       }
       const fundingSource = await createCardFundingSource(
         instanceUnderTest,
-        apis,
+        fundingSourceProviders,
       )
       const ownershipProof = await profilesClient.getOwnershipProof(
         sudo.id,

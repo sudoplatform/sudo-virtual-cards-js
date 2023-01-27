@@ -24,7 +24,7 @@ import {
   generateCheckoutPaymentToken,
   getTestCard,
 } from '../util/createFundingSource'
-import { ProviderAPIs } from '../util/getProviderAPIs'
+import { FundingSourceProviders } from '../util/getFundingSourceProviders'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
 describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
@@ -32,13 +32,13 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
   const log = new DefaultLogger('SudoVirtualCardsClientIntegrationTests')
   let instanceUnderTest: SudoVirtualCardsClient
   let userClient: SudoUserClient
-  let apis: ProviderAPIs
+  let fundingSourceProviders: FundingSourceProviders
 
   beforeAll(async () => {
     const result = await setupVirtualCardsClient(log)
     instanceUnderTest = result.virtualCardsClient
     userClient = result.userClient
-    apis = result.apis
+    fundingSourceProviders = result.fundingSourceProviders
   })
 
   const dummyCompletionDataForProvider: Record<
@@ -78,9 +78,9 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
         // asynchronously we can't use that knowledge
         // to control the set of providers we iterate
         // over so we have to use a flag
-        if (!apis['checkout']) {
+        if (!fundingSourceProviders.checkoutBankAccountEnabled) {
           console.warn(
-            `No API available for provider 'checkout'. Skipping tests.`,
+            `Checkout bank account provider not enabled. Skipping tests.`,
           )
           skip = true
         }
@@ -153,21 +153,27 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
     })
 
     describe.each`
-      provider
-      ${'stripe'}
-      ${'checkout'}
+      provider      | providerEnabled
+      ${'stripe'}   | ${'stripeCardEnabled'}
+      ${'checkout'} | ${'checkoutCardEnabled'}
     `(
-      'for provider $provider',
-      ({ provider }: { provider: keyof ProviderAPIs }) => {
+      'for card provider $provider',
+      ({
+        provider,
+        providerEnabled,
+      }: {
+        provider: keyof FundingSourceProviders['apis']
+        providerEnabled: keyof Omit<FundingSourceProviders, 'apis'>
+      }) => {
         let skip = false
         beforeAll(() => {
           // Since we determine availability of provider
           // asynchronously we can't use that knowledge
           // to control the set of providers we iterate
           // over so we have to use a flag
-          if (!apis[provider]) {
+          if (!fundingSourceProviders[providerEnabled]) {
             console.warn(
-              `No API available for provider ${provider}. Skipping tests.`,
+              `Card provider ${provider} not enabled. Skipping tests.`,
             )
             skip = true
           }
@@ -195,12 +201,12 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
 
           const card = getTestCard(provider)
           if (
-            apis.stripe &&
+            fundingSourceProviders.apis.stripe &&
             isStripeCardProvisionalFundingSourceProvisioningData(
               provisionalCard.provisioningData,
             )
           ) {
-            const stripe = apis.stripe
+            const stripe = fundingSourceProviders.apis.stripe
             const setupIntent = await confirmStripeSetupIntent(
               stripe,
               card,
@@ -210,13 +216,13 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
               throw 'Failed to get payment_method from setup intent'
             }
           } else if (
-            apis.checkout &&
+            fundingSourceProviders.apis.checkout &&
             isCheckoutCardProvisionalFundingSourceProvisioningData(
               provisionalCard.provisioningData,
             )
           ) {
             await generateCheckoutPaymentToken(
-              apis.checkout,
+              fundingSourceProviders.apis.checkout,
               card,
               provisionalCard.provisioningData,
             )
@@ -250,7 +256,7 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
               provisionalCard.provisioningData,
             )
           ) {
-            const stripe = apis.stripe
+            const stripe = fundingSourceProviders.apis.stripe
             const setupIntent = await confirmStripeSetupIntent(
               stripe,
               card,
@@ -265,13 +271,13 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
               paymentMethod: setupIntent.payment_method,
             }
           } else if (
-            apis.checkout &&
+            fundingSourceProviders.apis.checkout &&
             isCheckoutCardProvisionalFundingSourceProvisioningData(
               provisionalCard.provisioningData,
             )
           ) {
             const paymentToken = await generateCheckoutPaymentToken(
-              apis.checkout,
+              fundingSourceProviders.apis.checkout,
               card,
               provisionalCard.provisioningData,
             )
@@ -303,14 +309,14 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
     )
 
     // Stripe specific tests
-    describe('for provider stripe', () => {
+    describe('for provider stripe:card', () => {
       let skip = false
       beforeAll(() => {
         // Since we determine availability of provider
         // asynchronously we can't use that knowledge
         // to control the set of providers we iterate
         // over so we have to use a flag
-        if (!apis.stripe) {
+        if (!fundingSourceProviders.apis.stripe) {
           console.warn(`No API available for provider stripe. Skipping tests.`)
           skip = true
         }
@@ -335,17 +341,15 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
     })
 
     // Checkout specific tests
-    describe('for provider checkout', () => {
+    describe('for provider checkout:card', () => {
       let skip = false
       beforeAll(() => {
         // Since we determine availability of provider
         // asynchronously we can't use that knowledge
         // to control the set of providers we iterate
         // over so we have to use a flag
-        if (!apis.checkout) {
-          console.warn(
-            `No API available for provider checkout. Skipping tests.`,
-          )
+        if (!fundingSourceProviders.checkoutCardEnabled) {
+          console.warn(`Checkout card provider not enabled. Skipping tests.`)
           skip = true
         }
       })
@@ -361,7 +365,7 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
           })
 
         if (
-          !apis.checkout ||
+          !fundingSourceProviders.apis.checkout ||
           !isCheckoutCardProvisionalFundingSourceProvisioningData(
             provisionalFundingSource.provisioningData,
           )
@@ -372,7 +376,7 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
         const card = getTestCard('checkout', 'Visa-3DS2-1')
 
         const paymentToken = await generateCheckoutPaymentToken(
-          apis.checkout,
+          fundingSourceProviders.apis.checkout,
           card,
           provisionalFundingSource.provisioningData,
         )
@@ -431,7 +435,7 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
           })
 
         if (
-          !apis.checkout ||
+          !fundingSourceProviders.apis.checkout ||
           !isCheckoutCardProvisionalFundingSourceProvisioningData(
             provisionalFundingSource.provisioningData,
           )
@@ -442,7 +446,7 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
         const card = getTestCard('checkout', 'BadAddress')
 
         const paymentToken = await generateCheckoutPaymentToken(
-          apis.checkout,
+          fundingSourceProviders.apis.checkout,
           card,
           provisionalFundingSource.provisioningData,
         )

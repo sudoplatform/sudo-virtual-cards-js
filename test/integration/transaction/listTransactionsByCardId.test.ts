@@ -11,7 +11,7 @@ import {
   TransactionType,
   VirtualCard,
 } from '../../../src'
-import { ProviderAPIs } from '../util/getProviderAPIs'
+import { FundingSourceProviders } from '../util/getFundingSourceProviders'
 import { provisionVirtualCard } from '../util/provisionVirtualCard'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
@@ -24,7 +24,7 @@ describe('ListTransactionsByCardId Test Suite', () => {
   let instanceUnderTest: SudoVirtualCardsClient
   let vcSimulator: SudoVirtualCardsSimulatorClient
   let profilesClient: SudoProfilesClient
-  let apis: ProviderAPIs
+  let fundingSourceProviders: FundingSourceProviders
 
   let sudo: Sudo
   let card: VirtualCard
@@ -92,14 +92,14 @@ describe('ListTransactionsByCardId Test Suite', () => {
     instanceUnderTest = result.virtualCardsClient
     profilesClient = result.profilesClient
     sudo = result.sudo
-    apis = result.apis
+    fundingSourceProviders = result.fundingSourceProviders
     vcSimulator = result.virtualCardsSimulatorClient
 
     card = await provisionVirtualCard(
       instanceUnderTest,
       profilesClient,
       sudo,
-      apis,
+      fundingSourceProviders,
     )
     await setupTransactions()
   })

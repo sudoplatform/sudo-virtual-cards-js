@@ -1,10 +1,11 @@
 import { CachePolicy, DefaultLogger } from '@sudoplatform/sudo-common'
-import { FundingSource, SudoVirtualCardsClient } from '../../../src'
 import {
-  CardProviderName,
-  createCardFundingSource,
-} from '../util/createFundingSource'
-import { ProviderAPIs } from '../util/getProviderAPIs'
+  FundingSource,
+  FundingSourceType,
+  SudoVirtualCardsClient,
+} from '../../../src'
+import { createCardFundingSource } from '../util/createFundingSource'
+import { FundingSourceProviders } from '../util/getFundingSourceProviders'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
 describe('SudoVirtualCardsClient ListFundingSources Test Suite', () => {
@@ -13,12 +14,12 @@ describe('SudoVirtualCardsClient ListFundingSources Test Suite', () => {
 
   let fundingSources: FundingSource[] = []
   let instanceUnderTest: SudoVirtualCardsClient
-  let apis: ProviderAPIs
+  let fundingSourceProviders: FundingSourceProviders
 
   beforeEach(async () => {
     const result = await setupVirtualCardsClient(log)
     instanceUnderTest = result.virtualCardsClient
-    apis = result.apis
+    fundingSourceProviders = result.fundingSourceProviders
   })
 
   afterEach(() => {
@@ -27,20 +28,29 @@ describe('SudoVirtualCardsClient ListFundingSources Test Suite', () => {
 
   describe('listFundingSources', () => {
     describe.each`
-      provider
-      ${'stripe'}
+      provider      | type                            | providerEnabled
+      ${'stripe'}   | ${FundingSourceType.CreditCard} | ${'stripeCardEnabled'}
+      ${'checkout'} | ${FundingSourceType.CreditCard} | ${'checkoutCardEnabled'}
     `(
-      'for provider $provider',
-      ({ provider }: { provider: CardProviderName }) => {
+      'for $type provider $provider',
+      ({
+        provider,
+        type,
+        providerEnabled,
+      }: {
+        provider: keyof FundingSourceProviders['apis']
+        type: FundingSourceType
+        providerEnabled: keyof Omit<FundingSourceProviders, 'apis'>
+      }) => {
         let skip = false
         beforeEach(() => {
           // Since we determine availability of provider
           // asynchronously we can't use that knowledge
           // to control the set of providers we iterate
           // over so we have to use a flag
-          if (!apis[provider]) {
+          if (!fundingSourceProviders[providerEnabled]) {
             console.warn(
-              `No API available for provider ${provider}. Skipping tests.`,
+              `${type} provider ${provider} not enabled. Skipping tests.`,
             )
             skip = true
           }
@@ -51,7 +61,7 @@ describe('SudoVirtualCardsClient ListFundingSources Test Suite', () => {
 
           const visaFundingSource = await createCardFundingSource(
             instanceUnderTest,
-            apis,
+            fundingSourceProviders,
             {
               testCard: 'Visa-No3DS-1',
               supportedProviders: [provider],
@@ -59,7 +69,7 @@ describe('SudoVirtualCardsClient ListFundingSources Test Suite', () => {
           )
           const mastercardFundingSource = await createCardFundingSource(
             instanceUnderTest,
-            apis,
+            fundingSourceProviders,
             {
               testCard: 'MC-No3DS-1',
               supportedProviders: [provider],
@@ -84,14 +94,24 @@ describe('SudoVirtualCardsClient ListFundingSources Test Suite', () => {
         })
 
         it('returns expected result when limit specified', async () => {
-          const fs1 = await createCardFundingSource(instanceUnderTest, apis, {
-            testCard: 'Visa-No3DS-1',
-            supportedProviders: [provider],
-          })
-          const fs2 = await createCardFundingSource(instanceUnderTest, apis, {
-            testCard: 'MC-No3DS-1',
-            supportedProviders: [provider],
-          })
+          if (skip) return
+
+          const fs1 = await createCardFundingSource(
+            instanceUnderTest,
+            fundingSourceProviders,
+            {
+              testCard: 'Visa-No3DS-1',
+              supportedProviders: [provider],
+            },
+          )
+          const fs2 = await createCardFundingSource(
+            instanceUnderTest,
+            fundingSourceProviders,
+            {
+              testCard: 'MC-No3DS-1',
+              supportedProviders: [provider],
+            },
+          )
 
           const result = await instanceUnderTest.listFundingSources({
             cachePolicy: CachePolicy.RemoteOnly,
