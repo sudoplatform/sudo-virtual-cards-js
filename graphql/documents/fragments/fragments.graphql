@@ -48,6 +48,10 @@ fragment CreditCardFundingSource on CreditCardFundingSource {
   updatedAtEpochMs
   state
   currency
+  transactionVelocity {
+    maximum
+    velocity
+  }
   last4
   network
   cardType
@@ -61,6 +65,10 @@ fragment BankAccountFundingSource on BankAccountFundingSource {
   updatedAtEpochMs
   state
   currency
+  transactionVelocity {
+    maximum
+    velocity
+  }
   bankAccountType
   authorization {
     language

@@ -97,15 +97,24 @@ export class GraphQLDataFactory {
       provisioningData: this.bankAccountProvisioningData,
     }
 
-  static readonly creditCardfundingSource: CreditCardFundingSource = {
+  private static readonly commonFundingSourceUnsealedProps = {
     ...GraphQLDataFactory.commonProps,
-    __typename: 'CreditCardFundingSource',
     id: 'dummyFundingSourceId',
     currency: 'dummyCurrency',
+    state: FundingSourceState.Active,
+    transactionVelocity: {
+      __typename: 'TransactionVelocity' as const,
+      maximum: 10000,
+      velocity: ['10000/P1D'],
+    },
+  }
+
+  static readonly creditCardfundingSource: CreditCardFundingSource = {
+    ...GraphQLDataFactory.commonFundingSourceUnsealedProps,
+    __typename: 'CreditCardFundingSource',
+    cardType: CardType.Credit,
     last4: 'dummyLast4',
     network: CreditCardNetwork.Visa,
-    state: FundingSourceState.Active,
-    cardType: CardType.Credit,
   }
 
   static readonly defaultFundingSource: FundingSource =
@@ -115,11 +124,8 @@ export class GraphQLDataFactory {
     this.creditCardfundingSource
 
   static readonly bankAccountfundingSource: BankAccountFundingSource = {
-    ...GraphQLDataFactory.commonProps,
+    ...GraphQLDataFactory.commonFundingSourceUnsealedProps,
     __typename: 'BankAccountFundingSource',
-    id: 'dummyFundingSourceId',
-    currency: 'dummyCurrency',
-    state: FundingSourceState.Active,
     bankAccountType: BankAccountType.Savings,
     authorization: {
       content: 'dummyAuthorizationContent',
@@ -153,13 +159,10 @@ export class GraphQLDataFactory {
     nextToken: undefined,
   }
 
-  static readonly bankAccountfundingSourceUnsealed: BankAccountFundingSourceUnsealed =
+  static readonly bankAccountFundingSourceUnsealed: BankAccountFundingSourceUnsealed =
     {
-      ...GraphQLDataFactory.commonProps,
+      ...GraphQLDataFactory.commonFundingSourceUnsealedProps,
       __typename: 'BankAccountFundingSource',
-      id: 'dummyFundingSourceId',
-      currency: 'dummyCurrency',
-      state: FundingSourceState.Active,
       bankAccountType: BankAccountType.Savings,
       authorization: {
         content: 'dummyAuthorizationContent',

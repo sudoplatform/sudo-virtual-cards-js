@@ -67,6 +67,16 @@ export enum DeclineReason {
 }
 
 /**
+ * State of the transaction charge detail.
+ */
+export enum ChargeDetailState {
+  Pending = 'PENDING', // Funding transaction initiated
+  Cleared = 'CLEARED', // Funding transaction cleared
+  InsufficientFunds = 'INSUFFICIENT_FUNDS', // Funding transaction failed due to insufficient funds
+  Failed = 'FAILED', // Funding transaction deemed failed for another reason
+}
+
+/**
  * Detail of a transaction charge.
  */
 export interface TransactionDetailCharge {
@@ -76,6 +86,7 @@ export interface TransactionDetailCharge {
   fundingSourceAmount: CurrencyAmount
   fundingSourceId: string
   description: string
+  state: ChargeDetailState
 }
 
 /**

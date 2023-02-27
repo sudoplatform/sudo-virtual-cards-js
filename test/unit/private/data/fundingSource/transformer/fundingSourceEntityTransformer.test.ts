@@ -12,7 +12,7 @@ describe('FundingSourceEntityTransformer Test Suite', () => {
     it.each`
       graphql                                                | entity
       ${GraphQLDataFactory.creditCardfundingSource}          | ${EntityDataFactory.creditCardFundingSource}
-      ${GraphQLDataFactory.bankAccountfundingSourceUnsealed} | ${EntityDataFactory.bankAccountFundingSource}
+      ${GraphQLDataFactory.bankAccountFundingSourceUnsealed} | ${EntityDataFactory.bankAccountFundingSource}
     `(
       'successfully transforms graphql to entity format: $entity.type',
       ({ graphql, entity }) => {

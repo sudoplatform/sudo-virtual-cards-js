@@ -84,6 +84,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
       ).resolves.toEqual(data)
     })
   })
+
   describe('setupFundingSource', () => {
     beforeEach(() => {
       when(mockAppSync.setupFundingSource(anything())).thenResolve(

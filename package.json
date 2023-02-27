@@ -66,14 +66,14 @@
     "apollo-link-http": "^1.5.8",
     "apollo-cache-inmemory": "^1.6.6",
     "aws-appsync": "^4.1.9",
-    "node-fetch": "^2.6.8"
+    "node-fetch": "^2.6.9"
   },
   "devDependencies": {
-    "@graphql-codegen/add": "^3.2.0",
-    "@graphql-codegen/cli": "^2.16.4",
-    "@graphql-codegen/typed-document-node": "^2.3.12",
-    "@graphql-codegen/typescript": "^2.8.7",
-    "@graphql-codegen/typescript-operations": "^2.5.12",
+    "@graphql-codegen/add": "^4.0.1",
+    "@graphql-codegen/cli": "^3.2.1",
+    "@graphql-codegen/typed-document-node": "^3.0.1",
+    "@graphql-codegen/typescript": "^3.0.1",
+    "@graphql-codegen/typescript-operations": "^3.0.1",
     "@graphql-typed-document-node/apollo-client-2": "^1.0.0",
     "@sudoplatform/sudo-api-client": "^13.0.0",
     "@sudoplatform/sudo-common": "^8.3.0",
@@ -104,7 +104,7 @@
     "isomorphic-webcrypto": "^2.3.8",
     "jest": "^27.5.1",
     "luxon": "^3.2.1",
-    "madge": "^5.0.1",
+    "madge": "^6.0.0",
     "prettier": "^2.8.3",
     "prettier-plugin-organize-imports": "^3.2.2",
     "stripe": "^11.8.0",
@@ -120,12 +120,12 @@
   },
   "outdatedSuppressions": {
     "major": {
-      "@types/jest": 1677357644,
-      "@types/node": 1677357644,
-      "graphql": 1677357645,
-      "jest": 1677357645,
-      "node-fetch": 1677357646,
-      "ts-jest": 1677357646
+      "@types/jest": 1680052468,
+      "@types/node": 1680052468,
+      "graphql": 1680052468,
+      "jest": 1680052468,
+      "node-fetch": 1680052468,
+      "ts-jest": 1680052468
     }
   }
 }

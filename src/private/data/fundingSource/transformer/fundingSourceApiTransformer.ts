@@ -22,6 +22,7 @@ export class FundingSourceAPITransformer {
       currency: entity.currency,
       state: entity.state,
       version: entity.version,
+      transactionVelocity: entity.transactionVelocity,
     }
     if (isCreditCardFundingSourceEntity(entity)) {
       const transformed: CreditCardFundingSource = {

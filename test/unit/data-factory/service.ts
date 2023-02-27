@@ -1,4 +1,5 @@
 import { PublicKey, PublicKeyFormat } from '@sudoplatform/sudo-common'
+import { ChargeDetailState } from '../../../src'
 import { TransactionType } from '../../../src/gen/graphqlTypes'
 import { DeviceKey } from '../../../src/private/data/common/deviceKeyWorker'
 import { TransactionUnsealed } from '../../../src/private/data/common/transactionWorker'
@@ -87,6 +88,7 @@ export class ServiceDataFactory {
         fundingSourceAmount: { currency: 'USD', amount: 123 },
         fundingSourceId: 'dummyFundingSourceId',
         description: 'dummyFundingSourceDescription',
+        state: ChargeDetailState.Cleared,
       },
     ],
   }
@@ -118,6 +120,7 @@ export class ServiceDataFactory {
         fundingSourceAmount: { currency: 'USD', amount: 123 },
         fundingSourceId: 'dummyFundingSourceId',
         description: 'dummyFundingSourceDescription',
+        state: ChargeDetailState.Cleared,
       },
     ],
   }

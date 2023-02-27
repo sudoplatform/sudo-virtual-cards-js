@@ -19,6 +19,10 @@ export interface BaseFundingSourceEntity {
   state: FundingSourceState
   type: FundingSourceType
   currency: string
+  transactionVelocity?: {
+    maximum?: number
+    velocity?: string[]
+  }
 }
 export interface CreditCardFundingSourceEntity extends BaseFundingSourceEntity {
   type: FundingSourceType.CreditCard

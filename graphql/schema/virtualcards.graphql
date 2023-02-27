@@ -14,6 +14,7 @@ interface CommonFundingSource  {
   updatedAtEpochMs: Float!
   state: FundingSourceState!
   currency: String!
+  transactionVelocity: TransactionVelocity
 }
 
 enum KeyFormat {
@@ -71,6 +72,11 @@ type CurrencyAmount {
   amount: String!
 }
 
+type TransactionVelocity {
+  maximum: Int
+  velocity: [String!]
+}
+
 type VirtualCardsConfig {
   maxFundingSourceVelocity: [String!]!
   maxFundingSourceFailureVelocity: [String!]!
@@ -125,6 +131,7 @@ type CreditCardFundingSource implements CommonObject & CommonFundingSource {
   updatedAtEpochMs: Float!
   state: FundingSourceState!
   currency: String!
+  transactionVelocity: TransactionVelocity
   last4: String!
   network: CreditCardNetwork!
   cardType: CardType!
@@ -148,6 +155,7 @@ type BankAccountFundingSource implements CommonObject & CommonFundingSource {
   updatedAtEpochMs: Float!
   state: FundingSourceState!
   currency: String!
+  transactionVelocity: TransactionVelocity
   bankAccountType: BankAccountType!
   authorization: SignedAuthorizationText!
   last4: String!
@@ -244,6 +252,7 @@ type SealedTransactionDetailChargeAttribute {
   fundingSourceAmount: SealedCurrencyAmountAttribute!
   fundingSourceId: ID!
   description: String!
+  state: String
 }
 
 type SealedMarkupAttribute {
@@ -297,6 +306,7 @@ enum ProvisionalFundingSourceState {
 enum FundingSourceState {
   ACTIVE
   INACTIVE
+  REFRESH
 }
 
 enum FundingSourceType {

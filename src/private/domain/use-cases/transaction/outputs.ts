@@ -1,4 +1,5 @@
 import {
+  ChargeDetailState,
   DeclineReason,
   TransactionType,
 } from '../../../../public/typings/transaction'
@@ -34,5 +35,6 @@ export interface TransactionUseCaseOutput {
     fundingSourceAmount: CurrencyAmountUseCaseOutput
     fundingSourceId: string
     description: string
+    state: ChargeDetailState
   }[]
 }

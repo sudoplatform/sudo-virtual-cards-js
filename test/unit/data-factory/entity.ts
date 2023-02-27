@@ -1,5 +1,5 @@
 import { Base64 } from '@sudoplatform/sudo-common'
-import { BankAccountType, VirtualCard } from '../../../src'
+import { BankAccountType, ChargeDetailState, VirtualCard } from '../../../src'
 import { VirtualCardsConfigEntity } from '../../../src/private/domain/entities/configuration/virtualCardsConfigEntity'
 import { FundingSourceEntity } from '../../../src/private/domain/entities/fundingSource/fundingSourceEntity'
 import { ProvisionalFundingSourceEntity } from '../../../src/private/domain/entities/fundingSource/provisionalFundingSourceEntity'
@@ -82,24 +82,29 @@ export class EntityDataFactory {
       type: FundingSourceType.BankAccount,
     }
 
-  static readonly creditCardFundingSource: FundingSourceEntity = {
+  private static readonly commonFundingSourceProps = {
     ...this.commonProps,
     id: 'dummyFundingSourceId',
     currency: 'dummyCurrency',
-    last4: 'dummyLast4',
-    network: CreditCardNetwork.Visa,
     state: FundingSourceState.Active,
+    transactionVelocity: {
+      maximum: 10000,
+      velocity: ['10000/P1D'],
+    },
+  }
+
+  static readonly creditCardFundingSource: FundingSourceEntity = {
+    ...this.commonFundingSourceProps,
     type: FundingSourceType.CreditCard,
     cardType: CardType.Credit,
+    last4: 'dummyLast4',
+    network: CreditCardNetwork.Visa,
   }
 
   static readonly defaultFundingSource = this.creditCardFundingSource
 
   static readonly bankAccountFundingSource: FundingSourceEntity = {
-    ...this.commonProps,
-    id: 'dummyFundingSourceId',
-    currency: 'dummyCurrency',
-    state: FundingSourceState.Active,
+    ...this.commonFundingSourceProps,
     type: FundingSourceType.BankAccount,
     bankAccountType: BankAccountType.Savings,
     last4: '1234',
@@ -191,6 +196,7 @@ export class EntityDataFactory {
         fundingSourceAmount: this.fundingSourceAmount,
         fundingSourceId: 'dummyFundingSourceId',
         description: 'dummyFundingSourceDescription',
+        state: ChargeDetailState.Cleared,
       },
     ],
   }
@@ -222,6 +228,7 @@ export class EntityDataFactory {
         fundingSourceAmount: this.fundingSourceAmount,
         fundingSourceId: 'dummyFundingSourceId',
         description: 'dummyFundingSourceDescription',
+        state: ChargeDetailState.Cleared,
       },
     ],
   }

@@ -5,6 +5,7 @@ import {
   SealedTransactionDetailChargeAttribute,
 } from '../../../gen/graphqlTypes'
 import {
+  ChargeDetailState,
   DeclineReason,
   TransactionType,
 } from '../../../public/typings/transaction'
@@ -39,6 +40,7 @@ export interface TransactionUnsealed {
     fundingSourceAmount: CurrencyAmountEntity
     fundingSourceId: string
     description: string
+    state: ChargeDetailState
   }[]
 }
 
@@ -100,6 +102,17 @@ export class DefaultTransactionWorker implements TransactionWorker {
       }
       throw new FatalError(`Unsupported Decline Reason: ${unsealed}`)
     }
+    const unsealChargeDetailState = async (
+      encrypted: string,
+    ): Promise<ChargeDetailState> => {
+      const unsealed = await unseal(encrypted)
+      for (const val of Object.values(ChargeDetailState)) {
+        if (unsealed === val) {
+          return val
+        }
+      }
+      throw new FatalError(`Unsupported Charge Detail State: ${unsealed}`)
+    }
     const unsealDetail = async (
       encrypted: SealedTransactionDetailChargeAttribute,
     ): Promise<TransactionDetailChargeEntity> => {
@@ -123,6 +136,9 @@ export class DefaultTransactionWorker implements TransactionWorker {
         ),
         fundingSourceId: encrypted.fundingSourceId,
         description: await unseal(encrypted.description),
+        state: encrypted.state
+          ? await unsealChargeDetailState(encrypted.state)
+          : ChargeDetailState.Cleared,
       }
     }
     let transactionDetail: TransactionDetailChargeEntity[] | undefined

@@ -1,6 +1,7 @@
 import { AuthorizationText } from './authorizationText'
 import { BankAccountType } from './bankAccountType'
 import { CardType } from './cardType'
+import { TransactionVelocity } from './transactionVelocity'
 
 export interface BaseFundingSourceClientConfiguration {
   type: string
@@ -93,8 +94,12 @@ export function isCheckoutBankAccountFundingSourceClientConfiguration(
  * @property {Date} updatedAt Date when the funding source was last updated.
  * @property {FundingSourceState} state The funding source state.
  * @property {string} currency The currency of the funding source.
- * @property {string} last4 The last 4 digits of the funding source credit card.
- * @property {CreditCardNetwork} network The funding source credit card network.
+ * @property {TransactionVelocity} transactionVelocity
+ *   Effective transaction velocity, if any, applied to
+ *   virtual card transactions funded by this funding source.
+ *   This is the combined result of all velocity policies
+ *   (global and funding source specific) as at the time this funding
+ *   source was retrieved.
  */
 export interface BaseFundingSource {
   id: string
@@ -105,6 +110,7 @@ export interface BaseFundingSource {
   type: FundingSourceType
   state: FundingSourceState
   currency: string
+  transactionVelocity?: TransactionVelocity
 }
 
 /**
@@ -112,6 +118,8 @@ export interface BaseFundingSource {
  * funding source.
  *
  * @interface CreditCardFundingSource
+ * @extends BaseFundingSource
+ * @property {FundingSourceType.CreditCard} type Type of funding source
  * @property {CardType} cardType The type of card
  * @property {string} last4 The last 4 digits of the card number.
  * @property {CreditCardNetwork} network The funding source credit card network.
@@ -128,6 +136,8 @@ export interface CreditCardFundingSource extends BaseFundingSource {
  * funding source.
  *
  * @interface BankAccountFundingSource
+ * @extends BaseFundingSource
+ * @property {FundingSourceType.BankAccount} type Type of funding source
  * @property {BankAccountType} bankAccountType The type of bank account
  * @property {string} last4 The last 4 digits of the bank account number.
  * @property {string} institutionName
@@ -376,6 +386,7 @@ export enum ProvisionalFundingSourceState {
 export enum FundingSourceState {
   Active = 'ACTIVE',
   Inactive = 'INACTIVE',
+  Refresh = 'REFRESH',
 }
 
 /**

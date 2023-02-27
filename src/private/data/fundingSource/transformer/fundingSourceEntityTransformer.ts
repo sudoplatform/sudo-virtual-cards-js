@@ -1,8 +1,13 @@
 import { FatalError } from '@sudoplatform/sudo-common'
-import { BankAccountType, CardType } from '../../../../gen/graphqlTypes'
+import {
+  BankAccountType,
+  CardType,
+  TransactionVelocity,
+} from '../../../../gen/graphqlTypes'
 import { BankAccountType as BankAccountTypeEntity } from '../../../../public/typings/bankAccountType'
 import { CardType as CardTypeEntity } from '../../../../public/typings/cardType'
 import { FundingSourceType } from '../../../../public/typings/fundingSource'
+import { TransactionVelocity as TransactionVelocityEntity } from '../../../../public/typings/transactionVelocity'
 import { FundingSourceEntity } from '../../../domain/entities/fundingSource/fundingSourceEntity'
 import { FundingSourceUnsealed } from '../fundingSourceSealedAttributes'
 
@@ -16,6 +21,9 @@ export class FundingSourceEntityTransformer {
       currency: data.currency,
       state: data.state,
       version: data.version,
+      transactionVelocity: TransactionVelocityTransformer.transformGraphQL(
+        data.transactionVelocity,
+      ),
     }
     switch (data.__typename) {
       case 'CreditCardFundingSource':
@@ -43,6 +51,23 @@ export class FundingSourceEntityTransformer {
   }
 }
 
+export class TransactionVelocityTransformer {
+  static transformGraphQL(
+    data?: TransactionVelocity | null,
+  ): TransactionVelocityEntity | undefined {
+    const maximum = data?.maximum ?? undefined
+    const velocity = data?.velocity ?? undefined
+
+    if (maximum === undefined && velocity === undefined) {
+      return undefined
+    }
+
+    return {
+      maximum,
+      velocity,
+    }
+  }
+}
 export class CardTypeTransformer {
   static transformGraphQL(data: CardType): CardTypeEntity {
     switch (data) {
