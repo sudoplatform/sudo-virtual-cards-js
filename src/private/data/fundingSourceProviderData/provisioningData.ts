@@ -35,7 +35,7 @@ const PlaidLinkTokenProps = {
   expiration: t.string,
   request_id: t.string,
 }
-const PlaidLinkTokenCodec = t.type(PlaidLinkTokenProps, 'PlaidLinkToken')
+export const PlaidLinkTokenCodec = t.type(PlaidLinkTokenProps, 'PlaidLinkToken')
 
 const AuthorizationTextProperties = {
   language: t.string,
@@ -45,7 +45,7 @@ const AuthorizationTextProperties = {
   hashAlgorithm: t.string,
 }
 
-const AuthorizationTextCodec = t.type(
+export const AuthorizationTextCodec = t.type(
   AuthorizationTextProperties,
   'AuthorizationText',
 )

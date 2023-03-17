@@ -1,0 +1,10 @@
+mutation EnableUser($input: EnableUserInput!) {
+    enableUser(input: $input) {
+        success
+    }
+}
+mutation DisableUser($input: DisableUserInput!) {
+    disableUser(input: $input) {
+        success
+    }
+}

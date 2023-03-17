@@ -1,0 +1,27 @@
+
+input DisableUserInput {
+
+    username: String!
+}
+
+input EnableUserInput {
+
+    username: String!
+}
+
+type DisableUser
+{
+
+    success: Boolean!
+}
+
+type EnableUser
+{
+
+    success: Boolean!
+}
+
+type Mutation {
+    disableUser(input: DisableUserInput!): DisableUser!
+    enableUser(input: EnableUserInput!): EnableUser!
+}

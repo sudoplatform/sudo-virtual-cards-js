@@ -40,6 +40,7 @@ import {
   FundingSourceProviders,
   getFundingSourceProviders,
 } from './getFundingSourceProviders'
+import { IdentityAdminClient } from './identityAdminClient'
 
 export const sudoIssuer = 'sudoplatform.sudoservice'
 
@@ -91,6 +92,23 @@ const setupSimulatorApiClient = (): AWSAppSyncClient<NormalizedCacheObject> => {
     },
   })
 }
+const IdentityAdminApiConfig = t.type({
+  apiUrl: t.string,
+  region: t.string,
+})
+type IdentityAdminApiConfig = t.TypeOf<typeof IdentityAdminApiConfig>
+const setupIdentityAdminClient = (apiKey?: string): IdentityAdminClient => {
+  const config =
+    DefaultConfigurationManager.getInstance().bindConfigSet<IdentityAdminApiConfig>(
+      IdentityAdminApiConfig,
+      'adminConsoleProjectService',
+    )
+  return new IdentityAdminClient({
+    apiKey,
+    region: config.region,
+    graphqlUrl: config.apiUrl,
+  })
+}
 
 interface SetupVirtualCardsClientOutput {
   sudo: Sudo
@@ -101,6 +119,7 @@ interface SetupVirtualCardsClientOutput {
   entitlementsClient: SudoEntitlementsClient
   identityVerificationClient: SudoSecureIdVerificationClient
   profilesClient: SudoProfilesClient
+  identityAdminClient: IdentityAdminClient
   fundingSourceProviders: FundingSourceProviders
 }
 
@@ -179,6 +198,8 @@ export const setupVirtualCardsClient = async (
 
     const virtualCardsClient = new DefaultSudoVirtualCardsClient(options)
 
+    const identityAdminClient = setupIdentityAdminClient(adminApiKey)
+
     return {
       ownershipProofToken,
       virtualCardsClient,
@@ -188,6 +209,7 @@ export const setupVirtualCardsClient = async (
       identityVerificationClient,
       profilesClient,
       sudo,
+      identityAdminClient,
       fundingSourceProviders: await getFundingSourceProviders(
         virtualCardsClient,
       ),

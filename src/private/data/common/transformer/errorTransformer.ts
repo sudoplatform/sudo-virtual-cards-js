@@ -18,7 +18,7 @@ import {
   UnacceptableFundingSourceError,
   VelocityExceededError,
 } from '../../../../public/errors'
-import { decodeProvisionalFundingSourceInteractionData } from '../../fundingSourceProviderData/interactionData'
+import { decodeFundingSourceInteractionData } from '../../fundingSourceProviderData/interactionData'
 
 export class ErrorTransformer {
   static toClientError(error: AppSyncError): Error {
@@ -48,7 +48,7 @@ export class ErrorTransformer {
       case 'sudoplatform.virtual-cards.VelocityExceededError':
         return new VelocityExceededError(error.message)
       case 'sudoplatform.virtual-cards.FundingSourceRequiresUserInteractionError': {
-        const interactionData = decodeProvisionalFundingSourceInteractionData(
+        const interactionData = decodeFundingSourceInteractionData(
           error.errorInfo,
         )
         return new FundingSourceRequiresUserInteractionError(interactionData)

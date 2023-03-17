@@ -14,26 +14,50 @@ import {
   when,
 } from 'ts-mockito'
 import { v4 } from 'uuid'
-import { AuthorizationText, FundingSourceType } from '../../../../../src'
+import {
+  AuthorizationText,
+  FundingSourceType,
+  FundingSourceUpdateSubscriber,
+} from '../../../../../src'
+import { OnFundingSourceUpdateSubscription } from '../../../../../src/gen/graphqlTypes'
 import { ApiClient } from '../../../../../src/private/data/common/apiClient'
 import {
   DeviceKeyWorker,
   UnsealInput,
 } from '../../../../../src/private/data/common/deviceKeyWorker'
+import { SubscriptionManager } from '../../../../../src/private/data/common/subscriptionManager'
 import { DefaultFundingSourceService } from '../../../../../src/private/data/fundingSource/defaultFundingSourceService'
 import { FundingSourceServiceCompletionData } from '../../../../../src/private/domain/entities/fundingSource/fundingSourceService'
+import { FundingSource } from '../../../../../types'
+import { FundingSourceServiceRefreshData } from '../../../../../types/private/domain/entities/fundingSource/fundingSourceService'
 import { EntityDataFactory } from '../../../data-factory/entity'
 import { GraphQLDataFactory } from '../../../data-factory/graphQl'
 
+// Constructor mocks
+jest.mock('../../../../../src/private/data/common/subscriptionManager')
+const JestMockSubscriptionManager = SubscriptionManager as jest.MockedClass<
+  typeof SubscriptionManager
+>
 describe('DefaultFundingSourceService Test Suite', () => {
   const mockAppSync = mock<ApiClient>()
   const mockDeviceKeyWorker = mock<DeviceKeyWorker>()
+  const mockSubscriptionManager =
+    mock<
+      SubscriptionManager<
+        OnFundingSourceUpdateSubscription,
+        FundingSourceUpdateSubscriber
+      >
+    >()
 
   let instanceUnderTest: DefaultFundingSourceService
 
   beforeEach(() => {
     reset(mockAppSync)
     reset(mockDeviceKeyWorker)
+
+    JestMockSubscriptionManager.mockImplementation(() =>
+      instance(mockSubscriptionManager),
+    )
     instanceUnderTest = new DefaultFundingSourceService(
       instance(mockAppSync),
       instance(mockDeviceKeyWorker),
@@ -293,6 +317,149 @@ describe('DefaultFundingSourceService Test Suite', () => {
           }),
         ).resolves.toEqual(EntityDataFactory.defaultFundingSource)
       })
+    })
+  })
+
+  describe('refreshFundingSource', () => {
+    describe('for bank account', () => {
+      const now = new Date()
+      const signature = 'authorization-text-signature'
+      beforeEach(() => {
+        when(mockAppSync.refreshFundingSource(anything())).thenResolve(
+          GraphQLDataFactory.bankAccountfundingSource,
+        )
+
+        jest.useFakeTimers('modern').setSystemTime(now)
+
+        when(mockDeviceKeyWorker.signString(anything())).thenResolve(signature)
+      })
+
+      afterEach(() => {
+        jest.useRealTimers()
+      })
+
+      it('calls appSync', async () => {
+        const authorizationText: AuthorizationText = {
+          content: 'authorizationText',
+          contentType: 'authorizationTextContentType',
+          language: 'authorizationTextLanguage',
+          hash: 'authorizationTextHash',
+          hashAlgorithm: 'authorizationTextHashAlgorithm',
+        }
+
+        const refreshData: FundingSourceServiceRefreshData = {
+          provider: 'checkout',
+          type: FundingSourceType.BankAccount,
+          accountId: 'account-id',
+          authorizationText,
+        }
+        await instanceUnderTest.refreshFundingSource({
+          id: 'dummyId',
+          refreshData,
+          language: 'en-us',
+        })
+        verify(mockAppSync.refreshFundingSource(anything())).once()
+        const [args] = capture(mockAppSync.refreshFundingSource).first()
+
+        expect(args).toEqual<typeof args>({
+          id: 'dummyId',
+          refreshData: expect.any(String),
+          language: 'en-us',
+        })
+
+        const decodedActualRefreshData = JSON.parse(
+          Base64.decodeString(args.refreshData),
+        )
+        expect(decodedActualRefreshData).toEqual({
+          provider: refreshData.provider,
+          type: FundingSourceType.BankAccount,
+          version: 1,
+          keyId: 'key-id',
+          authorizationTextSignature: {
+            algorithm: 'RSASignatureSSAPKCS15SHA256',
+            data: `{"hash":"${authorizationText.hash}","hashAlgorithm":"${
+              authorizationText.hashAlgorithm
+            }","signedAt":"${now.toISOString()}","account":"account-id"}`,
+            keyId: 'key-id',
+            signature,
+          },
+        })
+      })
+
+      it('returns appsync data', async () => {
+        await expect(
+          instanceUnderTest.refreshFundingSource({
+            id: 'dummyId',
+            refreshData: {
+              provider: 'checkout',
+              type: FundingSourceType.BankAccount,
+              accountId: 'account-id',
+              authorizationText: {
+                content: 'authorizationText',
+                contentType: 'authorizationTextContentType',
+                language: 'authorizationTextLanguage',
+                hash: 'authorizationTextHash',
+                hashAlgorithm: 'authorizationTextHashAlgorithm',
+              },
+            },
+          }),
+        ).resolves.toEqual(EntityDataFactory.bankAccountFundingSource)
+      })
+
+      it('throws KeyNotFoundError if no current registered public key', async () => {
+        when(mockDeviceKeyWorker.getCurrentPublicKey()).thenResolve(undefined)
+
+        const authorizationText: AuthorizationText = {
+          content: 'authorizationText',
+          contentType: 'authorizationTextContentType',
+          language: 'authorizationTextLanguage',
+          hash: 'authorizationTextHash',
+          hashAlgorithm: 'authorizationTextHashAlgorithm',
+        }
+
+        const refreshData: FundingSourceServiceRefreshData = {
+          provider: 'checkout',
+          type: FundingSourceType.BankAccount,
+          accountId: 'account-id',
+          authorizationText,
+        }
+        await expect(
+          instanceUnderTest.refreshFundingSource({
+            id: 'dummyId',
+            refreshData,
+          }),
+        ).rejects.toEqual(new KeyNotFoundError())
+
+        verify(mockAppSync.refreshFundingSource(anything())).never()
+      })
+    })
+  })
+
+  describe('subscribeToFundingSourceChanges', () => {
+    it('calls services correctly', () => {
+      when(mockSubscriptionManager.getWatcher()).thenReturn(undefined)
+      instanceUnderTest.subscribeToFundingSourceChanges({
+        owner: 'owner-id',
+        id: 'subscribe-id',
+        subscriber: {
+          fundingSourceChanged(fundingSource: FundingSource): Promise<void> {
+            return Promise.resolve(undefined)
+          },
+        },
+      })
+      verify(mockSubscriptionManager.subscribe(anything(), anything())).once()
+      const [actualId, actualSubscriber] = capture(
+        mockSubscriptionManager.subscribe,
+      ).first()
+      expect(actualId).toEqual<typeof actualId>('subscribe-id')
+
+      verify(mockAppSync.onFundingSourceUpdate(anything())).once()
+      const [ownerId] = capture(mockAppSync.onFundingSourceUpdate).first()
+      expect(ownerId).toEqual<typeof ownerId>('owner-id')
+
+      verify(mockSubscriptionManager.getWatcher()).twice()
+      verify(mockSubscriptionManager.setWatcher(anything())).once()
+      verify(mockSubscriptionManager.setSubscription(anything())).once()
     })
   })
 

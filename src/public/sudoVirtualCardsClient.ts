@@ -39,7 +39,10 @@ import { CompleteFundingSourceUseCase } from '../private/domain/use-cases/fundin
 import { GetFundingSourceClientConfigurationUseCase } from '../private/domain/use-cases/fundingSource/getFundingSourceClientConfigurationUseCase'
 import { GetFundingSourceUseCase } from '../private/domain/use-cases/fundingSource/getFundingSourceUseCase'
 import { ListFundingSourcesUseCase } from '../private/domain/use-cases/fundingSource/listFundingSourcesUseCase'
+import { RefreshFundingSourceUseCase } from '../private/domain/use-cases/fundingSource/refreshFundingSourceUseCase'
 import { SetupFundingSourceUseCase } from '../private/domain/use-cases/fundingSource/setupFundingSourceUseCase'
+import { SubscribeToFundingSourceChangesUseCase } from '../private/domain/use-cases/fundingSource/subscribeToFundingSourceChangesUseCase'
+import { UnsubscribeFromFundingSourceChangesUseCase } from '../private/domain/use-cases/fundingSource/unsubscribeFromFundingSourceChangesUseCase'
 import { CreateKeysIfAbsentUseCase } from '../private/domain/use-cases/key/createKeysIfAbsent'
 import { GetTransactionUseCase } from '../private/domain/use-cases/transaction/getTransactionUseCase'
 import { ListTransactionsByCardIdUseCase } from '../private/domain/use-cases/transaction/listTransactionsByCardIdUseCase'
@@ -165,6 +168,24 @@ export type CompleteFundingSourceCompletionDataInput =
   | CompleteFundingSourceStripeCardCompletionDataInput
 
 /**
+ * Input for the refresh data of {@link SudoVirtualCardsClient#refreshFundingSource}.
+ *
+ * @property {string} provider Provider used to save the funding source information.
+ * @property {FundingSourceType.BankAccount} type Funding source provider type. Must be BankAccount.
+ * @property {string} accountId The identifier of the account associated with the funding source being refreshed, if known
+ * @property {AuthorizationText} authorizationText Authorization text presented to and agreed to by the user.
+ */
+export interface RefreshFundingSourceCheckoutBankAccountRefreshDataInput {
+  provider: 'checkout'
+  type: FundingSourceType.BankAccount
+  accountId?: string
+  authorizationText?: AuthorizationText
+}
+
+export type RefreshFundingSourceRefreshDataInput =
+  RefreshFundingSourceCheckoutBankAccountRefreshDataInput
+
+/**
  * Input for {@link SudoVirtualCardsClient.completeFundingSource}.
  *
  * @property {string} id Identifier of the provisional funding source to be completed and provisioned.
@@ -176,6 +197,30 @@ export interface CompleteFundingSourceInput {
   id: string
   completionData: CompleteFundingSourceCompletionDataInput
   updateCardFundingSource?: boolean
+}
+
+/**
+ * Input for {@link SudoVirtualCardsClient#refreshFundingSource}.
+ *
+ * @property {string} id The identifier of the funding source to be refreshed
+ * @property {string} refreshData JSON string of the refresh data to be passed back to the service.
+ * @property {string} language
+ *   Some funding source types require presentation of end-user language
+ *   specific agreements. This property allows the client application
+ *   to specify the user's preferred language. If such presentation is
+ *   required and has no translation in the requested language or no
+ *   preferred language is specified, the default translation will be
+ *   presented. The default is a property of service instance
+ *   configuration. The value is an RFC 5646 language tag e.g. en-US.
+ */
+export interface RefreshFundingSourceInput {
+  id: string
+  refreshData: RefreshFundingSourceRefreshDataInput
+  language?: string
+}
+
+export interface FundingSourceChangeSubscriber {
+  fundingSourceChanged(fundingSource: FundingSource): Promise<void>
 }
 
 /**
@@ -462,6 +507,49 @@ export interface SudoVirtualCardsClient {
   completeFundingSource(
     input: CompleteFundingSourceInput,
   ): Promise<FundingSource>
+
+  /**
+   * Refresh a funding source.
+   *
+   * @param {RefreshFundingSourceInput} input Parameters used to refresh the funding source.
+   *
+   * @returns {FundingSource} The funding source which has been refreshed.
+   *
+   * @throws {@link FundingSourceNotFoundError}
+   * No funding source with the ID specified could be found.
+   * @throws {@link FundingSourceStateError}
+   *  Funding source cannot be refreshed as it is in an invalid state.
+   * @throws {@link UnacceptableFundingSourceError}
+   *  Funding source cannot be refreshed as the provider has prevented it.
+   * @throws {@link FundingSourceRequiresUserInteractionError}
+   *  The funding source requires additional user interaction before refresh
+   *  can complete. The error's interactionData property contains
+   *  provider specific data to be used in this process.
+   */
+  refreshFundingSource(input: RefreshFundingSourceInput): Promise<FundingSource>
+
+  /**
+   * Subscribe to changes to funding sources
+   *
+   * @param {string} id unique identifier to differentiate subscriptions; note that specifying a duplicate subscription
+   * id will replace the previous subscription.
+   * @param {FundingSourceChangeSubscriber} subscriber implementation of callback to be invoked when funding source change occurs
+   *
+   * @returns {void}
+   */
+  subscribeToFundingSourceChanges(
+    id: string,
+    subscriber: FundingSourceChangeSubscriber,
+  ): Promise<void>
+
+  /**
+   * Unsubscribe from changes to funding sources
+   *
+   * @param {string} id unique identifier to differentiate subscription
+   *
+   * @returns {void}
+   **/
+  unsubscribeFromFundingSourceChanges(id: string): void
 
   /**
    * Get a funding source identified by id.
@@ -755,6 +843,36 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
       )
       return await useCase.execute(input)
     })
+  }
+
+  public async refreshFundingSource(
+    input: RefreshFundingSourceInput,
+  ): Promise<FundingSource> {
+    return this.serialise.runExclusive(async () => {
+      const useCase = new RefreshFundingSourceUseCase(
+        this.fundingSourceService,
+        this.sudoUserClient,
+      )
+      return await useCase.execute(input)
+    })
+  }
+
+  public async subscribeToFundingSourceChanges(
+    id: string,
+    subscriber: FundingSourceChangeSubscriber,
+  ): Promise<void> {
+    const useCase = new SubscribeToFundingSourceChangesUseCase(
+      this.fundingSourceService,
+      this.sudoUserClient,
+    )
+    await useCase.execute({ id, subscriber })
+  }
+
+  public unsubscribeFromFundingSourceChanges(id: string): void {
+    const useCase = new UnsubscribeFromFundingSourceChangesUseCase(
+      this.fundingSourceService,
+    )
+    useCase.execute({ id })
   }
 
   public async getFundingSource({

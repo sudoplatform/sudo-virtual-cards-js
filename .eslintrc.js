@@ -68,7 +68,7 @@ module.exports = {
         'test/**/*.ts',
         'jest.setup.ts'
       ],
-      plugins: [ "jest" ],
+      plugins: [ '@typescript-eslint', "jest" ],
       parser: '@typescript-eslint/parser',
       parserOptions: {
         project: './tsconfig.test.json',
@@ -77,6 +77,7 @@ module.exports = {
         'plugin:@typescript-eslint/recommended',
         'plugin:@typescript-eslint/recommended-requiring-type-checking',
         'prettier',
+        'plugin:prettier/recommended',
       ],
       rules: {
         '@typescript-eslint/no-namespace': 'off',

@@ -181,6 +181,24 @@ export type DateRangeInput = {
   startDateEpochMs: Scalars['Float']
 }
 
+export type DisableUser = {
+  __typename?: 'DisableUser'
+  success: Scalars['Boolean']
+}
+
+export type DisableUserInput = {
+  username: Scalars['String']
+}
+
+export type EnableUser = {
+  __typename?: 'EnableUser'
+  success: Scalars['Boolean']
+}
+
+export type EnableUserInput = {
+  username: Scalars['String']
+}
+
 export type FundingSource = BankAccountFundingSource | CreditCardFundingSource
 
 export type FundingSourceClientConfiguration = {
@@ -234,6 +252,9 @@ export type Mutation = {
   cardProvision: ProvisionalCard
   completeFundingSource: FundingSource
   createPublicKeyForVirtualCards: PublicKey
+  disableUser: DisableUser
+  enableUser: EnableUser
+  refreshFundingSource: FundingSource
   setupFundingSource: ProvisionalFundingSource
   updateCard: SealedCard
 }
@@ -256,6 +277,18 @@ export type MutationCompleteFundingSourceArgs = {
 
 export type MutationCreatePublicKeyForVirtualCardsArgs = {
   input: CreatePublicKeyInput
+}
+
+export type MutationDisableUserArgs = {
+  input: DisableUserInput
+}
+
+export type MutationEnableUserArgs = {
+  input: EnableUserInput
+}
+
+export type MutationRefreshFundingSourceArgs = {
+  input: RefreshFundingSourceRequest
 }
 
 export type MutationSetupFundingSourceArgs = {
@@ -417,6 +450,12 @@ export type QueryListTransactionsByCardId2Args = {
   sortOrder?: InputMaybe<SortOrder>
 }
 
+export type RefreshFundingSourceRequest = {
+  id: Scalars['ID']
+  language?: InputMaybe<Scalars['String']>
+  refreshData: Scalars['ID']
+}
+
 export type SealedAddressAttribute = {
   __typename?: 'SealedAddressAttribute'
   addressLine1: Scalars['String']
@@ -554,6 +593,15 @@ export type SignedAuthorizationText = {
 export enum SortOrder {
   Asc = 'ASC',
   Desc = 'DESC',
+}
+
+export type Subscription = {
+  __typename?: 'Subscription'
+  onFundingSourceUpdate?: Maybe<FundingSource>
+}
+
+export type SubscriptionOnFundingSourceUpdateArgs = {
+  owner: Scalars['ID']
 }
 
 export enum TransactionType {
@@ -1106,6 +1154,74 @@ export type CompleteFundingSourceMutation = {
       }
 }
 
+export type RefreshFundingSourceMutationVariables = Exact<{
+  input: RefreshFundingSourceRequest
+}>
+
+export type RefreshFundingSourceMutation = {
+  __typename?: 'Mutation'
+  refreshFundingSource:
+    | {
+        __typename?: 'BankAccountFundingSource'
+        id: string
+        owner: string
+        version: number
+        createdAtEpochMs: number
+        updatedAtEpochMs: number
+        state: FundingSourceState
+        currency: string
+        bankAccountType: BankAccountType
+        last4: string
+        transactionVelocity?: {
+          __typename?: 'TransactionVelocity'
+          maximum?: number | null
+          velocity?: Array<string> | null
+        } | null
+        authorization: {
+          __typename?: 'SignedAuthorizationText'
+          language: string
+          content: string
+          contentType: string
+          signature: string
+          keyId: string
+          algorithm: string
+          data: string
+        }
+        institutionName: {
+          __typename?: 'SealedAttribute'
+          keyId: string
+          algorithm: string
+          plainTextType: string
+          base64EncodedSealedData: string
+        }
+        institutionLogo?: {
+          __typename?: 'SealedAttribute'
+          keyId: string
+          algorithm: string
+          plainTextType: string
+          base64EncodedSealedData: string
+        } | null
+      }
+    | {
+        __typename?: 'CreditCardFundingSource'
+        id: string
+        owner: string
+        version: number
+        createdAtEpochMs: number
+        updatedAtEpochMs: number
+        state: FundingSourceState
+        currency: string
+        last4: string
+        network: CreditCardNetwork
+        cardType: CardType
+        transactionVelocity?: {
+          __typename?: 'TransactionVelocity'
+          maximum?: number | null
+          velocity?: Array<string> | null
+        } | null
+      }
+}
+
 export type CancelFundingSourceMutationVariables = Exact<{
   input: IdInput
 }>
@@ -1431,6 +1547,24 @@ export type CancelVirtualCardMutation = {
       base64EncodedSealedData: string
     } | null
   }
+}
+
+export type EnableUserMutationVariables = Exact<{
+  input: EnableUserInput
+}>
+
+export type EnableUserMutation = {
+  __typename?: 'Mutation'
+  enableUser: { __typename?: 'EnableUser'; success: boolean }
+}
+
+export type DisableUserMutationVariables = Exact<{
+  input: DisableUserInput
+}>
+
+export type DisableUserMutation = {
+  __typename?: 'Mutation'
+  disableUser: { __typename?: 'DisableUser'; success: boolean }
 }
 
 export type GetVirtualCardsConfigQueryVariables = Exact<{
@@ -2230,6 +2364,75 @@ export type ListTransactionsByCardIdQuery = {
       }> | null
     }>
   }
+}
+
+export type OnFundingSourceUpdateSubscriptionVariables = Exact<{
+  owner: Scalars['ID']
+}>
+
+export type OnFundingSourceUpdateSubscription = {
+  __typename?: 'Subscription'
+  onFundingSourceUpdate?:
+    | {
+        __typename?: 'BankAccountFundingSource'
+        id: string
+        owner: string
+        version: number
+        createdAtEpochMs: number
+        updatedAtEpochMs: number
+        state: FundingSourceState
+        currency: string
+        bankAccountType: BankAccountType
+        last4: string
+        transactionVelocity?: {
+          __typename?: 'TransactionVelocity'
+          maximum?: number | null
+          velocity?: Array<string> | null
+        } | null
+        authorization: {
+          __typename?: 'SignedAuthorizationText'
+          language: string
+          content: string
+          contentType: string
+          signature: string
+          keyId: string
+          algorithm: string
+          data: string
+        }
+        institutionName: {
+          __typename?: 'SealedAttribute'
+          keyId: string
+          algorithm: string
+          plainTextType: string
+          base64EncodedSealedData: string
+        }
+        institutionLogo?: {
+          __typename?: 'SealedAttribute'
+          keyId: string
+          algorithm: string
+          plainTextType: string
+          base64EncodedSealedData: string
+        } | null
+      }
+    | {
+        __typename?: 'CreditCardFundingSource'
+        id: string
+        owner: string
+        version: number
+        createdAtEpochMs: number
+        updatedAtEpochMs: number
+        state: FundingSourceState
+        currency: string
+        last4: string
+        network: CreditCardNetwork
+        cardType: CardType
+        transactionVelocity?: {
+          __typename?: 'TransactionVelocity'
+          maximum?: number | null
+          velocity?: Array<string> | null
+        } | null
+      }
+    | null
 }
 
 export const PublicKeyFragmentDoc = {
@@ -4008,6 +4211,226 @@ export const CompleteFundingSourceDocument = {
   CompleteFundingSourceMutation,
   CompleteFundingSourceMutationVariables
 >
+export const RefreshFundingSourceDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'RefreshFundingSource' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'input' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'RefreshFundingSourceRequest' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'refreshFundingSource' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'input' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'CreditCardFundingSource' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'FragmentSpread',
+                        name: {
+                          kind: 'Name',
+                          value: 'CreditCardFundingSource',
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'BankAccountFundingSource' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'FragmentSpread',
+                        name: {
+                          kind: 'Name',
+                          value: 'BankAccountFundingSource',
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'SealedAttribute' },
+      typeCondition: {
+        kind: 'NamedType',
+        name: { kind: 'Name', value: 'SealedAttribute' },
+      },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'keyId' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'algorithm' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'plainTextType' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'base64EncodedSealedData' },
+          },
+        ],
+      },
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'CreditCardFundingSource' },
+      typeCondition: {
+        kind: 'NamedType',
+        name: { kind: 'Name', value: 'CreditCardFundingSource' },
+      },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'version' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'currency' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'transactionVelocity' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'maximum' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'velocity' } },
+              ],
+            },
+          },
+          { kind: 'Field', name: { kind: 'Name', value: 'last4' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'network' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'cardType' } },
+        ],
+      },
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'BankAccountFundingSource' },
+      typeCondition: {
+        kind: 'NamedType',
+        name: { kind: 'Name', value: 'BankAccountFundingSource' },
+      },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'version' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'currency' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'transactionVelocity' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'maximum' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'velocity' } },
+              ],
+            },
+          },
+          { kind: 'Field', name: { kind: 'Name', value: 'bankAccountType' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'authorization' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'language' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'content' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'contentType' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'signature' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'keyId' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'algorithm' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'data' } },
+              ],
+            },
+          },
+          { kind: 'Field', name: { kind: 'Name', value: 'last4' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'institutionName' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'FragmentSpread',
+                  name: { kind: 'Name', value: 'SealedAttribute' },
+                },
+              ],
+            },
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'institutionLogo' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'FragmentSpread',
+                  name: { kind: 'Name', value: 'SealedAttribute' },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  RefreshFundingSourceMutation,
+  RefreshFundingSourceMutationVariables
+>
 export const CancelFundingSourceDocument = {
   kind: 'Document',
   definitions: [
@@ -5279,6 +5702,108 @@ export const CancelVirtualCardDocument = {
   CancelVirtualCardMutation,
   CancelVirtualCardMutationVariables
 >
+export const EnableUserDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'EnableUser' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'input' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'EnableUserInput' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'enableUser' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'input' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'success' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<EnableUserMutation, EnableUserMutationVariables>
+export const DisableUserDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'DisableUser' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'input' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'DisableUserInput' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'disableUser' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'input' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'success' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DisableUserMutation, DisableUserMutationVariables>
 export const GetVirtualCardsConfigDocument = {
   kind: 'Document',
   definitions: [
@@ -8405,4 +8930,221 @@ export const ListTransactionsByCardIdDocument = {
 } as unknown as DocumentNode<
   ListTransactionsByCardIdQuery,
   ListTransactionsByCardIdQueryVariables
+>
+export const OnFundingSourceUpdateDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'subscription',
+      name: { kind: 'Name', value: 'OnFundingSourceUpdate' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'owner' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'onFundingSourceUpdate' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'owner' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'owner' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'CreditCardFundingSource' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'FragmentSpread',
+                        name: {
+                          kind: 'Name',
+                          value: 'CreditCardFundingSource',
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'BankAccountFundingSource' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'FragmentSpread',
+                        name: {
+                          kind: 'Name',
+                          value: 'BankAccountFundingSource',
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'SealedAttribute' },
+      typeCondition: {
+        kind: 'NamedType',
+        name: { kind: 'Name', value: 'SealedAttribute' },
+      },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'keyId' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'algorithm' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'plainTextType' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'base64EncodedSealedData' },
+          },
+        ],
+      },
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'CreditCardFundingSource' },
+      typeCondition: {
+        kind: 'NamedType',
+        name: { kind: 'Name', value: 'CreditCardFundingSource' },
+      },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'version' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'currency' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'transactionVelocity' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'maximum' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'velocity' } },
+              ],
+            },
+          },
+          { kind: 'Field', name: { kind: 'Name', value: 'last4' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'network' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'cardType' } },
+        ],
+      },
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'BankAccountFundingSource' },
+      typeCondition: {
+        kind: 'NamedType',
+        name: { kind: 'Name', value: 'BankAccountFundingSource' },
+      },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'version' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'currency' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'transactionVelocity' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'maximum' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'velocity' } },
+              ],
+            },
+          },
+          { kind: 'Field', name: { kind: 'Name', value: 'bankAccountType' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'authorization' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'language' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'content' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'contentType' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'signature' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'keyId' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'algorithm' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'data' } },
+              ],
+            },
+          },
+          { kind: 'Field', name: { kind: 'Name', value: 'last4' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'institutionName' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'FragmentSpread',
+                  name: { kind: 'Name', value: 'SealedAttribute' },
+                },
+              ],
+            },
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'institutionLogo' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'FragmentSpread',
+                  name: { kind: 'Name', value: 'SealedAttribute' },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  OnFundingSourceUpdateSubscription,
+  OnFundingSourceUpdateSubscriptionVariables
 >

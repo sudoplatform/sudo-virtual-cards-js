@@ -15,8 +15,11 @@ import {
   FetchPolicy,
   MutationOptions,
   QueryOptions,
+  SubscriptionOptions,
 } from 'apollo-client/core/watchQueryOptions'
 import { ApolloError } from 'apollo-client/errors/ApolloError'
+import { Observable } from 'apollo-client/util/Observable'
+import { FetchResult } from 'apollo-link'
 import AWSAppSyncClient from 'aws-appsync'
 import {
   CancelFundingSourceDocument,
@@ -69,6 +72,8 @@ import {
   ListTransactionsDocument,
   ListTransactionsQuery,
   ListTransactionsQueryVariables,
+  OnFundingSourceUpdateDocument,
+  OnFundingSourceUpdateSubscription,
   PaginatedPublicKey,
   ProvisionalCard,
   ProvisionalCardConnection,
@@ -76,6 +81,9 @@ import {
   ProvisionVirtualCardDocument,
   ProvisionVirtualCardMutation,
   PublicKey,
+  RefreshFundingSourceDocument,
+  RefreshFundingSourceMutation,
+  RefreshFundingSourceRequest,
   SealedCard,
   SealedCardConnection,
   SealedTransaction,
@@ -88,7 +96,6 @@ import {
   VirtualCardsConfig,
 } from '../../../gen/graphqlTypes'
 import { ErrorTransformer } from './transformer/errorTransformer'
-
 export class ApiClient {
   private readonly log: Logger
   private readonly client: AWSAppSyncClient<NormalizedCacheObject>
@@ -228,6 +235,28 @@ export class ApiClient {
       calleeName: this.completeFundingSource.name,
     })
     return data.completeFundingSource
+  }
+
+  public async refreshFundingSource(
+    input: RefreshFundingSourceRequest,
+  ): Promise<FundingSource> {
+    const data = await this.performMutation<RefreshFundingSourceMutation>({
+      mutation: RefreshFundingSourceDocument,
+      variables: { input },
+      calleeName: this.refreshFundingSource.name,
+    })
+    return data.refreshFundingSource
+  }
+
+  public onFundingSourceUpdate(
+    owner: string,
+  ): Observable<FetchResult<OnFundingSourceUpdateSubscription>> {
+    return this.client.subscribe<OnFundingSourceUpdateSubscription>({
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      query: OnFundingSourceUpdateDocument,
+      variables: { owner },
+      fetchPolicy: 'network-only',
+    })
   }
 
   public async cancelFundingSource(input: IdInput): Promise<FundingSource> {
@@ -435,5 +464,32 @@ export class ApiClient {
         `${calleeName ?? '<no callee>'} did not return any result`,
       )
     }
+  }
+
+  subscribeTo<S>({
+    query,
+    variables,
+    calleeName,
+  }: Omit<SubscriptionOptions, 'fetchPolicy'> & {
+    calleeName?: string
+  }): Observable<FetchResult<S>> | undefined {
+    let result
+    try {
+      result = this.client.subscribe<S>({
+        query,
+        variables,
+      })
+    } catch (err) {
+      const clientError = err as ApolloError
+      this.log.debug('error received', { calleeName, clientError })
+      const error = clientError.graphQLErrors?.[0]
+      if (error) {
+        this.log.debug('appSync subscription failed with error', { error })
+        throw ErrorTransformer.toClientError(error)
+      } else {
+        throw new UnknownGraphQLError(err as AppSyncError)
+      }
+    }
+    return result
   }
 }

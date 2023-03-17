@@ -1,4 +1,4 @@
-import { ProvisionalFundingSourceInteractionData } from './typings/fundingSource'
+import { FundingSourceInteractionData } from './typings/fundingSource'
 
 class VirtualCardsError extends Error {
   constructor(msg?: string) {
@@ -150,7 +150,7 @@ export class VelocityExceededError extends VirtualCardsError {
  */
 export class FundingSourceRequiresUserInteractionError extends VirtualCardsError {
   constructor(
-    public readonly interactionData: ProvisionalFundingSourceInteractionData,
+    public readonly interactionData: FundingSourceInteractionData,
     msg?: string,
   ) {
     super(msg)

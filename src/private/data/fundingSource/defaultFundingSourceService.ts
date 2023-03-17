@@ -7,10 +7,17 @@ import {
   Logger,
   SignatureAlgorithm,
 } from '@sudoplatform/sudo-common'
+import { FetchResult } from 'apollo-link'
 import { isLeft } from 'fp-ts/lib/Either'
 import { PathReporter } from 'io-ts/lib/PathReporter'
-import { FundingSource } from '../../../gen/graphqlTypes'
-import { FundingSourceType } from '../../../public'
+import {
+  FundingSource,
+  OnFundingSourceUpdateSubscription,
+} from '../../../gen/graphqlTypes'
+import {
+  FundingSourceType,
+  FundingSourceUpdateSubscriber,
+} from '../../../public'
 import { FundingSourceEntity } from '../../domain/entities/fundingSource/fundingSourceEntity'
 import {
   FundingSourceService,
@@ -19,14 +26,19 @@ import {
   FundingSourceServiceGetFundingSourceInput,
   FundingSourceServiceListFundingSourcesInput,
   FundingSourceServiceListFundingSourcesOutput,
+  FundingSourceServiceRefreshFundingSourceInput,
   FundingSourceServiceSetupFundingSourceInput,
+  FundingSourceServiceSubscribeToFundingSourceChangesInput,
+  FundingSourceServiceUnsubscribeFromFundingSourceChangesInput,
   isFundingSourceServiceCheckoutBankAccountCompletionData,
+  isFundingSourceServiceCheckoutBankAccountRefreshData,
   isFundingSourceServiceCheckoutCardCompletionData,
   isFundingSourceServiceStripeCardCompletionData,
 } from '../../domain/entities/fundingSource/fundingSourceService'
 import { ProvisionalFundingSourceEntity } from '../../domain/entities/fundingSource/provisionalFundingSourceEntity'
 import { ApiClient } from '../common/apiClient'
 import { DeviceKeyWorker, KeyType } from '../common/deviceKeyWorker'
+import { SubscriptionManager } from '../common/subscriptionManager'
 import { AlgorithmTransformer } from '../common/transformer/algorithmTransformer'
 import { FetchPolicyTransformer } from '../common/transformer/fetchPolicyTransformer'
 import { decodeBankAccountFundingSourceInstitutionLogo } from '../fundingSourceProviderData/sealedData'
@@ -41,11 +53,20 @@ export interface FundingSourceSetup {
 export class DefaultFundingSourceService implements FundingSourceService {
   private readonly log: Logger
 
+  private readonly subscriptionManager: SubscriptionManager<
+    OnFundingSourceUpdateSubscription,
+    FundingSourceUpdateSubscriber
+  >
+
   constructor(
     private readonly appSync: ApiClient,
     private readonly deviceKeyWorker: DeviceKeyWorker,
   ) {
     this.log = new DefaultLogger(this.constructor.name)
+    this.subscriptionManager = new SubscriptionManager<
+      OnFundingSourceUpdateSubscription,
+      FundingSourceUpdateSubscriber
+    >(this.appSync)
   }
 
   async getFundingSourceClientConfiguration(): Promise<string> {
@@ -150,6 +171,65 @@ export class DefaultFundingSourceService implements FundingSourceService {
     return FundingSourceEntityTransformer.transformGraphQL(unsealed)
   }
 
+  async refreshFundingSource({
+    id,
+    refreshData,
+    language,
+  }: FundingSourceServiceRefreshFundingSourceInput): Promise<FundingSourceEntity> {
+    let encodedRefreshData: string
+    const provider = refreshData.provider
+    const type = refreshData.type ?? FundingSourceType.CreditCard
+    if (isFundingSourceServiceCheckoutBankAccountRefreshData(refreshData)) {
+      let authorizationTextSignature = undefined
+      const publicKey = await this.deviceKeyWorker.getCurrentPublicKey()
+      if (!publicKey) {
+        throw new KeyNotFoundError()
+      }
+      if (refreshData.authorizationText) {
+        const signedAt = new Date()
+        const authorizationTextSignatureData = {
+          hash: refreshData.authorizationText.hash,
+          hashAlgorithm: refreshData.authorizationText.hashAlgorithm,
+          signedAt,
+          account: refreshData.accountId,
+        }
+        const data = JSON.stringify(authorizationTextSignatureData)
+        const signature = await this.deviceKeyWorker.signString({
+          plainText: data,
+          keyId: publicKey.id,
+          keyType: KeyType.PrivateKey,
+          algorithm: SignatureAlgorithm.RsaPkcs15Sha256,
+        })
+        authorizationTextSignature = {
+          data,
+          algorithm: 'RSASignatureSSAPKCS15SHA256',
+          keyId: publicKey.id,
+          signature,
+        }
+      }
+      encodedRefreshData = Base64.encodeString(
+        JSON.stringify({
+          provider,
+          version: 1,
+          type,
+          keyId: publicKey.id,
+          authorizationTextSignature,
+        }),
+      )
+    } else {
+      throw new FatalError(`Unexpected provider: ${provider}:${type}`)
+    }
+
+    const result = await this.appSync.refreshFundingSource({
+      id,
+      refreshData: encodedRefreshData,
+      language,
+    })
+
+    const unsealed = await this.unsealFundingSource(result)
+    return FundingSourceEntityTransformer.transformGraphQL(unsealed)
+  }
+
   async getFundingSource(
     input: FundingSourceServiceGetFundingSourceInput,
   ): Promise<FundingSourceEntity | undefined> {
@@ -199,6 +279,29 @@ export class DefaultFundingSourceService implements FundingSourceService {
     const result = await this.appSync.cancelFundingSource({ id })
     const unsealed = await this.unsealFundingSource(result)
     return FundingSourceEntityTransformer.transformGraphQL(unsealed)
+  }
+
+  subscribeToFundingSourceChanges(
+    input: FundingSourceServiceSubscribeToFundingSourceChangesInput,
+  ): void {
+    this.subscriptionManager.subscribe(input.id, input.subscriber)
+    // if subscription manager watcher and subscription hasn't been setup yet
+    // create them and watch for funding source changes per `owner`
+    if (!this.subscriptionManager.getWatcher()) {
+      this.subscriptionManager.setWatcher(
+        this.appSync.onFundingSourceUpdate(input.owner),
+      )
+
+      this.subscriptionManager.setSubscription(
+        this.setupFundingSourceUpdateSubscription(),
+      )
+    }
+  }
+
+  unsubscribeFromFundingSourceChanges(
+    input: FundingSourceServiceUnsubscribeFromFundingSourceChangesInput,
+  ): void {
+    this.subscriptionManager.unsubscribe(input.id)
   }
 
   private async unsealFundingSource(
@@ -266,5 +369,41 @@ export class DefaultFundingSourceService implements FundingSourceService {
     }
 
     throw new FatalError('Unable to disambiguate funding source')
+  }
+
+  private setupFundingSourceUpdateSubscription():
+    | ZenObservable.Subscription
+    | undefined {
+    const subscription = this.subscriptionManager.getWatcher()?.subscribe({
+      next: (result: FetchResult<OnFundingSourceUpdateSubscription>) => {
+        return void (async (
+          result: FetchResult<OnFundingSourceUpdateSubscription>,
+        ): Promise<void> => {
+          this.log.info('executing onFundingSourceUpdate subscription', {
+            result,
+          })
+          if (result.data) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            const data = result.data.onFundingSourceUpdate
+            if (!data) {
+              throw new FatalError(
+                'onFundingSourceUpdate subscription response contained error',
+              )
+            } else {
+              this.log.info('onFundingSourceUpdate subscription successful', {
+                data,
+              })
+
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+              const unsealed = await this.unsealFundingSource(data)
+              await this.subscriptionManager.fundingSourceChanged(
+                FundingSourceEntityTransformer.transformGraphQL(unsealed),
+              )
+            }
+          }
+        })(result)
+      },
+    })
+    return subscription
   }
 }

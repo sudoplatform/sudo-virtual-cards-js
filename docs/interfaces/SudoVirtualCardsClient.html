@@ -38,7 +38,7 @@ errors defined in <code>@sudoplatform/sudo-common</code>:</p>
 <ul class="tsd-hierarchy">
 <li><a href="../classes/DefaultSudoVirtualCardsClient.html" class="tsd-signature-type" data-tsd-kind="Class">DefaultSudoVirtualCardsClient</a></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/sudoVirtualCardsClient.ts:393</li></ul></aside>
+<li>Defined in src/public/sudoVirtualCardsClient.ts:438</li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -62,8 +62,11 @@ errors defined in <code>@sudoplatform/sudo-common</code>:</p>
 <a href="SudoVirtualCardsClient.html#listTransactionsByCardId" class="tsd-index-link tsd-kind-method tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>list<wbr/>Transactions<wbr/>By<wbr/>Card<wbr/>Id</span></a>
 <a href="SudoVirtualCardsClient.html#listVirtualCards" class="tsd-index-link tsd-kind-method tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>list<wbr/>Virtual<wbr/>Cards</span></a>
 <a href="SudoVirtualCardsClient.html#provisionVirtualCard" class="tsd-index-link tsd-kind-method tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>provision<wbr/>Virtual<wbr/>Card</span></a>
+<a href="SudoVirtualCardsClient.html#refreshFundingSource" class="tsd-index-link tsd-kind-method tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>refresh<wbr/>Funding<wbr/>Source</span></a>
 <a href="SudoVirtualCardsClient.html#reset" class="tsd-index-link tsd-kind-method tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>reset</span></a>
 <a href="SudoVirtualCardsClient.html#setupFundingSource" class="tsd-index-link tsd-kind-method tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>setup<wbr/>Funding<wbr/>Source</span></a>
+<a href="SudoVirtualCardsClient.html#subscribeToFundingSourceChanges" class="tsd-index-link tsd-kind-method tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>subscribe<wbr/>To<wbr/>Funding<wbr/>Source<wbr/>Changes</span></a>
+<a href="SudoVirtualCardsClient.html#unsubscribeFromFundingSourceChanges" class="tsd-index-link tsd-kind-method tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>unsubscribe<wbr/>From<wbr/>Funding<wbr/>Source<wbr/>Changes</span></a>
 <a href="SudoVirtualCardsClient.html#updateVirtualCard" class="tsd-index-link tsd-kind-method tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>update<wbr/>Virtual<wbr/>Card</span></a>
 </div></section></div></details></section></section>
 <section class="tsd-panel-group tsd-member-group">
@@ -89,7 +92,7 @@ errors defined in <code>@sudoplatform/sudo-common</code>:</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/FundingSource.html" class="tsd-signature-type" data-tsd-kind="Type alias">FundingSource</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/sudoVirtualCardsClient.ts:501</li></ul></aside></li></ul></section>
+<li>Defined in src/public/sudoVirtualCardsClient.ts:589</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface"><a id="cancelVirtualCard" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>cancel<wbr/>Virtual<wbr/>Card</span><a href="#cancelVirtualCard" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
@@ -111,7 +114,7 @@ errors defined in <code>@sudoplatform/sudo-common</code>:</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/APIResult.html" class="tsd-signature-type" data-tsd-kind="Type alias">APIResult</a><span class="tsd-signature-symbol">&lt;</span><a href="VirtualCard.html" class="tsd-signature-type" data-tsd-kind="Interface">VirtualCard</a><span class="tsd-signature-symbol">, </span><a href="VirtualCardSealedAttributes.html" class="tsd-signature-type" data-tsd-kind="Interface">VirtualCardSealedAttributes</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/sudoVirtualCardsClient.ts:549</li></ul></aside></li></ul></section>
+<li>Defined in src/public/sudoVirtualCardsClient.ts:637</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface"><a id="completeFundingSource" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>complete<wbr/>Funding<wbr/>Source</span><a href="#completeFundingSource" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
@@ -155,7 +158,7 @@ errors defined in <code>@sudoplatform/sudo-common</code>:</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/FundingSource.html" class="tsd-signature-type" data-tsd-kind="Type alias">FundingSource</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/sudoVirtualCardsClient.ts:462</li></ul></aside></li></ul></section>
+<li>Defined in src/public/sudoVirtualCardsClient.ts:507</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface"><a id="createKeysIfAbsent" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>create<wbr/>Keys<wbr/>If<wbr/>Absent</span><a href="#createKeysIfAbsent" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
@@ -171,7 +174,7 @@ card metadata.</p>
 <h3>Returns</h3></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="CreateKeysIfAbsentResult.html" class="tsd-signature-type" data-tsd-kind="Interface">CreateKeysIfAbsentResult</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/sudoVirtualCardsClient.ts:406</li></ul></aside></li></ul></section>
+<li>Defined in src/public/sudoVirtualCardsClient.ts:451</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface"><a id="getFundingSource" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Funding<wbr/>Source</span><a href="#getFundingSource" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
@@ -194,7 +197,7 @@ card metadata.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../types/FundingSource.html" class="tsd-signature-type" data-tsd-kind="Type alias">FundingSource</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/sudoVirtualCardsClient.ts:477</li></ul></aside></li></ul></section>
+<li>Defined in src/public/sudoVirtualCardsClient.ts:565</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface"><a id="getFundingSourceClientConfiguration" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Funding<wbr/>Source<wbr/>Client<wbr/>Configuration</span><a href="#getFundingSourceClientConfiguration" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
@@ -206,7 +209,7 @@ card metadata.</p>
 </div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/FundingSourceClientConfiguration.html" class="tsd-signature-type" data-tsd-kind="Type alias">FundingSourceClientConfiguration</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/sudoVirtualCardsClient.ts:413</li></ul></aside></li></ul></section>
+<li>Defined in src/public/sudoVirtualCardsClient.ts:458</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface"><a id="getProvisionalCard" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Provisional<wbr/>Card</span><a href="#getProvisionalCard" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
@@ -225,7 +228,7 @@ card metadata.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="ProvisionalVirtualCard.html" class="tsd-signature-type" data-tsd-kind="Interface">ProvisionalVirtualCard</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/sudoVirtualCardsClient.ts:559</li></ul></aside></li></ul></section>
+<li>Defined in src/public/sudoVirtualCardsClient.ts:647</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface"><a id="getTransaction" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Transaction</span><a href="#getTransaction" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
@@ -244,7 +247,7 @@ card metadata.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="Transaction.html" class="tsd-signature-type" data-tsd-kind="Interface">Transaction</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/sudoVirtualCardsClient.ts:597</li></ul></aside></li></ul></section>
+<li>Defined in src/public/sudoVirtualCardsClient.ts:685</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface"><a id="getVirtualCard" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Virtual<wbr/>Card</span><a href="#getVirtualCard" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
@@ -263,7 +266,7 @@ card metadata.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="VirtualCard.html" class="tsd-signature-type" data-tsd-kind="Interface">VirtualCard</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/sudoVirtualCardsClient.ts:579</li></ul></aside></li></ul></section>
+<li>Defined in src/public/sudoVirtualCardsClient.ts:667</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface"><a id="getVirtualCardsConfig" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Virtual<wbr/>Cards<wbr/>Config</span><a href="#getVirtualCardsConfig" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
@@ -275,7 +278,7 @@ card metadata.</p>
 </div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="VirtualCardsConfig.html" class="tsd-signature-type" data-tsd-kind="Interface">VirtualCardsConfig</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/sudoVirtualCardsClient.ts:626</li></ul></aside></li></ul></section>
+<li>Defined in src/public/sudoVirtualCardsClient.ts:714</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface"><a id="listFundingSources" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>list<wbr/>Funding<wbr/>Sources</span><a href="#listFundingSources" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
@@ -295,7 +298,7 @@ card metadata.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ListOutput</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/FundingSource.html" class="tsd-signature-type" data-tsd-kind="Type alias">FundingSource</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/sudoVirtualCardsClient.ts:488</li></ul></aside></li></ul></section>
+<li>Defined in src/public/sudoVirtualCardsClient.ts:576</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface"><a id="listProvisionalCards" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>list<wbr/>Provisional<wbr/>Cards</span><a href="#listProvisionalCards" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
@@ -314,7 +317,7 @@ card metadata.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/ListProvisionalCardsResults.html" class="tsd-signature-type" data-tsd-kind="Type alias">ListProvisionalCardsResults</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/sudoVirtualCardsClient.ts:569</li></ul></aside></li></ul></section>
+<li>Defined in src/public/sudoVirtualCardsClient.ts:657</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface"><a id="listTransactions" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>list<wbr/>Transactions</span><a href="#listTransactions" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
@@ -333,7 +336,7 @@ card metadata.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/ListTransactionsResults.html" class="tsd-signature-type" data-tsd-kind="Type alias">ListTransactionsResults</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/sudoVirtualCardsClient.ts:606</li></ul></aside></li></ul></section>
+<li>Defined in src/public/sudoVirtualCardsClient.ts:694</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface"><a id="listTransactionsByCardId" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>list<wbr/>Transactions<wbr/>By<wbr/>Card<wbr/>Id</span><a href="#listTransactionsByCardId" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
@@ -352,7 +355,7 @@ card metadata.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/ListTransactionsResults.html" class="tsd-signature-type" data-tsd-kind="Type alias">ListTransactionsResults</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/sudoVirtualCardsClient.ts:617</li></ul></aside></li></ul></section>
+<li>Defined in src/public/sudoVirtualCardsClient.ts:705</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface"><a id="listVirtualCards" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>list<wbr/>Virtual<wbr/>Cards</span><a href="#listVirtualCards" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
@@ -371,7 +374,7 @@ card metadata.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/ListVirtualCardsResults.html" class="tsd-signature-type" data-tsd-kind="Type alias">ListVirtualCardsResults</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/sudoVirtualCardsClient.ts:587</li></ul></aside></li></ul></section>
+<li>Defined in src/public/sudoVirtualCardsClient.ts:675</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface"><a id="provisionVirtualCard" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>provision<wbr/>Virtual<wbr/>Card</span><a href="#provisionVirtualCard" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
@@ -403,7 +406,40 @@ card metadata.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="ProvisionalVirtualCard.html" class="tsd-signature-type" data-tsd-kind="Interface">ProvisionalVirtualCard</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/sudoVirtualCardsClient.ts:520</li></ul></aside></li></ul></section>
+<li>Defined in src/public/sudoVirtualCardsClient.ts:608</li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface"><a id="refreshFundingSource" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>refresh<wbr/>Funding<wbr/>Source</span><a href="#refreshFundingSource" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
+<li class="tsd-signature tsd-anchor-link" id="refreshFundingSource.refreshFundingSource-1">refresh<wbr/>Funding<wbr/>Source<span class="tsd-signature-symbol">(</span>input<span class="tsd-signature-symbol">: </span><a href="RefreshFundingSourceInput.html" class="tsd-signature-type" data-tsd-kind="Interface">RefreshFundingSourceInput</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/FundingSource.html" class="tsd-signature-type" data-tsd-kind="Type alias">FundingSource</a><span class="tsd-signature-symbol">&gt;</span><a href="#refreshFundingSource.refreshFundingSource-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Refresh a funding source.</p>
+
+<h3>Returns</h3><p>The funding source which has been refreshed.</p>
+
+<h3>Throws</h3><p><a href="../classes/FundingSourceNotFoundError.html">FundingSourceNotFoundError</a>
+No funding source with the ID specified could be found.</p>
+
+<h3>Throws</h3><p><a href="../classes/FundingSourceStateError.html">FundingSourceStateError</a>
+ Funding source cannot be refreshed as it is in an invalid state.</p>
+
+<h3>Throws</h3><p><a href="../classes/UnacceptableFundingSourceError.html">UnacceptableFundingSourceError</a>
+ Funding source cannot be refreshed as the provider has prevented it.</p>
+
+<h3>Throws</h3><p><a href="../classes/FundingSourceRequiresUserInteractionError.html">FundingSourceRequiresUserInteractionError</a>
+ The funding source requires additional user interaction before refresh
+ can complete. The error&#39;s interactionData property contains
+ provider specific data to be used in this process.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5>input: <a href="RefreshFundingSourceInput.html" class="tsd-signature-type" data-tsd-kind="Interface">RefreshFundingSourceInput</a></h5>
+<div class="tsd-comment tsd-typography"><p>Parameters used to refresh the funding source.</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/FundingSource.html" class="tsd-signature-type" data-tsd-kind="Type alias">FundingSource</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in src/public/sudoVirtualCardsClient.ts:529</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface"><a id="reset" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>reset</span><a href="#reset" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
@@ -413,7 +449,7 @@ card metadata.</p>
 </div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/sudoVirtualCardsClient.ts:631</li></ul></aside></li></ul></section>
+<li>Defined in src/public/sudoVirtualCardsClient.ts:719</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface"><a id="setupFundingSource" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>setup<wbr/>Funding<wbr/>Source</span><a href="#setupFundingSource" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
@@ -440,7 +476,48 @@ card metadata.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="ProvisionalFundingSource.html" class="tsd-signature-type" data-tsd-kind="Interface">ProvisionalFundingSource</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/sudoVirtualCardsClient.ts:431</li></ul></aside></li></ul></section>
+<li>Defined in src/public/sudoVirtualCardsClient.ts:476</li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface"><a id="subscribeToFundingSourceChanges" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>subscribe<wbr/>To<wbr/>Funding<wbr/>Source<wbr/>Changes</span><a href="#subscribeToFundingSourceChanges" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
+<li class="tsd-signature tsd-anchor-link" id="subscribeToFundingSourceChanges.subscribeToFundingSourceChanges-1">subscribe<wbr/>To<wbr/>Funding<wbr/>Source<wbr/>Changes<span class="tsd-signature-symbol">(</span>id<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, subscriber<span class="tsd-signature-symbol">: </span><a href="FundingSourceChangeSubscriber.html" class="tsd-signature-type" data-tsd-kind="Interface">FundingSourceChangeSubscriber</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><a href="#subscribeToFundingSourceChanges.subscribeToFundingSourceChanges-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Subscribe to changes to funding sources</p>
+
+<h3>Returns</h3></div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5>id: <span class="tsd-signature-type">string</span></h5>
+<div class="tsd-comment tsd-typography"><p>unique identifier to differentiate subscriptions; note that specifying a duplicate subscription
+id will replace the previous subscription.</p>
+</div></li>
+<li>
+<h5>subscriber: <a href="FundingSourceChangeSubscriber.html" class="tsd-signature-type" data-tsd-kind="Interface">FundingSourceChangeSubscriber</a></h5>
+<div class="tsd-comment tsd-typography"><p>implementation of callback to be invoked when funding source change occurs</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in src/public/sudoVirtualCardsClient.ts:540</li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface"><a id="unsubscribeFromFundingSourceChanges" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>unsubscribe<wbr/>From<wbr/>Funding<wbr/>Source<wbr/>Changes</span><a href="#unsubscribeFromFundingSourceChanges" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
+<li class="tsd-signature tsd-anchor-link" id="unsubscribeFromFundingSourceChanges.unsubscribeFromFundingSourceChanges-1">unsubscribe<wbr/>From<wbr/>Funding<wbr/>Source<wbr/>Changes<span class="tsd-signature-symbol">(</span>id<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#unsubscribeFromFundingSourceChanges.unsubscribeFromFundingSourceChanges-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Unsubscribe from changes to funding sources</p>
+
+<h3>Returns</h3></div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5>id: <span class="tsd-signature-type">string</span></h5>
+<div class="tsd-comment tsd-typography"><p>unique identifier to differentiate subscription</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in src/public/sudoVirtualCardsClient.ts:552</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface"><a id="updateVirtualCard" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>update<wbr/>Virtual<wbr/>Card</span><a href="#updateVirtualCard" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
@@ -466,7 +543,7 @@ card metadata.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/APIResult.html" class="tsd-signature-type" data-tsd-kind="Type alias">APIResult</a><span class="tsd-signature-symbol">&lt;</span><a href="VirtualCard.html" class="tsd-signature-type" data-tsd-kind="Interface">VirtualCard</a><span class="tsd-signature-symbol">, </span><a href="VirtualCardSealedAttributes.html" class="tsd-signature-type" data-tsd-kind="Interface">VirtualCardSealedAttributes</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/sudoVirtualCardsClient.ts:536</li></ul></aside></li></ul></section></section></div>
+<li>Defined in src/public/sudoVirtualCardsClient.ts:624</li></ul></aside></li></ul></section></section></div>
 <div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 <div class="tsd-navigation settings">
 <details class="tsd-index-accordion"><summary class="tsd-accordion-summary">
@@ -507,8 +584,11 @@ card metadata.</p>
 <li class="tsd-kind-method tsd-parent-kind-interface"><a href="SudoVirtualCardsClient.html#listTransactionsByCardId" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>list<wbr/>Transactions<wbr/>By<wbr/>Card<wbr/>Id</a></li>
 <li class="tsd-kind-method tsd-parent-kind-interface"><a href="SudoVirtualCardsClient.html#listVirtualCards" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>list<wbr/>Virtual<wbr/>Cards</a></li>
 <li class="tsd-kind-method tsd-parent-kind-interface"><a href="SudoVirtualCardsClient.html#provisionVirtualCard" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>provision<wbr/>Virtual<wbr/>Card</a></li>
+<li class="tsd-kind-method tsd-parent-kind-interface"><a href="SudoVirtualCardsClient.html#refreshFundingSource" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>refresh<wbr/>Funding<wbr/>Source</a></li>
 <li class="tsd-kind-method tsd-parent-kind-interface"><a href="SudoVirtualCardsClient.html#reset" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>reset</a></li>
 <li class="tsd-kind-method tsd-parent-kind-interface"><a href="SudoVirtualCardsClient.html#setupFundingSource" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>setup<wbr/>Funding<wbr/>Source</a></li>
+<li class="tsd-kind-method tsd-parent-kind-interface"><a href="SudoVirtualCardsClient.html#subscribeToFundingSourceChanges" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>subscribe<wbr/>To<wbr/>Funding<wbr/>Source<wbr/>Changes</a></li>
+<li class="tsd-kind-method tsd-parent-kind-interface"><a href="SudoVirtualCardsClient.html#unsubscribeFromFundingSourceChanges" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>unsubscribe<wbr/>From<wbr/>Funding<wbr/>Source<wbr/>Changes</a></li>
 <li class="tsd-kind-method tsd-parent-kind-interface"><a href="SudoVirtualCardsClient.html#updateVirtualCard" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>update<wbr/>Virtual<wbr/>Card</a></li></ul></li></ul></nav></div></div>
 <div class="container tsd-generator">
 <p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></div>

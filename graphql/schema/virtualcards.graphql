@@ -333,6 +333,12 @@ input CompleteFundingSourceRequest {
   updateCardFundingSource: Boolean
 }
 
+input RefreshFundingSourceRequest {
+  id: ID!
+  refreshData: ID!
+  language: String
+}
+
 input IdInput {
   id: ID!
 }
@@ -441,8 +447,13 @@ type Mutation {
     input: SetupFundingSourceRequest!
   ): ProvisionalFundingSource!
   completeFundingSource(input: CompleteFundingSourceRequest!): FundingSource!
+  refreshFundingSource(input: RefreshFundingSourceRequest!): FundingSource!
   cancelFundingSource(input: IdInput!): FundingSource!
   cardProvision(input: CardProvisionRequest!): ProvisionalCard!
   updateCard(input: CardUpdateRequest): SealedCard!
   cancelCard(input: CardCancelRequest!): SealedCard!
+}
+
+type Subscription {
+  onFundingSourceUpdate(owner: ID!): FundingSource
 }

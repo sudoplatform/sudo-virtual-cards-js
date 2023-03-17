@@ -1,5 +1,5 @@
 import { Base64, FatalError } from '@sudoplatform/sudo-common'
-import { decodeProvisionalFundingSourceInteractionData } from '../../../../../src/private/data/fundingSourceProviderData/interactionData'
+import { decodeFundingSourceInteractionData } from '../../../../../src/private/data/fundingSourceProviderData/interactionData'
 import {
   CheckoutCardProvisionalFundingSourceInteractionData,
   FundingSourceType,
@@ -12,7 +12,7 @@ describe('Interaction Data Test Suite', () => {
         let caught: Error | undefined
         let decoded: any
         try {
-          decoded = decodeProvisionalFundingSourceInteractionData(
+          decoded = decodeFundingSourceInteractionData(
             'this is not a JSON record',
           )
         } catch (err) {
@@ -30,7 +30,7 @@ describe('Interaction Data Test Suite', () => {
         let caught: Error | undefined
         let decoded: any
         try {
-          decoded = decodeProvisionalFundingSourceInteractionData({
+          decoded = decodeFundingSourceInteractionData({
             provisioningData: null,
           })
         } catch (err) {
@@ -48,7 +48,7 @@ describe('Interaction Data Test Suite', () => {
         let caught: Error | undefined
         let decoded: any
         try {
-          decoded = decodeProvisionalFundingSourceInteractionData({
+          decoded = decodeFundingSourceInteractionData({
             provisioningData: 1,
           })
         } catch (err) {
@@ -66,7 +66,7 @@ describe('Interaction Data Test Suite', () => {
         let caught: Error | undefined
         let decoded: any
         try {
-          decoded = decodeProvisionalFundingSourceInteractionData({
+          decoded = decodeFundingSourceInteractionData({
             provisioningData: Base64.encodeString('this is not JSON'),
           })
         } catch (err) {
@@ -84,7 +84,7 @@ describe('Interaction Data Test Suite', () => {
         let caught: Error | undefined
         let decoded: any
         try {
-          decoded = decodeProvisionalFundingSourceInteractionData({
+          decoded = decodeFundingSourceInteractionData({
             provisioningData: Base64.encodeString('true'),
           })
         } catch (err) {
@@ -102,7 +102,7 @@ describe('Interaction Data Test Suite', () => {
         let caught: Error | undefined
         let decoded: any
         try {
-          decoded = decodeProvisionalFundingSourceInteractionData({
+          decoded = decodeFundingSourceInteractionData({
             provisioningData: Base64.encodeString('{"some":"value"}'),
           })
         } catch (err) {
@@ -120,7 +120,7 @@ describe('Interaction Data Test Suite', () => {
         let caught: Error | undefined
         let decoded: any
         try {
-          decoded = decodeProvisionalFundingSourceInteractionData({
+          decoded = decodeFundingSourceInteractionData({
             provisioningData: Base64.encodeString(
               '{"provider":"stripe","version":1,"type":"CREDIT_CARD"}',
             ),
@@ -158,7 +158,7 @@ describe('Interaction Data Test Suite', () => {
 
         it('should decode interaction data with correct type', () => {
           expect(
-            decodeProvisionalFundingSourceInteractionData({
+            decodeFundingSourceInteractionData({
               provisioningData: checkoutDataEncoded,
             }),
           ).toEqual(checkoutDataDecoded)

@@ -1,9 +1,10 @@
 import { Base64, FatalError, isJsonRecord } from '@sudoplatform/sudo-common'
 import * as t from 'io-ts'
 import {
+  FundingSourceInteractionData,
   FundingSourceType,
-  ProvisionalFundingSourceInteractionData,
 } from '../../../public/typings/fundingSource'
+import { AuthorizationTextCodec, PlaidLinkTokenCodec } from './provisioningData'
 
 /* eslint-disable tree-shaking/no-side-effects-in-initialization */
 const BaseProvisionalFundingSourceInteractionDataProperties = {
@@ -29,18 +30,32 @@ const CheckoutCardProvisionalFundingSourceInteractionDataCodec = t.type(
   'CheckoutProvisionalFundingSourceInteractionData',
 )
 
+const CheckoutBankAccountRefreshFundingSourceInteractionDataProperties = {
+  provider: t.literal('checkout'),
+  version: t.literal(1),
+  type: t.literal('BANK_ACCOUNT'),
+  plaidLinkToken: PlaidLinkTokenCodec,
+  authorizationText: t.array(AuthorizationTextCodec),
+}
+
+const CheckoutBankAccountRefreshFundingSourceInteractionDataCodec = t.type(
+  CheckoutBankAccountRefreshFundingSourceInteractionDataProperties,
+  'CheckoutBankAccountRefreshFundingSourceInteractionData',
+)
+
 const ProvisionalFundingSourceInteractionDataCodec = t.union(
   [
     CheckoutCardProvisionalFundingSourceInteractionDataCodec,
+    CheckoutBankAccountRefreshFundingSourceInteractionDataCodec,
     BaseProvisionalFundingSourceInteractionDataCodec,
   ],
   'ProvisionalFundingSourceInteractionData',
 )
 /* eslint-enable tree-shaking/no-side-effects-in-initialization */
 
-export function decodeProvisionalFundingSourceInteractionData(
+export function decodeFundingSourceInteractionData(
   errorInfo: unknown,
-): ProvisionalFundingSourceInteractionData {
+): FundingSourceInteractionData {
   const msg = 'error info cannot be decoded as funding source interaction data'
   if (
     !isJsonRecord(errorInfo) ||
@@ -95,6 +110,16 @@ export function decodeProvisionalFundingSourceInteractionData(
       type: FundingSourceType.CreditCard,
       version: 1,
       redirectUrl: decoded.redirectUrl,
+    }
+  } else if (
+    CheckoutBankAccountRefreshFundingSourceInteractionDataCodec.is(decoded)
+  ) {
+    return {
+      provider: 'checkout',
+      type: FundingSourceType.BankAccount,
+      version: 1,
+      linkToken: decoded.plaidLinkToken.link_token,
+      authorizationText: decoded.authorizationText,
     }
   } else {
     throw new FatalError(

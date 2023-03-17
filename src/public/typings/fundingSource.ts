@@ -297,16 +297,36 @@ export interface CheckoutCardProvisionalFundingSourceInteractionData
   redirectUrl: string
 }
 
-export type ProvisionalFundingSourceInteractionData =
+export interface CheckoutBankAccountRefreshFundingSourceInteractionData
+  extends BaseProvisionalFundingSourceInteractionData {
+  provider: 'checkout'
+  version: 1
+  type: FundingSourceType.BankAccount
+  linkToken: string
+  authorizationText: AuthorizationText[]
+}
+
+export type FundingSourceInteractionData =
   | CheckoutCardProvisionalFundingSourceInteractionData
+  | CheckoutBankAccountRefreshFundingSourceInteractionData
   | BaseProvisionalFundingSourceProvisioningData
 
 export function isCheckoutCardProvisionalFundingSourceInteractionData(
-  data: ProvisionalFundingSourceInteractionData,
+  data: FundingSourceInteractionData,
 ): data is CheckoutCardProvisionalFundingSourceInteractionData {
   return (
     data.provider === 'checkout' &&
     data.type === FundingSourceType.CreditCard &&
+    data.version === 1
+  )
+}
+
+export function isCheckoutBankAccountRefreshFundingSourceInteractionData(
+  data: FundingSourceInteractionData,
+): data is CheckoutBankAccountRefreshFundingSourceInteractionData {
+  return (
+    data.provider === 'checkout' &&
+    data.type === FundingSourceType.BankAccount &&
     data.version === 1
   )
 }
@@ -413,4 +433,8 @@ export enum CreditCardNetwork {
   Other = 'OTHER',
   Unionpay = 'UNIONPAY',
   Visa = 'VISA',
+}
+
+export interface FundingSourceUpdateSubscriber {
+  fundingSourceChanged(fundingSource: FundingSource): Promise<void>
 }

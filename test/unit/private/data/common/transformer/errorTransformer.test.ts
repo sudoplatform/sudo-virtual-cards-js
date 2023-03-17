@@ -20,7 +20,7 @@ import {
   VelocityExceededError,
 } from '../../../../../../src'
 import { ErrorTransformer } from '../../../../../../src/private/data/common/transformer/errorTransformer'
-import { decodeProvisionalFundingSourceInteractionData } from '../../../../../../src/private/data/fundingSourceProviderData/interactionData'
+import { decodeFundingSourceInteractionData } from '../../../../../../src/private/data/fundingSourceProviderData/interactionData'
 import { GraphQLDataFactory } from '../../../../data-factory/graphQl'
 
 class InstanceUnderTest extends ErrorTransformer {}
@@ -78,7 +78,7 @@ describe('Error Transformer Test Suite', () => {
       errorInfo: GraphQLDataFactory.interactionDataErrorInfo,
     } as any
 
-    const interactionData = decodeProvisionalFundingSourceInteractionData(
+    const interactionData = decodeFundingSourceInteractionData(
       GraphQLDataFactory.interactionDataErrorInfo,
     )
 

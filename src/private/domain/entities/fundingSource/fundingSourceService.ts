@@ -1,6 +1,9 @@
 import { CachePolicy } from '@sudoplatform/sudo-common'
 import { AuthorizationText } from '../../../../public'
-import { FundingSourceType } from '../../../../public/typings/fundingSource'
+import {
+  FundingSourceType,
+  FundingSourceUpdateSubscriber,
+} from '../../../../public/typings/fundingSource'
 import { FundingSourceEntity } from './fundingSourceEntity'
 import { ProvisionalFundingSourceEntity } from './provisionalFundingSourceEntity'
 
@@ -35,6 +38,16 @@ export type FundingSourceServiceCompletionData =
   | FundingSourceServiceCheckoutCardCompletionData
   | FundingSourceServiceCheckoutBankAccountCompletionData
 
+export interface FundingSourceServiceCheckoutBankAccountRefreshData {
+  provider: 'checkout'
+  type: FundingSourceType.BankAccount
+  accountId?: string
+  authorizationText?: AuthorizationText
+}
+
+export type FundingSourceServiceRefreshData =
+  FundingSourceServiceCheckoutBankAccountRefreshData
+
 export function isFundingSourceServiceStripeCardCompletionData(
   d: FundingSourceServiceCompletionData,
 ): d is FundingSourceServiceStripeCardCompletionData {
@@ -56,10 +69,21 @@ export function isFundingSourceServiceCheckoutBankAccountCompletionData(
   return d.provider === 'checkout' && d.type === FundingSourceType.BankAccount
 }
 
+export function isFundingSourceServiceCheckoutBankAccountRefreshData(
+  d: FundingSourceServiceRefreshData,
+): d is FundingSourceServiceCheckoutBankAccountRefreshData {
+  return d.provider === 'checkout' && d.type === FundingSourceType.BankAccount
+}
+
 export interface FundingSourceServiceCompleteFundingSourceInput {
   id: string
   completionData: FundingSourceServiceCompletionData
   updateCardFundingSource?: boolean
+}
+export interface FundingSourceServiceRefreshFundingSourceInput {
+  id: string
+  refreshData: FundingSourceServiceRefreshData
+  language?: string
 }
 
 /**
@@ -110,6 +134,16 @@ export interface FundingSourceServiceCancelFundingSourceInput {
   id: string
 }
 
+export interface FundingSourceServiceSubscribeToFundingSourceChangesInput {
+  id: string
+  owner: string
+  subscriber: FundingSourceUpdateSubscriber
+}
+
+export interface FundingSourceServiceUnsubscribeFromFundingSourceChangesInput {
+  id: string
+}
+
 /**
  * Core entity representation of a funding source service used in business logic. Used to perform operations for funding sources.
  *
@@ -124,6 +158,10 @@ export interface FundingSourceService {
 
   completeFundingSource(
     input: FundingSourceServiceCompleteFundingSourceInput,
+  ): Promise<FundingSourceEntity>
+
+  refreshFundingSource(
+    input: FundingSourceServiceRefreshFundingSourceInput,
   ): Promise<FundingSourceEntity>
 
   /**
@@ -155,4 +193,12 @@ export interface FundingSourceService {
   cancelFundingSource(
     input: FundingSourceServiceCancelFundingSourceInput,
   ): Promise<FundingSourceEntity>
+
+  subscribeToFundingSourceChanges(
+    input: FundingSourceServiceSubscribeToFundingSourceChangesInput,
+  ): void
+
+  unsubscribeFromFundingSourceChanges(
+    input: FundingSourceServiceUnsubscribeFromFundingSourceChangesInput,
+  ): void
 }
