@@ -2,14 +2,17 @@ import { DefaultLogger, Logger } from '@sudoplatform/sudo-common'
 import { Observable } from 'apollo-client/util/Observable'
 import { FetchResult } from 'apollo-link'
 import { OnFundingSourceUpdateSubscription } from '../../../gen/graphqlTypes'
-import { FundingSource, FundingSourceUpdateSubscriber } from '../../../public'
-import { ApiClient } from './apiClient'
+import {
+  ConnectionState,
+  FundingSource,
+  FundingSourceChangeSubscriber,
+} from '../../../public'
 
 export type Subscribable = OnFundingSourceUpdateSubscription
 export class SubscriptionManager<
   T extends Subscribable,
-  S extends FundingSourceUpdateSubscriber,
-> implements FundingSourceUpdateSubscriber
+  S extends FundingSourceChangeSubscriber,
+> implements FundingSourceChangeSubscriber
 {
   private readonly log: Logger
   private subscribers: Record<string, S | undefined> = {}
@@ -18,7 +21,7 @@ export class SubscriptionManager<
 
   private _watcher: Observable<FetchResult<T>> | undefined = undefined
 
-  public constructor(private readonly apiClient: ApiClient) {
+  public constructor() {
     this.log = new DefaultLogger(this.constructor.name)
   }
 
@@ -29,6 +32,7 @@ export class SubscriptionManager<
   public unsubscribe(id: string): void {
     this.subscribers[id] = undefined
   }
+
   public getWatcher(): Observable<FetchResult<T>> | undefined {
     return this._watcher
   }
@@ -45,6 +49,28 @@ export class SubscriptionManager<
   ): SubscriptionManager<T, S> {
     this._subscription = value
     return this
+  }
+
+  /**
+   * Processes AppSync subscription connection status change.
+   *
+   * @param state connection state.
+   */
+  public connectionStatusChanged(state: ConnectionState): void {
+    const subscribersToNotify = Object.values(this.subscribers)
+
+    if (state == ConnectionState.Disconnected) {
+      this.subscribers = {}
+      this._subscription?.unsubscribe()
+      this._watcher = undefined
+      this._subscription = undefined
+    }
+
+    subscribersToNotify.forEach((subscriber) => {
+      if (subscriber && subscriber.connectionStatusChanged) {
+        subscriber.connectionStatusChanged(state)
+      }
+    })
   }
 
   async fundingSourceChanged(fundingSource: FundingSource): Promise<void> {

@@ -16,8 +16,10 @@ import {
 import { v4 } from 'uuid'
 import {
   AuthorizationText,
+  ConnectionState,
+  FundingSource,
+  FundingSourceChangeSubscriber,
   FundingSourceType,
-  FundingSourceUpdateSubscriber,
 } from '../../../../../src'
 import { OnFundingSourceUpdateSubscription } from '../../../../../src/gen/graphqlTypes'
 import { ApiClient } from '../../../../../src/private/data/common/apiClient'
@@ -27,9 +29,10 @@ import {
 } from '../../../../../src/private/data/common/deviceKeyWorker'
 import { SubscriptionManager } from '../../../../../src/private/data/common/subscriptionManager'
 import { DefaultFundingSourceService } from '../../../../../src/private/data/fundingSource/defaultFundingSourceService'
-import { FundingSourceServiceCompletionData } from '../../../../../src/private/domain/entities/fundingSource/fundingSourceService'
-import { FundingSource } from '../../../../../types'
-import { FundingSourceServiceRefreshData } from '../../../../../types/private/domain/entities/fundingSource/fundingSourceService'
+import {
+  FundingSourceServiceCompletionData,
+  FundingSourceServiceRefreshData,
+} from '../../../../../src/private/domain/entities/fundingSource/fundingSourceService'
 import { EntityDataFactory } from '../../../data-factory/entity'
 import { GraphQLDataFactory } from '../../../data-factory/graphQl'
 
@@ -45,7 +48,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
     mock<
       SubscriptionManager<
         OnFundingSourceUpdateSubscription,
-        FundingSourceUpdateSubscriber
+        FundingSourceChangeSubscriber
       >
     >()
 
@@ -443,7 +446,10 @@ describe('DefaultFundingSourceService Test Suite', () => {
         id: 'subscribe-id',
         subscriber: {
           fundingSourceChanged(fundingSource: FundingSource): Promise<void> {
-            return Promise.resolve(undefined)
+            return Promise.resolve()
+          },
+          connectionStatusChanged(state: ConnectionState): void {
+            return
           },
         },
       })
@@ -460,6 +466,12 @@ describe('DefaultFundingSourceService Test Suite', () => {
       verify(mockSubscriptionManager.getWatcher()).twice()
       verify(mockSubscriptionManager.setWatcher(anything())).once()
       verify(mockSubscriptionManager.setSubscription(anything())).once()
+
+      verify(
+        mockSubscriptionManager.connectionStatusChanged(
+          ConnectionState.Connected,
+        ),
+      ).once()
     })
   })
 

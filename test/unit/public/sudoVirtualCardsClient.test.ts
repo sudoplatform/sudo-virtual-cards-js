@@ -19,7 +19,10 @@ import {
   when,
 } from 'ts-mockito'
 import { v4 } from 'uuid'
-import { FundingSourceRequiresUserInteractionError } from '../../../src'
+import {
+  FundingSource,
+  FundingSourceRequiresUserInteractionError,
+} from '../../../src'
 import { ApiClient } from '../../../src/private/data/common/apiClient'
 import { SudoVirtualCardsClientPrivateOptions } from '../../../src/private/data/common/privateSudoVirtualCardsClientOptions'
 import { DefaultFundingSourceService } from '../../../src/private/data/fundingSource/defaultFundingSourceService'
@@ -55,7 +58,6 @@ import {
   FundingSourceType,
 } from '../../../src/public/typings/fundingSource'
 import { SortOrder } from '../../../src/public/typings/sortOrder'
-import { FundingSource } from '../../../types'
 import { ApiDataFactory } from '../data-factory/api'
 import { EntityDataFactory } from '../data-factory/entity'
 
@@ -716,7 +718,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     it('generates use case', async () => {
       await instanceUnderTest.subscribeToFundingSourceChanges('id', {
         fundingSourceChanged(fundingSource: FundingSource): Promise<void> {
-          return Promise.resolve(undefined)
+          return Promise.resolve()
         },
       })
       expect(

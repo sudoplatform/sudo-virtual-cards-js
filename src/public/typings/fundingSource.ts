@@ -435,6 +435,35 @@ export enum CreditCardNetwork {
   Visa = 'VISA',
 }
 
-export interface FundingSourceUpdateSubscriber {
+/**
+ * Connection state of a subscription.
+ */
+export enum ConnectionState {
+  /**
+   * Connected and receiving updates.
+   */
+  Connected,
+
+  /**
+   * Disconnected and won't receive any updates. When disconnected all subscribers will be
+   * unsubscribed so the consumer must re-subscribe.
+   */
+  Disconnected,
+}
+
+export interface FundingSourceChangeSubscriber {
+  /**
+   * Notifies the subscriber that the funding source has changed.
+   *
+   * @param fundingSource The changed funding source.
+   */
   fundingSourceChanged(fundingSource: FundingSource): Promise<void>
+
+  /**
+   * Notifies the subscriber that the subscription connection state has changed. The subscriber won't be
+   * notified of funding source changes until the connection status changes to [ConnectionState.CONNECTED]. The subscriber will
+   * stop receiving funding source change notifications when the connection state changes to [ConnectionState.DISCONNECTED].
+   * @param state connection state.
+   */
+  connectionStatusChanged?(state: ConnectionState): void
 }

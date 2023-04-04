@@ -9,9 +9,9 @@ import {
   verify,
   when,
 } from 'ts-mockito'
+import { ConnectionState, FundingSource } from '../../../../../../src'
 import { FundingSourceService } from '../../../../../../src/private/domain/entities/fundingSource/fundingSourceService'
 import { SubscribeToFundingSourceChangesUseCase } from '../../../../../../src/private/domain/use-cases/fundingSource/subscribeToFundingSourceChangesUseCase'
-import { FundingSource } from '../../../../../../types'
 
 describe('SubscribeToFundingSourceChangesUseCase Test Suite', () => {
   const mockFundingSourceService = mock<FundingSourceService>()
@@ -50,6 +50,9 @@ describe('SubscribeToFundingSourceChangesUseCase Test Suite', () => {
         subscriber: {
           fundingSourceChanged(fundingSource: FundingSource): Promise<void> {
             return Promise.resolve()
+          },
+          connectionStatusChanged(state: ConnectionState): void {
+            return
           },
         },
       })

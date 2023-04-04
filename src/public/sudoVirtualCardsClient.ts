@@ -62,6 +62,7 @@ import { CreateKeysIfAbsentResult } from './typings/createKeysIfAbsentResult'
 import { DateRange } from './typings/dateRange'
 import {
   FundingSource,
+  FundingSourceChangeSubscriber,
   FundingSourceClientConfiguration,
   FundingSourceType,
   ProvisionalFundingSource,
@@ -217,10 +218,6 @@ export interface RefreshFundingSourceInput {
   id: string
   refreshData: RefreshFundingSourceRefreshDataInput
   language?: string
-}
-
-export interface FundingSourceChangeSubscriber {
-  fundingSourceChanged(fundingSource: FundingSource): Promise<void>
 }
 
 /**

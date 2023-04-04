@@ -1,8 +1,8 @@
 import { CachePolicy } from '@sudoplatform/sudo-common'
 import { AuthorizationText } from '../../../../public'
 import {
+  FundingSourceChangeSubscriber,
   FundingSourceType,
-  FundingSourceUpdateSubscriber,
 } from '../../../../public/typings/fundingSource'
 import { FundingSourceEntity } from './fundingSourceEntity'
 import { ProvisionalFundingSourceEntity } from './provisionalFundingSourceEntity'
@@ -137,7 +137,7 @@ export interface FundingSourceServiceCancelFundingSourceInput {
 export interface FundingSourceServiceSubscribeToFundingSourceChangesInput {
   id: string
   owner: string
-  subscriber: FundingSourceUpdateSubscriber
+  subscriber: FundingSourceChangeSubscriber
 }
 
 export interface FundingSourceServiceUnsubscribeFromFundingSourceChangesInput {

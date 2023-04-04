@@ -1,17 +1,26 @@
-import { DefaultLogger } from '@sudoplatform/sudo-common'
+import { DefaultLogger, PublicKeyFormat } from '@sudoplatform/sudo-common'
 import { SudoUserClient } from '@sudoplatform/sudo-user'
+import { Observable } from 'apollo-client/util/Observable'
+import { anything, instance, mock, when } from 'ts-mockito'
 import { v4 } from 'uuid'
 import waitForExpect from 'wait-for-expect'
 import {
   CompleteFundingSourceCompletionDataInput,
+  ConnectionState,
   CreditCardNetwork,
+  FundingSource,
   FundingSourceState,
   FundingSourceType,
   isCheckoutCardProvisionalFundingSourceProvisioningData,
   isStripeCardProvisionalFundingSourceProvisioningData,
   SudoVirtualCardsClient,
 } from '../../../src'
-import { FundingSource } from '../../../types'
+import { ApiClient } from '../../../src/private/data/common/apiClient'
+import {
+  DeviceKeyWorker,
+  UnsealInput,
+} from '../../../src/private/data/common/deviceKeyWorker'
+import { DefaultFundingSourceService } from '../../../src/private/data/fundingSource/defaultFundingSourceService'
 import { uuidV4Regex } from '../../utility/uuidV4Regex'
 import {
   confirmStripeSetupIntent,
@@ -54,6 +63,8 @@ describe('SudoVirtualCardsClient SubscribeToFundingSourceUpdates Test Suite', ()
       }) => {
         let skip = false
         let subscriptionCalled = false
+        let connectionStateChangeCalled = false
+        let connectionState: ConnectionState = ConnectionState.Disconnected
         let notifiedFundingSourceId: string | undefined = undefined
         let fundingSource: FundingSource | undefined
         beforeAll(() => {
@@ -151,10 +162,17 @@ describe('SudoVirtualCardsClient SubscribeToFundingSourceUpdates Test Suite', ()
               ): Promise<void> {
                 subscriptionCalled = true
                 notifiedFundingSourceId = fundingSource.id
-                return Promise.resolve(undefined)
+                return Promise.resolve()
+              },
+              connectionStatusChanged(state: ConnectionState): void {
+                connectionStateChangeCalled = true
+                connectionState = state
               },
             },
           )
+
+          expect(connectionStateChangeCalled).toBeTruthy()
+          expect(connectionState).toBe(ConnectionState.Connected)
 
           if (!fundingSource) {
             fail('no funding source was set up')
@@ -194,6 +212,10 @@ describe('SudoVirtualCardsClient SubscribeToFundingSourceUpdates Test Suite', ()
                 notifiedFundingSourceId = fundingSource.id
                 return Promise.resolve(undefined)
               },
+              connectionStatusChanged(state: ConnectionState): void {
+                connectionStateChangeCalled = true
+                connectionState = state
+              },
             },
           )
 
@@ -226,5 +248,70 @@ describe('SudoVirtualCardsClient SubscribeToFundingSourceUpdates Test Suite', ()
         })
       },
     )
+    it('execution error invokes error handler and connection state change', async () => {
+      const mockAppSync = mock<ApiClient>()
+      const mockDeviceKeyWorker = mock<DeviceKeyWorker>()
+
+      const fundingSourceService = new DefaultFundingSourceService(
+        instance(mockAppSync),
+        instance(mockDeviceKeyWorker),
+      )
+
+      when(mockDeviceKeyWorker.getCurrentPublicKey()).thenResolve({
+        id: 'key-id',
+        keyRingId: 'key-ring-id',
+        algorithm: 'key-algorithm',
+        data: 'key-data',
+        format: PublicKeyFormat.SPKI,
+      })
+
+      when(mockDeviceKeyWorker.unsealString(anything())).thenCall(
+        (input: UnsealInput) => {
+          switch (input.encrypted) {
+            case 'sealed-dummyInstitutionName':
+              return 'dummyInstitutionName'
+            case 'sealed-dummyInstitutionLogo':
+              return JSON.stringify({
+                type: 'image/png',
+                data: 'dummyInstitutionLogo',
+              })
+            default:
+              return `unknown sealed input: ${input.encrypted}`
+          }
+        },
+      )
+      const networkError = {
+        name: 'name',
+        message: 'message',
+        statusCode: 401,
+      }
+      when(mockAppSync.onFundingSourceUpdate(anything())).thenReturn(
+        new Observable((observer) => {
+          observer.error(networkError)
+        }),
+      )
+      let latestConnectionStatus: ConnectionState = ConnectionState.Disconnected
+      let connectionStatusChangedCalled = false
+
+      fundingSourceService.subscribeToFundingSourceChanges({
+        owner: 'owner-id',
+        id: 'subscribe-id',
+        subscriber: {
+          fundingSourceChanged(fundingSource: FundingSource): Promise<void> {
+            return Promise.resolve()
+          },
+          connectionStatusChanged(state: ConnectionState): void {
+            connectionStatusChangedCalled = true
+            latestConnectionStatus = state
+          },
+        },
+      })
+
+      expect(connectionStatusChangedCalled).toBeTruthy()
+
+      await waitForExpect(() =>
+        expect(latestConnectionStatus).toBe(ConnectionState.Disconnected),
+      )
+    })
   })
 })

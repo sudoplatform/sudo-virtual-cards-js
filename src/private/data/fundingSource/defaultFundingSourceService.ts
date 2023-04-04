@@ -15,8 +15,9 @@ import {
   OnFundingSourceUpdateSubscription,
 } from '../../../gen/graphqlTypes'
 import {
+  ConnectionState,
+  FundingSourceChangeSubscriber,
   FundingSourceType,
-  FundingSourceUpdateSubscriber,
 } from '../../../public'
 import { FundingSourceEntity } from '../../domain/entities/fundingSource/fundingSourceEntity'
 import {
@@ -55,7 +56,7 @@ export class DefaultFundingSourceService implements FundingSourceService {
 
   private readonly subscriptionManager: SubscriptionManager<
     OnFundingSourceUpdateSubscription,
-    FundingSourceUpdateSubscriber
+    FundingSourceChangeSubscriber
   >
 
   constructor(
@@ -65,8 +66,8 @@ export class DefaultFundingSourceService implements FundingSourceService {
     this.log = new DefaultLogger(this.constructor.name)
     this.subscriptionManager = new SubscriptionManager<
       OnFundingSourceUpdateSubscription,
-      FundingSourceUpdateSubscriber
-    >(this.appSync)
+      FundingSourceChangeSubscriber
+    >()
   }
 
   async getFundingSourceClientConfiguration(): Promise<string> {
@@ -295,6 +296,9 @@ export class DefaultFundingSourceService implements FundingSourceService {
       this.subscriptionManager.setSubscription(
         this.setupFundingSourceUpdateSubscription(),
       )
+      this.subscriptionManager.connectionStatusChanged(
+        ConnectionState.Connected,
+      )
     }
   }
 
@@ -375,6 +379,21 @@ export class DefaultFundingSourceService implements FundingSourceService {
     | ZenObservable.Subscription
     | undefined {
     const subscription = this.subscriptionManager.getWatcher()?.subscribe({
+      complete: () => {
+        this.log.info('completed onFundingSourceUpdate subscription')
+
+        this.subscriptionManager.connectionStatusChanged(
+          ConnectionState.Disconnected,
+        )
+      },
+      error: (error) => {
+        this.log.info('failed to update onFundingSourceUpdate subscription', {
+          error,
+        })
+        this.subscriptionManager.connectionStatusChanged(
+          ConnectionState.Disconnected,
+        )
+      },
       next: (result: FetchResult<OnFundingSourceUpdateSubscription>) => {
         return void (async (
           result: FetchResult<OnFundingSourceUpdateSubscription>,

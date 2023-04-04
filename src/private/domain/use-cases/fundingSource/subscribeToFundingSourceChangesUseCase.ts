@@ -4,12 +4,12 @@ import {
   NotSignedInError,
 } from '@sudoplatform/sudo-common'
 import { SudoUserClient } from '@sudoplatform/sudo-user'
-import { FundingSourceUpdateSubscriber } from '../../../../public/typings/fundingSource'
+import { FundingSourceChangeSubscriber } from '../../../../public/typings/fundingSource'
 import { FundingSourceService } from '../../entities/fundingSource/fundingSourceService'
 
 interface SubscribeToFundingSourceChangesUseCaseInput {
   id: string
-  subscriber: FundingSourceUpdateSubscriber
+  subscriber: FundingSourceChangeSubscriber
 }
 
 /**
