@@ -212,6 +212,8 @@ fragment SealedTransaction on SealedTransaction {
     }
     fundingSourceId
     description
+    state
+    continuationOfExistingCharge
   }
 }
 

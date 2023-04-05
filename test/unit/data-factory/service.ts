@@ -89,6 +89,7 @@ export class ServiceDataFactory {
         fundingSourceId: 'dummyFundingSourceId',
         description: 'dummyFundingSourceDescription',
         state: ChargeDetailState.Cleared,
+        continuationOfExistingCharge: false,
       },
     ],
   }
@@ -121,6 +122,7 @@ export class ServiceDataFactory {
         fundingSourceId: 'dummyFundingSourceId',
         description: 'dummyFundingSourceDescription',
         state: ChargeDetailState.Cleared,
+        continuationOfExistingCharge: false,
       },
     ],
   }

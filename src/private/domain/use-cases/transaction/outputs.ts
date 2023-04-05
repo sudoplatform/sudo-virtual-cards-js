@@ -36,5 +36,6 @@ export interface TransactionUseCaseOutput {
     fundingSourceId: string
     description: string
     state: ChargeDetailState
+    continuationOfExistingCharge: boolean
   }[]
 }

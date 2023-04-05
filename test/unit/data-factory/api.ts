@@ -181,6 +181,7 @@ export class ApiDataFactory {
         fundingSourceId: 'dummyFundingSourceId',
         description: 'dummyFundingSourceDescription',
         state: ChargeDetailState.Cleared,
+        continuationOfExistingCharge: false,
       },
     ],
   }
@@ -212,6 +213,7 @@ export class ApiDataFactory {
         fundingSourceId: 'dummyFundingSourceId',
         description: 'dummyFundingSourceDescription',
         state: ChargeDetailState.Cleared,
+        continuationOfExistingCharge: false,
       },
     ],
   }

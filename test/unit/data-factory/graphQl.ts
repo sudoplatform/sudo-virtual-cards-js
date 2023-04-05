@@ -262,6 +262,8 @@ export class GraphQLDataFactory {
         },
         markupAmount: this.sealedCurrencyAmount,
         virtualCardAmount: this.sealedCurrencyAmount,
+        state: 'dummyChargeDetailState',
+        continuationOfExistingCharge: false,
       },
     ],
     keyId: 'dummyKeyId',

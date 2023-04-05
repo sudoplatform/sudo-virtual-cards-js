@@ -87,6 +87,7 @@ export interface TransactionDetailCharge {
   fundingSourceId: string
   description: string
   state: ChargeDetailState
+  continuationOfExistingCharge: boolean
 }
 
 /**

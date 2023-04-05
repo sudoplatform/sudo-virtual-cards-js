@@ -563,6 +563,7 @@ export type SealedTransactionConnection = {
 
 export type SealedTransactionDetailChargeAttribute = {
   __typename?: 'SealedTransactionDetailChargeAttribute'
+  continuationOfExistingCharge?: Maybe<Scalars['Boolean']>
   description: Scalars['String']
   fundingSourceAmount: SealedCurrencyAmountAttribute
   fundingSourceId: Scalars['ID']
@@ -899,6 +900,8 @@ export type SealedCardWithLastTransactionFragment = {
       __typename?: 'SealedTransactionDetailChargeAttribute'
       fundingSourceId: string
       description: string
+      state?: string | null
+      continuationOfExistingCharge?: boolean | null
       virtualCardAmount: {
         __typename?: 'SealedCurrencyAmountAttribute'
         currency: string
@@ -979,6 +982,8 @@ export type SealedTransactionFragment = {
     __typename?: 'SealedTransactionDetailChargeAttribute'
     fundingSourceId: string
     description: string
+    state?: string | null
+    continuationOfExistingCharge?: boolean | null
     virtualCardAmount: {
       __typename?: 'SealedCurrencyAmountAttribute'
       currency: string
@@ -1404,6 +1409,8 @@ export type UpdateVirtualCardMutation = {
         __typename?: 'SealedTransactionDetailChargeAttribute'
         fundingSourceId: string
         description: string
+        state?: string | null
+        continuationOfExistingCharge?: boolean | null
         virtualCardAmount: {
           __typename?: 'SealedCurrencyAmountAttribute'
           currency: string
@@ -1505,6 +1512,8 @@ export type CancelVirtualCardMutation = {
         __typename?: 'SealedTransactionDetailChargeAttribute'
         fundingSourceId: string
         description: string
+        state?: string | null
+        continuationOfExistingCharge?: boolean | null
         virtualCardAmount: {
           __typename?: 'SealedCurrencyAmountAttribute'
           currency: string
@@ -2014,6 +2023,8 @@ export type GetCardQuery = {
         __typename?: 'SealedTransactionDetailChargeAttribute'
         fundingSourceId: string
         description: string
+        state?: string | null
+        continuationOfExistingCharge?: boolean | null
         virtualCardAmount: {
           __typename?: 'SealedCurrencyAmountAttribute'
           currency: string
@@ -2119,6 +2130,8 @@ export type ListCardsQuery = {
           __typename?: 'SealedTransactionDetailChargeAttribute'
           fundingSourceId: string
           description: string
+          state?: string | null
+          continuationOfExistingCharge?: boolean | null
           virtualCardAmount: {
             __typename?: 'SealedCurrencyAmountAttribute'
             currency: string
@@ -2202,6 +2215,8 @@ export type GetTransactionQuery = {
       __typename?: 'SealedTransactionDetailChargeAttribute'
       fundingSourceId: string
       description: string
+      state?: string | null
+      continuationOfExistingCharge?: boolean | null
       virtualCardAmount: {
         __typename?: 'SealedCurrencyAmountAttribute'
         currency: string
@@ -2270,6 +2285,8 @@ export type ListTransactionsQuery = {
         __typename?: 'SealedTransactionDetailChargeAttribute'
         fundingSourceId: string
         description: string
+        state?: string | null
+        continuationOfExistingCharge?: boolean | null
         virtualCardAmount: {
           __typename?: 'SealedCurrencyAmountAttribute'
           currency: string
@@ -2340,6 +2357,8 @@ export type ListTransactionsByCardIdQuery = {
         __typename?: 'SealedTransactionDetailChargeAttribute'
         fundingSourceId: string
         description: string
+        state?: string | null
+        continuationOfExistingCharge?: boolean | null
         virtualCardAmount: {
           __typename?: 'SealedCurrencyAmountAttribute'
           currency: string
@@ -3284,6 +3303,11 @@ export const SealedTransactionFragmentDoc = {
                   name: { kind: 'Name', value: 'fundingSourceId' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'continuationOfExistingCharge' },
+                },
               ],
             },
           },
@@ -3647,6 +3671,11 @@ export const SealedCardWithLastTransactionFragmentDoc = {
                   name: { kind: 'Name', value: 'fundingSourceId' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'continuationOfExistingCharge' },
+                },
               ],
             },
           },
@@ -5258,6 +5287,11 @@ export const UpdateVirtualCardDocument = {
                   name: { kind: 'Name', value: 'fundingSourceId' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'continuationOfExistingCharge' },
+                },
               ],
             },
           },
@@ -5661,6 +5695,11 @@ export const CancelVirtualCardDocument = {
                   name: { kind: 'Name', value: 'fundingSourceId' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'continuationOfExistingCharge' },
+                },
               ],
             },
           },
@@ -7686,6 +7725,11 @@ export const GetCardDocument = {
                   name: { kind: 'Name', value: 'fundingSourceId' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'continuationOfExistingCharge' },
+                },
               ],
             },
           },
@@ -8106,6 +8150,11 @@ export const ListCardsDocument = {
                   name: { kind: 'Name', value: 'fundingSourceId' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'continuationOfExistingCharge' },
+                },
               ],
             },
           },
@@ -8358,6 +8407,11 @@ export const GetTransactionDocument = {
                   name: { kind: 'Name', value: 'fundingSourceId' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'continuationOfExistingCharge' },
+                },
               ],
             },
           },
@@ -8628,6 +8682,11 @@ export const ListTransactionsDocument = {
                   name: { kind: 'Name', value: 'fundingSourceId' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'continuationOfExistingCharge' },
+                },
               ],
             },
           },
@@ -8920,6 +8979,11 @@ export const ListTransactionsByCardIdDocument = {
                   name: { kind: 'Name', value: 'fundingSourceId' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'continuationOfExistingCharge' },
+                },
               ],
             },
           },

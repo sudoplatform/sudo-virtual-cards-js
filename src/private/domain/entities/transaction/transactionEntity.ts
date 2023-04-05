@@ -35,6 +35,7 @@ export interface TransactionDetailChargeEntity {
   fundingSourceId: string
   description: string
   state: ChargeDetailState
+  continuationOfExistingCharge: boolean
 }
 
 export interface MarkupEntity {

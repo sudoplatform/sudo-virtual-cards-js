@@ -41,6 +41,7 @@ export interface TransactionUnsealed {
     fundingSourceId: string
     description: string
     state: ChargeDetailState
+    continuationOfExistingCharge: boolean
   }[]
 }
 
@@ -139,6 +140,7 @@ export class DefaultTransactionWorker implements TransactionWorker {
         state: encrypted.state
           ? await unsealChargeDetailState(encrypted.state)
           : ChargeDetailState.Cleared,
+        continuationOfExistingCharge: !!encrypted.continuationOfExistingCharge,
       }
     }
     let transactionDetail: TransactionDetailChargeEntity[] | undefined

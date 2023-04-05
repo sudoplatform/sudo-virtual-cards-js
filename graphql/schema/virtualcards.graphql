@@ -253,6 +253,7 @@ type SealedTransactionDetailChargeAttribute {
   fundingSourceId: ID!
   description: String!
   state: String
+  continuationOfExistingCharge: Boolean
 }
 
 type SealedMarkupAttribute {

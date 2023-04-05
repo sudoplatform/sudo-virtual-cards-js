@@ -197,6 +197,7 @@ export class EntityDataFactory {
         fundingSourceId: 'dummyFundingSourceId',
         description: 'dummyFundingSourceDescription',
         state: ChargeDetailState.Cleared,
+        continuationOfExistingCharge: false,
       },
     ],
   }
@@ -229,6 +230,7 @@ export class EntityDataFactory {
         fundingSourceId: 'dummyFundingSourceId',
         description: 'dummyFundingSourceDescription',
         state: ChargeDetailState.Cleared,
+        continuationOfExistingCharge: false,
       },
     ],
   }
