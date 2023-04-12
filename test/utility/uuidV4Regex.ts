@@ -1,3 +1,9 @@
+/*
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export const uuidV4Regex = (prefix?: string): RegExp => {
   if (prefix) {
     return new RegExp(

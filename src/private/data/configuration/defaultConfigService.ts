@@ -1,3 +1,9 @@
+/*
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { VirtualCardsConfigEntity } from '../../domain/entities/configuration/virtualCardsConfigEntity'
 import { VirtualCardsConfigService } from '../../domain/entities/configuration/virtualCardsConfigService'
 import { ApiClient } from '../common/apiClient'

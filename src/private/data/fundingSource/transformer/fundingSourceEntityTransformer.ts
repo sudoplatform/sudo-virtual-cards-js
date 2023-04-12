@@ -9,6 +9,12 @@ import { CardType as CardTypeEntity } from '../../../../public/typings/cardType'
 import { FundingSourceType } from '../../../../public/typings/fundingSource'
 import { TransactionVelocity as TransactionVelocityEntity } from '../../../../public/typings/transactionVelocity'
 import { FundingSourceEntity } from '../../../domain/entities/fundingSource/fundingSourceEntity'
+/*
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { FundingSourceUnsealed } from '../fundingSourceSealedAttributes'
 
 export class FundingSourceEntityTransformer {

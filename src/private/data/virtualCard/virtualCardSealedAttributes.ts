@@ -1,3 +1,9 @@
+/*
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { ProvisionalCard } from '../../../gen/graphqlTypes'
 import { Metadata } from '../../../public/typings/metadata'
 import { CardState } from '../../../public/typings/virtualCard'

@@ -1,3 +1,9 @@
+/*
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Base64, FatalError } from '@sudoplatform/sudo-common'
 import { decodeFundingSourceInteractionData } from '../../../../../src/private/data/fundingSourceProviderData/interactionData'
 import {

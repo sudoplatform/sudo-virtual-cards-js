@@ -1,3 +1,9 @@
+/*
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { ProvisionalFundingSource } from '../../../../public/typings/fundingSource'
 import { ProvisionalFundingSourceEntity } from '../../../domain/entities/fundingSource/provisionalFundingSourceEntity'
 import { decodeProvisionalFundingSourceProvisioningData } from '../../fundingSourceProviderData/provisioningData'

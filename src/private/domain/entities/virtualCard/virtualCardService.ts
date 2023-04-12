@@ -1,3 +1,9 @@
+/*
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { CachePolicy, ListOperationResult } from '@sudoplatform/sudo-common'
 import { APIResult } from '../../../../public/typings/apiResult'
 import { Metadata } from '../../../../public/typings/metadata'

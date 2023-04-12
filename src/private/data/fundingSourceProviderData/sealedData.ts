@@ -1,3 +1,9 @@
+/*
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { isLeft } from 'fp-ts/lib/Either'
 import * as t from 'io-ts'
 import * as tt from 'io-ts-types'

@@ -1,3 +1,9 @@
+/*
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { TextDecoder, TextEncoder } from 'util'
 // Workaround for `jsdom` test environment not providing TextEncoder and
 // TextDecoder.
