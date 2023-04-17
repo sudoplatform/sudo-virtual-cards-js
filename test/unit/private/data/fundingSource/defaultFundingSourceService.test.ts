@@ -133,6 +133,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
       await instanceUnderTest.setupFundingSource({
         currency: 'dummyCurrency',
         type,
+        setupData: { applicationName: 'system-test-app' },
       })
       verify(mockAppSync.setupFundingSource(anything())).once()
       const [args] = capture(mockAppSync.setupFundingSource).first()
@@ -140,6 +141,9 @@ describe('DefaultFundingSourceService Test Suite', () => {
       expect(args).toEqual<typeof args>({
         currency: 'dummyCurrency',
         type,
+        setupData: Base64.encodeString(
+          JSON.stringify({ applicationName: 'system-test-app' }),
+        ),
       })
     })
 
@@ -152,6 +156,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
         instanceUnderTest.setupFundingSource({
           currency: 'dummyCurrency',
           type,
+          setupData: { applicationName: 'system-test-app' },
         }),
       ).resolves.toEqual(EntityDataFactory.provisionalFundingSource)
     })
@@ -359,6 +364,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
         const refreshData: FundingSourceServiceRefreshData = {
           provider: 'checkout',
           type: FundingSourceType.BankAccount,
+          applicationName: 'system-test-app',
           accountId: 'account-id',
           authorizationText,
         }
@@ -382,6 +388,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
         expect(decodedActualRefreshData).toEqual({
           provider: refreshData.provider,
           type: FundingSourceType.BankAccount,
+          applicationName: 'system-test-app',
           version: 1,
           keyId: 'key-id',
           authorizationTextSignature: {
@@ -402,6 +409,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
             refreshData: {
               provider: 'checkout',
               type: FundingSourceType.BankAccount,
+              applicationName: 'system-test-app',
               accountId: 'account-id',
               authorizationText: {
                 content: 'authorizationText',
@@ -429,6 +437,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
         const refreshData: FundingSourceServiceRefreshData = {
           provider: 'checkout',
           type: FundingSourceType.BankAccount,
+          applicationName: 'system-test-app',
           accountId: 'account-id',
           authorizationText,
         }

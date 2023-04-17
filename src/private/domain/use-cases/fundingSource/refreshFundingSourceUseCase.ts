@@ -24,6 +24,7 @@ interface RefreshFundingSourceUseCaseCheckoutBankAccountRefreshData {
   type: FundingSourceType.BankAccount
   accountId?: string
   authorizationText?: AuthorizationText
+  applicationName: string
 }
 
 type RefreshFundingSourceUseCaseRefreshData =

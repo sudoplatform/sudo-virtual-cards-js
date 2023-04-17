@@ -13,10 +13,15 @@ import {
 import { FundingSourceEntity } from './fundingSourceEntity'
 import { ProvisionalFundingSourceEntity } from './provisionalFundingSourceEntity'
 
+export interface FundingSourceServiceSetupData {
+  applicationName: string
+}
+
 export interface FundingSourceServiceSetupFundingSourceInput {
   type: FundingSourceType
   currency: string
   supportedProviders?: string[]
+  setupData: FundingSourceServiceSetupData
 }
 
 export interface FundingSourceServiceStripeCardCompletionData {
@@ -47,6 +52,7 @@ export type FundingSourceServiceCompletionData =
 export interface FundingSourceServiceCheckoutBankAccountRefreshData {
   provider: 'checkout'
   type: FundingSourceType.BankAccount
+  applicationName: string
   accountId?: string
   authorizationText?: AuthorizationText
 }

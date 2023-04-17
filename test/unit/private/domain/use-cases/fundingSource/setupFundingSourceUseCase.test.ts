@@ -48,6 +48,7 @@ describe('SetupFundingSourceUseCase Test Suite', () => {
         instanceUnderTest.execute({
           type: FundingSourceType.CreditCard,
           currency: 'dummyCurrency',
+          applicationName: 'system-test-app',
         }),
       ).rejects.toThrow(NotSignedInError)
     })
@@ -62,6 +63,7 @@ describe('SetupFundingSourceUseCase Test Suite', () => {
         await instanceUnderTest.execute({
           type,
           currency: 'dummyCurrency',
+          applicationName: 'system-test-app',
         })
         verify(mockFundingSourceService.setupFundingSource(anything())).once()
         const [args] = capture(
@@ -70,6 +72,7 @@ describe('SetupFundingSourceUseCase Test Suite', () => {
         expect(args).toEqual<typeof args>({
           type,
           currency: 'dummyCurrency',
+          setupData: { applicationName: 'system-test-app' },
         })
       },
     )
@@ -88,6 +91,7 @@ describe('SetupFundingSourceUseCase Test Suite', () => {
           instanceUnderTest.execute({
             type,
             currency: 'dummyCurrency',
+            applicationName: 'system-test-app',
           }),
         ).resolves.toEqual({
           ...EntityDataFactory.provisionalFundingSource,

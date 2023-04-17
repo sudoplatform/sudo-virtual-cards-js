@@ -38,6 +38,7 @@ describe('SudoVirtualCardsClient RefreshFundingSource Test Suite', () => {
       provider: 'checkout',
       type: FundingSourceType.BankAccount,
       accountId: 'dummyAccountId',
+      applicationName: 'system-test-app',
     },
   }
 
@@ -49,6 +50,7 @@ describe('SudoVirtualCardsClient RefreshFundingSource Test Suite', () => {
       provider: 'checkout',
       type: FundingSourceType.BankAccount,
       accountId: 'dummyAccountId',
+      applicationName: 'system-test-app',
       authorizationText: {
         language: 'en-US',
         content: 'authorization-text-content',

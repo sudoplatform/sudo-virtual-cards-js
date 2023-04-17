@@ -37,6 +37,7 @@ describe('SudoVirtualCardsClient SetupFundingSource Test Suite', () => {
       const result = await instanceUnderTest.setupFundingSource({
         currency: 'USD',
         type: FundingSourceType.CreditCard,
+        applicationName: 'system-test-app',
       })
       expect(result).toMatchObject({
         id: expect.stringMatching(uuidV4Regex('vc-fnd')),
@@ -55,6 +56,7 @@ describe('SudoVirtualCardsClient SetupFundingSource Test Suite', () => {
         instanceUnderTest.setupFundingSource({
           currency: 'AAAAAAAAAA',
           type: FundingSourceType.CreditCard,
+          applicationName: 'system-test-app',
         }),
       ).rejects.toThrow()
     })
@@ -74,6 +76,7 @@ describe('SudoVirtualCardsClient SetupFundingSource Test Suite', () => {
           currency: 'USD',
           type: FundingSourceType.CreditCard,
           supportedProviders: ['checkout'],
+          applicationName: 'system-test-app',
         })
 
         expect(result.provisioningData).toMatchObject({
@@ -97,6 +100,7 @@ describe('SudoVirtualCardsClient SetupFundingSource Test Suite', () => {
           currency: 'USD',
           type: FundingSourceType.BankAccount,
           supportedProviders: ['checkout'],
+          applicationName: 'system-test-app',
         })
 
         expect(result.provisioningData).toMatchObject({

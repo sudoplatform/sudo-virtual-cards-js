@@ -93,6 +93,7 @@ describe('SudoVirtualCardsClient SubscribeToFundingSourceUpdates Test Suite', ()
             currency: 'USD',
             type: FundingSourceType.CreditCard,
             supportedProviders: [provider],
+            applicationName: 'system-test-app',
           })
 
           const card = getTestCard(provider)

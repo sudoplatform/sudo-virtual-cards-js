@@ -124,6 +124,7 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
               currency: 'USD',
               type: FundingSourceType.BankAccount,
               supportedProviders: ['checkout'],
+              applicationName: 'system-test-app',
             })
 
           const provisioningData = provisionalFundingSource.provisioningData
@@ -203,6 +204,7 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
             currency: 'USD',
             type: FundingSourceType.CreditCard,
             supportedProviders: [provider],
+            applicationName: 'system-test-app',
           })
 
           const card = getTestCard(provider)
@@ -253,6 +255,7 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
             currency: 'USD',
             type: FundingSourceType.CreditCard,
             supportedProviders: [provider],
+            applicationName: 'system-test-app',
           })
 
           const card = getTestCard(provider)
@@ -335,6 +338,7 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
           currency: 'USD',
           type: FundingSourceType.CreditCard,
           supportedProviders: ['stripe'],
+          applicationName: 'system-test-app',
         })
 
         await expect(
@@ -368,6 +372,7 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
             currency: 'USD',
             type: FundingSourceType.CreditCard,
             supportedProviders: ['checkout'],
+            applicationName: 'system-test-app',
           })
 
         if (
@@ -438,6 +443,7 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
             currency: 'USD',
             type: FundingSourceType.CreditCard,
             supportedProviders: ['checkout'],
+            applicationName: 'system-test-app',
           })
 
         if (

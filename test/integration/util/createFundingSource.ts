@@ -267,6 +267,7 @@ export const createCardFundingSource = async (
     testCard?: TestCardName
     currency?: string
     supportedProviders?: string[]
+    applicationName?: string
     updateCardFundingSource?: boolean
   },
 ): Promise<FundingSource> => {
@@ -274,6 +275,7 @@ export const createCardFundingSource = async (
     currency: 'USD',
     type: FundingSourceType.CreditCard,
     supportedProviders: options?.supportedProviders,
+    applicationName: options?.applicationName ?? 'webApplication',
   })
 
   const provisioningData = provisionalCard.provisioningData

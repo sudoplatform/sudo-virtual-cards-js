@@ -576,6 +576,7 @@ export type SealedTransactionDetailChargeAttribute = {
 export type SetupFundingSourceRequest = {
   currency: Scalars['String']
   language?: InputMaybe<Scalars['String']>
+  setupData?: InputMaybe<Scalars['ID']>
   supportedProviders?: InputMaybe<Array<Scalars['String']>>
   type: FundingSourceType
 }

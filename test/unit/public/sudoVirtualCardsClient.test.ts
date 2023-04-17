@@ -482,6 +482,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       await instanceUnderTest.setupFundingSource({
         currency: 'dummyCurrency',
         type: FundingSourceType.CreditCard,
+        applicationName: 'system-test-app',
       })
       expect(JestMockSetupFundingSourceUseCase).toHaveBeenCalledTimes(1)
     })
@@ -490,12 +491,14 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       await instanceUnderTest.setupFundingSource({
         currency,
         type: FundingSourceType.CreditCard,
+        applicationName: 'system-test-app',
       })
       verify(mockSetupFundingSourceUseCase.execute(anything())).once()
       const [args] = capture(mockSetupFundingSourceUseCase.execute).first()
       expect(args).toEqual<typeof args>({
         currency,
         type: FundingSourceType.CreditCard,
+        applicationName: 'system-test-app',
       })
     })
     it('returns expected result', async () => {
@@ -503,6 +506,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
         instanceUnderTest.setupFundingSource({
           currency: 'dummyCurrency',
           type: FundingSourceType.CreditCard,
+          applicationName: 'system-test-app',
         }),
       ).resolves.toEqual(ApiDataFactory.provisionalFundingSource)
     })
@@ -622,6 +626,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
           provider: 'checkout',
           type: FundingSourceType.BankAccount,
           accountId: 'accountId',
+          applicationName: 'system-test-app',
         },
       })
       expect(JestMockRefreshFundingSourceUseCase).toHaveBeenCalledTimes(1)
@@ -634,6 +639,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
           provider: 'checkout',
           type: FundingSourceType.BankAccount,
           accountId: 'accountId',
+          applicationName: 'system-test-app',
           authorizationText: {
             content: 'authorizationText',
             contentType: 'authorizationTextContentType',
@@ -650,6 +656,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
         refreshData: {
           provider: 'checkout',
           type: FundingSourceType.BankAccount,
+          applicationName: 'system-test-app',
           accountId: 'accountId',
           authorizationText: {
             content: 'authorizationText',
@@ -672,6 +679,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
           refreshData: {
             provider: 'checkout',
             type: FundingSourceType.BankAccount,
+            applicationName: 'system-test-app',
             accountId: 'accountId',
             authorizationText: {
               content: 'authorizationText',
@@ -712,6 +720,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
             provider: 'checkout',
             type: FundingSourceType.BankAccount,
             accountId: 'accountId',
+            applicationName: 'system-test-app',
           },
         }),
       ).rejects.toEqual(

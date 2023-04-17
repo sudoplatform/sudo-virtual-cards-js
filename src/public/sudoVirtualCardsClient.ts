@@ -94,6 +94,9 @@ import {
  *
  * @property {string} currency The ISO 4217 currency code that is being used for the setup.
  * @property {FundingSourceType} type The type of the funding source being setup.
+ * @property {string} applicationName
+ *   The name of the client application. Must be shared with the service for
+ *   configuration purposes.
  * @property {string[]} supportedProviders
  *   Names of providers supported by the client. Will default to the default
  *   provider for the funding source type depending on configuration of the
@@ -110,6 +113,7 @@ import {
 export interface SetupFundingSourceInput {
   currency: string
   type: FundingSourceType
+  applicationName: string
   supportedProviders?: string[]
   language?: string
 }
@@ -179,12 +183,16 @@ export type CompleteFundingSourceCompletionDataInput =
  *
  * @property {string} provider Provider used to save the funding source information.
  * @property {FundingSourceType.BankAccount} type Funding source provider type. Must be BankAccount.
+ * @property {string} applicationName
+ * The name of the client application. Must be shared with the service for
+ * configuration purposes.
  * @property {string} accountId The identifier of the account associated with the funding source being refreshed, if known
  * @property {AuthorizationText} authorizationText Authorization text presented to and agreed to by the user.
  */
 export interface RefreshFundingSourceCheckoutBankAccountRefreshDataInput {
   provider: 'checkout'
   type: FundingSourceType.BankAccount
+  applicationName: string
   accountId?: string
   authorizationText?: AuthorizationText
 }

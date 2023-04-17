@@ -326,6 +326,7 @@ input SetupFundingSourceRequest {
   currency: String!
   supportedProviders: [String!]
   language: String
+  setupData: ID
 }
 
 input CompleteFundingSourceRequest {

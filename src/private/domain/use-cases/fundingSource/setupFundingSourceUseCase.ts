@@ -18,6 +18,7 @@ interface SetupFundingSourceUseCaseInput {
   type: FundingSourceType
   currency: string
   supportedProviders?: string[]
+  applicationName: string
 }
 
 interface SetupFundingSourceUseCaseOutput {
@@ -41,6 +42,7 @@ export class SetupFundingSourceUseCase {
     type,
     currency,
     supportedProviders,
+    applicationName,
   }: SetupFundingSourceUseCaseInput): Promise<SetupFundingSourceUseCaseOutput> {
     if (!(await this.userService.isSignedIn())) {
       throw new NotSignedInError()
@@ -49,6 +51,7 @@ export class SetupFundingSourceUseCase {
       type,
       currency,
       supportedProviders,
+      setupData: { applicationName },
     })
   }
 }

@@ -84,11 +84,14 @@ export class DefaultFundingSourceService implements FundingSourceService {
     currency,
     type,
     supportedProviders,
+    setupData,
   }: FundingSourceServiceSetupFundingSourceInput): Promise<ProvisionalFundingSourceEntity> {
+    const encodedSetupData = Base64.encodeString(JSON.stringify(setupData))
     const provisionalFundingSource = await this.appSync.setupFundingSource({
       currency,
       type,
       supportedProviders,
+      setupData: encodedSetupData,
     })
     return ProvisionalFundingSourceEntityTransformer.transformGraphQL(
       provisionalFundingSource,
@@ -221,6 +224,7 @@ export class DefaultFundingSourceService implements FundingSourceService {
           type,
           keyId: publicKey.id,
           authorizationTextSignature,
+          applicationName: refreshData.applicationName,
         }),
       )
     } else {

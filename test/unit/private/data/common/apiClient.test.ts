@@ -5,7 +5,7 @@
  */
 
 import { ApiClientManager } from '@sudoplatform/sudo-api-client'
-import { UnknownGraphQLError } from '@sudoplatform/sudo-common'
+import { Base64, UnknownGraphQLError } from '@sudoplatform/sudo-common'
 import { NormalizedCacheObject } from 'apollo-cache-inmemory'
 import { NetworkStatus } from 'apollo-client/core/networkStatus'
 import { ApolloError } from 'apollo-client/errors/ApolloError'
@@ -423,10 +423,14 @@ describe('ApiClient Test Suite', () => {
       } as any)
       const currency = v4()
       const type = FundingSourceType.CreditCard
+      const setupData = Base64.encodeString(
+        JSON.stringify({ applicationName: 'system-test-app' }),
+      )
       await expect(
         instanceUnderTest.setupFundingSource({
           currency,
           type,
+          setupData,
         }),
       ).resolves.toStrictEqual(GraphQLDataFactory.provisionalFundingSource)
       verify(mockClient.mutate(anything())).once()
@@ -437,6 +441,7 @@ describe('ApiClient Test Suite', () => {
           input: {
             currency,
             type,
+            setupData,
           },
         },
       })
@@ -451,6 +456,9 @@ describe('ApiClient Test Suite', () => {
         instanceUnderTest.setupFundingSource({
           currency: '',
           type: FundingSourceType.CreditCard,
+          setupData: Base64.encodeString(
+            JSON.stringify({ applicationName: 'system-test-app' }),
+          ),
         }),
       ).rejects.toThrow(UnknownGraphQLError)
     })
@@ -462,6 +470,9 @@ describe('ApiClient Test Suite', () => {
         instanceUnderTest.setupFundingSource({
           currency: '',
           type: FundingSourceType.CreditCard,
+          setupData: Base64.encodeString(
+            JSON.stringify({ applicationName: 'system-test-app' }),
+          ),
         }),
       ).rejects.toThrow(UnknownGraphQLError)
     })
