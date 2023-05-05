@@ -5,7 +5,6 @@
  */
 
 import { DefaultLogger } from '@sudoplatform/sudo-common'
-import { SudoUserClient } from '@sudoplatform/sudo-user'
 import { v4 } from 'uuid'
 import {
   FundingSourceNotFoundError,
@@ -20,13 +19,11 @@ describe('SudoVirtualCardsClient RefreshFundingSource Test Suite', () => {
   jest.setTimeout(240000)
   const log = new DefaultLogger('SudoVirtualCardsClientIntegrationTests')
   let instanceUnderTest: SudoVirtualCardsClient
-  let userClient: SudoUserClient
   let fundingSourceProviders: FundingSourceProviders
 
   beforeAll(async () => {
     const result = await setupVirtualCardsClient(log)
     instanceUnderTest = result.virtualCardsClient
-    userClient = result.userClient
     fundingSourceProviders = result.fundingSourceProviders
   })
 

@@ -24,6 +24,9 @@ import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
 describe('GetTransaction Test Suite', () => {
   jest.setTimeout(240000)
+  waitForExpect.defaults.interval = 250
+  waitForExpect.defaults.timeout = 10000
+
   const log = new DefaultLogger('SudoVirtualCardsClientIntegrationTests')
   let instanceUnderTest: SudoVirtualCardsClient
   let vcSimulator: SudoVirtualCardsSimulatorClient

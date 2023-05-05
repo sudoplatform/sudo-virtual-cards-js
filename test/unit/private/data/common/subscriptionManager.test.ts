@@ -134,12 +134,14 @@ describe('SubscriptionManager test suite', () => {
 
   it('subscribe same id overwrites previous subscription', async () => {
     iut.subscribe('dummy-id', {
-      connectionStatusChanged(state: ConnectionState): void {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      connectionStatusChanged(_state: ConnectionState): void {
         fail(
           'unexpectedly invoked incorrect connection status changed callback',
         )
       },
-      fundingSourceChanged(fundingSource: FundingSource): Promise<void> {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      fundingSourceChanged(_fundingSource: FundingSource): Promise<void> {
         fail('unexpectedly invoked incorrect funding source updated callback')
         return Promise.resolve(undefined)
       },

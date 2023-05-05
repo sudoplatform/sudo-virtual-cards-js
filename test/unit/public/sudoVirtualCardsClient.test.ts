@@ -732,7 +732,8 @@ describe('SudoVirtualCardsClient Test Suite', () => {
   describe('subscribeToFundingSourceChanges', () => {
     it('generates use case', async () => {
       await instanceUnderTest.subscribeToFundingSourceChanges('id', {
-        fundingSourceChanged(fundingSource: FundingSource): Promise<void> {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        fundingSourceChanged(_fundingSource: FundingSource): Promise<void> {
           return Promise.resolve()
         },
       })

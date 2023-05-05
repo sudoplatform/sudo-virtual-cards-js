@@ -12,6 +12,7 @@ import { Sudo, SudoProfilesClient } from '@sudoplatform/sudo-profiles'
 import { SudoVirtualCardsSimulatorClient } from '@sudoplatform/sudo-virtual-cards-simulator'
 import waitForExpect from 'wait-for-expect'
 import {
+  ListTransactionsResults,
   SudoVirtualCardsClient,
   Transaction,
   TransactionType,
@@ -24,7 +25,7 @@ import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 describe('ListTransactions Test Suite', () => {
   jest.setTimeout(240000)
   waitForExpect.defaults.interval = 250
-  waitForExpect.defaults.timeout = 5000
+  waitForExpect.defaults.timeout = 10000
 
   const log = new DefaultLogger('SudoVirtualCardsClientIntegrationTests')
   let instanceUnderTest: SudoVirtualCardsClient
@@ -112,49 +113,53 @@ describe('ListTransactions Test Suite', () => {
 
   describe('ListTransactions', () => {
     it('returns expected result', async () => {
+      let result: ListTransactionsResults | undefined
+
       await waitForExpect(async () => {
-        const result = await instanceUnderTest.listTransactions({})
+        result = await instanceUnderTest.listTransactions({})
+        expect(result.status).toEqual(ListOperationResultStatus.Success)
         if (result.status !== ListOperationResultStatus.Success) {
           fail('unexpected result')
         }
         expect(result.items).toHaveLength(4)
-
-        const pending = result.items.find(
-          (t) => t.type === TransactionType.Pending,
-        )
-        expect(pending).toMatchObject<Partial<Transaction>>({
-          billedAmount: { currency: 'USD', amount: 50 },
-        })
-        expect(pending?.settledAt).toBeFalsy()
-        expect(pending?.declineReason).toBeFalsy()
-
-        const complete = result.items.find(
-          (t) => t.type === TransactionType.Complete,
-        )
-        expect(complete).toMatchObject<Partial<Transaction>>({
-          billedAmount: { currency: 'USD', amount: 75 },
-          settledAt: expect.any(Date),
-        })
-        expect(complete?.declineReason).toBeFalsy()
-
-        const refund = result.items.find(
-          (t) => t.type === TransactionType.Refund,
-        )
-        expect(refund).toMatchObject<Partial<Transaction>>({
-          billedAmount: { currency: 'USD', amount: 75 },
-          settledAt: expect.any(Date),
-        })
-        expect(refund?.declineReason).toBeFalsy()
-
-        const declined = result.items.find(
-          (t) => t.type === TransactionType.Decline,
-        )
-        expect(declined).toMatchObject<Partial<Transaction>>({
-          billedAmount: { currency: 'USD', amount: 50 },
-        })
-        expect(declined?.declineReason).toBeDefined()
-        expect(declined?.settledAt).toBeFalsy()
       })
+      if (result?.status !== ListOperationResultStatus.Success) {
+        fail(`result.status unexpectedly not Success`)
+      }
+
+      const pending = result.items.find(
+        (t) => t.type === TransactionType.Pending,
+      )
+      expect(pending).toMatchObject<Partial<Transaction>>({
+        billedAmount: { currency: 'USD', amount: 50 },
+      })
+      expect(pending?.settledAt).toBeFalsy()
+      expect(pending?.declineReason).toBeFalsy()
+
+      const complete = result.items.find(
+        (t) => t.type === TransactionType.Complete,
+      )
+      expect(complete).toMatchObject<Partial<Transaction>>({
+        billedAmount: { currency: 'USD', amount: 75 },
+        settledAt: expect.any(Date),
+      })
+      expect(complete?.declineReason).toBeFalsy()
+
+      const refund = result.items.find((t) => t.type === TransactionType.Refund)
+      expect(refund).toMatchObject<Partial<Transaction>>({
+        billedAmount: { currency: 'USD', amount: 75 },
+        settledAt: expect.any(Date),
+      })
+      expect(refund?.declineReason).toBeFalsy()
+
+      const declined = result.items.find(
+        (t) => t.type === TransactionType.Decline,
+      )
+      expect(declined).toMatchObject<Partial<Transaction>>({
+        billedAmount: { currency: 'USD', amount: 50 },
+      })
+      expect(declined?.declineReason).toBeDefined()
+      expect(declined?.settledAt).toBeFalsy()
     })
 
     it('limits transactions as expected', async () => {

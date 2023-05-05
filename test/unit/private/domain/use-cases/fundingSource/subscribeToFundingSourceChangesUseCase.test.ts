@@ -42,7 +42,8 @@ describe('SubscribeToFundingSourceChangesUseCase Test Suite', () => {
         instanceUnderTest.execute({
           id: 'subscription-id',
           subscriber: {
-            fundingSourceChanged(fundingSource: FundingSource): Promise<void> {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            fundingSourceChanged(_fundingSource: FundingSource): Promise<void> {
               return Promise.resolve()
             },
           },
@@ -54,10 +55,12 @@ describe('SubscribeToFundingSourceChangesUseCase Test Suite', () => {
       await instanceUnderTest.execute({
         id: 'subscribe-id',
         subscriber: {
-          fundingSourceChanged(fundingSource: FundingSource): Promise<void> {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          fundingSourceChanged(_fundingSource: FundingSource): Promise<void> {
             return Promise.resolve()
           },
-          connectionStatusChanged(state: ConnectionState): void {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          connectionStatusChanged(_state: ConnectionState): void {
             return
           },
         },

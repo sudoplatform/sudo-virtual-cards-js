@@ -460,18 +460,18 @@ describe('DefaultFundingSourceService Test Suite', () => {
         owner: 'owner-id',
         id: 'subscribe-id',
         subscriber: {
-          fundingSourceChanged(fundingSource: FundingSource): Promise<void> {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          fundingSourceChanged(_fundingSource: FundingSource): Promise<void> {
             return Promise.resolve()
           },
-          connectionStatusChanged(state: ConnectionState): void {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          connectionStatusChanged(_state: ConnectionState): void {
             return
           },
         },
       })
       verify(mockSubscriptionManager.subscribe(anything(), anything())).once()
-      const [actualId, actualSubscriber] = capture(
-        mockSubscriptionManager.subscribe,
-      ).first()
+      const [actualId] = capture(mockSubscriptionManager.subscribe).first()
       expect(actualId).toEqual<typeof actualId>('subscribe-id')
 
       verify(mockAppSync.onFundingSourceUpdate(anything())).once()

@@ -10,8 +10,8 @@ import { v4 } from 'uuid'
 import waitForExpect from 'wait-for-expect'
 import {
   CardState,
-  ProvisioningState,
   ProvisionVirtualCardInput,
+  ProvisioningState,
   SudoVirtualCardsClient,
 } from '../../../src'
 import { createCardFundingSource } from '../util/createFundingSource'

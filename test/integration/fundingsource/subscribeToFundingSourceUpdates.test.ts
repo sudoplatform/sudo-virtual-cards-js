@@ -17,9 +17,9 @@ import {
   FundingSource,
   FundingSourceState,
   FundingSourceType,
+  SudoVirtualCardsClient,
   isCheckoutCardProvisionalFundingSourceProvisioningData,
   isStripeCardProvisionalFundingSourceProvisioningData,
-  SudoVirtualCardsClient,
 } from '../../../src'
 import { ApiClient } from '../../../src/private/data/common/apiClient'
 import {
@@ -304,7 +304,8 @@ describe('SudoVirtualCardsClient SubscribeToFundingSourceUpdates Test Suite', ()
         owner: 'owner-id',
         id: 'subscribe-id',
         subscriber: {
-          fundingSourceChanged(fundingSource: FundingSource): Promise<void> {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          fundingSourceChanged(_fundingSource: FundingSource): Promise<void> {
             return Promise.resolve()
           },
           connectionStatusChanged(state: ConnectionState): void {
