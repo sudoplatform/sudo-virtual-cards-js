@@ -12,7 +12,6 @@ import { Sudo, SudoProfilesClient } from '@sudoplatform/sudo-profiles'
 import { SudoVirtualCardsSimulatorClient } from '@sudoplatform/sudo-virtual-cards-simulator'
 import waitForExpect from 'wait-for-expect'
 import {
-  ListTransactionsResults,
   SudoVirtualCardsClient,
   Transaction,
   TransactionType,
@@ -92,6 +91,33 @@ describe('ListTransactionsByCardId Test Suite', () => {
         csc: card.csc,
       }),
     ])
+
+    await waitForExpect(async () => {
+      const result = await instanceUnderTest.listTransactionsByCardId({
+        cardId: card.id,
+      })
+      expect(result.status).toEqual(ListOperationResultStatus.Success)
+      if (result.status !== ListOperationResultStatus.Success) {
+        fail('unexpected result')
+      }
+      expect(result.items).toHaveLength(4)
+      const nPending = result.items.filter(
+        (t) => t.type === TransactionType.Pending,
+      ).length
+      const nDeclined = result.items.filter(
+        (t) => t.type === TransactionType.Decline,
+      ).length
+      const nDebit = result.items.filter(
+        (t) => t.type === TransactionType.Complete,
+      ).length
+      const nRefund = result.items.filter(
+        (t) => t.type === TransactionType.Complete,
+      ).length
+      expect(nPending).toEqual(1)
+      expect(nDeclined).toEqual(1)
+      expect(nDebit).toEqual(1)
+      expect(nRefund).toEqual(1)
+    })
   }
 
   beforeAll(async () => {
@@ -113,19 +139,11 @@ describe('ListTransactionsByCardId Test Suite', () => {
 
   describe('listTransactionsByCardId', () => {
     it('returns expected result', async () => {
-      let result: ListTransactionsResults | undefined
-
-      await waitForExpect(async () => {
-        result = await instanceUnderTest.listTransactionsByCardId({
-          cardId: card.id,
-        })
-        expect(result.status).toEqual(ListOperationResultStatus.Success)
-        if (result.status !== ListOperationResultStatus.Success) {
-          fail('unexpected result')
-        }
-        expect(result.items).toHaveLength(4)
+      const result = await instanceUnderTest.listTransactionsByCardId({
+        cardId: card.id,
       })
-      if (result?.status !== ListOperationResultStatus.Success) {
+
+      if (result.status !== ListOperationResultStatus.Success) {
         fail(`result.status unexpectedly not Success`)
       }
       const pending = result.items.find(

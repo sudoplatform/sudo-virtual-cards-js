@@ -26,6 +26,10 @@ import {
   TESTAuthenticationProvider,
 } from '@sudoplatform/sudo-user'
 import {
+  DefaultVirtualCardsAdminClient,
+  SudoVirtualCardsAdminClient,
+} from '@sudoplatform/sudo-virtual-cards-admin'
+import {
   DefaultSudoVirtualCardsSimulatorClient,
   SudoVirtualCardsSimulatorClient,
 } from '@sudoplatform/sudo-virtual-cards-simulator'
@@ -81,7 +85,6 @@ const SimApiConfig = t.type({
   region: t.string,
 })
 type SimApiConfig = t.TypeOf<typeof SimApiConfig>
-
 const setupSimulatorApiClient = (): AWSAppSyncClient<NormalizedCacheObject> => {
   const config =
     DefaultConfigurationManager.getInstance().bindConfigSet<SimApiConfig>(
@@ -98,6 +101,7 @@ const setupSimulatorApiClient = (): AWSAppSyncClient<NormalizedCacheObject> => {
     },
   })
 }
+
 const IdentityAdminApiConfig = t.type({
   apiUrl: t.string,
   region: t.string,
@@ -121,6 +125,7 @@ interface SetupVirtualCardsClientOutput {
   ownershipProofToken: string
   virtualCardsClient: SudoVirtualCardsClient
   virtualCardsSimulatorClient: SudoVirtualCardsSimulatorClient
+  virtualCardsAdminClient: SudoVirtualCardsAdminClient
   userClient: SudoUserClient
   entitlementsClient: SudoEntitlementsClient
   identityVerificationClient: SudoSecureIdVerificationClient
@@ -128,7 +133,6 @@ interface SetupVirtualCardsClientOutput {
   identityAdminClient: IdentityAdminClient
   fundingSourceProviders: FundingSourceProviders
 }
-
 export const setupVirtualCardsClient = async (
   log: Logger,
 ): Promise<SetupVirtualCardsClientOutput> => {
@@ -197,6 +201,10 @@ export const setupVirtualCardsClient = async (
         appSyncClient: setupSimulatorApiClient(),
       })
 
+    const virtualCardsAdminClient = new DefaultVirtualCardsAdminClient(
+      adminApiKey,
+    )
+
     const options: SudoVirtualCardsClientPrivateOptions = {
       sudoUserClient: userClient,
       apiClient,
@@ -210,6 +218,7 @@ export const setupVirtualCardsClient = async (
       ownershipProofToken,
       virtualCardsClient,
       virtualCardsSimulatorClient,
+      virtualCardsAdminClient,
       userClient,
       entitlementsClient,
       identityVerificationClient,

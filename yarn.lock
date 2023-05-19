@@ -3016,6 +3016,24 @@
     tslib "^2.5.0"
     uuid "^9.0.0"
 
+"@sudoplatform/sudo-virtual-cards-admin@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@sudoplatform/sudo-virtual-cards-admin/-/sudo-virtual-cards-admin-2.1.0.tgz#9d2ba2c8dc1c31fcc2a476ff513ec8670a35d075"
+  integrity sha512-8JmXBpGuOqDcMWVZDBO/RO+h26xJ9XJ1UCWbkQqYydPuMRy1nfg6S38SiP7zPMITkonM3sxthmszUWAdrQLJWA==
+  dependencies:
+    "@graphql-typed-document-node/core" "^3.1.1"
+    apollo-cache-inmemory "^1.6.6"
+    aws-appsync "^4.1.9"
+    fp-ts "^2.13.1"
+    graphql "15.8.0"
+    io-ts "^2.2.20"
+    io-ts-types "^0.5.19"
+    monocle-ts "^2.3.13"
+    newtype-ts "^0.3.5"
+    redux "^4.2.0"
+    tslib "^2.4.1"
+    uuid "^9.0.0"
+
 "@sudoplatform/sudo-virtual-cards-simulator@^5.0.1":
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/@sudoplatform/sudo-virtual-cards-simulator/-/sudo-virtual-cards-simulator-5.0.1.tgz#a6e769eb3b6b02f7cff5506fe64af7374af31210"
@@ -5649,7 +5667,7 @@ graphql-ws@5.12.1:
   resolved "https://registry.yarnpkg.com/graphql-ws/-/graphql-ws-5.12.1.tgz#c62d5ac54dbd409cc6520b0b39de374b3d59d0dd"
   integrity sha512-umt4f5NnMK46ChM2coO36PTFhHouBrK9stWWBczERguwYrGnPNxJ9dimU6IyOBfOkC6Izhkg4H8+F51W/8CYDg==
 
-graphql@^15.8.0:
+graphql@15.8.0, graphql@^15.8.0:
   version "15.8.0"
   resolved "https://registry.yarnpkg.com/graphql/-/graphql-15.8.0.tgz#33410e96b012fa3bdb1091cc99a94769db212b38"
   integrity sha512-5gghUc24tP9HRznNpV2+FIoq3xKkj5dTQqf4v0CpdPbFVwFkWoxOM+o+2OC9ZSvjEMTjfmG9QT+gcvggTwW1zw==

@@ -5,13 +5,18 @@
  */
 
 import { DefaultLogger } from '@sudoplatform/sudo-common'
+import { SudoVirtualCardsAdminClient } from '@sudoplatform/sudo-virtual-cards-admin'
 import { v4 } from 'uuid'
 import {
   FundingSourceNotFoundError,
+  FundingSourceState,
+  FundingSourceStateError,
   FundingSourceType,
+  RefreshFundingSourceInput,
   RefreshFundingSourceRefreshDataInput,
   SudoVirtualCardsClient,
 } from '../../../src'
+import { createBankAccountFundingSource } from '../util/createFundingSource'
 import { FundingSourceProviders } from '../util/getFundingSourceProviders'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
@@ -19,11 +24,13 @@ describe('SudoVirtualCardsClient RefreshFundingSource Test Suite', () => {
   jest.setTimeout(240000)
   const log = new DefaultLogger('SudoVirtualCardsClientIntegrationTests')
   let instanceUnderTest: SudoVirtualCardsClient
+  let virtualCardsAdminClient: SudoVirtualCardsAdminClient
   let fundingSourceProviders: FundingSourceProviders
 
   beforeAll(async () => {
     const result = await setupVirtualCardsClient(log)
     instanceUnderTest = result.virtualCardsClient
+    virtualCardsAdminClient = result.virtualCardsAdminClient
     fundingSourceProviders = result.fundingSourceProviders
   })
 
@@ -36,25 +43,6 @@ describe('SudoVirtualCardsClient RefreshFundingSource Test Suite', () => {
       type: FundingSourceType.BankAccount,
       accountId: 'dummyAccountId',
       applicationName: 'system-test-app',
-    },
-  }
-
-  const dummyCompleteRefreshDataForProvider: Record<
-    string,
-    RefreshFundingSourceRefreshDataInput
-  > = {
-    checkoutBankAccount: {
-      provider: 'checkout',
-      type: FundingSourceType.BankAccount,
-      accountId: 'dummyAccountId',
-      applicationName: 'system-test-app',
-      authorizationText: {
-        language: 'en-US',
-        content: 'authorization-text-content',
-        contentType: 'authorization-text-content-type',
-        hash: 'authorization-text-hash',
-        hashAlgorithm: 'authorization-text-hash-algorithm',
-      },
     },
   }
 
@@ -89,7 +77,71 @@ describe('SudoVirtualCardsClient RefreshFundingSource Test Suite', () => {
         ).rejects.toThrow(FundingSourceNotFoundError)
       })
 
-      // Without the ability to complete bank account funding source setup, we cannot refresh a bank account funding source.
+      it('returns bank account funding source from refresh when refresh is not required', async () => {
+        if (skip) return
+
+        await instanceUnderTest.createKeysIfAbsent()
+
+        const fundingSource = await createBankAccountFundingSource(
+          instanceUnderTest,
+          virtualCardsAdminClient,
+          {
+            username: 'custom_checking_500',
+            supportedProviders: ['checkout'],
+          },
+        )
+        expect(fundingSource).toBeDefined()
+
+        const refreshData: RefreshFundingSourceRefreshDataInput = {
+          provider: 'checkout',
+          type: FundingSourceType.BankAccount,
+          applicationName: 'webApplication',
+        }
+        const refreshInput: RefreshFundingSourceInput = {
+          id: fundingSource.id,
+          language: 'en-US',
+          refreshData,
+        }
+        await expect(
+          instanceUnderTest.refreshFundingSource(refreshInput),
+        ).resolves.toMatchObject(fundingSource)
+      })
+
+      it('returns FundingSourceStateError from refresh if funding source is inactive', async () => {
+        if (skip) return
+
+        await instanceUnderTest.createKeysIfAbsent()
+
+        const fundingSource = await createBankAccountFundingSource(
+          instanceUnderTest,
+          virtualCardsAdminClient,
+          {
+            username: 'custom_checking_500',
+            supportedProviders: ['checkout'],
+          },
+        )
+        expect(fundingSource.state).toEqual(FundingSourceState.Active)
+
+        const cancelledFundingSource =
+          await instanceUnderTest.cancelFundingSource(fundingSource.id)
+        expect(cancelledFundingSource.state).toEqual(
+          FundingSourceState.Inactive,
+        )
+
+        const refreshData: RefreshFundingSourceRefreshDataInput = {
+          provider: 'checkout',
+          type: FundingSourceType.BankAccount,
+          applicationName: 'webApplication',
+        }
+        const refreshInput: RefreshFundingSourceInput = {
+          id: fundingSource.id,
+          language: 'en-US',
+          refreshData,
+        }
+        await expect(
+          instanceUnderTest.refreshFundingSource(refreshInput),
+        ).rejects.toThrow(FundingSourceStateError)
+      })
     })
   })
 })

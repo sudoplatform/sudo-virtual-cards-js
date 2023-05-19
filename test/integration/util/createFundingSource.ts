@@ -4,15 +4,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { SudoVirtualCardsAdminClient } from '@sudoplatform/sudo-virtual-cards-admin'
 import { Checkout } from 'checkout-sdk-node'
 import Stripe from 'stripe'
 import {
+  BankAccountFundingSource,
   CardType,
   CheckoutCardProvisionalFundingSourceProvisioningData,
+  CompleteFundingSourceCheckoutBankAccountCompletionDataInput,
   CompleteFundingSourceCompletionDataInput,
   CreditCardFundingSource,
   FundingSource,
   FundingSourceType,
+  isCheckoutBankAccountProvisionalFundingSourceProvisioningData,
   isCheckoutCardProvisionalFundingSourceProvisioningData,
   isStripeCardProvisionalFundingSourceProvisioningData,
   StripeCardProvisionalFundingSourceProvisioningData,
@@ -25,6 +29,15 @@ export const CardProviderNames = ['stripe', 'checkout'] as const
 export type CardProviderName = (typeof CardProviderNames)[number]
 export function isCardProviderName(s: string): s is CardProviderName {
   return (CardProviderNames as readonly string[]).includes(s)
+}
+
+export const BankAccountProviderNames = ['checkout'] as const
+
+export type BankAccountProviderName = (typeof BankAccountProviderNames)[number]
+export function isBankAccountProviderName(
+  s: string,
+): s is BankAccountProviderName {
+  return (BankAccountProviderNames as readonly string[]).includes(s)
 }
 
 export interface TestCardBillingAddressProperties {
@@ -87,6 +100,12 @@ export type TestCard = {
   cardType: CardType
   address: TestCardBillingAddress
 }
+
+export const TestBankAccountUsernames = [
+  'custom_checking_500',
+  'custom_identity_mismatch',
+] as const
+export type TestBankAccountUsername = (typeof TestBankAccountUsernames)[number]
 
 /**
  * Checkout funding source test data.
@@ -333,6 +352,75 @@ export const createCardFundingSource = async (
 
   expect(fundingSource.last4).toEqual(card.last4)
   expect(fundingSource.cardType).toEqual(card.cardType)
+
+  return fundingSource
+}
+
+export const createBankAccountFundingSource = async (
+  virtualCardsClient: SudoVirtualCardsClient,
+  virtualCardsAdminClient: SudoVirtualCardsAdminClient,
+  options?: {
+    username: TestBankAccountUsername
+    supportedProviders?: string[]
+    applicationName?: string
+  },
+): Promise<FundingSource> => {
+  const provisionalFundingSource = await virtualCardsClient.setupFundingSource({
+    currency: 'USD',
+    type: FundingSourceType.BankAccount,
+    supportedProviders: options?.supportedProviders,
+    language: 'en-US',
+    applicationName: options?.applicationName ?? 'webApplication',
+  })
+
+  const provisioningData = provisionalFundingSource.provisioningData
+  const provider = provisioningData.provider
+  if (!isBankAccountProviderName(provider)) {
+    throw new Error(
+      `Unrecognized bank account provider name in provisioning data: ${provisioningData.provider}`,
+    )
+  }
+
+  const institutionId = 'ins_109508' // Plaid Sandbox Bank Account - Platypus
+  const username = options?.username ?? 'custom_checking_500'
+  const sandboxData = await virtualCardsAdminClient.getPlaidSandboxData({
+    institutionId,
+    username,
+  })
+  const account = sandboxData.accountMetadata[0]
+
+  let completionData: CompleteFundingSourceCheckoutBankAccountCompletionDataInput
+  if (
+    isCheckoutBankAccountProvisionalFundingSourceProvisioningData(
+      provisioningData,
+    )
+  ) {
+    completionData = {
+      provider: 'checkout',
+      type: FundingSourceType.BankAccount,
+      accountId: account.accountId,
+      institutionId,
+      publicToken: sandboxData.publicToken,
+      authorizationText: {
+        language: provisioningData.authorizationText[0].language,
+        content: provisioningData.authorizationText[0].content,
+        contentType: provisioningData.authorizationText[0].contentType,
+        hash: provisioningData.authorizationText[0].hash,
+        hashAlgorithm: provisioningData.authorizationText[0].hashAlgorithm,
+      },
+    }
+  } else {
+    throw new Error('Unsupported funding source type')
+  }
+
+  const result = await virtualCardsClient.completeFundingSource({
+    id: provisionalFundingSource.id,
+    completionData: completionData,
+  })
+  const fundingSource = result as BankAccountFundingSource
+
+  expect(fundingSource.id).toEqual(provisionalFundingSource.id)
+  expect(fundingSource.owner).toEqual(provisionalFundingSource.owner)
 
   return fundingSource
 }

@@ -6,8 +6,10 @@
 
 import { DefaultLogger } from '@sudoplatform/sudo-common'
 import { SudoUserClient } from '@sudoplatform/sudo-user'
+import { SudoVirtualCardsAdminClient } from '@sudoplatform/sudo-virtual-cards-admin'
 import { v4 } from 'uuid'
 import {
+  BankAccountType,
   CompleteFundingSourceCompletionDataInput,
   CreditCardNetwork,
   FundingSource,
@@ -16,6 +18,7 @@ import {
   FundingSourceRequiresUserInteractionError,
   FundingSourceState,
   FundingSourceType,
+  IdentityVerificationNotVerifiedError,
   isCheckoutBankAccountProvisionalFundingSourceProvisioningData,
   isCheckoutCardProvisionalFundingSourceInteractionData,
   isCheckoutCardProvisionalFundingSourceProvisioningData,
@@ -27,6 +30,7 @@ import {
 import { uuidV4Regex } from '../../utility/uuidV4Regex'
 import {
   confirmStripeSetupIntent,
+  createBankAccountFundingSource,
   generateCheckoutPaymentToken,
   getTestCard,
 } from '../util/createFundingSource'
@@ -37,12 +41,14 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
   jest.setTimeout(240000)
   const log = new DefaultLogger('SudoVirtualCardsClientIntegrationTests')
   let instanceUnderTest: SudoVirtualCardsClient
+  let virtualCardsAdminClient: SudoVirtualCardsAdminClient
   let userClient: SudoUserClient
   let fundingSourceProviders: FundingSourceProviders
 
   beforeAll(async () => {
     const result = await setupVirtualCardsClient(log)
     instanceUnderTest = result.virtualCardsClient
+    virtualCardsAdminClient = result.virtualCardsAdminClient
     userClient = result.userClient
     fundingSourceProviders = result.fundingSourceProviders
   })
@@ -103,6 +109,47 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
             completionData: dummyCompletionDataForProvider['checkout'],
           }),
         ).rejects.toThrow(ProvisionalFundingSourceNotFoundError)
+      })
+
+      it('returns IdentityVerificationNotVerifiedError for user that does not match identity verification', async () => {
+        if (skip) return
+
+        await instanceUnderTest.createKeysIfAbsent()
+
+        await expect(
+          createBankAccountFundingSource(
+            instanceUnderTest,
+            virtualCardsAdminClient,
+            {
+              username: 'custom_identity_mismatch',
+              supportedProviders: ['checkout'],
+            },
+          ),
+        ).rejects.toThrow(IdentityVerificationNotVerifiedError)
+      })
+
+      it('returns fully provisioned bank account funding source', async () => {
+        if (skip) return
+
+        await instanceUnderTest.createKeysIfAbsent()
+
+        const result = await createBankAccountFundingSource(
+          instanceUnderTest,
+          virtualCardsAdminClient,
+          {
+            username: 'custom_checking_500',
+            supportedProviders: ['checkout'],
+          },
+        )
+        expect(result).toMatchObject({
+          version: 1,
+          currency: 'USD',
+          last4: expect.stringMatching(/\d{4}/),
+          state: FundingSourceState.Active,
+          type: FundingSourceType.BankAccount,
+          bankAccountType: BankAccountType.Checking,
+          institutionName: 'First Platypus Bank',
+        })
       })
 
       /*
