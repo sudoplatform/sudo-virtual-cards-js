@@ -15,7 +15,7 @@
     "lint:circular": "yarn madge --circular --extensions ts src test",
     "codegen": "graphql-codegen -c codegen.yml",
     "verify": "yarn audit-with-suppressions && yarn lint",
-    "unit-test": "jest --verbose test/unit --coverage", 
+    "unit-test": "jest --verbose test/unit --coverage",
     "integration-test": "jest --verbose test/integration",
     "clean": "rm -rf lib docs",
     "build": "yarn codegen && yarn build:transpile && yarn build:docs",
@@ -51,7 +51,7 @@
     "apollo-cache-inmemory": "^1.6.6",
     "async-mutex": "^0.4.0",
     "aws-appsync": "^4.1.9",
-    "fp-ts": "^2.14.0",
+    "fp-ts": "^2.15.0",
     "graphql": "^15.8.0",
     "io-ts": "^2.2.20",
     "io-ts-types": "^0.5.19",
@@ -59,7 +59,7 @@
     "monocle-ts": "^2.3.13",
     "newtype-ts": "^0.3.5",
     "redux": "^4.2.1",
-    "tslib": "^2.5.0"
+    "tslib": "^2.5.2"
   },
   "resolutions": {
     "apollo-client": "^2.6.10",
@@ -67,7 +67,7 @@
     "apollo-link-http": "^1.5.8",
     "apollo-cache-inmemory": "^1.6.6",
     "aws-appsync": "^4.1.9",
-    "node-fetch": "^2.6.9"
+    "node-fetch": "^2.6.11"
   },
   "devDependencies": {
     "@graphql-codegen/add": "^4.0.1",
@@ -80,7 +80,7 @@
     "@sudoplatform/sudo-common": "^8.5.1",
     "@sudoplatform/sudo-entitlements": "^16.0.0",
     "@sudoplatform/sudo-entitlements-admin": "^11.1.0",
-    "@sudoplatform/sudo-profiles": "^17.0.0",
+    "@sudoplatform/sudo-profiles": "^17.0.2",
     "@sudoplatform/sudo-secure-id-verification": "^8.0.0",
     "@sudoplatform/sudo-user": "^13.0.0",
     "@sudoplatform/sudo-virtual-cards-simulator": "^5.0.1",
@@ -89,14 +89,14 @@
     "@types/jest": "^27.5.2",
     "@types/lodash": "^4.14.194",
     "@types/luxon": "^3.2.0",
-    "@types/node": "^16.18.25",
+    "@types/node": "^16.18.32",
     "@types/uuid": "^9.0.1",
-    "@typescript-eslint/eslint-plugin": "^5.59.2",
-    "@typescript-eslint/parser": "^5.59.2",
+    "@typescript-eslint/eslint-plugin": "^5.59.6",
+    "@typescript-eslint/parser": "^5.59.6",
     "apollo-client": "^2.6.10",
     "checkout-sdk-node": "^2.2.1",
-    "concurrently": "^7.6.0",
-    "eslint": "^8.39.0",
+    "concurrently": "^8.0.1",
+    "eslint": "^8.41.0",
     "eslint-config-prettier": "^8.7.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-jest": "^27.2.1",
@@ -110,12 +110,12 @@
     "madge": "^6.0.0",
     "prettier": "^2.8.8",
     "prettier-plugin-organize-imports": "^3.2.2",
-    "stripe": "^12.3.0",
+    "stripe": "^12.6.0",
     "subscriptions-transport-ws": "^0.11.0",
     "ts-jest": "^27.1.5",
     "ts-mockito": "^2.6.1",
     "ts-node": "^10.9.1",
-    "typedoc": "^0.24.6",
+    "typedoc": "^0.24.7",
     "typescript": "^5.0.4",
     "uuid": "^9.0.0",
     "wait-for-expect": "^3.0.2",
@@ -123,12 +123,12 @@
   },
   "outdatedSuppressions": {
     "major": {
-      "@types/jest": 1681529822,
-      "@types/node": 1681529822,
-      "graphql": 1681529823,
-      "jest": 1681529823,
-      "node-fetch": 1681529823,
-      "ts-jest": 1681529823
+      "@types/jest": 1687317652,
+      "@types/node": 1687317652,
+      "graphql": 1687317653,
+      "jest": 1687317654,
+      "node-fetch": 1687317654,
+      "ts-jest": 1687317655
     }
   }
 }

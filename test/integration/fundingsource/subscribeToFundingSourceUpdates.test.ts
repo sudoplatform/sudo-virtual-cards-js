@@ -17,6 +17,7 @@ import {
   FundingSource,
   FundingSourceState,
   FundingSourceType,
+  ProvisionalFundingSource,
   SudoVirtualCardsClient,
   isCheckoutCardProvisionalFundingSourceProvisioningData,
   isStripeCardProvisionalFundingSourceProvisioningData,
@@ -27,6 +28,7 @@ import {
   UnsealInput,
 } from '../../../src/private/data/common/deviceKeyWorker'
 import { DefaultFundingSourceService } from '../../../src/private/data/fundingSource/defaultFundingSourceService'
+import { delay } from '../../utility/delay'
 import { uuidV4Regex } from '../../utility/uuidV4Regex'
 import {
   confirmStripeSetupIntent,
@@ -39,11 +41,16 @@ import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
 describe('SudoVirtualCardsClient SubscribeToFundingSourceUpdates Test Suite', () => {
   jest.setTimeout(240000)
+  waitForExpect.defaults.interval = 250
+  waitForExpect.defaults.timeout = 15000
+
   const log = new DefaultLogger('SudoVirtualCardsClientIntegrationTests')
   let instanceUnderTest: SudoVirtualCardsClient
   let fundingSourceProviders: FundingSourceProviders
   let userClient: SudoUserClient
   let identityAdminClient: IdentityAdminClient
+  let username: string
+  let connectionState: ConnectionState = ConnectionState.Disconnected
 
   beforeAll(async () => {
     const result = await setupVirtualCardsClient(log)
@@ -51,9 +58,26 @@ describe('SudoVirtualCardsClient SubscribeToFundingSourceUpdates Test Suite', ()
     fundingSourceProviders = result.fundingSourceProviders
     userClient = result.userClient
     identityAdminClient = result.identityAdminClient
+    username = (await userClient.getUserName()) ?? fail('username not defined')
+
+    // Create a subscription simply to monitor connection state
+    // and wait for initial connection to be set up.
+    await instanceUnderTest.subscribeToFundingSourceChanges(
+      'initial-subscription',
+      {
+        fundingSourceChanged: () => Promise.resolve(),
+        connectionStatusChanged: (state) => (connectionState = state),
+      },
+    )
+    await waitForExpect(() =>
+      expect(connectionState).toEqual(ConnectionState.Connected),
+    )
   })
 
   describe('SubscribeToFundingSourceUpdates', () => {
+    // Note that this suite does not test for connection state change
+    // notifications since the behaviour of that is presently global to the
+    // client rather than individual subscriptions.
     describe.each`
       provider      | providerEnabled
       ${'stripe'}   | ${'stripeCardEnabled'}
@@ -69,10 +93,10 @@ describe('SudoVirtualCardsClient SubscribeToFundingSourceUpdates Test Suite', ()
       }) => {
         let skip = false
         let subscriptionCalled = false
-        let connectionStateChangeCalled = false
-        let connectionState: ConnectionState = ConnectionState.Disconnected
-        let notifiedFundingSourceId: string | undefined = undefined
+        let notifiedFundingSource: FundingSource | undefined = undefined
         let fundingSource: FundingSource | undefined
+        const subscriptionIds: string[] = []
+
         beforeAll(() => {
           // Since we determine availability of provider
           // asynchronously we can't use that knowledge
@@ -85,29 +109,39 @@ describe('SudoVirtualCardsClient SubscribeToFundingSourceUpdates Test Suite', ()
             skip = true
           }
         })
+
         beforeEach(async () => {
           if (skip) return
           subscriptionCalled = false
-          notifiedFundingSourceId = undefined
-          const provisionalCard = await instanceUnderTest.setupFundingSource({
-            currency: 'USD',
-            type: FundingSourceType.CreditCard,
-            supportedProviders: [provider],
-            applicationName: 'system-test-app',
+          notifiedFundingSource = undefined
+
+          // Account may still appear eventual-inconsistently locked so wait for success
+          let provisionalFundingSource: ProvisionalFundingSource | undefined
+          await waitForExpect(async () => {
+            provisionalFundingSource =
+              await instanceUnderTest.setupFundingSource({
+                currency: 'USD',
+                type: FundingSourceType.CreditCard,
+                supportedProviders: [provider],
+                applicationName: 'system-test-app',
+              })
           })
+          if (!provisionalFundingSource) {
+            fail('provisionalFundingSource unexpectedly falsy')
+          }
 
           const card = getTestCard(provider)
           let completionData: CompleteFundingSourceCompletionDataInput
           if (
             isStripeCardProvisionalFundingSourceProvisioningData(
-              provisionalCard.provisioningData,
+              provisionalFundingSource.provisioningData,
             )
           ) {
             const stripe = fundingSourceProviders.apis.stripe
             const setupIntent = await confirmStripeSetupIntent(
               stripe,
               card,
-              provisionalCard.provisioningData,
+              provisionalFundingSource.provisioningData,
             )
             if (typeof setupIntent.payment_method !== 'string') {
               throw 'Failed to get payment_method from setup intent'
@@ -120,13 +154,13 @@ describe('SudoVirtualCardsClient SubscribeToFundingSourceUpdates Test Suite', ()
           } else if (
             fundingSourceProviders.apis.checkout &&
             isCheckoutCardProvisionalFundingSourceProvisioningData(
-              provisionalCard.provisioningData,
+              provisionalFundingSource.provisioningData,
             )
           ) {
             const paymentToken = await generateCheckoutPaymentToken(
               fundingSourceProviders.apis.checkout,
               card,
-              provisionalCard.provisioningData,
+              provisionalFundingSource.provisioningData,
             )
             completionData = {
               provider: 'checkout',
@@ -138,7 +172,7 @@ describe('SudoVirtualCardsClient SubscribeToFundingSourceUpdates Test Suite', ()
           }
 
           fundingSource = await instanceUnderTest.completeFundingSource({
-            id: provisionalCard.id,
+            id: provisionalFundingSource.id,
             completionData,
           })
           expect(fundingSource).toMatchObject({
@@ -153,7 +187,21 @@ describe('SudoVirtualCardsClient SubscribeToFundingSourceUpdates Test Suite', ()
         })
 
         afterEach(async () => {
-          if (fundingSource) {
+          subscriptionIds.forEach((subscriptionId) =>
+            instanceUnderTest.unsubscribeFromFundingSourceChanges(
+              subscriptionId,
+            ),
+          )
+
+          await identityAdminClient.enableUser({
+            input: {
+              username,
+            },
+          })
+          if (
+            fundingSource &&
+            notifiedFundingSource?.state !== FundingSourceState.Inactive
+          ) {
             await instanceUnderTest.cancelFundingSource(fundingSource.id)
           }
         })
@@ -161,6 +209,8 @@ describe('SudoVirtualCardsClient SubscribeToFundingSourceUpdates Test Suite', ()
         it('Successfully notifies of funding source update if subscribed', async () => {
           if (skip) return
           const subscriptionId = v4()
+          subscriptionIds.push(subscriptionId)
+
           await instanceUnderTest.subscribeToFundingSourceChanges(
             subscriptionId,
             {
@@ -168,18 +218,12 @@ describe('SudoVirtualCardsClient SubscribeToFundingSourceUpdates Test Suite', ()
                 fundingSource: FundingSource,
               ): Promise<void> {
                 subscriptionCalled = true
-                notifiedFundingSourceId = fundingSource.id
+                notifiedFundingSource = fundingSource
                 return Promise.resolve()
-              },
-              connectionStatusChanged(state: ConnectionState): void {
-                connectionStateChangeCalled = true
-                connectionState = state
               },
             },
           )
-
-          expect(connectionStateChangeCalled).toBeTruthy()
-          expect(connectionState).toBe(ConnectionState.Connected)
+          expect(connectionState).toEqual(ConnectionState.Connected)
 
           if (!fundingSource) {
             fail('no funding source was set up')
@@ -196,19 +240,18 @@ describe('SudoVirtualCardsClient SubscribeToFundingSourceUpdates Test Suite', ()
 
           await waitForExpect(() => {
             expect(subscriptionCalled).toBeTruthy()
-            expect(notifiedFundingSourceId).toEqual(fundingSource?.id)
-          })
-
-          await identityAdminClient.enableUser({
-            input: {
-              username,
-            },
+            expect(notifiedFundingSource?.id).toEqual(fundingSource?.id)
+            expect(notifiedFundingSource?.state).toEqual(
+              FundingSourceState.Inactive,
+            )
           })
         })
 
         it('Does not notify of funding source update if not subscribed', async () => {
           if (skip) return
           const subscriptionId = v4()
+          subscriptionIds.push(subscriptionId)
+
           await instanceUnderTest.subscribeToFundingSourceChanges(
             subscriptionId,
             {
@@ -216,15 +259,12 @@ describe('SudoVirtualCardsClient SubscribeToFundingSourceUpdates Test Suite', ()
                 fundingSource: FundingSource,
               ): Promise<void> {
                 subscriptionCalled = true
-                notifiedFundingSourceId = fundingSource.id
+                notifiedFundingSource = fundingSource
                 return Promise.resolve(undefined)
-              },
-              connectionStatusChanged(state: ConnectionState): void {
-                connectionStateChangeCalled = true
-                connectionState = state
               },
             },
           )
+          expect(connectionState).toEqual(ConnectionState.Connected)
 
           if (!fundingSource) {
             fail('no funding source was set up')
@@ -242,19 +282,15 @@ describe('SudoVirtualCardsClient SubscribeToFundingSourceUpdates Test Suite', ()
             },
           })
 
-          await waitForExpect(() => {
-            expect(subscriptionCalled).toBeFalsy()
-            expect(notifiedFundingSourceId).toBeUndefined()
-          })
-
-          await identityAdminClient.enableUser({
-            input: {
-              username,
-            },
-          })
+          // For negative test we wait for 5s and make sure subscription
+          // wasn't invoked in that time frame
+          await delay(5000)
+          expect(subscriptionCalled).toBeFalsy()
+          expect(notifiedFundingSource).toBeUndefined()
         })
       },
     )
+
     it('execution error invokes error handler and connection state change', async () => {
       const mockAppSync = mock<ApiClient>()
       const mockDeviceKeyWorker = mock<DeviceKeyWorker>()

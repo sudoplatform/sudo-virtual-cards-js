@@ -172,6 +172,9 @@ export const setupVirtualCardsClient = async (
     const profilesClient = new DefaultSudoProfilesClient({
       sudoUserClient: userClient,
     })
+    // Prime SudoProfiles client cache by listing first
+    await profilesClient.listSudos()
+
     await profilesClient.pushSymmetricKey(
       'virtualCardsIntegrationTest',
       '01234567890123456789',
