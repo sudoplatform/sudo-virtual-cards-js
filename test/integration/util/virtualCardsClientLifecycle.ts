@@ -8,9 +8,13 @@ import { DefaultApiClientManager } from '@sudoplatform/sudo-api-client'
 import { DefaultConfigurationManager, Logger } from '@sudoplatform/sudo-common'
 import {
   DefaultSudoEntitlementsClient,
+  Entitlement,
   SudoEntitlementsClient,
 } from '@sudoplatform/sudo-entitlements'
-import { DefaultSudoEntitlementsAdminClient } from '@sudoplatform/sudo-entitlements-admin'
+import {
+  DefaultSudoEntitlementsAdminClient,
+  SudoEntitlementsAdminClient,
+} from '@sudoplatform/sudo-entitlements-admin'
 import {
   DefaultSudoProfilesClient,
   Sudo,
@@ -128,14 +132,37 @@ interface SetupVirtualCardsClientOutput {
   virtualCardsAdminClient: SudoVirtualCardsAdminClient
   userClient: SudoUserClient
   entitlementsClient: SudoEntitlementsClient
+  entitlementsAdminClient: SudoEntitlementsAdminClient
   identityVerificationClient: SudoSecureIdVerificationClient
   profilesClient: SudoProfilesClient
   identityAdminClient: IdentityAdminClient
   fundingSourceProviders: FundingSourceProviders
+  bankAccountFundingSourceExpendableEnabled: boolean
 }
+export type SetupVirtualCardsClientOpts = {
+  log: Logger
+
+  /**
+   * Overrides for matching default entitlements.
+   */
+  entitlements?: Entitlement[]
+}
+function isSetupVirtualCardsClientOpts(
+  optsOrLog: Logger | SetupVirtualCardsClientOpts,
+): optsOrLog is SetupVirtualCardsClientOpts {
+  return 'log' in optsOrLog && 'debug' in optsOrLog.log
+}
+
 export const setupVirtualCardsClient = async (
-  log: Logger,
+  optsOrLog: Logger | SetupVirtualCardsClientOpts,
 ): Promise<SetupVirtualCardsClientOutput> => {
+  const log: Logger = isSetupVirtualCardsClientOpts(optsOrLog)
+    ? optsOrLog.log
+    : optsOrLog
+  let entitlements = isSetupVirtualCardsClientOpts(optsOrLog)
+    ? optsOrLog.entitlements ?? undefined
+    : undefined
+
   try {
     if (!adminApiKey) {
       throw new Error('ADMIN_API_KEY must be set')
@@ -160,7 +187,37 @@ export const setupVirtualCardsClient = async (
     const entitlementsAdminClient = new DefaultSudoEntitlementsAdminClient(
       adminApiKey,
     )
-    await new EntitlementsBuilder()
+
+    const virtualCardsSimulatorClient =
+      new DefaultSudoVirtualCardsSimulatorClient({
+        appSyncClient: setupSimulatorApiClient(),
+      })
+
+    const virtualCardsAdminClient = new DefaultVirtualCardsAdminClient(
+      adminApiKey,
+    )
+
+    const options: SudoVirtualCardsClientPrivateOptions = {
+      sudoUserClient: userClient,
+      apiClient,
+    }
+
+    const virtualCardsClient = new DefaultSudoVirtualCardsClient(options)
+
+    const identityAdminClient = setupIdentityAdminClient(adminApiKey)
+
+    const config = await virtualCardsClient.getVirtualCardsConfig()
+
+    if (config.bankAccountFundingSourceExpendableEnabled) {
+      entitlements ??= [
+        {
+          name: 'sudoplatform.virtual-cards.bankAccountFundingSourceExpendable',
+          value: 5,
+        },
+      ]
+    }
+
+    await new EntitlementsBuilder({ entitlements })
       .setEntitlementsClient(entitlementsClient)
       .setEntitlementsAdminClient(entitlementsAdminClient)
       .setLogger(log)
@@ -169,6 +226,7 @@ export const setupVirtualCardsClient = async (
         console.log('Error applying entitlements', { err })
         throw err
       })
+
     const profilesClient = new DefaultSudoProfilesClient({
       sudoUserClient: userClient,
     })
@@ -199,24 +257,6 @@ export const setupVirtualCardsClient = async (
       dateOfBirth: '1975-02-28',
     })
 
-    const virtualCardsSimulatorClient =
-      new DefaultSudoVirtualCardsSimulatorClient({
-        appSyncClient: setupSimulatorApiClient(),
-      })
-
-    const virtualCardsAdminClient = new DefaultVirtualCardsAdminClient(
-      adminApiKey,
-    )
-
-    const options: SudoVirtualCardsClientPrivateOptions = {
-      sudoUserClient: userClient,
-      apiClient,
-    }
-
-    const virtualCardsClient = new DefaultSudoVirtualCardsClient(options)
-
-    const identityAdminClient = setupIdentityAdminClient(adminApiKey)
-
     return {
       ownershipProofToken,
       virtualCardsClient,
@@ -224,6 +264,7 @@ export const setupVirtualCardsClient = async (
       virtualCardsAdminClient,
       userClient,
       entitlementsClient,
+      entitlementsAdminClient,
       identityVerificationClient,
       profilesClient,
       sudo,
@@ -231,6 +272,8 @@ export const setupVirtualCardsClient = async (
       fundingSourceProviders: await getFundingSourceProviders(
         virtualCardsClient,
       ),
+      bankAccountFundingSourceExpendableEnabled:
+        config.bankAccountFundingSourceExpendableEnabled,
     }
   } catch (err) {
     log.error(`${setupVirtualCardsClient.name} FAILED`)

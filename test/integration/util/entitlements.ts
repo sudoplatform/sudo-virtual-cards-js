@@ -15,35 +15,10 @@ export class EntitlementsBuilder {
   private entitlementsClient?: SudoEntitlementsClient
   private entitlementsAdminClient?: SudoEntitlementsAdminClient
   private log: Logger = new DefaultLogger(this.constructor.name)
+  private entitlements: Record<string, Entitlement> = {}
 
-  setEntitlementsClient(
-    entitlementsClient: SudoEntitlementsClient,
-  ): EntitlementsBuilder {
-    this.entitlementsClient = entitlementsClient
-    return this
-  }
-
-  setEntitlementsAdminClient(
-    entitlementsAdminClient: SudoEntitlementsAdminClient,
-  ): EntitlementsBuilder {
-    this.entitlementsAdminClient = entitlementsAdminClient
-    return this
-  }
-
-  setLogger(log: Logger): EntitlementsBuilder {
-    this.log = log
-    return this
-  }
-
-  async apply(): Promise<void> {
-    if (!this.entitlementsClient) {
-      throw 'Entitlements client not set'
-    }
-    if (!this.entitlementsAdminClient) {
-      throw 'Entitlements admin client not set'
-    }
-    const externalId = await this.entitlementsClient.getExternalId()
-    const entitlements: Entitlement[] = [
+  constructor(opts?: { entitlements?: Entitlement[] }) {
+    this.setEntitlements([
       {
         name: 'sudoplatform.sudo.max',
         value: 3,
@@ -68,11 +43,51 @@ export class EntitlementsBuilder {
         name: 'sudoplatform.virtual-cards.virtualCardTransactUserEntitled',
         value: 1,
       },
-    ]
+    ])
+    if (opts?.entitlements) {
+      this.setEntitlements(opts.entitlements)
+    }
+  }
+
+  setEntitlementsClient(
+    entitlementsClient: SudoEntitlementsClient,
+  ): EntitlementsBuilder {
+    this.entitlementsClient = entitlementsClient
+    return this
+  }
+
+  setEntitlementsAdminClient(
+    entitlementsAdminClient: SudoEntitlementsAdminClient,
+  ): EntitlementsBuilder {
+    this.entitlementsAdminClient = entitlementsAdminClient
+    return this
+  }
+
+  setEntitlements(entitlements: Entitlement[]): EntitlementsBuilder {
+    entitlements.forEach((e) => {
+      this.entitlements[e.name] = e
+    })
+    return this
+  }
+
+  setLogger(log: Logger): EntitlementsBuilder {
+    this.log = log
+    return this
+  }
+
+  async apply(): Promise<void> {
+    if (!this.entitlementsClient) {
+      throw 'Entitlements client not set'
+    }
+    if (!this.entitlementsAdminClient) {
+      throw 'Entitlements admin client not set'
+    }
+    const externalId = await this.entitlementsClient.getExternalId()
+
     const appliedEntitlements =
       await this.entitlementsAdminClient.applyEntitlementsToUser(
         externalId,
-        entitlements,
+        Object.values(this.entitlements),
       )
     this.log.debug('applied entitlements', { appliedEntitlements })
 

@@ -266,5 +266,6 @@ export class EntityDataFactory {
       },
     ],
     virtualCardCurrencies: ['USD'],
+    bankAccountFundingSourceExpendableEnabled: true,
   }
 }

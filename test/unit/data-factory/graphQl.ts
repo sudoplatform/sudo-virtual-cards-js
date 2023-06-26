@@ -335,5 +335,6 @@ export class GraphQLDataFactory {
       },
     ],
     virtualCardCurrencies: ['USD'],
+    bankAccountFundingSourceExpendableEnabled: true,
   }
 }

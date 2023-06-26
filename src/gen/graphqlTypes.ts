@@ -12,31 +12,40 @@ export type MakeOptional<T, K extends keyof T> = Omit<T, K> & {
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & {
   [SubKey in K]: Maybe<T[SubKey]>
 }
+export type MakeEmpty<
+  T extends { [key: string]: unknown },
+  K extends keyof T,
+> = { [_ in K]?: never }
+export type Incremental<T> =
+  | T
+  | {
+      [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never
+    }
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-  ID: string
-  String: string
-  Boolean: boolean
-  Int: number
-  Float: number
-  AWSDate: any
-  AWSDateTime: any
-  AWSEmail: any
-  AWSIPAddress: any
-  AWSJSON: any
-  AWSPhone: any
-  AWSTime: any
-  AWSTimestamp: any
-  AWSURL: any
+  ID: { input: string; output: string }
+  String: { input: string; output: string }
+  Boolean: { input: boolean; output: boolean }
+  Int: { input: number; output: number }
+  Float: { input: number; output: number }
+  AWSDate: { input: any; output: any }
+  AWSDateTime: { input: any; output: any }
+  AWSEmail: { input: any; output: any }
+  AWSIPAddress: { input: any; output: any }
+  AWSJSON: { input: any; output: any }
+  AWSPhone: { input: any; output: any }
+  AWSTime: { input: any; output: any }
+  AWSTimestamp: { input: any; output: any }
+  AWSURL: { input: any; output: any }
 }
 
 export type AddressInput = {
-  addressLine1: Scalars['String']
-  addressLine2?: InputMaybe<Scalars['String']>
-  city: Scalars['String']
-  country: Scalars['String']
-  postalCode: Scalars['String']
-  state: Scalars['String']
+  addressLine1: Scalars['String']['input']
+  addressLine2?: InputMaybe<Scalars['String']['input']>
+  city: Scalars['String']['input']
+  country: Scalars['String']['input']
+  postalCode: Scalars['String']['input']
+  state: Scalars['String']['input']
 }
 
 export type BankAccountFundingSource = CommonFundingSource &
@@ -44,17 +53,17 @@ export type BankAccountFundingSource = CommonFundingSource &
     __typename?: 'BankAccountFundingSource'
     authorization: SignedAuthorizationText
     bankAccountType: BankAccountType
-    createdAtEpochMs: Scalars['Float']
-    currency: Scalars['String']
-    id: Scalars['ID']
+    createdAtEpochMs: Scalars['Float']['output']
+    currency: Scalars['String']['output']
+    id: Scalars['ID']['output']
     institutionLogo?: Maybe<SealedAttribute>
     institutionName: SealedAttribute
-    last4: Scalars['String']
-    owner: Scalars['ID']
+    last4: Scalars['String']['output']
+    owner: Scalars['ID']['output']
     state: FundingSourceState
     transactionVelocity?: Maybe<TransactionVelocity>
-    updatedAtEpochMs: Scalars['Float']
-    version: Scalars['Int']
+    updatedAtEpochMs: Scalars['Float']['output']
+    version: Scalars['Int']['output']
   }
 
 export enum BankAccountType {
@@ -64,20 +73,20 @@ export enum BankAccountType {
 }
 
 export type CardCancelRequest = {
-  id: Scalars['ID']
-  keyId?: InputMaybe<Scalars['String']>
+  id: Scalars['ID']['input']
+  keyId?: InputMaybe<Scalars['String']['input']>
 }
 
 export type CardProvisionRequest = {
-  alias?: InputMaybe<Scalars['String']>
+  alias?: InputMaybe<Scalars['String']['input']>
   billingAddress?: InputMaybe<AddressInput>
-  cardHolder: Scalars['String']
-  clientRefId: Scalars['String']
-  currency: Scalars['String']
-  fundingSourceId: Scalars['ID']
-  keyRingId: Scalars['ID']
+  cardHolder: Scalars['String']['input']
+  clientRefId: Scalars['String']['input']
+  currency: Scalars['String']['input']
+  fundingSourceId: Scalars['ID']['input']
+  keyRingId: Scalars['ID']['input']
   metadata?: InputMaybe<SealedAttributeInput>
-  ownerProofs: Array<Scalars['ID']>
+  ownerProofs: Array<Scalars['ID']['input']>
 }
 
 export enum CardState {
@@ -95,62 +104,62 @@ export enum CardType {
 }
 
 export type CardUpdateRequest = {
-  alias?: InputMaybe<Scalars['String']>
+  alias?: InputMaybe<Scalars['String']['input']>
   billingAddress?: InputMaybe<AddressInput>
-  cardHolder?: InputMaybe<Scalars['String']>
-  expectedVersion?: InputMaybe<Scalars['Int']>
-  id: Scalars['ID']
-  keyId?: InputMaybe<Scalars['String']>
+  cardHolder?: InputMaybe<Scalars['String']['input']>
+  expectedVersion?: InputMaybe<Scalars['Int']['input']>
+  id: Scalars['ID']['input']
+  keyId?: InputMaybe<Scalars['String']['input']>
   metadata?: InputMaybe<SealedAttributeInput>
 }
 
 export type CommonFundingSource = {
-  createdAtEpochMs: Scalars['Float']
-  currency: Scalars['String']
-  id: Scalars['ID']
-  owner: Scalars['ID']
+  createdAtEpochMs: Scalars['Float']['output']
+  currency: Scalars['String']['output']
+  id: Scalars['ID']['output']
+  owner: Scalars['ID']['output']
   state: FundingSourceState
   transactionVelocity?: Maybe<TransactionVelocity>
-  updatedAtEpochMs: Scalars['Float']
-  version: Scalars['Int']
+  updatedAtEpochMs: Scalars['Float']['output']
+  version: Scalars['Int']['output']
 }
 
 export type CommonObject = {
-  createdAtEpochMs: Scalars['Float']
-  id: Scalars['ID']
-  owner: Scalars['ID']
-  updatedAtEpochMs: Scalars['Float']
-  version: Scalars['Int']
+  createdAtEpochMs: Scalars['Float']['output']
+  id: Scalars['ID']['output']
+  owner: Scalars['ID']['output']
+  updatedAtEpochMs: Scalars['Float']['output']
+  version: Scalars['Int']['output']
 }
 
 export type CompleteFundingSourceRequest = {
-  completionData: Scalars['ID']
-  id: Scalars['ID']
-  updateCardFundingSource?: InputMaybe<Scalars['Boolean']>
+  completionData: Scalars['ID']['input']
+  id: Scalars['ID']['input']
+  updateCardFundingSource?: InputMaybe<Scalars['Boolean']['input']>
 }
 
 export type CreatePublicKeyInput = {
-  algorithm: Scalars['String']
+  algorithm: Scalars['String']['input']
   keyFormat?: InputMaybe<KeyFormat>
-  keyId: Scalars['String']
-  keyRingId: Scalars['String']
-  publicKey: Scalars['String']
+  keyId: Scalars['String']['input']
+  keyRingId: Scalars['String']['input']
+  publicKey: Scalars['String']['input']
 }
 
 export type CreditCardFundingSource = CommonFundingSource &
   CommonObject & {
     __typename?: 'CreditCardFundingSource'
     cardType: CardType
-    createdAtEpochMs: Scalars['Float']
-    currency: Scalars['String']
-    id: Scalars['ID']
-    last4: Scalars['String']
+    createdAtEpochMs: Scalars['Float']['output']
+    currency: Scalars['String']['output']
+    id: Scalars['ID']['output']
+    last4: Scalars['String']['output']
     network: CreditCardNetwork
-    owner: Scalars['ID']
+    owner: Scalars['ID']['output']
     state: FundingSourceState
     transactionVelocity?: Maybe<TransactionVelocity>
-    updatedAtEpochMs: Scalars['Float']
-    version: Scalars['Int']
+    updatedAtEpochMs: Scalars['Float']['output']
+    version: Scalars['Int']['output']
   }
 
 export enum CreditCardNetwork {
@@ -166,50 +175,50 @@ export enum CreditCardNetwork {
 
 export type CurrencyAmount = {
   __typename?: 'CurrencyAmount'
-  amount: Scalars['String']
-  currency: Scalars['String']
+  amount: Scalars['String']['output']
+  currency: Scalars['String']['output']
 }
 
 export type CurrencyVelocity = {
   __typename?: 'CurrencyVelocity'
-  currency: Scalars['String']
-  velocity: Array<Scalars['String']>
+  currency: Scalars['String']['output']
+  velocity: Array<Scalars['String']['output']>
 }
 
 export type DateRangeInput = {
-  endDateEpochMs: Scalars['Float']
-  startDateEpochMs: Scalars['Float']
+  endDateEpochMs: Scalars['Float']['input']
+  startDateEpochMs: Scalars['Float']['input']
 }
 
 export type DisableUser = {
   __typename?: 'DisableUser'
-  success: Scalars['Boolean']
+  success: Scalars['Boolean']['output']
 }
 
 export type DisableUserInput = {
-  username: Scalars['String']
+  username: Scalars['String']['input']
 }
 
 export type EnableUser = {
   __typename?: 'EnableUser'
-  success: Scalars['Boolean']
+  success: Scalars['Boolean']['output']
 }
 
 export type EnableUserInput = {
-  username: Scalars['String']
+  username: Scalars['String']['input']
 }
 
 export type FundingSource = BankAccountFundingSource | CreditCardFundingSource
 
 export type FundingSourceClientConfiguration = {
   __typename?: 'FundingSourceClientConfiguration'
-  data: Scalars['ID']
+  data: Scalars['ID']['output']
 }
 
 export type FundingSourceConnection = {
   __typename?: 'FundingSourceConnection'
   items: Array<FundingSource>
-  nextToken?: Maybe<Scalars['String']>
+  nextToken?: Maybe<Scalars['String']['output']>
 }
 
 export enum FundingSourceState {
@@ -226,9 +235,9 @@ export type FundingSourceSupportDetail = {
 export type FundingSourceSupportInfo = {
   __typename?: 'FundingSourceSupportInfo'
   detail: Array<FundingSourceSupportDetail>
-  fundingSourceType: Scalars['String']
-  network: Scalars['String']
-  providerType: Scalars['String']
+  fundingSourceType: Scalars['String']['output']
+  network: Scalars['String']['output']
+  providerType: Scalars['String']['output']
 }
 
 export enum FundingSourceType {
@@ -237,7 +246,7 @@ export enum FundingSourceType {
 }
 
 export type IdInput = {
-  id: Scalars['ID']
+  id: Scalars['ID']['input']
 }
 
 export enum KeyFormat {
@@ -301,43 +310,43 @@ export type MutationUpdateCardArgs = {
 
 export type Owner = {
   __typename?: 'Owner'
-  id: Scalars['String']
-  issuer: Scalars['String']
+  id: Scalars['String']['output']
+  issuer: Scalars['String']['output']
 }
 
 export type PaginatedPublicKey = {
   __typename?: 'PaginatedPublicKey'
   items: Array<PublicKey>
-  nextToken?: Maybe<Scalars['String']>
+  nextToken?: Maybe<Scalars['String']['output']>
 }
 
 export type ProvisionalCard = {
   __typename?: 'ProvisionalCard'
   card?: Maybe<Array<SealedCard>>
-  clientRefId: Scalars['String']
-  createdAtEpochMs: Scalars['Float']
-  id: Scalars['ID']
-  owner: Scalars['ID']
+  clientRefId: Scalars['String']['output']
+  createdAtEpochMs: Scalars['Float']['output']
+  id: Scalars['ID']['output']
+  owner: Scalars['ID']['output']
   provisioningState: ProvisioningState
-  updatedAtEpochMs: Scalars['Float']
-  version: Scalars['Int']
+  updatedAtEpochMs: Scalars['Float']['output']
+  version: Scalars['Int']['output']
 }
 
 export type ProvisionalCardConnection = {
   __typename?: 'ProvisionalCardConnection'
   items: Array<ProvisionalCard>
-  nextToken?: Maybe<Scalars['String']>
+  nextToken?: Maybe<Scalars['String']['output']>
 }
 
 export type ProvisionalFundingSource = CommonObject & {
   __typename?: 'ProvisionalFundingSource'
-  createdAtEpochMs: Scalars['Float']
-  id: Scalars['ID']
-  owner: Scalars['ID']
-  provisioningData: Scalars['ID']
+  createdAtEpochMs: Scalars['Float']['output']
+  id: Scalars['ID']['output']
+  owner: Scalars['ID']['output']
+  provisioningData: Scalars['ID']['output']
   state: ProvisionalFundingSourceState
-  updatedAtEpochMs: Scalars['Float']
-  version: Scalars['Int']
+  updatedAtEpochMs: Scalars['Float']['output']
+  version: Scalars['Int']['output']
 }
 
 export enum ProvisionalFundingSourceState {
@@ -355,16 +364,16 @@ export enum ProvisioningState {
 
 export type PublicKey = {
   __typename?: 'PublicKey'
-  algorithm: Scalars['String']
-  createdAtEpochMs: Scalars['Float']
-  id: Scalars['ID']
+  algorithm: Scalars['String']['output']
+  createdAtEpochMs: Scalars['Float']['output']
+  id: Scalars['ID']['output']
   keyFormat?: Maybe<KeyFormat>
-  keyId: Scalars['String']
-  keyRingId: Scalars['String']
-  owner: Scalars['ID']
-  publicKey: Scalars['String']
-  updatedAtEpochMs: Scalars['Float']
-  version: Scalars['Int']
+  keyId: Scalars['String']['output']
+  keyRingId: Scalars['String']['output']
+  owner: Scalars['ID']['output']
+  publicKey: Scalars['String']['output']
+  updatedAtEpochMs: Scalars['Float']['output']
+  version: Scalars['Int']['output']
 }
 
 export type Query = {
@@ -386,210 +395,210 @@ export type Query = {
 }
 
 export type QueryGetCardArgs = {
-  id: Scalars['ID']
-  keyId?: InputMaybe<Scalars['String']>
+  id: Scalars['ID']['input']
+  keyId?: InputMaybe<Scalars['String']['input']>
 }
 
 export type QueryGetFundingSourceArgs = {
-  id: Scalars['ID']
+  id: Scalars['ID']['input']
 }
 
 export type QueryGetKeyRingForVirtualCardsArgs = {
   keyFormats?: InputMaybe<Array<KeyFormat>>
-  keyRingId: Scalars['String']
-  limit?: InputMaybe<Scalars['Int']>
-  nextToken?: InputMaybe<Scalars['String']>
+  keyRingId: Scalars['String']['input']
+  limit?: InputMaybe<Scalars['Int']['input']>
+  nextToken?: InputMaybe<Scalars['String']['input']>
 }
 
 export type QueryGetProvisionalCardArgs = {
-  id: Scalars['ID']
+  id: Scalars['ID']['input']
 }
 
 export type QueryGetPublicKeyForVirtualCardsArgs = {
   keyFormats?: InputMaybe<Array<KeyFormat>>
-  keyId: Scalars['String']
+  keyId: Scalars['String']['input']
 }
 
 export type QueryGetPublicKeysForVirtualCardsArgs = {
-  limit?: InputMaybe<Scalars['Int']>
-  nextToken?: InputMaybe<Scalars['String']>
+  limit?: InputMaybe<Scalars['Int']['input']>
+  nextToken?: InputMaybe<Scalars['String']['input']>
 }
 
 export type QueryGetTransactionArgs = {
-  id: Scalars['ID']
-  keyId?: InputMaybe<Scalars['String']>
+  id: Scalars['ID']['input']
+  keyId?: InputMaybe<Scalars['String']['input']>
 }
 
 export type QueryListCardsArgs = {
-  limit?: InputMaybe<Scalars['Int']>
-  nextToken?: InputMaybe<Scalars['String']>
+  limit?: InputMaybe<Scalars['Int']['input']>
+  nextToken?: InputMaybe<Scalars['String']['input']>
 }
 
 export type QueryListFundingSourcesArgs = {
-  limit?: InputMaybe<Scalars['Int']>
-  nextToken?: InputMaybe<Scalars['String']>
+  limit?: InputMaybe<Scalars['Int']['input']>
+  nextToken?: InputMaybe<Scalars['String']['input']>
 }
 
 export type QueryListProvisionalCardsArgs = {
-  limit?: InputMaybe<Scalars['Int']>
-  nextToken?: InputMaybe<Scalars['String']>
+  limit?: InputMaybe<Scalars['Int']['input']>
+  nextToken?: InputMaybe<Scalars['String']['input']>
 }
 
 export type QueryListTransactions2Args = {
   dateRange?: InputMaybe<DateRangeInput>
-  limit?: InputMaybe<Scalars['Int']>
-  nextToken?: InputMaybe<Scalars['String']>
+  limit?: InputMaybe<Scalars['Int']['input']>
+  nextToken?: InputMaybe<Scalars['String']['input']>
   sortOrder?: InputMaybe<SortOrder>
 }
 
 export type QueryListTransactionsByCardId2Args = {
-  cardId: Scalars['ID']
+  cardId: Scalars['ID']['input']
   dateRange?: InputMaybe<DateRangeInput>
-  limit?: InputMaybe<Scalars['Int']>
-  nextToken?: InputMaybe<Scalars['String']>
+  limit?: InputMaybe<Scalars['Int']['input']>
+  nextToken?: InputMaybe<Scalars['String']['input']>
   sortOrder?: InputMaybe<SortOrder>
 }
 
 export type RefreshFundingSourceRequest = {
-  id: Scalars['ID']
-  language?: InputMaybe<Scalars['String']>
-  refreshData: Scalars['ID']
+  id: Scalars['ID']['input']
+  language?: InputMaybe<Scalars['String']['input']>
+  refreshData: Scalars['ID']['input']
 }
 
 export type SealedAddressAttribute = {
   __typename?: 'SealedAddressAttribute'
-  addressLine1: Scalars['String']
-  addressLine2?: Maybe<Scalars['String']>
-  city: Scalars['String']
-  country: Scalars['String']
-  postalCode: Scalars['String']
-  state: Scalars['String']
+  addressLine1: Scalars['String']['output']
+  addressLine2?: Maybe<Scalars['String']['output']>
+  city: Scalars['String']['output']
+  country: Scalars['String']['output']
+  postalCode: Scalars['String']['output']
+  state: Scalars['String']['output']
 }
 
 export type SealedAttribute = {
   __typename?: 'SealedAttribute'
-  algorithm: Scalars['String']
-  base64EncodedSealedData: Scalars['String']
-  keyId: Scalars['String']
-  plainTextType: Scalars['String']
+  algorithm: Scalars['String']['output']
+  base64EncodedSealedData: Scalars['String']['output']
+  keyId: Scalars['String']['output']
+  plainTextType: Scalars['String']['output']
 }
 
 export type SealedAttributeInput = {
-  algorithm: Scalars['String']
-  base64EncodedSealedData: Scalars['String']
-  keyId: Scalars['String']
-  plainTextType: Scalars['String']
+  algorithm: Scalars['String']['input']
+  base64EncodedSealedData: Scalars['String']['input']
+  keyId: Scalars['String']['input']
+  plainTextType: Scalars['String']['input']
 }
 
 export type SealedCard = {
   __typename?: 'SealedCard'
-  activeToEpochMs: Scalars['Float']
-  algorithm: Scalars['String']
-  alias?: Maybe<Scalars['String']>
+  activeToEpochMs: Scalars['Float']['output']
+  algorithm: Scalars['String']['output']
+  alias?: Maybe<Scalars['String']['output']>
   billingAddress?: Maybe<SealedAddressAttribute>
-  cancelledAtEpochMs?: Maybe<Scalars['Float']>
-  cardHolder: Scalars['String']
-  createdAtEpochMs: Scalars['Float']
-  csc: Scalars['String']
-  currency: Scalars['String']
+  cancelledAtEpochMs?: Maybe<Scalars['Float']['output']>
+  cardHolder: Scalars['String']['output']
+  createdAtEpochMs: Scalars['Float']['output']
+  csc: Scalars['String']['output']
+  currency: Scalars['String']['output']
   expiry: SealedExpiryAttribute
-  fundingSourceId: Scalars['ID']
-  id: Scalars['ID']
-  keyId: Scalars['String']
-  keyRingId: Scalars['ID']
-  last4: Scalars['String']
+  fundingSourceId: Scalars['ID']['output']
+  id: Scalars['ID']['output']
+  keyId: Scalars['String']['output']
+  keyRingId: Scalars['ID']['output']
+  last4: Scalars['String']['output']
   lastTransaction?: Maybe<SealedTransaction>
   metadata?: Maybe<SealedAttribute>
-  owner: Scalars['ID']
+  owner: Scalars['ID']['output']
   owners: Array<Owner>
-  pan: Scalars['String']
+  pan: Scalars['String']['output']
   state: CardState
-  updatedAtEpochMs: Scalars['Float']
-  version: Scalars['Int']
+  updatedAtEpochMs: Scalars['Float']['output']
+  version: Scalars['Int']['output']
 }
 
 export type SealedCardConnection = {
   __typename?: 'SealedCardConnection'
   items: Array<SealedCard>
-  nextToken?: Maybe<Scalars['String']>
+  nextToken?: Maybe<Scalars['String']['output']>
 }
 
 export type SealedCurrencyAmountAttribute = {
   __typename?: 'SealedCurrencyAmountAttribute'
-  amount: Scalars['String']
-  currency: Scalars['String']
+  amount: Scalars['String']['output']
+  currency: Scalars['String']['output']
 }
 
 export type SealedExpiryAttribute = {
   __typename?: 'SealedExpiryAttribute'
-  mm: Scalars['String']
-  yyyy: Scalars['String']
+  mm: Scalars['String']['output']
+  yyyy: Scalars['String']['output']
 }
 
 export type SealedMarkupAttribute = {
   __typename?: 'SealedMarkupAttribute'
-  flat: Scalars['String']
-  minCharge?: Maybe<Scalars['String']>
-  percent: Scalars['String']
+  flat: Scalars['String']['output']
+  minCharge?: Maybe<Scalars['String']['output']>
+  percent: Scalars['String']['output']
 }
 
 export type SealedTransaction = {
   __typename?: 'SealedTransaction'
-  algorithm: Scalars['String']
+  algorithm: Scalars['String']['output']
   billedAmount: SealedCurrencyAmountAttribute
-  cardId: Scalars['ID']
-  createdAtEpochMs: Scalars['Float']
-  declineReason?: Maybe<Scalars['String']>
-  description: Scalars['String']
+  cardId: Scalars['ID']['output']
+  createdAtEpochMs: Scalars['Float']['output']
+  declineReason?: Maybe<Scalars['String']['output']>
+  description: Scalars['String']['output']
   detail?: Maybe<Array<SealedTransactionDetailChargeAttribute>>
-  id: Scalars['ID']
-  keyId: Scalars['String']
-  owner: Scalars['ID']
-  sequenceId: Scalars['ID']
-  settledAtEpochMs?: Maybe<Scalars['String']>
-  sortDateEpochMs: Scalars['Float']
+  id: Scalars['ID']['output']
+  keyId: Scalars['String']['output']
+  owner: Scalars['ID']['output']
+  sequenceId: Scalars['ID']['output']
+  settledAtEpochMs?: Maybe<Scalars['String']['output']>
+  sortDateEpochMs: Scalars['Float']['output']
   transactedAmount: SealedCurrencyAmountAttribute
-  transactedAtEpochMs: Scalars['String']
+  transactedAtEpochMs: Scalars['String']['output']
   type: TransactionType
-  updatedAtEpochMs: Scalars['Float']
-  version: Scalars['Int']
+  updatedAtEpochMs: Scalars['Float']['output']
+  version: Scalars['Int']['output']
 }
 
 export type SealedTransactionConnection = {
   __typename?: 'SealedTransactionConnection'
   items: Array<SealedTransaction>
-  nextToken?: Maybe<Scalars['String']>
+  nextToken?: Maybe<Scalars['String']['output']>
 }
 
 export type SealedTransactionDetailChargeAttribute = {
   __typename?: 'SealedTransactionDetailChargeAttribute'
-  continuationOfExistingCharge?: Maybe<Scalars['Boolean']>
-  description: Scalars['String']
+  continuationOfExistingCharge?: Maybe<Scalars['Boolean']['output']>
+  description: Scalars['String']['output']
   fundingSourceAmount: SealedCurrencyAmountAttribute
-  fundingSourceId: Scalars['ID']
+  fundingSourceId: Scalars['ID']['output']
   markup: SealedMarkupAttribute
   markupAmount: SealedCurrencyAmountAttribute
-  state?: Maybe<Scalars['String']>
+  state?: Maybe<Scalars['String']['output']>
   virtualCardAmount: SealedCurrencyAmountAttribute
 }
 
 export type SetupFundingSourceRequest = {
-  currency: Scalars['String']
-  language?: InputMaybe<Scalars['String']>
-  setupData?: InputMaybe<Scalars['ID']>
-  supportedProviders?: InputMaybe<Array<Scalars['String']>>
+  currency: Scalars['String']['input']
+  language?: InputMaybe<Scalars['String']['input']>
+  setupData?: InputMaybe<Scalars['ID']['input']>
+  supportedProviders?: InputMaybe<Array<Scalars['String']['input']>>
   type: FundingSourceType
 }
 
 export type SignedAuthorizationText = {
   __typename?: 'SignedAuthorizationText'
-  algorithm: Scalars['String']
-  content: Scalars['String']
-  contentType: Scalars['String']
-  data: Scalars['String']
-  keyId: Scalars['String']
-  language: Scalars['String']
-  signature: Scalars['String']
+  algorithm: Scalars['String']['output']
+  content: Scalars['String']['output']
+  contentType: Scalars['String']['output']
+  data: Scalars['String']['output']
+  keyId: Scalars['String']['output']
+  language: Scalars['String']['output']
+  signature: Scalars['String']['output']
 }
 
 export enum SortOrder {
@@ -603,7 +612,7 @@ export type Subscription = {
 }
 
 export type SubscriptionOnFundingSourceUpdateArgs = {
-  owner: Scalars['ID']
+  owner: Scalars['ID']['input']
 }
 
 export enum TransactionType {
@@ -615,19 +624,20 @@ export enum TransactionType {
 
 export type TransactionVelocity = {
   __typename?: 'TransactionVelocity'
-  maximum?: Maybe<Scalars['Int']>
-  velocity?: Maybe<Array<Scalars['String']>>
+  maximum?: Maybe<Scalars['Int']['output']>
+  velocity?: Maybe<Array<Scalars['String']['output']>>
 }
 
 export type VirtualCardsConfig = {
   __typename?: 'VirtualCardsConfig'
+  bankAccountFundingSourceExpendableEnabled: Scalars['Boolean']['output']
   fundingSourceSupportInfo: Array<FundingSourceSupportInfo>
-  maxCardCreationVelocity: Array<Scalars['String']>
-  maxFundingSourceFailureVelocity: Array<Scalars['String']>
-  maxFundingSourceVelocity: Array<Scalars['String']>
+  maxCardCreationVelocity: Array<Scalars['String']['output']>
+  maxFundingSourceFailureVelocity: Array<Scalars['String']['output']>
+  maxFundingSourceVelocity: Array<Scalars['String']['output']>
   maxTransactionAmount: Array<CurrencyAmount>
   maxTransactionVelocity: Array<CurrencyVelocity>
-  virtualCardCurrencies: Array<Scalars['String']>
+  virtualCardCurrencies: Array<Scalars['String']['output']>
 }
 
 export type PublicKeyFragment = {
@@ -1031,6 +1041,7 @@ export type VirtualCardsConfigFragment = {
   maxFundingSourceFailureVelocity: Array<string>
   maxCardCreationVelocity: Array<string>
   virtualCardCurrencies: Array<string>
+  bankAccountFundingSourceExpendableEnabled: boolean
   maxTransactionVelocity: Array<{
     __typename?: 'CurrencyVelocity'
     currency: string
@@ -1589,6 +1600,7 @@ export type GetVirtualCardsConfigQuery = {
     maxFundingSourceFailureVelocity: Array<string>
     maxCardCreationVelocity: Array<string>
     virtualCardCurrencies: Array<string>
+    bankAccountFundingSourceExpendableEnabled: boolean
     maxTransactionVelocity: Array<{
       __typename?: 'CurrencyVelocity'
       currency: string
@@ -1613,7 +1625,7 @@ export type GetVirtualCardsConfigQuery = {
 }
 
 export type GetPublicKeyQueryVariables = Exact<{
-  keyId: Scalars['String']
+  keyId: Scalars['String']['input']
   keyFormats?: InputMaybe<Array<KeyFormat> | KeyFormat>
 }>
 
@@ -1635,8 +1647,8 @@ export type GetPublicKeyQuery = {
 }
 
 export type GetPublicKeysQueryVariables = Exact<{
-  limit?: InputMaybe<Scalars['Int']>
-  nextToken?: InputMaybe<Scalars['String']>
+  limit?: InputMaybe<Scalars['Int']['input']>
+  nextToken?: InputMaybe<Scalars['String']['input']>
 }>
 
 export type GetPublicKeysQuery = {
@@ -1661,9 +1673,9 @@ export type GetPublicKeysQuery = {
 }
 
 export type GetKeyRingQueryVariables = Exact<{
-  keyRingId: Scalars['String']
-  limit?: InputMaybe<Scalars['Int']>
-  nextToken?: InputMaybe<Scalars['String']>
+  keyRingId: Scalars['String']['input']
+  limit?: InputMaybe<Scalars['Int']['input']>
+  nextToken?: InputMaybe<Scalars['String']['input']>
   keyFormats?: InputMaybe<Array<KeyFormat> | KeyFormat>
 }>
 
@@ -1701,7 +1713,7 @@ export type GetFundingSourceClientConfigurationQuery = {
 }
 
 export type GetFundingSourceQueryVariables = Exact<{
-  id: Scalars['ID']
+  id: Scalars['ID']['input']
 }>
 
 export type GetFundingSourceQuery = {
@@ -1770,8 +1782,8 @@ export type GetFundingSourceQuery = {
 }
 
 export type ListFundingSourcesQueryVariables = Exact<{
-  limit?: InputMaybe<Scalars['Int']>
-  nextToken?: InputMaybe<Scalars['String']>
+  limit?: InputMaybe<Scalars['Int']['input']>
+  nextToken?: InputMaybe<Scalars['String']['input']>
 }>
 
 export type ListFundingSourcesQuery = {
@@ -1844,7 +1856,7 @@ export type ListFundingSourcesQuery = {
 }
 
 export type GetProvisionalCardQueryVariables = Exact<{
-  id: Scalars['ID']
+  id: Scalars['ID']['input']
 }>
 
 export type GetProvisionalCardQuery = {
@@ -1901,8 +1913,8 @@ export type GetProvisionalCardQuery = {
 }
 
 export type ListProvisionalCardsQueryVariables = Exact<{
-  limit?: InputMaybe<Scalars['Int']>
-  nextToken?: InputMaybe<Scalars['String']>
+  limit?: InputMaybe<Scalars['Int']['input']>
+  nextToken?: InputMaybe<Scalars['String']['input']>
 }>
 
 export type ListProvisionalCardsQuery = {
@@ -1967,8 +1979,8 @@ export type ListProvisionalCardsQuery = {
 }
 
 export type GetCardQueryVariables = Exact<{
-  id: Scalars['ID']
-  keyId?: InputMaybe<Scalars['String']>
+  id: Scalars['ID']['input']
+  keyId?: InputMaybe<Scalars['String']['input']>
 }>
 
 export type GetCardQuery = {
@@ -2071,8 +2083,8 @@ export type GetCardQuery = {
 }
 
 export type ListCardsQueryVariables = Exact<{
-  limit?: InputMaybe<Scalars['Int']>
-  nextToken?: InputMaybe<Scalars['String']>
+  limit?: InputMaybe<Scalars['Int']['input']>
+  nextToken?: InputMaybe<Scalars['String']['input']>
 }>
 
 export type ListCardsQuery = {
@@ -2179,8 +2191,8 @@ export type ListCardsQuery = {
 }
 
 export type GetTransactionQueryVariables = Exact<{
-  id: Scalars['ID']
-  keyId?: InputMaybe<Scalars['String']>
+  id: Scalars['ID']['input']
+  keyId?: InputMaybe<Scalars['String']['input']>
 }>
 
 export type GetTransactionQuery = {
@@ -2244,8 +2256,8 @@ export type GetTransactionQuery = {
 }
 
 export type ListTransactionsQueryVariables = Exact<{
-  limit?: InputMaybe<Scalars['Int']>
-  nextToken?: InputMaybe<Scalars['String']>
+  limit?: InputMaybe<Scalars['Int']['input']>
+  nextToken?: InputMaybe<Scalars['String']['input']>
   dateRange?: InputMaybe<DateRangeInput>
   sortOrder?: InputMaybe<SortOrder>
 }>
@@ -2315,9 +2327,9 @@ export type ListTransactionsQuery = {
 }
 
 export type ListTransactionsByCardIdQueryVariables = Exact<{
-  cardId: Scalars['ID']
-  limit?: InputMaybe<Scalars['Int']>
-  nextToken?: InputMaybe<Scalars['String']>
+  cardId: Scalars['ID']['input']
+  limit?: InputMaybe<Scalars['Int']['input']>
+  nextToken?: InputMaybe<Scalars['String']['input']>
   dateRange?: InputMaybe<DateRangeInput>
   sortOrder?: InputMaybe<SortOrder>
 }>
@@ -2387,7 +2399,7 @@ export type ListTransactionsByCardIdQuery = {
 }
 
 export type OnFundingSourceUpdateSubscriptionVariables = Exact<{
-  owner: Scalars['ID']
+  owner: Scalars['ID']['input']
 }>
 
 export type OnFundingSourceUpdateSubscription = {
@@ -3814,6 +3826,13 @@ export const VirtualCardsConfigFragmentDoc = {
                   name: { kind: 'Name', value: 'FundingSourceSupportInfo' },
                 },
               ],
+            },
+          },
+          {
+            kind: 'Field',
+            name: {
+              kind: 'Name',
+              value: 'bankAccountFundingSourceExpendableEnabled',
             },
           },
         ],
@@ -5972,6 +5991,13 @@ export const GetVirtualCardsConfigDocument = {
                   name: { kind: 'Name', value: 'FundingSourceSupportInfo' },
                 },
               ],
+            },
+          },
+          {
+            kind: 'Field',
+            name: {
+              kind: 'Name',
+              value: 'bankAccountFundingSourceExpendableEnabled',
             },
           },
         ],

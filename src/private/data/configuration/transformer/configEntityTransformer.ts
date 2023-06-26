@@ -27,6 +27,8 @@ export class VirtualCardsConfigEntityTransformer {
         data.maxTransactionVelocity,
       ),
       virtualCardCurrencies: data.virtualCardCurrencies,
+      bankAccountFundingSourceExpendableEnabled:
+        data.bankAccountFundingSourceExpendableEnabled,
     }
   }
 }

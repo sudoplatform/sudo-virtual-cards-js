@@ -463,7 +463,7 @@ describe('DeviceKeyWorker Test Suite', () => {
           mockKeyManager.generateSignatureWithPrivateKey,
         ).first()
         expect(actualName).toEqual(keyId)
-        expect(actualData).toEqual(bufferToSign)
+        expect(Buffer.from(actualData)).toEqual(Buffer.from(bufferToSign))
         expect(actualOptions).toEqual({
           algorithm: SignatureAlgorithm.RsaPkcs15Sha256,
         })
