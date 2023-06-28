@@ -11,7 +11,6 @@ import {
 import { SudoEntitlementsClient } from '@sudoplatform/sudo-entitlements'
 import { SudoEntitlementsAdminClient } from '@sudoplatform/sudo-entitlements-admin'
 import { SudoUserClient } from '@sudoplatform/sudo-user'
-import { SudoVirtualCardsAdminClient } from '@sudoplatform/sudo-virtual-cards-admin'
 import { v4 } from 'uuid'
 import waitForExpect from 'wait-for-expect'
 import {
@@ -47,7 +46,6 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
   jest.setTimeout(240000)
   const log = new DefaultLogger('SudoVirtualCardsClientIntegrationTests')
   let instanceUnderTest: SudoVirtualCardsClient
-  let virtualCardsAdminClient: SudoVirtualCardsAdminClient
   let entitlementsAdminClient: SudoEntitlementsAdminClient
   let entitlementsClient: SudoEntitlementsClient
   let userClient: SudoUserClient
@@ -67,7 +65,6 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
       ],
     })
     instanceUnderTest = result.virtualCardsClient
-    virtualCardsAdminClient = result.virtualCardsAdminClient
     entitlementsAdminClient = result.entitlementsAdminClient
     entitlementsClient = result.entitlementsClient
     userClient = result.userClient
@@ -235,14 +232,10 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
         await instanceUnderTest.createKeysIfAbsent()
 
         await expect(
-          createBankAccountFundingSource(
-            instanceUnderTest,
-            virtualCardsAdminClient,
-            {
-              username: 'custom_identity_mismatch',
-              supportedProviders: ['checkout'],
-            },
-          ),
+          createBankAccountFundingSource(instanceUnderTest, {
+            username: 'custom_identity_mismatch',
+            supportedProviders: ['checkout'],
+          }),
         ).rejects.toThrow(IdentityVerificationNotVerifiedError)
       })
 
@@ -254,14 +247,10 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
         await entitleBankAccountFundingSourceExpendable()
         await instanceUnderTest.createKeysIfAbsent()
 
-        const result = await createBankAccountFundingSource(
-          instanceUnderTest,
-          virtualCardsAdminClient,
-          {
-            username: 'custom_checking_500',
-            supportedProviders: ['checkout'],
-          },
-        )
+        const result = await createBankAccountFundingSource(instanceUnderTest, {
+          username: 'custom_checking_500',
+          supportedProviders: ['checkout'],
+        })
         expect(result).toMatchObject({
           version: 1,
           currency: 'USD',
@@ -342,14 +331,10 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
           await instanceUnderTest.createKeysIfAbsent()
 
           await expect(
-            createBankAccountFundingSource(
-              instanceUnderTest,
-              virtualCardsAdminClient,
-              {
-                username: 'custom_checking_500',
-                supportedProviders: ['checkout'],
-              },
-            ),
+            createBankAccountFundingSource(instanceUnderTest, {
+              username: 'custom_checking_500',
+              supportedProviders: ['checkout'],
+            }),
           ).rejects.toThrow(new InsufficientEntitlementsError())
         })
       })

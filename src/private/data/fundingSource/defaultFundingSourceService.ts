@@ -24,6 +24,8 @@ import {
   ConnectionState,
   FundingSourceChangeSubscriber,
   FundingSourceType,
+  SandboxGetPlaidDataInput,
+  SandboxSetFundingSourceToRequireRefreshInput,
 } from '../../../public'
 import { FundingSourceEntity } from '../../domain/entities/fundingSource/fundingSourceEntity'
 import {
@@ -43,6 +45,7 @@ import {
   isFundingSourceServiceStripeCardCompletionData,
 } from '../../domain/entities/fundingSource/fundingSourceService'
 import { ProvisionalFundingSourceEntity } from '../../domain/entities/fundingSource/provisionalFundingSourceEntity'
+import { SandboxPlaidDataEntity } from '../../domain/entities/fundingSource/sandboxPlaidDataEntity'
 import { ApiClient } from '../common/apiClient'
 import { DeviceKeyWorker, KeyType } from '../common/deviceKeyWorker'
 import { SubscriptionManager } from '../common/subscriptionManager'
@@ -52,6 +55,7 @@ import { decodeBankAccountFundingSourceInstitutionLogo } from '../fundingSourceP
 import { FundingSourceUnsealed } from './fundingSourceSealedAttributes'
 import { FundingSourceEntityTransformer } from './transformer/fundingSourceEntityTransformer'
 import { ProvisionalFundingSourceEntityTransformer } from './transformer/provisionalFundingSourceEntityTransformer'
+import { SandboxPlaidDataEntityTransformer } from './transformer/sandboxPlaidDataTransformer'
 
 export interface FundingSourceSetup {
   provider: string
@@ -316,6 +320,29 @@ export class DefaultFundingSourceService implements FundingSourceService {
     input: FundingSourceServiceUnsubscribeFromFundingSourceChangesInput,
   ): void {
     this.subscriptionManager.unsubscribe(input.id)
+  }
+
+  public async sandboxGetPlaidData(
+    input: SandboxGetPlaidDataInput,
+  ): Promise<SandboxPlaidDataEntity> {
+    const result = await this.appSync.sandboxGetPlaidData({
+      input: {
+        institutionId: input.institutionId,
+        username: input.plaidUsername,
+      },
+    })
+    return SandboxPlaidDataEntityTransformer.transformGraphQL(result)
+  }
+
+  public async sandboxSetFundingSourceToRequireRefresh(
+    input: SandboxSetFundingSourceToRequireRefreshInput,
+  ): Promise<FundingSourceEntity> {
+    const result = await this.appSync.sandboxSetFundingSourceToRequireRefresh({
+      input,
+    })
+
+    const unsealed = await this.unsealFundingSource(result)
+    return FundingSourceEntityTransformer.transformGraphQL(unsealed)
   }
 
   private async unsealFundingSource(

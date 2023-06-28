@@ -90,6 +90,13 @@ import {
   RefreshFundingSourceDocument,
   RefreshFundingSourceMutation,
   RefreshFundingSourceRequest,
+  SandboxGetPlaidDataDocument,
+  SandboxGetPlaidDataQuery,
+  SandboxGetPlaidDataQueryVariables,
+  SandboxGetPlaidDataResponse,
+  SandboxSetFundingSourceToRequireRefreshDocument,
+  SandboxSetFundingSourceToRequireRefreshMutation,
+  SandboxSetFundingSourceToRequireRefreshMutationVariables,
   SealedCard,
   SealedCardConnection,
   SealedTransaction,
@@ -394,6 +401,34 @@ export class ApiClient {
       calleeName: this.listTransactionsByCardId.name,
     })
     return data.listTransactionsByCardId2
+  }
+
+  async sandboxGetPlaidData(
+    input: SandboxGetPlaidDataQueryVariables,
+  ): Promise<SandboxGetPlaidDataResponse> {
+    const data = await this.performQuery<SandboxGetPlaidDataQuery>({
+      query: SandboxGetPlaidDataDocument,
+      variables: input,
+      fetchPolicy: 'network-only',
+      calleeName: this.sandboxGetPlaidData.name,
+    })
+
+    return data.sandboxGetPlaidData
+  }
+
+  async sandboxSetFundingSourceToRequireRefresh(
+    input: SandboxSetFundingSourceToRequireRefreshMutationVariables,
+  ): Promise<FundingSource> {
+    const data =
+      await this.performMutation<SandboxSetFundingSourceToRequireRefreshMutation>(
+        {
+          mutation: SandboxSetFundingSourceToRequireRefreshDocument,
+          variables: { input },
+          calleeName: this.sandboxSetFundingSourceToRequireRefresh.name,
+        },
+      )
+
+    return data.sandboxSetFundingSourceToRequireRefresh
   }
 
   async performQuery<Q>({

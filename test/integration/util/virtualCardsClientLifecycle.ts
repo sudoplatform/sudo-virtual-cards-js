@@ -30,10 +30,6 @@ import {
   TESTAuthenticationProvider,
 } from '@sudoplatform/sudo-user'
 import {
-  DefaultVirtualCardsAdminClient,
-  SudoVirtualCardsAdminClient,
-} from '@sudoplatform/sudo-virtual-cards-admin'
-import {
   DefaultSudoVirtualCardsSimulatorClient,
   SudoVirtualCardsSimulatorClient,
 } from '@sudoplatform/sudo-virtual-cards-simulator'
@@ -129,7 +125,6 @@ interface SetupVirtualCardsClientOutput {
   ownershipProofToken: string
   virtualCardsClient: SudoVirtualCardsClient
   virtualCardsSimulatorClient: SudoVirtualCardsSimulatorClient
-  virtualCardsAdminClient: SudoVirtualCardsAdminClient
   userClient: SudoUserClient
   entitlementsClient: SudoEntitlementsClient
   entitlementsAdminClient: SudoEntitlementsAdminClient
@@ -192,10 +187,6 @@ export const setupVirtualCardsClient = async (
       new DefaultSudoVirtualCardsSimulatorClient({
         appSyncClient: setupSimulatorApiClient(),
       })
-
-    const virtualCardsAdminClient = new DefaultVirtualCardsAdminClient(
-      adminApiKey,
-    )
 
     const options: SudoVirtualCardsClientPrivateOptions = {
       sudoUserClient: userClient,
@@ -261,7 +252,6 @@ export const setupVirtualCardsClient = async (
       ownershipProofToken,
       virtualCardsClient,
       virtualCardsSimulatorClient,
-      virtualCardsAdminClient,
       userClient,
       entitlementsClient,
       entitlementsAdminClient,

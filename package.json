@@ -83,7 +83,6 @@
     "@sudoplatform/sudo-profiles": "^17.0.4",
     "@sudoplatform/sudo-secure-id-verification": "^8.0.2",
     "@sudoplatform/sudo-user": "^13.0.2",
-    "@sudoplatform/sudo-virtual-cards-admin": "^2.2.0",
     "@sudoplatform/sudo-virtual-cards-simulator": "^5.0.1",
     "@sudoplatform/sudo-web-crypto-provider": "^8.0.1",
     "@types/jest": "^27.5.2",
@@ -132,6 +131,7 @@
     }
   },
   "auditSuppressions": {
-    "1092310": 1689023741
+    "1092310": 1689023741,
+    "1092330": 1689123365
   }
 }

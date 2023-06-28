@@ -26,8 +26,10 @@ import {
 } from 'ts-mockito'
 import { v4 } from 'uuid'
 import {
+  BankAccountType,
   FundingSource,
   FundingSourceRequiresUserInteractionError,
+  SandboxPlaidData,
 } from '../../../src'
 import { ApiClient } from '../../../src/private/data/common/apiClient'
 import { SudoVirtualCardsClientPrivateOptions } from '../../../src/private/data/common/privateSudoVirtualCardsClientOptions'
@@ -39,6 +41,8 @@ import { GetFundingSourceClientConfigurationUseCase } from '../../../src/private
 import { GetFundingSourceUseCase } from '../../../src/private/domain/use-cases/fundingSource/getFundingSourceUseCase'
 import { ListFundingSourcesUseCase } from '../../../src/private/domain/use-cases/fundingSource/listFundingSourcesUseCase'
 import { RefreshFundingSourceUseCase } from '../../../src/private/domain/use-cases/fundingSource/refreshFundingSourceUseCase'
+import { SandboxGetPlaidDataUseCase } from '../../../src/private/domain/use-cases/fundingSource/sandboxGetPlaidDataUseCase'
+import { SandboxSetFundingSourceToRequireRefreshUseCase } from '../../../src/private/domain/use-cases/fundingSource/sandboxSetFundingSourceToRequireRefreshUseCase'
 import { SetupFundingSourceUseCase } from '../../../src/private/domain/use-cases/fundingSource/setupFundingSourceUseCase'
 import { SubscribeToFundingSourceChangesUseCase } from '../../../src/private/domain/use-cases/fundingSource/subscribeToFundingSourceChangesUseCase'
 import { UnsubscribeFromFundingSourceChangesUseCase } from '../../../src/private/domain/use-cases/fundingSource/unsubscribeFromFundingSourceChangesUseCase'
@@ -55,6 +59,8 @@ import { ProvisionVirtualCardUseCase } from '../../../src/private/domain/use-cas
 import { UpdateVirtualCardUseCase } from '../../../src/private/domain/use-cases/virtualCard/updateVirtualCardUseCase'
 import {
   DefaultSudoVirtualCardsClient,
+  SandboxGetPlaidDataInput,
+  SandboxSetFundingSourceToRequireRefreshInput,
   SudoVirtualCardsClient,
 } from '../../../src/public/sudoVirtualCardsClient'
 import { APIResultStatus } from '../../../src/public/typings/apiResult'
@@ -223,6 +229,22 @@ const JestMockListTransactionsByCardIdUseCase =
     typeof ListTransactionsByCardIdUseCase
   >
 
+jest.mock(
+  '../../../src/private/domain/use-cases/fundingSource/sandboxGetPlaidDataUseCase',
+)
+const JestMockSandboxGetPlaidDataUseCase =
+  SandboxGetPlaidDataUseCase as jest.MockedClass<
+    typeof SandboxGetPlaidDataUseCase
+  >
+
+jest.mock(
+  '../../../src/private/domain/use-cases/fundingSource/sandboxSetFundingSourceToRequireRefreshUseCase',
+)
+const JestMockSandboxSetFundingSourceToRequireRefreshUseCase =
+  SandboxSetFundingSourceToRequireRefreshUseCase as jest.MockedClass<
+    typeof SandboxSetFundingSourceToRequireRefreshUseCase
+  >
+
 describe('SudoVirtualCardsClient Test Suite', () => {
   // Opt Mocks
   const mockSudoUserClient = mock<SudoUserClient>()
@@ -259,6 +281,9 @@ describe('SudoVirtualCardsClient Test Suite', () => {
   const mockListTransactionsUseCase = mock<ListTransactionsUseCase>()
   const mockListTransactionsByCardIdUseCase =
     mock<ListTransactionsByCardIdUseCase>()
+  const mockSandboxGetPlaidDataUseCase = mock<SandboxGetPlaidDataUseCase>()
+  const mockSandboxSetFundingSourceToRequireRefreshUseCase =
+    mock<SandboxSetFundingSourceToRequireRefreshUseCase>()
 
   let instanceUnderTest: SudoVirtualCardsClient
 
@@ -290,6 +315,8 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     reset(mockGetTransactionUseCase)
     reset(mockListTransactionsUseCase)
     reset(mockListTransactionsByCardIdUseCase)
+    reset(mockSandboxGetPlaidDataUseCase)
+    reset(mockSandboxSetFundingSourceToRequireRefreshUseCase)
 
     JestMockDefaultFundingSourceService.mockClear()
     JestMockApiClient.mockClear()
@@ -380,6 +407,12 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     )
     JestMockListTransactionsByCardIdUseCase.mockImplementation(() =>
       instance(mockListTransactionsByCardIdUseCase),
+    )
+    JestMockSandboxGetPlaidDataUseCase.mockImplementation(() =>
+      instance(mockSandboxGetPlaidDataUseCase),
+    )
+    JestMockSandboxSetFundingSourceToRequireRefreshUseCase.mockImplementation(
+      () => instance(mockSandboxSetFundingSourceToRequireRefreshUseCase),
     )
   }
 
@@ -1302,6 +1335,70 @@ describe('SudoVirtualCardsClient Test Suite', () => {
         status: ListOperationResultStatus.Success,
         items: [ApiDataFactory.transaction],
       })
+    })
+  })
+
+  describe('sandboxGetPlaidData', () => {
+    const result: SandboxPlaidData = {
+      accountMetadata: [
+        { accountId: 'account-id', subtype: BankAccountType.Checking },
+      ],
+      publicToken: 'public-token',
+    }
+
+    beforeEach(() => {
+      when(mockSandboxGetPlaidDataUseCase.execute(anything())).thenResolve(
+        result,
+      )
+    })
+
+    it('returns expected result', async () => {
+      const input: SandboxGetPlaidDataInput = {
+        institutionId: 'institution-id',
+        plaidUsername: 'plaid-username',
+      }
+
+      await expect(
+        instanceUnderTest.sandboxGetPlaidData(input),
+      ).resolves.toEqual(result)
+
+      expect(JestMockSandboxGetPlaidDataUseCase).toHaveBeenCalledTimes(1)
+
+      verify(mockSandboxGetPlaidDataUseCase.execute(anything())).once()
+      const [actualInput] = capture(
+        mockSandboxGetPlaidDataUseCase.execute,
+      ).first()
+      expect(actualInput).toEqual(input)
+    })
+  })
+
+  describe('sandboxSetFundingSourceToRequireRefresh', () => {
+    beforeEach(() => {
+      when(
+        mockSandboxSetFundingSourceToRequireRefreshUseCase.execute(anything()),
+      ).thenResolve(EntityDataFactory.bankAccountFundingSource)
+    })
+
+    it('returns expected result', async () => {
+      const input: SandboxSetFundingSourceToRequireRefreshInput = {
+        fundingSourceId: EntityDataFactory.bankAccountFundingSource.id,
+      }
+
+      await expect(
+        instanceUnderTest.sandboxSetFundingSourceToRequireRefresh(input),
+      ).resolves.toEqual(EntityDataFactory.bankAccountFundingSource)
+
+      expect(
+        JestMockSandboxSetFundingSourceToRequireRefreshUseCase,
+      ).toHaveBeenCalledTimes(1)
+
+      verify(
+        mockSandboxSetFundingSourceToRequireRefreshUseCase.execute(anything()),
+      ).once()
+      const [actualInput] = capture(
+        mockSandboxSetFundingSourceToRequireRefreshUseCase.execute,
+      ).first()
+      expect(actualInput).toEqual(input)
     })
   })
 

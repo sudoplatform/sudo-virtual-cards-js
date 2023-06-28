@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SudoVirtualCardsAdminClient } from '@sudoplatform/sudo-virtual-cards-admin'
 import { Checkout } from 'checkout-sdk-node'
 import Stripe from 'stripe'
 import {
@@ -358,7 +357,6 @@ export const createCardFundingSource = async (
 
 export const createBankAccountFundingSource = async (
   virtualCardsClient: SudoVirtualCardsClient,
-  virtualCardsAdminClient: SudoVirtualCardsAdminClient,
   options?: {
     username: TestBankAccountUsername
     supportedProviders?: string[]
@@ -382,10 +380,10 @@ export const createBankAccountFundingSource = async (
   }
 
   const institutionId = 'ins_109508' // Plaid Sandbox Bank Account - Platypus
-  const username = options?.username ?? 'custom_checking_500'
-  const sandboxData = await virtualCardsAdminClient.getPlaidSandboxData({
+  const plaidUsername = options?.username ?? 'custom_checking_500'
+  const sandboxData = await virtualCardsClient.sandboxGetPlaidData({
     institutionId,
-    username,
+    plaidUsername,
   })
   const account = sandboxData.accountMetadata[0]
 

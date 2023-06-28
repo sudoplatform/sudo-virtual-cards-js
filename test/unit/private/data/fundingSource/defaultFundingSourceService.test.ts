@@ -22,12 +22,17 @@ import {
 import { v4 } from 'uuid'
 import {
   AuthorizationText,
+  BankAccountType,
   ConnectionState,
   FundingSource,
   FundingSourceChangeSubscriber,
   FundingSourceType,
+  SandboxGetPlaidDataInput,
 } from '../../../../../src'
-import { OnFundingSourceUpdateSubscription } from '../../../../../src/gen/graphqlTypes'
+import {
+  OnFundingSourceUpdateSubscription,
+  SandboxGetPlaidDataResponse,
+} from '../../../../../src/gen/graphqlTypes'
 import { ApiClient } from '../../../../../src/private/data/common/apiClient'
 import {
   DeviceKeyWorker,
@@ -39,6 +44,7 @@ import {
   FundingSourceServiceCompletionData,
   FundingSourceServiceRefreshData,
 } from '../../../../../src/private/domain/entities/fundingSource/fundingSourceService'
+import { SandboxPlaidDataEntity } from '../../../../../src/private/domain/entities/fundingSource/sandboxPlaidDataEntity'
 import { EntityDataFactory } from '../../../data-factory/entity'
 import { GraphQLDataFactory } from '../../../data-factory/graphQl'
 
@@ -615,6 +621,79 @@ describe('DefaultFundingSourceService Test Suite', () => {
         id: entity.id,
       })
       verify(mockAppSync.cancelFundingSource(anything())).once()
+    })
+  })
+
+  describe('sandboxGetPlaidData', () => {
+    const input: SandboxGetPlaidDataInput = {
+      institutionId: 'institution-id',
+      plaidUsername: 'plaid-username',
+    }
+
+    const entity: SandboxPlaidDataEntity = {
+      accountMetadata: [
+        { accountId: 'account-id-1', subtype: BankAccountType.Checking },
+        { accountId: 'account-id-2', subtype: BankAccountType.Savings },
+        { accountId: 'account-id-3', subtype: BankAccountType.Other },
+        { accountId: 'account-id-4', subtype: BankAccountType.Other },
+      ],
+      publicToken: 'public-token',
+    }
+
+    const graphql: SandboxGetPlaidDataResponse = {
+      accountMetadata: [
+        { accountId: 'account-id-1', subtype: 'checking' },
+        { accountId: 'account-id-2', subtype: 'savings' },
+        { accountId: 'account-id-3', subtype: 'something-else' },
+        { accountId: 'account-id-4' },
+      ],
+      publicToken: 'public-token',
+    }
+
+    it('calls appsync correctly', async () => {
+      when(mockAppSync.sandboxGetPlaidData(anything())).thenResolve(graphql)
+
+      await expect(
+        instanceUnderTest.sandboxGetPlaidData(input),
+      ).resolves.toEqual(entity)
+
+      verify(mockAppSync.sandboxGetPlaidData(anything())).once()
+      const [inputArgs] = capture(mockAppSync.sandboxGetPlaidData).first()
+      expect(inputArgs).toEqual<typeof inputArgs>({
+        input: {
+          institutionId: input.institutionId,
+          username: input.plaidUsername,
+        },
+      })
+    })
+  })
+
+  describe('sandboxSetFundingSourceToRequireRefresh', () => {
+    const graphql = GraphQLDataFactory.bankAccountfundingSource
+    const entity = EntityDataFactory.bankAccountFundingSource
+
+    it('calls appsync correctly', async () => {
+      when(
+        mockAppSync.sandboxSetFundingSourceToRequireRefresh(anything()),
+      ).thenResolve(graphql)
+
+      await expect(
+        instanceUnderTest.sandboxSetFundingSourceToRequireRefresh({
+          fundingSourceId: entity.id,
+        }),
+      ).resolves.toEqual(entity)
+
+      verify(
+        mockAppSync.sandboxSetFundingSourceToRequireRefresh(anything()),
+      ).once()
+      const [inputArgs] = capture(
+        mockAppSync.sandboxSetFundingSourceToRequireRefresh,
+      ).first()
+      expect(inputArgs).toEqual<typeof inputArgs>({
+        input: {
+          fundingSourceId: entity.id,
+        },
+      })
     })
   })
 })

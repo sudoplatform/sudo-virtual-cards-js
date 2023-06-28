@@ -5,13 +5,18 @@
  */
 
 import { CachePolicy } from '@sudoplatform/sudo-common'
-import { AuthorizationText } from '../../../../public'
+import {
+  AuthorizationText,
+  SandboxGetPlaidDataInput,
+  SandboxSetFundingSourceToRequireRefreshInput,
+} from '../../../../public'
 import {
   FundingSourceChangeSubscriber,
   FundingSourceType,
 } from '../../../../public/typings/fundingSource'
 import { FundingSourceEntity } from './fundingSourceEntity'
 import { ProvisionalFundingSourceEntity } from './provisionalFundingSourceEntity'
+import { SandboxPlaidDataEntity } from './sandboxPlaidDataEntity'
 
 export interface FundingSourceServiceSetupData {
   applicationName: string
@@ -213,4 +218,15 @@ export interface FundingSourceService {
   unsubscribeFromFundingSourceChanges(
     input: FundingSourceServiceUnsubscribeFromFundingSourceChangesInput,
   ): void
+
+  /*
+   * Sandbox API
+   */
+  sandboxGetPlaidData(
+    input: SandboxGetPlaidDataInput,
+  ): Promise<SandboxPlaidDataEntity>
+
+  sandboxSetFundingSourceToRequireRefresh(
+    input: SandboxSetFundingSourceToRequireRefreshInput,
+  ): Promise<FundingSourceEntity>
 }

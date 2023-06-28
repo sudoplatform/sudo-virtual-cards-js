@@ -46,6 +46,8 @@ import { GetFundingSourceClientConfigurationUseCase } from '../private/domain/us
 import { GetFundingSourceUseCase } from '../private/domain/use-cases/fundingSource/getFundingSourceUseCase'
 import { ListFundingSourcesUseCase } from '../private/domain/use-cases/fundingSource/listFundingSourcesUseCase'
 import { RefreshFundingSourceUseCase } from '../private/domain/use-cases/fundingSource/refreshFundingSourceUseCase'
+import { SandboxGetPlaidDataUseCase } from '../private/domain/use-cases/fundingSource/sandboxGetPlaidDataUseCase'
+import { SandboxSetFundingSourceToRequireRefreshUseCase } from '../private/domain/use-cases/fundingSource/sandboxSetFundingSourceToRequireRefreshUseCase'
 import { SetupFundingSourceUseCase } from '../private/domain/use-cases/fundingSource/setupFundingSourceUseCase'
 import { SubscribeToFundingSourceChangesUseCase } from '../private/domain/use-cases/fundingSource/subscribeToFundingSourceChangesUseCase'
 import { UnsubscribeFromFundingSourceChangesUseCase } from '../private/domain/use-cases/fundingSource/unsubscribeFromFundingSourceChangesUseCase'
@@ -61,7 +63,7 @@ import { ListVirtualCardsUseCase } from '../private/domain/use-cases/virtualCard
 import { ProvisionVirtualCardUseCase } from '../private/domain/use-cases/virtualCard/provisionVirtualCardUseCase'
 import { UpdateVirtualCardUseCase } from '../private/domain/use-cases/virtualCard/updateVirtualCardUseCase'
 import { VirtualCardsServiceConfigNotFoundError } from './errors'
-import { AuthorizationText } from './typings'
+import { AuthorizationText, SandboxPlaidData } from './typings'
 import { APIResult } from './typings/apiResult'
 import { VirtualCardsConfig } from './typings/config'
 import { CreateKeysIfAbsentResult } from './typings/createKeysIfAbsentResult'
@@ -434,6 +436,28 @@ export interface ListTransactionsByCardIdInput {
 }
 
 /**
+ * Input for {@link SudoVirtualCardsClient.sandboxGetPlaidData}
+ *
+ * @property {string} institutionId ID of Plaid sandbox institution to use
+ * @property {string} plaidUsername Username of Plaid sandbox user to obtain data for
+ */
+export interface SandboxGetPlaidDataInput {
+  institutionId: string
+  plaidUsername: string
+}
+
+/**
+ * Input for {@link SudoVirtualCardsClient.sandboxSetFundingSourceToRequireRefresh}
+ *
+ * @property {string} fundingSourceId
+ *   ID of funding source to set to refresh state.
+ *   Must identify a bank account funding source.
+ */
+export interface SandboxSetFundingSourceToRequireRefreshInput {
+  fundingSourceId: string
+}
+
+/**
  * Sudo Platform Virtual Cards client API
  *
  * All methods should be expected to be able to throw the following
@@ -723,6 +747,27 @@ export interface SudoVirtualCardsClient {
    * @returns {VirtualCardsConfig} The configuration data for the virtual cards service.
    */
   getVirtualCardsConfig(): Promise<VirtualCardsConfig>
+
+  /**
+   * Sandbox API to obtain data normally returned by full Plaid Link flow. Useful for testing
+   * ahead of full Plaid Link integration during application development.
+   *
+   * @returns {SandboxPlaidData}
+   *   Sandbox Plaid data for provisioning new funding
+   *   source at requested institution and user
+   */
+  sandboxGetPlaidData(
+    input: SandboxGetPlaidDataInput,
+  ): Promise<SandboxPlaidData>
+
+  /**
+   * Sandbox API to set a funding source to refresh state to facilitate testing
+   *
+   * @returns {FundingSource} The funding source in refresh state
+   */
+  sandboxSetFundingSourceToRequireRefresh(
+    input: SandboxSetFundingSourceToRequireRefreshInput,
+  ): Promise<FundingSource>
 
   /**
    * Removes any cached data maintained by this client.
@@ -1073,6 +1118,30 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
       this.sudoUserService,
     )
     return await useCase.execute()
+  }
+
+  async sandboxGetPlaidData(
+    input: SandboxGetPlaidDataInput,
+  ): Promise<SandboxPlaidData> {
+    return this.serialise.runExclusive(async () => {
+      const useCase = new SandboxGetPlaidDataUseCase(
+        this.fundingSourceService,
+        this.sudoUserService,
+      )
+      return await useCase.execute(input)
+    })
+  }
+
+  async sandboxSetFundingSourceToRequireRefresh(
+    input: SandboxSetFundingSourceToRequireRefreshInput,
+  ): Promise<FundingSource> {
+    return this.serialise.runExclusive(async () => {
+      const useCase = new SandboxSetFundingSourceToRequireRefreshUseCase(
+        this.fundingSourceService,
+        this.sudoUserService,
+      )
+      return await useCase.execute(input)
+    })
   }
 
   async reset(): Promise<void> {

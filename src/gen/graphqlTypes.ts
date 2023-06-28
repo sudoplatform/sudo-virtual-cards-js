@@ -264,6 +264,14 @@ export type Mutation = {
   disableUser: DisableUser
   enableUser: EnableUser
   refreshFundingSource: FundingSource
+  /**
+   * Sets a funding source to state requiring refresh.
+   * Allows testing without requiring occurrence of specific
+   * event that would require refresh.
+   *
+   * SANDBOX ONLY
+   */
+  sandboxSetFundingSourceToRequireRefresh: FundingSource
   setupFundingSource: ProvisionalFundingSource
   updateCard: SealedCard
 }
@@ -300,6 +308,10 @@ export type MutationRefreshFundingSourceArgs = {
   input: RefreshFundingSourceRequest
 }
 
+export type MutationSandboxSetFundingSourceToRequireRefreshArgs = {
+  input: SandboxSetFundingSourceToRequireRefreshRequest
+}
+
 export type MutationSetupFundingSourceArgs = {
   input: SetupFundingSourceRequest
 }
@@ -318,6 +330,14 @@ export type PaginatedPublicKey = {
   __typename?: 'PaginatedPublicKey'
   items: Array<PublicKey>
   nextToken?: Maybe<Scalars['String']['output']>
+}
+
+export type PlaidAccountMetadata = {
+  __typename?: 'PlaidAccountMetadata'
+  /** ID of the bank account. */
+  accountId: Scalars['String']['output']
+  /** Bank account subtype. E.g. checking, saving etc. */
+  subtype?: Maybe<Scalars['String']['output']>
 }
 
 export type ProvisionalCard = {
@@ -392,6 +412,14 @@ export type Query = {
   listProvisionalCards: ProvisionalCardConnection
   listTransactions2: SealedTransactionConnection
   listTransactionsByCardId2: SealedTransactionConnection
+  /**
+   * Generates and returns the Plaid public token and bank account id
+   * required to provide information to build the bank account funding source completion data. Allows testing without engaging full Plaid
+   * flow.
+   *
+   * SANDBOX ONLY
+   */
+  sandboxGetPlaidData: SandboxGetPlaidDataResponse
 }
 
 export type QueryGetCardArgs = {
@@ -459,10 +487,41 @@ export type QueryListTransactionsByCardId2Args = {
   sortOrder?: InputMaybe<SortOrder>
 }
 
+export type QuerySandboxGetPlaidDataArgs = {
+  input: SandboxGetPlaidDataRequest
+}
+
 export type RefreshFundingSourceRequest = {
   id: Scalars['ID']['input']
   language?: InputMaybe<Scalars['String']['input']>
   refreshData: Scalars['ID']['input']
+}
+
+/**
+ * Request to generate and retrieve the public token and bank account id
+ * required to complete bank account funding source provisioning in a sandbox context.
+ *
+ * List of supported sandbox institutionId: https://plaid.com/docs/sandbox/institutions/
+ */
+export type SandboxGetPlaidDataRequest = {
+  institutionId: Scalars['String']['input']
+  username: Scalars['String']['input']
+}
+
+/** Response containing the public token and bank account metadata to complete bank account funding source provisioning in a sandbox context. */
+export type SandboxGetPlaidDataResponse = {
+  __typename?: 'SandboxGetPlaidDataResponse'
+  /** Metadata of the bank account including ID and subtype. */
+  accountMetadata: Array<PlaidAccountMetadata>
+  /**
+   * The public token that is required to build completion data for creating
+   * a bank account funding source.
+   */
+  publicToken: Scalars['String']['output']
+}
+
+export type SandboxSetFundingSourceToRequireRefreshRequest = {
+  fundingSourceId: Scalars['String']['input']
 }
 
 export type SealedAddressAttribute = {
@@ -1570,6 +1629,74 @@ export type CancelVirtualCardMutation = {
   }
 }
 
+export type SandboxSetFundingSourceToRequireRefreshMutationVariables = Exact<{
+  input: SandboxSetFundingSourceToRequireRefreshRequest
+}>
+
+export type SandboxSetFundingSourceToRequireRefreshMutation = {
+  __typename?: 'Mutation'
+  sandboxSetFundingSourceToRequireRefresh:
+    | {
+        __typename?: 'BankAccountFundingSource'
+        id: string
+        owner: string
+        version: number
+        createdAtEpochMs: number
+        updatedAtEpochMs: number
+        state: FundingSourceState
+        currency: string
+        bankAccountType: BankAccountType
+        last4: string
+        transactionVelocity?: {
+          __typename?: 'TransactionVelocity'
+          maximum?: number | null
+          velocity?: Array<string> | null
+        } | null
+        authorization: {
+          __typename?: 'SignedAuthorizationText'
+          language: string
+          content: string
+          contentType: string
+          signature: string
+          keyId: string
+          algorithm: string
+          data: string
+        }
+        institutionName: {
+          __typename?: 'SealedAttribute'
+          keyId: string
+          algorithm: string
+          plainTextType: string
+          base64EncodedSealedData: string
+        }
+        institutionLogo?: {
+          __typename?: 'SealedAttribute'
+          keyId: string
+          algorithm: string
+          plainTextType: string
+          base64EncodedSealedData: string
+        } | null
+      }
+    | {
+        __typename?: 'CreditCardFundingSource'
+        id: string
+        owner: string
+        version: number
+        createdAtEpochMs: number
+        updatedAtEpochMs: number
+        state: FundingSourceState
+        currency: string
+        last4: string
+        network: CreditCardNetwork
+        cardType: CardType
+        transactionVelocity?: {
+          __typename?: 'TransactionVelocity'
+          maximum?: number | null
+          velocity?: Array<string> | null
+        } | null
+      }
+}
+
 export type EnableUserMutationVariables = Exact<{
   input: EnableUserInput
 }>
@@ -2394,6 +2521,23 @@ export type ListTransactionsByCardIdQuery = {
           amount: string
         }
       }> | null
+    }>
+  }
+}
+
+export type SandboxGetPlaidDataQueryVariables = Exact<{
+  input: SandboxGetPlaidDataRequest
+}>
+
+export type SandboxGetPlaidDataQuery = {
+  __typename?: 'Query'
+  sandboxGetPlaidData: {
+    __typename?: 'SandboxGetPlaidDataResponse'
+    publicToken: string
+    accountMetadata: Array<{
+      __typename?: 'PlaidAccountMetadata'
+      accountId: string
+      subtype?: string | null
     }>
   }
 }
@@ -5761,6 +5905,232 @@ export const CancelVirtualCardDocument = {
   CancelVirtualCardMutation,
   CancelVirtualCardMutationVariables
 >
+export const SandboxSetFundingSourceToRequireRefreshDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'SandboxSetFundingSourceToRequireRefresh' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'input' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: {
+                kind: 'Name',
+                value: 'SandboxSetFundingSourceToRequireRefreshRequest',
+              },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: {
+              kind: 'Name',
+              value: 'sandboxSetFundingSourceToRequireRefresh',
+            },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'input' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'CreditCardFundingSource' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'FragmentSpread',
+                        name: {
+                          kind: 'Name',
+                          value: 'CreditCardFundingSource',
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'BankAccountFundingSource' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'FragmentSpread',
+                        name: {
+                          kind: 'Name',
+                          value: 'BankAccountFundingSource',
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'SealedAttribute' },
+      typeCondition: {
+        kind: 'NamedType',
+        name: { kind: 'Name', value: 'SealedAttribute' },
+      },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'keyId' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'algorithm' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'plainTextType' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'base64EncodedSealedData' },
+          },
+        ],
+      },
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'CreditCardFundingSource' },
+      typeCondition: {
+        kind: 'NamedType',
+        name: { kind: 'Name', value: 'CreditCardFundingSource' },
+      },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'version' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'currency' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'transactionVelocity' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'maximum' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'velocity' } },
+              ],
+            },
+          },
+          { kind: 'Field', name: { kind: 'Name', value: 'last4' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'network' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'cardType' } },
+        ],
+      },
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'BankAccountFundingSource' },
+      typeCondition: {
+        kind: 'NamedType',
+        name: { kind: 'Name', value: 'BankAccountFundingSource' },
+      },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'version' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'currency' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'transactionVelocity' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'maximum' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'velocity' } },
+              ],
+            },
+          },
+          { kind: 'Field', name: { kind: 'Name', value: 'bankAccountType' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'authorization' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'language' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'content' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'contentType' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'signature' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'keyId' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'algorithm' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'data' } },
+              ],
+            },
+          },
+          { kind: 'Field', name: { kind: 'Name', value: 'last4' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'institutionName' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'FragmentSpread',
+                  name: { kind: 'Name', value: 'SealedAttribute' },
+                },
+              ],
+            },
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'institutionLogo' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'FragmentSpread',
+                  name: { kind: 'Name', value: 'SealedAttribute' },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  SandboxSetFundingSourceToRequireRefreshMutation,
+  SandboxSetFundingSourceToRequireRefreshMutationVariables
+>
 export const EnableUserDocument = {
   kind: 'Document',
   definitions: [
@@ -9021,6 +9391,77 @@ export const ListTransactionsByCardIdDocument = {
 } as unknown as DocumentNode<
   ListTransactionsByCardIdQuery,
   ListTransactionsByCardIdQueryVariables
+>
+export const SandboxGetPlaidDataDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'SandboxGetPlaidData' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'input' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'SandboxGetPlaidDataRequest' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'sandboxGetPlaidData' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'input' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'accountMetadata' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'accountId' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'subtype' },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'publicToken' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  SandboxGetPlaidDataQuery,
+  SandboxGetPlaidDataQueryVariables
 >
 export const OnFundingSourceUpdateDocument = {
   kind: 'Document',

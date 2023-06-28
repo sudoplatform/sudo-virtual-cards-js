@@ -5,7 +5,6 @@
  */
 
 import { DefaultLogger } from '@sudoplatform/sudo-common'
-import { SudoVirtualCardsAdminClient } from '@sudoplatform/sudo-virtual-cards-admin'
 import { v4 } from 'uuid'
 import {
   FundingSourceNotFoundError,
@@ -24,13 +23,11 @@ describe('SudoVirtualCardsClient RefreshFundingSource Test Suite', () => {
   jest.setTimeout(240000)
   const log = new DefaultLogger('SudoVirtualCardsClientIntegrationTests')
   let instanceUnderTest: SudoVirtualCardsClient
-  let virtualCardsAdminClient: SudoVirtualCardsAdminClient
   let fundingSourceProviders: FundingSourceProviders
 
   beforeAll(async () => {
     const result = await setupVirtualCardsClient(log)
     instanceUnderTest = result.virtualCardsClient
-    virtualCardsAdminClient = result.virtualCardsAdminClient
     fundingSourceProviders = result.fundingSourceProviders
   })
 
@@ -84,7 +81,6 @@ describe('SudoVirtualCardsClient RefreshFundingSource Test Suite', () => {
 
         const fundingSource = await createBankAccountFundingSource(
           instanceUnderTest,
-          virtualCardsAdminClient,
           {
             username: 'custom_checking_500',
             supportedProviders: ['checkout'],
@@ -114,7 +110,6 @@ describe('SudoVirtualCardsClient RefreshFundingSource Test Suite', () => {
 
         const fundingSource = await createBankAccountFundingSource(
           instanceUnderTest,
-          virtualCardsAdminClient,
           {
             username: 'custom_checking_500',
             supportedProviders: ['checkout'],
