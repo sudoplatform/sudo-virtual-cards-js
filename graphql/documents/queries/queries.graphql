@@ -139,6 +139,25 @@ query ListTransactionsByCardId(
   }
 }
 
+query ListTransactionsByCardIdAndType(
+  $cardId: ID!
+  $transactionType: TransactionType!
+  $limit: Int
+  $nextToken: String
+) {
+  listTransactionsByCardIdAndType(
+    cardId: $cardId
+    transactionType: $transactionType
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      ...SealedTransaction
+    }
+    nextToken
+  }
+}
+
 query SandboxGetPlaidData($input: SandboxGetPlaidDataRequest!) {
   sandboxGetPlaidData(input: $input) {
     accountMetadata {

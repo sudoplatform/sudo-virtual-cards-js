@@ -5,6 +5,7 @@
  */
 
 import { CachePolicy, ListOperationResult } from '@sudoplatform/sudo-common'
+import { TransactionType } from '../../../../public'
 import { DateRange } from '../../../../public/typings/dateRange'
 import { SortOrder } from '../../../../public/typings/sortOrder'
 import { TransactionSealedAttributes } from '../../../data/transaction/transactionSealedAttributes'
@@ -32,6 +33,14 @@ export interface TransactionServiceListTransactionsByCardIdInput {
   sortOrder?: SortOrder
 }
 
+export interface TransactionServiceListTransactionsByCardIdAndTypeInput {
+  cardId: string
+  transactionType: TransactionType
+  cachePolicy?: CachePolicy
+  limit?: number
+  nextToken?: string
+}
+
 export interface TransactionService {
   getTransaction(
     input: TransactionServiceGetTransactionInput,
@@ -45,6 +54,12 @@ export interface TransactionService {
 
   listTransactionsByCardId(
     input: TransactionServiceListTransactionsByCardIdInput,
+  ): Promise<
+    ListOperationResult<TransactionEntity, TransactionSealedAttributes>
+  >
+
+  listTransactionsByCardIdAndType(
+    input: TransactionServiceListTransactionsByCardIdAndTypeInput,
   ): Promise<
     ListOperationResult<TransactionEntity, TransactionSealedAttributes>
   >

@@ -30,6 +30,7 @@ import {
   FundingSource,
   FundingSourceRequiresUserInteractionError,
   SandboxPlaidData,
+  TransactionType,
 } from '../../../src'
 import { ApiClient } from '../../../src/private/data/common/apiClient'
 import { SudoVirtualCardsClientPrivateOptions } from '../../../src/private/data/common/privateSudoVirtualCardsClientOptions'
@@ -48,6 +49,7 @@ import { SubscribeToFundingSourceChangesUseCase } from '../../../src/private/dom
 import { UnsubscribeFromFundingSourceChangesUseCase } from '../../../src/private/domain/use-cases/fundingSource/unsubscribeFromFundingSourceChangesUseCase'
 import { CreateKeysIfAbsentUseCase } from '../../../src/private/domain/use-cases/key/createKeysIfAbsent'
 import { GetTransactionUseCase } from '../../../src/private/domain/use-cases/transaction/getTransactionUseCase'
+import { ListTransactionsByCardIdAndTypeUseCase } from '../../../src/private/domain/use-cases/transaction/listTransactionsByCardIdAndTypeUseCase'
 import { ListTransactionsByCardIdUseCase } from '../../../src/private/domain/use-cases/transaction/listTransactionsByCardIdUseCase'
 import { ListTransactionsUseCase } from '../../../src/private/domain/use-cases/transaction/listTransactionsUseCase'
 import { CancelVirtualCardUseCase } from '../../../src/private/domain/use-cases/virtualCard/cancelVirtualCardUseCase'
@@ -230,6 +232,14 @@ const JestMockListTransactionsByCardIdUseCase =
   >
 
 jest.mock(
+  '../../../src/private/domain/use-cases/transaction/listTransactionsByCardIdAndTypeUseCase',
+)
+const JestMockListTransactionsByCardIdAndTypeUseCase =
+  ListTransactionsByCardIdAndTypeUseCase as jest.MockedClass<
+    typeof ListTransactionsByCardIdAndTypeUseCase
+  >
+
+jest.mock(
   '../../../src/private/domain/use-cases/fundingSource/sandboxGetPlaidDataUseCase',
 )
 const JestMockSandboxGetPlaidDataUseCase =
@@ -281,6 +291,8 @@ describe('SudoVirtualCardsClient Test Suite', () => {
   const mockListTransactionsUseCase = mock<ListTransactionsUseCase>()
   const mockListTransactionsByCardIdUseCase =
     mock<ListTransactionsByCardIdUseCase>()
+  const mockListTransactionsByCardIdAndTypeUseCase =
+    mock<ListTransactionsByCardIdAndTypeUseCase>()
   const mockSandboxGetPlaidDataUseCase = mock<SandboxGetPlaidDataUseCase>()
   const mockSandboxSetFundingSourceToRequireRefreshUseCase =
     mock<SandboxSetFundingSourceToRequireRefreshUseCase>()
@@ -315,6 +327,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     reset(mockGetTransactionUseCase)
     reset(mockListTransactionsUseCase)
     reset(mockListTransactionsByCardIdUseCase)
+    reset(mockListTransactionsByCardIdAndTypeUseCase)
     reset(mockSandboxGetPlaidDataUseCase)
     reset(mockSandboxSetFundingSourceToRequireRefreshUseCase)
 
@@ -342,6 +355,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     JestMockGetTransactionUseCase.mockClear()
     JestMockListTransactionsUseCase.mockClear()
     JestMockListTransactionsByCardIdUseCase.mockClear()
+    JestMockListTransactionsByCardIdAndTypeUseCase.mockClear()
 
     JestMockDefaultFundingSourceService.mockImplementation(() =>
       instance(mockFundingSourceService),
@@ -407,6 +421,9 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     )
     JestMockListTransactionsByCardIdUseCase.mockImplementation(() =>
       instance(mockListTransactionsByCardIdUseCase),
+    )
+    JestMockListTransactionsByCardIdAndTypeUseCase.mockImplementation(() =>
+      instance(mockListTransactionsByCardIdAndTypeUseCase),
     )
     JestMockSandboxGetPlaidDataUseCase.mockImplementation(() =>
       instance(mockSandboxGetPlaidDataUseCase),
@@ -1331,6 +1348,68 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     it('returns expected result', async () => {
       await expect(
         instanceUnderTest.listTransactionsByCardId({ cardId: '' }),
+      ).resolves.toEqual({
+        status: ListOperationResultStatus.Success,
+        items: [ApiDataFactory.transaction],
+      })
+    })
+  })
+
+  describe('listTransactionsByCardIdAndType', () => {
+    beforeEach(() => {
+      when(
+        mockListTransactionsByCardIdAndTypeUseCase.execute(anything()),
+      ).thenResolve({
+        status: ListOperationResultStatus.Success,
+        items: [EntityDataFactory.transaction],
+      })
+      when(mockSudoUserClient.isSignedIn()).thenResolve(true)
+    })
+
+    it('generates use case', async () => {
+      await instanceUnderTest.listTransactionsByCardIdAndType({
+        cardId: '',
+        transactionType: TransactionType.Pending,
+      })
+      expect(
+        JestMockListTransactionsByCardIdAndTypeUseCase,
+      ).toHaveBeenCalledTimes(1)
+    })
+
+    it('calls use case as expected', async () => {
+      const cardId = v4()
+      const transactionType = TransactionType.Pending
+      const cachePolicy = CachePolicy.CacheOnly
+      const limit = 100
+      const nextToken = v4()
+      await instanceUnderTest.listTransactionsByCardIdAndType({
+        cardId,
+        transactionType,
+        cachePolicy,
+        limit,
+        nextToken,
+      })
+      verify(
+        mockListTransactionsByCardIdAndTypeUseCase.execute(anything()),
+      ).once()
+      const [args] = capture(
+        mockListTransactionsByCardIdAndTypeUseCase.execute,
+      ).first()
+      expect(args).toEqual<typeof args>({
+        cardId,
+        transactionType,
+        cachePolicy,
+        limit,
+        nextToken,
+      })
+    })
+
+    it('returns expected result', async () => {
+      await expect(
+        instanceUnderTest.listTransactionsByCardIdAndType({
+          cardId: '',
+          transactionType: TransactionType.Pending,
+        }),
       ).resolves.toEqual({
         status: ListOperationResultStatus.Success,
         items: [ApiDataFactory.transaction],

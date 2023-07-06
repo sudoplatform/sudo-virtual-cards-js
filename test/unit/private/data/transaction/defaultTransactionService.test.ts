@@ -18,7 +18,7 @@ import {
   when,
 } from 'ts-mockito'
 import { v4 } from 'uuid'
-import { SortOrder } from '../../../../../src'
+import { SortOrder, TransactionType } from '../../../../../src'
 import { ApiClient } from '../../../../../src/private/data/common/apiClient'
 import { TransactionWorker } from '../../../../../src/private/data/common/transactionWorker'
 import { DefaultTransactionService } from '../../../../../src/private/data/transaction/defaultTransactionService'
@@ -492,6 +492,219 @@ describe('DefaultTransactionService Test Suite', () => {
 
       await expect(
         instanceUnderTest.listTransactionsByCardId({ cardId: '' }),
+      ).resolves.toEqual({
+        status: ListOperationResultStatus.Success,
+        nextToken: undefined,
+        items: [
+          {
+            ...EntityDataFactory.transaction,
+            id: '1',
+          },
+        ],
+      })
+    })
+  })
+
+  describe('listTransactionsByCardIdAndType', () => {
+    beforeEach(() => {
+      when(
+        mockAppSync.listTransactionsByCardIdAndType(anything(), anything()),
+      ).thenResolve({
+        items: [GraphQLDataFactory.sealedTransaction],
+        nextToken: undefined,
+      })
+    })
+
+    it('calls expected methods', async () => {
+      const cardId = v4()
+      const transactionType = TransactionType.Pending
+      const cachePolicy = CachePolicy.CacheOnly
+      const limit = 4
+      const nextToken = v4()
+      await instanceUnderTest.listTransactionsByCardIdAndType({
+        cardId,
+        transactionType,
+        cachePolicy,
+        limit,
+        nextToken,
+      })
+      verify(
+        mockAppSync.listTransactionsByCardIdAndType(anything(), anything()),
+      ).once()
+      const [appSyncArgs, fetchPolicy] = capture(
+        mockAppSync.listTransactionsByCardIdAndType,
+      ).first()
+      expect(appSyncArgs).toEqual<typeof appSyncArgs>({
+        cardId,
+        transactionType,
+        limit,
+        nextToken,
+      })
+      expect(fetchPolicy).toEqual<typeof fetchPolicy>('cache-only')
+      verify(mockTransactionWorker.unsealTransaction(anything())).atLeast(1)
+    })
+
+    it('returns empty list if appsync returns empty list', async () => {
+      when(
+        mockAppSync.listTransactionsByCardIdAndType(anything(), anything()),
+      ).thenResolve({ items: [] })
+      await expect(
+        instanceUnderTest.listTransactionsByCardIdAndType({
+          cardId: '',
+          transactionType: TransactionType.Pending,
+        }),
+      ).resolves.toStrictEqual({
+        status: ListOperationResultStatus.Success,
+        items: [],
+        nextToken: undefined,
+      })
+    })
+
+    it('returns expected result', async () => {
+      const result = await instanceUnderTest.listTransactionsByCardIdAndType({
+        cardId: '',
+        transactionType: TransactionType.Pending,
+      })
+      expect(result).toEqual<typeof result>({
+        status: ListOperationResultStatus.Success,
+        nextToken: undefined,
+        items: [EntityDataFactory.transaction],
+      })
+    })
+
+    it('returns partial results when all unsealing fails', async () => {
+      when(
+        mockAppSync.listTransactionsByCardIdAndType(anything(), anything()),
+      ).thenResolve({
+        items: [
+          { ...GraphQLDataFactory.sealedTransaction, id: '1' },
+          { ...GraphQLDataFactory.sealedTransaction, id: '2' },
+        ],
+      })
+      when(mockTransactionWorker.unsealTransaction(anything())).thenReject(
+        new Error('failed to unseal 1'),
+        new Error('failed to unseal 2'),
+      )
+
+      await expect(
+        instanceUnderTest.listTransactionsByCardIdAndType({
+          cardId: '',
+          transactionType: TransactionType.Pending,
+        }),
+      ).resolves.toEqual({
+        status: ListOperationResultStatus.Partial,
+        nextToken: undefined,
+        items: [],
+        failed: [
+          {
+            item: generatePartialTransaction({
+              ...EntityDataFactory.transaction,
+              id: '1',
+            }),
+            cause: new Error('failed to unseal 1'),
+          },
+          {
+            item: generatePartialTransaction({
+              ...EntityDataFactory.transaction,
+              id: '2',
+            }),
+            cause: new Error('failed to unseal 2'),
+          },
+        ],
+      })
+    })
+
+    it('returns partial results when some unsealing fails', async () => {
+      when(
+        mockAppSync.listTransactionsByCardIdAndType(anything(), anything()),
+      ).thenResolve({
+        items: [
+          { ...GraphQLDataFactory.sealedTransaction, id: '1' },
+          { ...GraphQLDataFactory.sealedTransaction, id: '2' },
+        ],
+      })
+      when(mockTransactionWorker.unsealTransaction(anything()))
+        .thenReject(new Error('failed to unseal 1'))
+        .thenResolve({ ...ServiceDataFactory.transactionUnsealed, id: '2' })
+
+      await expect(
+        instanceUnderTest.listTransactionsByCardIdAndType({
+          cardId: '',
+          transactionType: TransactionType.Pending,
+        }),
+      ).resolves.toEqual({
+        status: ListOperationResultStatus.Partial,
+        nextToken: undefined,
+        items: [
+          {
+            ...EntityDataFactory.transaction,
+            id: '2',
+          },
+        ],
+        failed: [
+          {
+            item: generatePartialTransaction({
+              ...EntityDataFactory.transaction,
+              id: '1',
+            }),
+            cause: new Error('failed to unseal 1'),
+          },
+        ],
+      })
+    })
+
+    it('succeeds when at least one instance of sealed transaction can be unsealed', async () => {
+      when(
+        mockAppSync.listTransactionsByCardIdAndType(anything(), anything()),
+      ).thenResolve({
+        items: [
+          { ...GraphQLDataFactory.sealedTransaction, id: '1', keyId: 'key-1' },
+          { ...GraphQLDataFactory.sealedTransaction, id: '1', keyId: 'key-2' },
+        ],
+      })
+      when(mockTransactionWorker.unsealTransaction(anything()))
+        .thenReject(new Error('failed to unseal key-1'))
+        .thenResolve({
+          ...ServiceDataFactory.transactionUnsealed,
+          id: '1',
+        })
+
+      await expect(
+        instanceUnderTest.listTransactionsByCardIdAndType({
+          cardId: '',
+          transactionType: TransactionType.Pending,
+        }),
+      ).resolves.toEqual({
+        status: ListOperationResultStatus.Success,
+        nextToken: undefined,
+        items: [
+          {
+            ...EntityDataFactory.transaction,
+            id: '1',
+          },
+        ],
+      })
+    })
+
+    it('returns only a single instance of a transaction sealed with multiple keys', async () => {
+      when(
+        mockAppSync.listTransactionsByCardIdAndType(anything(), anything()),
+      ).thenResolve({
+        items: [
+          { ...GraphQLDataFactory.sealedTransaction, id: '1', keyId: 'key-1' },
+          { ...GraphQLDataFactory.sealedTransaction, id: '1', keyId: 'key-2' },
+        ],
+      })
+      when(mockTransactionWorker.unsealTransaction(anything())).thenResolve({
+        ...ServiceDataFactory.transactionUnsealed,
+        id: '1',
+      })
+
+      await expect(
+        instanceUnderTest.listTransactionsByCardIdAndType({
+          cardId: '',
+          transactionType: TransactionType.Pending,
+        }),
       ).resolves.toEqual({
         status: ListOperationResultStatus.Success,
         nextToken: undefined,

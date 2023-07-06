@@ -14,6 +14,7 @@ import { TransactionEntity } from '../../domain/entities/transaction/transaction
 import {
   TransactionService,
   TransactionServiceGetTransactionInput,
+  TransactionServiceListTransactionsByCardIdAndTypeInput,
   TransactionServiceListTransactionsByCardIdInput,
   TransactionServiceListTransactionsInput,
 } from '../../domain/entities/transaction/transactionService'
@@ -26,6 +27,7 @@ import { DateRangeTransformer } from '../common/transformer/dateRangeTransformer
 import { FetchPolicyTransformer } from '../common/transformer/fetchPolicyTransformer'
 import { TransactionSealedAttributes } from './transactionSealedAttributes'
 import { TransactionEntityTransformer } from './transformer/TransactionEntityTransformer'
+import { TransactionTypeEntityTransformer } from './transformer/transactionTypeEntityTransformer'
 
 export class DefaultTransactionService implements TransactionService {
   constructor(
@@ -81,6 +83,7 @@ export class DefaultTransactionService implements TransactionService {
       newNextToken ?? undefined,
     )
   }
+
   async listTransactionsByCardId(
     input: TransactionServiceListTransactionsByCardIdInput,
   ): Promise<
@@ -100,6 +103,35 @@ export class DefaultTransactionService implements TransactionService {
           nextToken: input.nextToken,
           dateRange,
           sortOrder: input.sortOrder,
+        },
+        fetchPolicy,
+      )
+
+    return this.unsealTransactions(
+      sealedTransactions,
+      newNextToken ?? undefined,
+    )
+  }
+
+  async listTransactionsByCardIdAndType(
+    input: TransactionServiceListTransactionsByCardIdAndTypeInput,
+  ): Promise<
+    ListOperationResult<TransactionEntity, TransactionSealedAttributes>
+  > {
+    const fetchPolicy = input.cachePolicy
+      ? FetchPolicyTransformer.transformCachePolicy(input.cachePolicy)
+      : undefined
+    const transactionType =
+      TransactionTypeEntityTransformer.transformToGraphQLInput(
+        input.transactionType,
+      )
+    const { items: sealedTransactions, nextToken: newNextToken } =
+      await this.appSync.listTransactionsByCardIdAndType(
+        {
+          cardId: input.cardId,
+          transactionType: transactionType,
+          limit: input.limit,
+          nextToken: input.nextToken,
         },
         fetchPolicy,
       )

@@ -39,11 +39,13 @@ import {
   ListCardsDocument,
   ListFundingSourcesDocument,
   ListProvisionalCardsDocument,
+  ListTransactionsByCardIdAndTypeDocument,
   ListTransactionsByCardIdDocument,
   ListTransactionsDocument,
   ProvisionVirtualCardDocument,
   SetupFundingSourceDocument,
   SortOrder,
+  TransactionType,
   UpdateVirtualCardDocument,
 } from '../../../../../src/gen/graphqlTypes'
 import { ApiClient } from '../../../../../src/private/data/common/apiClient'
@@ -1162,6 +1164,78 @@ describe('ApiClient Test Suite', () => {
       })
       await expect(
         instanceUnderTest.listTransactionsByCardId({ cardId: '' }),
+      ).rejects.toThrow(UnknownGraphQLError)
+    })
+  })
+
+  describe('listTransactionsByCardIdAndType', () => {
+    it('performs successfully', async () => {
+      when(mockClient.query(anything())).thenResolve({
+        data: {
+          listTransactionsByCardIdAndType: {
+            items: [GraphQLDataFactory.sealedTransaction],
+            nextToken: undefined,
+          },
+        },
+      } as any)
+      const cardId = v4()
+      const transactionType = TransactionType.Pending
+      const fetchPolicy = 'cache-only'
+      const limit = 100
+      const nextToken = v4()
+      await expect(
+        instanceUnderTest.listTransactionsByCardIdAndType(
+          {
+            cardId,
+            transactionType,
+            limit,
+            nextToken,
+          },
+          fetchPolicy,
+        ),
+      ).resolves.toStrictEqual({
+        items: [GraphQLDataFactory.sealedTransaction],
+        nextToken: undefined,
+      })
+      verify(mockClient.query(anything())).once()
+      const [args] = capture(mockClient.query as any).first()
+      expect(args).toStrictEqual({
+        fetchPolicy: 'cache-only',
+        variables: {
+          cardId,
+          transactionType,
+          limit,
+          nextToken,
+        },
+        query: ListTransactionsByCardIdAndTypeDocument,
+      })
+    })
+    it('handles thrown error from app sync call', async () => {
+      when(mockClient.query(anything())).thenReject(
+        new ApolloError({
+          graphQLErrors: [new GraphQLError('appsync failure')],
+        }),
+      )
+      await expect(
+        instanceUnderTest.listTransactionsByCardIdAndType({
+          cardId: '',
+          transactionType: TransactionType.Pending,
+        }),
+      ).rejects.toThrow(UnknownGraphQLError)
+    })
+    it('handles error from graphQl', async () => {
+      when(mockClient.query(anything())).thenResolve({
+        data: null,
+        errors: [new GraphQLError('failed')],
+        loading: false,
+        networkStatus: NetworkStatus.error,
+        stale: false,
+      })
+      await expect(
+        instanceUnderTest.listTransactionsByCardIdAndType({
+          cardId: '',
+          transactionType: TransactionType.Pending,
+        }),
       ).rejects.toThrow(UnknownGraphQLError)
     })
   })

@@ -72,6 +72,9 @@ import {
   ListFundingSourcesQuery,
   ListProvisionalCardsDocument,
   ListProvisionalCardsQuery,
+  ListTransactionsByCardIdAndTypeDocument,
+  ListTransactionsByCardIdAndTypeQuery,
+  ListTransactionsByCardIdAndTypeQueryVariables,
   ListTransactionsByCardIdDocument,
   ListTransactionsByCardIdQuery,
   ListTransactionsByCardIdQueryVariables,
@@ -401,6 +404,19 @@ export class ApiClient {
       calleeName: this.listTransactionsByCardId.name,
     })
     return data.listTransactionsByCardId2
+  }
+
+  async listTransactionsByCardIdAndType(
+    input: ListTransactionsByCardIdAndTypeQueryVariables,
+    fetchPolicy: FetchPolicy = 'network-only',
+  ): Promise<SealedTransactionConnection> {
+    const data = await this.performQuery<ListTransactionsByCardIdAndTypeQuery>({
+      query: ListTransactionsByCardIdAndTypeDocument,
+      variables: input,
+      fetchPolicy,
+      calleeName: this.listTransactionsByCardIdAndType.name,
+    })
+    return data.listTransactionsByCardIdAndType
   }
 
   async sandboxGetPlaidData(

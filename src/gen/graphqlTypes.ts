@@ -412,6 +412,7 @@ export type Query = {
   listProvisionalCards: ProvisionalCardConnection
   listTransactions2: SealedTransactionConnection
   listTransactionsByCardId2: SealedTransactionConnection
+  listTransactionsByCardIdAndType: SealedTransactionConnection
   /**
    * Generates and returns the Plaid public token and bank account id
    * required to provide information to build the bank account funding source completion data. Allows testing without engaging full Plaid
@@ -485,6 +486,13 @@ export type QueryListTransactionsByCardId2Args = {
   limit?: InputMaybe<Scalars['Int']['input']>
   nextToken?: InputMaybe<Scalars['String']['input']>
   sortOrder?: InputMaybe<SortOrder>
+}
+
+export type QueryListTransactionsByCardIdAndTypeArgs = {
+  cardId: Scalars['ID']['input']
+  limit?: InputMaybe<Scalars['Int']['input']>
+  nextToken?: InputMaybe<Scalars['String']['input']>
+  transactionType: TransactionType
 }
 
 export type QuerySandboxGetPlaidDataArgs = {
@@ -2464,6 +2472,77 @@ export type ListTransactionsByCardIdQueryVariables = Exact<{
 export type ListTransactionsByCardIdQuery = {
   __typename?: 'Query'
   listTransactionsByCardId2: {
+    __typename?: 'SealedTransactionConnection'
+    nextToken?: string | null
+    items: Array<{
+      __typename?: 'SealedTransaction'
+      id: string
+      owner: string
+      version: number
+      createdAtEpochMs: number
+      updatedAtEpochMs: number
+      sortDateEpochMs: number
+      algorithm: string
+      keyId: string
+      cardId: string
+      sequenceId: string
+      type: TransactionType
+      transactedAtEpochMs: string
+      settledAtEpochMs?: string | null
+      description: string
+      declineReason?: string | null
+      billedAmount: {
+        __typename?: 'SealedCurrencyAmountAttribute'
+        currency: string
+        amount: string
+      }
+      transactedAmount: {
+        __typename?: 'SealedCurrencyAmountAttribute'
+        currency: string
+        amount: string
+      }
+      detail?: Array<{
+        __typename?: 'SealedTransactionDetailChargeAttribute'
+        fundingSourceId: string
+        description: string
+        state?: string | null
+        continuationOfExistingCharge?: boolean | null
+        virtualCardAmount: {
+          __typename?: 'SealedCurrencyAmountAttribute'
+          currency: string
+          amount: string
+        }
+        markup: {
+          __typename?: 'SealedMarkupAttribute'
+          percent: string
+          flat: string
+          minCharge?: string | null
+        }
+        markupAmount: {
+          __typename?: 'SealedCurrencyAmountAttribute'
+          currency: string
+          amount: string
+        }
+        fundingSourceAmount: {
+          __typename?: 'SealedCurrencyAmountAttribute'
+          currency: string
+          amount: string
+        }
+      }> | null
+    }>
+  }
+}
+
+export type ListTransactionsByCardIdAndTypeQueryVariables = Exact<{
+  cardId: Scalars['ID']['input']
+  transactionType: TransactionType
+  limit?: InputMaybe<Scalars['Int']['input']>
+  nextToken?: InputMaybe<Scalars['String']['input']>
+}>
+
+export type ListTransactionsByCardIdAndTypeQuery = {
+  __typename?: 'Query'
+  listTransactionsByCardIdAndType: {
     __typename?: 'SealedTransactionConnection'
     nextToken?: string | null
     items: Array<{
@@ -9391,6 +9470,287 @@ export const ListTransactionsByCardIdDocument = {
 } as unknown as DocumentNode<
   ListTransactionsByCardIdQuery,
   ListTransactionsByCardIdQueryVariables
+>
+export const ListTransactionsByCardIdAndTypeDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'ListTransactionsByCardIdAndType' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'cardId' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'transactionType' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'TransactionType' },
+            },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'limit' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'nextToken' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'listTransactionsByCardIdAndType' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'cardId' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'cardId' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'transactionType' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'transactionType' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'limit' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'limit' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'nextToken' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'nextToken' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'FragmentSpread',
+                        name: { kind: 'Name', value: 'SealedTransaction' },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'nextToken' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'SealedCurrencyAmountAttribute' },
+      typeCondition: {
+        kind: 'NamedType',
+        name: { kind: 'Name', value: 'SealedCurrencyAmountAttribute' },
+      },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'currency' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
+        ],
+      },
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'SealedTransaction' },
+      typeCondition: {
+        kind: 'NamedType',
+        name: { kind: 'Name', value: 'SealedTransaction' },
+      },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'version' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'sortDateEpochMs' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'algorithm' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'keyId' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'cardId' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'sequenceId' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'transactedAtEpochMs' },
+          },
+          { kind: 'Field', name: { kind: 'Name', value: 'settledAtEpochMs' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'billedAmount' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'FragmentSpread',
+                  name: {
+                    kind: 'Name',
+                    value: 'SealedCurrencyAmountAttribute',
+                  },
+                },
+              ],
+            },
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'transactedAmount' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'FragmentSpread',
+                  name: {
+                    kind: 'Name',
+                    value: 'SealedCurrencyAmountAttribute',
+                  },
+                },
+              ],
+            },
+          },
+          { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'declineReason' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'detail' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'virtualCardAmount' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'FragmentSpread',
+                        name: {
+                          kind: 'Name',
+                          value: 'SealedCurrencyAmountAttribute',
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'markup' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'percent' },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'flat' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'minCharge' },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'markupAmount' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'FragmentSpread',
+                        name: {
+                          kind: 'Name',
+                          value: 'SealedCurrencyAmountAttribute',
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'fundingSourceAmount' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'FragmentSpread',
+                        name: {
+                          kind: 'Name',
+                          value: 'SealedCurrencyAmountAttribute',
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'fundingSourceId' },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'continuationOfExistingCharge' },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  ListTransactionsByCardIdAndTypeQuery,
+  ListTransactionsByCardIdAndTypeQueryVariables
 >
 export const SandboxGetPlaidDataDocument = {
   kind: 'Document',

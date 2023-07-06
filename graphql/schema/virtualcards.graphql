@@ -6,7 +6,7 @@ interface CommonObject {
   updatedAtEpochMs: Float!
 }
 
-interface CommonFundingSource  {
+interface CommonFundingSource {
   id: ID!
   owner: ID!
   version: Int!
@@ -441,6 +441,12 @@ type Query {
     nextToken: String
     dateRange: DateRangeInput
     sortOrder: SortOrder
+  ): SealedTransactionConnection!
+  listTransactionsByCardIdAndType(
+    cardId: ID!
+    transactionType: TransactionType!
+    limit: Int
+    nextToken: String
   ): SealedTransactionConnection!
 }
 
