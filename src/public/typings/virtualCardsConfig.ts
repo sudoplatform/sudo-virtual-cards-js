@@ -4,6 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { CardType } from './cardType'
+import { CurrencyAmount } from './currencyAmount'
+import { FundingSourceClientConfiguration } from './fundingSource'
+
 /**
  * The Sudo Platform SDK representation of virtual cards configuration data.
  *
@@ -15,10 +19,24 @@
  * @property {CurrencyAmount[]} maxTransactionAmount The maximum transaction amount per currency.
  * @property {string[]} virtualCardCurrencies The list of supported virtual card currencies.
  * @property {ProviderCardFundingSourceSupportDetail[]} fundingSourceSupportInfo Funding source support info.
+ * @property {FundingSourceClientConfiguration[]} fundingSourceClientConfiguration The funding source client configuration.
+ * @property {[applicationName: string]: ClientApplicationConfiguration} clientApplicationConfiguration The client application
+ *  configuration keyed by application name.
  */
-
-import { CardType } from './cardType'
-import { CurrencyAmount } from './currencyAmount'
+export interface VirtualCardsConfig {
+  maxFundingSourceVelocity: string[]
+  maxFundingSourceFailureVelocity: string[]
+  maxCardCreationVelocity: string[]
+  maxTransactionVelocity: CurrencyVelocity[]
+  maxTransactionAmount: CurrencyAmount[]
+  virtualCardCurrencies: string[]
+  fundingSourceSupportInfo: FundingSourceSupportInfo[]
+  bankAccountFundingSourceExpendableEnabled: boolean
+  fundingSourceClientConfiguration: FundingSourceClientConfiguration[]
+  clientApplicationConfiguration: {
+    [applicationName: string]: ClientApplicationConfiguration
+  }
+}
 
 export interface FundingSourceSupportDetail {
   cardType: CardType
@@ -41,13 +59,15 @@ export interface CurrencyVelocity {
   velocity: string[]
 }
 
-export interface VirtualCardsConfig {
-  maxFundingSourceVelocity: string[]
-  maxFundingSourceFailureVelocity: string[]
-  maxCardCreationVelocity: string[]
-  maxTransactionVelocity: CurrencyVelocity[]
-  maxTransactionAmount: CurrencyAmount[]
-  virtualCardCurrencies: string[]
-  fundingSourceSupportInfo: FundingSourceSupportInfo[]
-  bankAccountFundingSourceExpendableEnabled: boolean
+export interface ClientApplicationConfiguration {
+  funding_source_providers: FundingSourceProvider
+}
+
+export interface FundingSourceProvider {
+  plaid: PlaidApplicationConfiguration
+}
+
+export interface PlaidApplicationConfiguration {
+  client_name: string
+  redirect_uri: string
 }

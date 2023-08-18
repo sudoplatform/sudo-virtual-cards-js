@@ -29,6 +29,7 @@ import {
   TransactionWorker,
 } from '../private/data/common/transactionWorker'
 import { DefaultVirtualCardsConfigService } from '../private/data/configuration/defaultConfigService'
+import { VirtualCardsConfigAPITransformer } from '../private/data/configuration/transformer/virtualCardsConfigApiTransformer'
 import { DefaultFundingSourceService } from '../private/data/fundingSource/defaultFundingSourceService'
 import { ProvisionalFundingSourceApiTransformer } from '../private/data/fundingSource/transformer/provisionalFundingSourceApiTransformer'
 import { DefaultKeyService } from '../private/data/key/defaultKeyService'
@@ -66,7 +67,6 @@ import { UpdateVirtualCardUseCase } from '../private/domain/use-cases/virtualCar
 import { VirtualCardsServiceConfigNotFoundError } from './errors'
 import { AuthorizationText, SandboxPlaidData } from './typings'
 import { APIResult } from './typings/apiResult'
-import { VirtualCardsConfig } from './typings/config'
 import { CreateKeysIfAbsentResult } from './typings/createKeysIfAbsentResult'
 import { DateRange } from './typings/dateRange'
 import {
@@ -91,6 +91,7 @@ import {
   VirtualCard,
   VirtualCardSealedAttributes,
 } from './typings/virtualCard'
+import { VirtualCardsConfig } from './typings/virtualCardsConfig'
 
 /**
  * Input for {@link SudoVirtualCardsClient#setupFundingSource}.
@@ -504,6 +505,8 @@ export interface SudoVirtualCardsClient {
   createKeysIfAbsent(): Promise<CreateKeysIfAbsentResult>
 
   /**
+   * @deprecated Use `getVirtualCardsConfig` instead to retrieve the FundingSourceClientConfiguration.
+   *
    * Get the funding source client configuration.
    *
    * @returns {FundingSourceClientConfiguration} The configuration of the client funding source data.
@@ -1158,7 +1161,8 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
       this.configurationDataService,
       this.sudoUserService,
     )
-    return await useCase.execute()
+    const result = await useCase.execute()
+    return VirtualCardsConfigAPITransformer.transformEntity(result)
   }
 
   async sandboxGetPlaidData(

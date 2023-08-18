@@ -7,7 +7,7 @@
 import { VirtualCardsConfigEntity } from '../../domain/entities/configuration/virtualCardsConfigEntity'
 import { VirtualCardsConfigService } from '../../domain/entities/configuration/virtualCardsConfigService'
 import { ApiClient } from '../common/apiClient'
-import { VirtualCardsConfigEntityTransformer } from './transformer/configEntityTransformer'
+import { VirtualCardsConfigEntityTransformer } from './transformer/virtualCardsConfigEntityTransformer'
 
 export class DefaultVirtualCardsConfigService
   implements VirtualCardsConfigService

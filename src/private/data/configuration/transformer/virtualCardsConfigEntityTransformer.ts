@@ -10,9 +10,11 @@ import {
   VirtualCardsConfig,
 } from '../../../../gen/graphqlTypes'
 import {
+  ClientApplicationConfigurationEntity,
   CurrencyVelocityEntity,
   VirtualCardsConfigEntity,
 } from '../../../domain/entities/configuration/virtualCardsConfigEntity'
+import { FundingSourceClientConfigurationEntity } from '../../../domain/entities/fundingSource/fundingSourceEntity'
 import { CurrencyAmountEntity } from '../../../domain/entities/transaction/transactionEntity'
 
 export class VirtualCardsConfigEntityTransformer {
@@ -29,6 +31,20 @@ export class VirtualCardsConfigEntityTransformer {
       virtualCardCurrencies: data.virtualCardCurrencies,
       bankAccountFundingSourceExpendableEnabled:
         data.bankAccountFundingSourceExpendableEnabled,
+      fundingSourceClientConfiguration: data.fundingSourceClientConfiguration
+        ? {
+            data: (
+              data.fundingSourceClientConfiguration as FundingSourceClientConfigurationEntity
+            ).data,
+          }
+        : undefined,
+      clientApplicationConfiguration: data.clientApplicationsConfiguration
+        ? {
+            data: (
+              data.clientApplicationsConfiguration as ClientApplicationConfigurationEntity
+            ).data,
+          }
+        : undefined,
     }
   }
 }

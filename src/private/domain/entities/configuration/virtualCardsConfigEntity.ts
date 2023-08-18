@@ -4,12 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { FundingSourceSupportInfo } from '../../../../public/typings/config'
+import { FundingSourceSupportInfo } from '../../../../public/typings/virtualCardsConfig'
+import { FundingSourceClientConfigurationEntity } from '../fundingSource/fundingSourceEntity'
 import { CurrencyAmountEntity } from '../transaction/transactionEntity'
 
 export interface CurrencyVelocityEntity {
   currency: string
   velocity: string[]
+}
+
+export interface ClientApplicationConfigurationEntity {
+  data: string
 }
 
 export interface VirtualCardsConfigEntity {
@@ -21,4 +26,6 @@ export interface VirtualCardsConfigEntity {
   virtualCardCurrencies: string[]
   fundingSourceSupportInfo: FundingSourceSupportInfo[]
   bankAccountFundingSourceExpendableEnabled: boolean
+  fundingSourceClientConfiguration?: FundingSourceClientConfigurationEntity
+  clientApplicationConfiguration?: ClientApplicationConfigurationEntity
 }

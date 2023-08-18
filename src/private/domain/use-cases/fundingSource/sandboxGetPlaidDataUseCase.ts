@@ -10,7 +10,7 @@ import {
   NotSignedInError,
 } from '@sudoplatform/sudo-common'
 import { SandboxGetPlaidDataInput, SandboxPlaidData } from '../../../../public'
-import { FundingSourceSupportInfo } from '../../../../public/typings/config'
+import { FundingSourceSupportInfo } from '../../../../public/typings/virtualCardsConfig'
 import { FundingSourceService } from '../../entities/fundingSource/fundingSourceService'
 import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
 import { CurrencyAmountEntity } from '../../entities/transaction/transactionEntity'

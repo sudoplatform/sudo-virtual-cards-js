@@ -36,6 +36,7 @@ import { ApiClient } from '../../../src/private/data/common/apiClient'
 import { SudoVirtualCardsClientPrivateOptions } from '../../../src/private/data/common/privateSudoVirtualCardsClientOptions'
 import { DefaultFundingSourceService } from '../../../src/private/data/fundingSource/defaultFundingSourceService'
 import { VirtualCardBillingAddressEntity } from '../../../src/private/domain/entities/virtualCard/virtualCardEntity'
+import { GetVirtualCardsConfigUseCase } from '../../../src/private/domain/use-cases/configuration/getConfigUseCase'
 import { CancelFundingSourceUseCase } from '../../../src/private/domain/use-cases/fundingSource/cancelFundingSourceUseCase'
 import { CompleteFundingSourceUseCase } from '../../../src/private/domain/use-cases/fundingSource/completeFundingSourceUseCase'
 import { GetFundingSourceClientConfigurationUseCase } from '../../../src/private/domain/use-cases/fundingSource/getFundingSourceClientConfigurationUseCase'
@@ -201,6 +202,13 @@ const JestMockListVirtualCardsUseCase =
 jest.mock(
   '../../../src/private/domain/use-cases/virtualCard/updateVirtualCardUseCase',
 )
+const JestMockGetVirtualCardsConfigUseCase =
+  GetVirtualCardsConfigUseCase as jest.MockedClass<
+    typeof GetVirtualCardsConfigUseCase
+  >
+jest.mock(
+  '../../../src/private/domain/use-cases/configuration/getConfigUseCase',
+)
 const JestMockUpdateVirtualCardUseCase =
   UpdateVirtualCardUseCase as jest.MockedClass<typeof UpdateVirtualCardUseCase>
 
@@ -285,6 +293,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
   const mockListProvisionalCardsUseCase = mock<ListProvisionalCardsUseCase>()
   const mockGetVirtualCardUseCase = mock<GetVirtualCardUseCase>()
   const mockListVirtualCardsUseCase = mock<ListVirtualCardsUseCase>()
+  const mockGetVirtualCardsConfigUseCase = mock<GetVirtualCardsConfigUseCase>()
   const mockUpdateVirtualCardUseCase = mock<UpdateVirtualCardUseCase>()
   const mockCancelVirtualCardUseCase = mock<CancelVirtualCardUseCase>()
   const mockGetTransactionUseCase = mock<GetTransactionUseCase>()
@@ -322,6 +331,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     reset(mockListProvisionalCardsUseCase)
     reset(mockGetVirtualCardUseCase)
     reset(mockListVirtualCardsUseCase)
+    reset(mockGetVirtualCardsConfigUseCase)
     reset(mockUpdateVirtualCardUseCase)
     reset(mockCancelVirtualCardUseCase)
     reset(mockGetTransactionUseCase)
@@ -350,6 +360,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     JestMockListProvisionalCardsUseCase.mockClear()
     JestMockGetVirtualCardUseCase.mockClear()
     JestMockListVirtualCardsUseCase.mockClear()
+    JestMockGetVirtualCardsConfigUseCase.mockClear()
     JestMockUpdateVirtualCardUseCase.mockClear()
     JestMockCancelVirtualCardUseCase.mockClear()
     JestMockGetTransactionUseCase.mockClear()
@@ -406,6 +417,9 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     )
     JestMockListVirtualCardsUseCase.mockImplementation(() =>
       instance(mockListVirtualCardsUseCase),
+    )
+    JestMockGetVirtualCardsConfigUseCase.mockImplementation(() =>
+      instance(mockGetVirtualCardsConfigUseCase),
     )
     JestMockUpdateVirtualCardUseCase.mockImplementation(() =>
       instance(mockUpdateVirtualCardUseCase),
@@ -1215,6 +1229,26 @@ describe('SudoVirtualCardsClient Test Suite', () => {
         status: ListOperationResultStatus.Success,
         items: [ApiDataFactory.virtualCard],
       })
+    })
+  })
+  describe('getVirtualCardsConfig', () => {
+    beforeEach(() => {
+      when(mockGetVirtualCardsConfigUseCase.execute()).thenResolve(
+        EntityDataFactory.configurationData,
+      )
+    })
+    it('generates use case', async () => {
+      await instanceUnderTest.getVirtualCardsConfig()
+      expect(JestMockGetVirtualCardsConfigUseCase).toHaveBeenCalledTimes(1)
+    })
+    it('calls use case as expected', async () => {
+      await instanceUnderTest.getVirtualCardsConfig()
+      verify(mockGetVirtualCardsConfigUseCase.execute()).once()
+    })
+    it('returns expected result', async () => {
+      await expect(instanceUnderTest.getVirtualCardsConfig()).resolves.toEqual(
+        ApiDataFactory.configurationData,
+      )
     })
   })
   describe('getTransaction', () => {

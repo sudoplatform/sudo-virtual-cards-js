@@ -15,12 +15,17 @@
 <li><a href="../modules.html">@sudoplatform/sudo-virtual-cards</a></li>
 <li><a href="VirtualCardsConfig.html">VirtualCardsConfig</a></li></ul>
 <h1>Interface VirtualCardsConfig</h1></div>
+<section class="tsd-panel tsd-comment">
+<div class="tsd-comment tsd-typography"><p>The Sudo Platform SDK representation of virtual cards configuration data.</p>
+<p> VirtualCardsConfig</p>
+</div>
+<div class="tsd-comment tsd-typography"></div></section>
 <section class="tsd-panel tsd-hierarchy">
 <h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
 <li><span class="target">VirtualCardsConfig</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/typings/config.ts:44</li></ul></aside>
+<li>Defined in src/public/typings/virtualCardsConfig.ts:26</li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -29,6 +34,8 @@
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading">Properties</h3>
 <div class="tsd-index-list"><a href="VirtualCardsConfig.html#bankAccountFundingSourceExpendableEnabled" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-1024"><rect fill="var(--color-icon-background)" stroke="#FF984D" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12"></rect><path d="M9.354 16V7.24H12.174C12.99 7.24 13.638 7.476 14.118 7.948C14.606 8.412 14.85 9.036 14.85 9.82C14.85 10.604 14.606 11.232 14.118 11.704C13.638 12.168 12.99 12.4 12.174 12.4H10.434V16H9.354ZM10.434 11.428H12.174C12.646 11.428 13.022 11.284 13.302 10.996C13.59 10.7 13.734 10.308 13.734 9.82C13.734 9.324 13.59 8.932 13.302 8.644C13.022 8.356 12.646 8.212 12.174 8.212H10.434V11.428Z" fill="var(--color-text)"></path></g></svg><span>bank<wbr/>Account<wbr/>Funding<wbr/>Source<wbr/>Expendable<wbr/>Enabled</span></a>
+<a href="VirtualCardsConfig.html#clientApplicationConfiguration" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>client<wbr/>Application<wbr/>Configuration</span></a>
+<a href="VirtualCardsConfig.html#fundingSourceClientConfiguration" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>funding<wbr/>Source<wbr/>Client<wbr/>Configuration</span></a>
 <a href="VirtualCardsConfig.html#fundingSourceSupportInfo" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>funding<wbr/>Source<wbr/>Support<wbr/>Info</span></a>
 <a href="VirtualCardsConfig.html#maxCardCreationVelocity" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>max<wbr/>Card<wbr/>Creation<wbr/>Velocity</span></a>
 <a href="VirtualCardsConfig.html#maxFundingSourceFailureVelocity" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>max<wbr/>Funding<wbr/>Source<wbr/>Failure<wbr/>Velocity</span></a>
@@ -43,42 +50,85 @@
 <h3 class="tsd-anchor-link"><span>bank<wbr/>Account<wbr/>Funding<wbr/>Source<wbr/>Expendable<wbr/>Enabled</span><a href="#bankAccountFundingSourceExpendableEnabled" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><g stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" id="icon-anchor"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5"></path><path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5"></path></g></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">bank<wbr/>Account<wbr/>Funding<wbr/>Source<wbr/>Expendable<wbr/>Enabled</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/typings/config.ts:52</li></ul></aside></section>
+<li>Defined in src/public/typings/virtualCardsConfig.ts:34</li></ul></aside></section>
+<section class="tsd-panel tsd-member"><a id="clientApplicationConfiguration" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>client<wbr/>Application<wbr/>Configuration</span><a href="#clientApplicationConfiguration" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">client<wbr/>Application<wbr/>Configuration</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span><br/><span>    </span>[<span class="tsd-kind-index-signature">applicationName</span>: <span class="tsd-signature-type">string</span>]<span class="tsd-signature-symbol">: </span><a href="ClientApplicationConfiguration.html" class="tsd-signature-type tsd-kind-interface">ClientApplicationConfiguration</a><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span></div>
+<div class="tsd-comment tsd-typography"><p>The client application
+ configuration keyed by application name.</p>
+</div>
+<div class="tsd-type-declaration">
+<h4>Type declaration</h4>
+<ul class="tsd-parameters">
+<li class="tsd-parameter-index-signature">
+<h5><span class="tsd-signature-symbol">[</span><span class="tsd-kind-parameter">applicationName</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]: </span><a href="ClientApplicationConfiguration.html" class="tsd-signature-type tsd-kind-interface">ClientApplicationConfiguration</a></h5></li></ul></div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
+<ul>
+<li>Defined in src/public/typings/virtualCardsConfig.ts:36</li></ul></aside></section>
+<section class="tsd-panel tsd-member"><a id="fundingSourceClientConfiguration" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>funding<wbr/>Source<wbr/>Client<wbr/>Configuration</span><a href="#fundingSourceClientConfiguration" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">funding<wbr/>Source<wbr/>Client<wbr/>Configuration</span><span class="tsd-signature-symbol">:</span> <a href="../types/FundingSourceClientConfiguration.html" class="tsd-signature-type tsd-kind-type-alias">FundingSourceClientConfiguration</a><span class="tsd-signature-symbol">[]</span></div>
+<div class="tsd-comment tsd-typography"><p>The funding source client configuration.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
+<ul>
+<li>Defined in src/public/typings/virtualCardsConfig.ts:35</li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="fundingSourceSupportInfo" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>funding<wbr/>Source<wbr/>Support<wbr/>Info</span><a href="#fundingSourceSupportInfo" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">funding<wbr/>Source<wbr/>Support<wbr/>Info</span><span class="tsd-signature-symbol">:</span> <a href="FundingSourceSupportInfo.html" class="tsd-signature-type tsd-kind-interface">FundingSourceSupportInfo</a><span class="tsd-signature-symbol">[]</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">funding<wbr/>Source<wbr/>Support<wbr/>Info</span><span class="tsd-signature-symbol">:</span> <a href="FundingSourceSupportInfo.html" class="tsd-signature-type tsd-kind-interface">FundingSourceSupportInfo</a><span class="tsd-signature-symbol">[]</span></div>
+<div class="tsd-comment tsd-typography"><p>Funding source support info.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/typings/config.ts:51</li></ul></aside></section>
+<li>Defined in src/public/typings/virtualCardsConfig.ts:33</li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="maxCardCreationVelocity" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>max<wbr/>Card<wbr/>Creation<wbr/>Velocity</span><a href="#maxCardCreationVelocity" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">max<wbr/>Card<wbr/>Creation<wbr/>Velocity</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">max<wbr/>Card<wbr/>Creation<wbr/>Velocity</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div>
+<div class="tsd-comment tsd-typography"><p>The maximum number of virtual cards that can be created within a defined period.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/typings/config.ts:47</li></ul></aside></section>
+<li>Defined in src/public/typings/virtualCardsConfig.ts:29</li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="maxFundingSourceFailureVelocity" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>max<wbr/>Funding<wbr/>Source<wbr/>Failure<wbr/>Velocity</span><a href="#maxFundingSourceFailureVelocity" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">max<wbr/>Funding<wbr/>Source<wbr/>Failure<wbr/>Velocity</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">max<wbr/>Funding<wbr/>Source<wbr/>Failure<wbr/>Velocity</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div>
+<div class="tsd-comment tsd-typography"><p>The maximum number of funding sources that can be created within a defined period.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/typings/config.ts:46</li></ul></aside></section>
+<li>Defined in src/public/typings/virtualCardsConfig.ts:28</li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="maxFundingSourceVelocity" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>max<wbr/>Funding<wbr/>Source<wbr/>Velocity</span><a href="#maxFundingSourceVelocity" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">max<wbr/>Funding<wbr/>Source<wbr/>Velocity</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">max<wbr/>Funding<wbr/>Source<wbr/>Velocity</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div>
+<div class="tsd-comment tsd-typography"><p>The maximum number of funding sources that can be created within a defined period.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/typings/config.ts:45</li></ul></aside></section>
+<li>Defined in src/public/typings/virtualCardsConfig.ts:27</li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="maxTransactionAmount" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>max<wbr/>Transaction<wbr/>Amount</span><a href="#maxTransactionAmount" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">max<wbr/>Transaction<wbr/>Amount</span><span class="tsd-signature-symbol">:</span> <a href="CurrencyAmount.html" class="tsd-signature-type tsd-kind-interface">CurrencyAmount</a><span class="tsd-signature-symbol">[]</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">max<wbr/>Transaction<wbr/>Amount</span><span class="tsd-signature-symbol">:</span> <a href="CurrencyAmount.html" class="tsd-signature-type tsd-kind-interface">CurrencyAmount</a><span class="tsd-signature-symbol">[]</span></div>
+<div class="tsd-comment tsd-typography"><p>The maximum transaction amount per currency.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/typings/config.ts:49</li></ul></aside></section>
+<li>Defined in src/public/typings/virtualCardsConfig.ts:31</li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="maxTransactionVelocity" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>max<wbr/>Transaction<wbr/>Velocity</span><a href="#maxTransactionVelocity" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">max<wbr/>Transaction<wbr/>Velocity</span><span class="tsd-signature-symbol">:</span> <a href="CurrencyVelocity.html" class="tsd-signature-type tsd-kind-interface">CurrencyVelocity</a><span class="tsd-signature-symbol">[]</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">max<wbr/>Transaction<wbr/>Velocity</span><span class="tsd-signature-symbol">:</span> <a href="CurrencyVelocity.html" class="tsd-signature-type tsd-kind-interface">CurrencyVelocity</a><span class="tsd-signature-symbol">[]</span></div>
+<div class="tsd-comment tsd-typography"><p>The maximum number of transactions that can be created within a defined period.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/typings/config.ts:48</li></ul></aside></section>
+<li>Defined in src/public/typings/virtualCardsConfig.ts:30</li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="virtualCardCurrencies" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>virtual<wbr/>Card<wbr/>Currencies</span><a href="#virtualCardCurrencies" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">virtual<wbr/>Card<wbr/>Currencies</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">virtual<wbr/>Card<wbr/>Currencies</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div>
+<div class="tsd-comment tsd-typography"><p>The list of supported virtual card currencies.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/typings/config.ts:50</li></ul></aside></section></section></div>
+<li>Defined in src/public/typings/virtualCardsConfig.ts:32</li></ul></aside></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -98,6 +148,8 @@
 <div class="tsd-accordion-details">
 <ul>
 <li><a href="#bankAccountFundingSourceExpendableEnabled" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>bank<wbr/>Account<wbr/>Funding<wbr/>Source<wbr/>Expendable<wbr/>Enabled</span></a></li>
+<li><a href="#clientApplicationConfiguration" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>client<wbr/>Application<wbr/>Configuration</span></a></li>
+<li><a href="#fundingSourceClientConfiguration" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>funding<wbr/>Source<wbr/>Client<wbr/>Configuration</span></a></li>
 <li><a href="#fundingSourceSupportInfo" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>funding<wbr/>Source<wbr/>Support<wbr/>Info</span></a></li>
 <li><a href="#maxCardCreationVelocity" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>max<wbr/>Card<wbr/>Creation<wbr/>Velocity</span></a></li>
 <li><a href="#maxFundingSourceFailureVelocity" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>max<wbr/>Funding<wbr/>Source<wbr/>Failure<wbr/>Velocity</span></a></li>
@@ -152,6 +204,7 @@
 <li><a href="CheckoutCardFundingSourceClientConfiguration.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Checkout<wbr/>Card<wbr/>Funding<wbr/>Source<wbr/>Client<wbr/>Configuration</span></a></li>
 <li><a href="CheckoutCardProvisionalFundingSourceInteractionData.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Checkout<wbr/>Card<wbr/>Provisional<wbr/>Funding<wbr/>Source<wbr/>Interaction<wbr/>Data</span></a></li>
 <li><a href="CheckoutCardProvisionalFundingSourceProvisioningData.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Checkout<wbr/>Card<wbr/>Provisional<wbr/>Funding<wbr/>Source<wbr/>Provisioning<wbr/>Data</span></a></li>
+<li><a href="ClientApplicationConfiguration.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Application<wbr/>Configuration</span></a></li>
 <li><a href="CompleteFundingSourceCheckoutBankAccountCompletionDataInput.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Complete<wbr/>Funding<wbr/>Source<wbr/>Checkout<wbr/>Bank<wbr/>Account<wbr/>Completion<wbr/>Data<wbr/>Input</span></a></li>
 <li><a href="CompleteFundingSourceCheckoutCardCompletionDataInput.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Complete<wbr/>Funding<wbr/>Source<wbr/>Checkout<wbr/>Card<wbr/>Completion<wbr/>Data<wbr/>Input</span></a></li>
 <li><a href="CompleteFundingSourceInput.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Complete<wbr/>Funding<wbr/>Source<wbr/>Input</span></a></li>
@@ -165,6 +218,7 @@
 <li><a href="DateRange.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Date<wbr/>Range</span></a></li>
 <li><a href="Expiry.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Expiry</span></a></li>
 <li><a href="FundingSourceChangeSubscriber.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Funding<wbr/>Source<wbr/>Change<wbr/>Subscriber</span></a></li>
+<li><a href="FundingSourceProvider.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Funding<wbr/>Source<wbr/>Provider</span></a></li>
 <li><a href="FundingSourceSupportDetail.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Funding<wbr/>Source<wbr/>Support<wbr/>Detail</span></a></li>
 <li><a href="FundingSourceSupportInfo.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Funding<wbr/>Source<wbr/>Support<wbr/>Info</span></a></li>
 <li><a href="GetFundingSourceInput.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Get<wbr/>Funding<wbr/>Source<wbr/>Input</span></a></li>
@@ -179,6 +233,7 @@
 <li><a href="ListVirtualCardsInput.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>List<wbr/>Virtual<wbr/>Cards<wbr/>Input</span></a></li>
 <li><a href="Markup.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Markup</span></a></li>
 <li><a href="PlaidAccountMetadata.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Plaid<wbr/>Account<wbr/>Metadata</span></a></li>
+<li><a href="PlaidApplicationConfiguration.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Plaid<wbr/>Application<wbr/>Configuration</span></a></li>
 <li><a href="ProvisionVirtualCardBillingAddressInput.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Provision<wbr/>Virtual<wbr/>Card<wbr/>Billing<wbr/>Address<wbr/>Input</span></a></li>
 <li><a href="ProvisionVirtualCardInput.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Provision<wbr/>Virtual<wbr/>Card<wbr/>Input</span></a></li>
 <li><a href="ProvisionalFundingSource.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Provisional<wbr/>Funding<wbr/>Source</span></a></li>

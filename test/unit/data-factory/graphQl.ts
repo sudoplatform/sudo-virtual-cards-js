@@ -15,6 +15,7 @@ import {
   FundingSource,
   FundingSourceConnection,
   FundingSourceState,
+  FundingSourceType,
   KeyFormat,
   ProvisionalCard,
   ProvisionalFundingSource,
@@ -336,5 +337,33 @@ export class GraphQLDataFactory {
     ],
     virtualCardCurrencies: ['USD'],
     bankAccountFundingSourceExpendableEnabled: true,
+    fundingSourceClientConfiguration: {
+      data: Base64.encodeString(
+        JSON.stringify({
+          fundingSourceTypes: [
+            {
+              type: 'checkout',
+              fundingSourceType: FundingSourceType.BankAccount,
+              version: 1,
+              apiKey: 'dummyApiKey',
+            },
+          ],
+        }),
+      ),
+    },
+    clientApplicationsConfiguration: {
+      data: Base64.encodeString(
+        JSON.stringify({
+          webApplication: {
+            funding_source_providers: {
+              plaid: {
+                client_name: 'dummyClientName',
+                redirect_uri: 'dummyRedirectUri',
+              },
+            },
+          },
+        }),
+      ),
+    },
   }
 }

@@ -67,7 +67,9 @@
     "apollo-link-http": "^1.5.8",
     "apollo-cache-inmemory": "^1.6.6",
     "aws-appsync": "^4.1.9",
-    "node-fetch": "^2.6.11"
+    "node-fetch": "^2.6.11",
+    "word-wrap": "^1.2.5",
+    "semver": "^7.5.4"
   },
   "devDependencies": {
     "@graphql-codegen/add": "^5.0.0",
@@ -80,7 +82,7 @@
     "@sudoplatform/sudo-common": "^8.8.0",
     "@sudoplatform/sudo-entitlements": "^16.0.3",
     "@sudoplatform/sudo-entitlements-admin": "^11.2.1",
-    "@sudoplatform/sudo-profiles": "^17.0.4",
+    "@sudoplatform/sudo-profiles": "^17.0.5",
     "@sudoplatform/sudo-secure-id-verification": "^8.0.2",
     "@sudoplatform/sudo-user": "^13.0.2",
     "@sudoplatform/sudo-virtual-cards-simulator": "^5.0.1",

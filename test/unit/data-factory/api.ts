@@ -22,6 +22,7 @@ import {
   TransactionType,
   VirtualCard,
 } from '../../../src'
+import { VirtualCardsConfig } from '../../../src/public/typings/virtualCardsConfig'
 
 export class ApiDataFactory {
   private static readonly commonProps = {
@@ -222,5 +223,51 @@ export class ApiDataFactory {
         continuationOfExistingCharge: false,
       },
     ],
+  }
+
+  static readonly configurationData: VirtualCardsConfig = {
+    fundingSourceSupportInfo: [
+      {
+        detail: [{ cardType: CardType.Credit }],
+        fundingSourceType: 'card',
+        network: 'VISA',
+        providerType: 'stripe',
+      },
+    ],
+    maxCardCreationVelocity: ['5/P1D'],
+    maxFundingSourceVelocity: ['5/P1D'],
+    maxFundingSourceFailureVelocity: [''],
+    maxTransactionAmount: [
+      {
+        currency: 'USD',
+        amount: 25000,
+      },
+    ],
+    maxTransactionVelocity: [
+      {
+        currency: 'USD',
+        velocity: ['25000/P1D'],
+      },
+    ],
+    virtualCardCurrencies: ['USD'],
+    bankAccountFundingSourceExpendableEnabled: true,
+    fundingSourceClientConfiguration: [
+      {
+        type: 'checkout',
+        fundingSourceType: FundingSourceType.BankAccount,
+        version: 1,
+        apiKey: 'dummyApiKey',
+      },
+    ],
+    clientApplicationConfiguration: {
+      webApplication: {
+        funding_source_providers: {
+          plaid: {
+            client_name: 'dummyClientName',
+            redirect_uri: 'dummyRedirectUri',
+          },
+        },
+      },
+    },
   }
 }

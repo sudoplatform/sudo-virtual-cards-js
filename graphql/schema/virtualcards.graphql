@@ -86,6 +86,8 @@ type VirtualCardsConfig {
   virtualCardCurrencies: [String!]!
   fundingSourceSupportInfo: [FundingSourceSupportInfo!]!
   bankAccountFundingSourceExpendableEnabled: Boolean!
+  fundingSourceClientConfiguration: FundingSourceClientConfiguration
+  clientApplicationsConfiguration: VirtualCardApplicationsConfiguration
 }
 
 type PublicKey {
@@ -116,6 +118,10 @@ type SealedExpiryAttribute {
 }
 
 type FundingSourceClientConfiguration {
+  data: ID!
+}
+
+type VirtualCardApplicationsConfiguration {
   data: ID!
 }
 

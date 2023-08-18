@@ -695,9 +695,16 @@ export type TransactionVelocity = {
   velocity?: Maybe<Array<Scalars['String']['output']>>
 }
 
+export type VirtualCardApplicationsConfiguration = {
+  __typename?: 'VirtualCardApplicationsConfiguration'
+  data: Scalars['ID']['output']
+}
+
 export type VirtualCardsConfig = {
   __typename?: 'VirtualCardsConfig'
   bankAccountFundingSourceExpendableEnabled: Scalars['Boolean']['output']
+  clientApplicationsConfiguration?: Maybe<VirtualCardApplicationsConfiguration>
+  fundingSourceClientConfiguration?: Maybe<FundingSourceClientConfiguration>
   fundingSourceSupportInfo: Array<FundingSourceSupportInfo>
   maxCardCreationVelocity: Array<Scalars['String']['output']>
   maxFundingSourceFailureVelocity: Array<Scalars['String']['output']>
@@ -1129,6 +1136,14 @@ export type VirtualCardsConfigFragment = {
       cardType: CardType
     }>
   }>
+  fundingSourceClientConfiguration?: {
+    __typename?: 'FundingSourceClientConfiguration'
+    data: string
+  } | null
+  clientApplicationsConfiguration?: {
+    __typename?: 'VirtualCardApplicationsConfiguration'
+    data: string
+  } | null
 }
 
 export type CreatePublicKeyMutationVariables = Exact<{
@@ -1756,6 +1771,14 @@ export type GetVirtualCardsConfigQuery = {
         cardType: CardType
       }>
     }>
+    fundingSourceClientConfiguration?: {
+      __typename?: 'FundingSourceClientConfiguration'
+      data: string
+    } | null
+    clientApplicationsConfiguration?: {
+      __typename?: 'VirtualCardApplicationsConfiguration'
+      data: string
+    } | null
   }
 }
 
@@ -4056,6 +4079,26 @@ export const VirtualCardsConfigFragmentDoc = {
             name: {
               kind: 'Name',
               value: 'bankAccountFundingSourceExpendableEnabled',
+            },
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'fundingSourceClientConfiguration' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'data' } },
+              ],
+            },
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'clientApplicationsConfiguration' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'data' } },
+              ],
             },
           },
         ],
@@ -6447,6 +6490,26 @@ export const GetVirtualCardsConfigDocument = {
             name: {
               kind: 'Name',
               value: 'bankAccountFundingSourceExpendableEnabled',
+            },
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'fundingSourceClientConfiguration' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'data' } },
+              ],
+            },
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'clientApplicationsConfiguration' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'data' } },
+              ],
             },
           },
         ],

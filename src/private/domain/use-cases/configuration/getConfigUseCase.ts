@@ -9,8 +9,10 @@ import {
   Logger,
   NotSignedInError,
 } from '@sudoplatform/sudo-common'
-import { FundingSourceSupportInfo } from '../../../../public/typings/config'
+import { FundingSourceSupportInfo } from '../../../../public/typings/virtualCardsConfig'
+import { ClientApplicationConfigurationEntity } from '../../entities/configuration/virtualCardsConfigEntity'
 import { VirtualCardsConfigService } from '../../entities/configuration/virtualCardsConfigService'
+import { FundingSourceClientConfigurationEntity } from '../../entities/fundingSource/fundingSourceEntity'
 import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
 import { CurrencyAmountEntity } from '../../entities/transaction/transactionEntity'
 
@@ -28,6 +30,8 @@ export interface VirtualCardsConfigUseCaseOutput {
   virtualCardCurrencies: string[]
   fundingSourceSupportInfo: FundingSourceSupportInfo[]
   bankAccountFundingSourceExpendableEnabled: boolean
+  fundingSourceClientConfiguration?: FundingSourceClientConfigurationEntity
+  clientApplicationConfiguration?: ClientApplicationConfigurationEntity
 }
 
 /**

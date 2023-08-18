@@ -6,7 +6,7 @@
 
 import { DefaultLogger } from '@sudoplatform/sudo-common'
 import { Duration } from 'luxon'
-import { SudoVirtualCardsClient } from '../../../src'
+import { FundingSourceType, SudoVirtualCardsClient } from '../../../src'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 
 describe('SudoVirtualCardsClient GetConfigurationData Test Suite', () => {
@@ -43,6 +43,12 @@ describe('SudoVirtualCardsClient GetConfigurationData Test Suite', () => {
       expect(config.maxTransactionVelocity.length).toBeGreaterThanOrEqual(1)
       expect(config.virtualCardCurrencies.length).toBeGreaterThanOrEqual(1)
       expect(config.fundingSourceSupportInfo.length).toBeGreaterThanOrEqual(1)
+      expect(config.fundingSourceClientConfiguration).toContainEqual({
+        type: 'stripe',
+        version: 1,
+        fundingSourceType: FundingSourceType.CreditCard,
+        apiKey: expect.stringMatching(/^pk_.*/),
+      })
     })
   })
 })
