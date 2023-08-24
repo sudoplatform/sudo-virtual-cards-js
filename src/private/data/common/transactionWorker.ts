@@ -103,7 +103,7 @@ export class DefaultTransactionWorker implements TransactionWorker {
     ): Promise<DeclineReason> => {
       const unsealed = await unseal(encrypted)
       for (const val of Object.values(DeclineReason)) {
-        if (unsealed === val) {
+        if (unsealed === (val as string)) {
           return val
         }
       }
@@ -114,7 +114,7 @@ export class DefaultTransactionWorker implements TransactionWorker {
     ): Promise<ChargeDetailState> => {
       const unsealed = await unseal(encrypted)
       for (const val of Object.values(ChargeDetailState)) {
-        if (unsealed === val) {
+        if (unsealed === (val as string)) {
           return val
         }
       }

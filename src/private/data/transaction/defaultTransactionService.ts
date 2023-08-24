@@ -50,9 +50,8 @@ export class DefaultTransactionService implements TransactionService {
     if (!sealedTransaction) {
       return undefined
     }
-    const unsealed = await this.transactionWorker.unsealTransaction(
-      sealedTransaction,
-    )
+    const unsealed =
+      await this.transactionWorker.unsealTransaction(sealedTransaction)
     return TransactionEntityTransformer.transform(unsealed)
   }
 
@@ -166,9 +165,8 @@ export class DefaultTransactionService implements TransactionService {
 
       for (const sealed of sealedTransactions) {
         try {
-          const unsealed = await this.transactionWorker.unsealTransaction(
-            sealed,
-          )
+          const unsealed =
+            await this.transactionWorker.unsealTransaction(sealed)
           successForId = unsealed
           break
         } catch (e) {

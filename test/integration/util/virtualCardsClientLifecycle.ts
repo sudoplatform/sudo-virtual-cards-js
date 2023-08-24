@@ -259,9 +259,8 @@ export const setupVirtualCardsClient = async (
       profilesClient,
       sudo,
       identityAdminClient,
-      fundingSourceProviders: await getFundingSourceProviders(
-        virtualCardsClient,
-      ),
+      fundingSourceProviders:
+        await getFundingSourceProviders(virtualCardsClient),
       bankAccountFundingSourceExpendableEnabled:
         config.bankAccountFundingSourceExpendableEnabled,
     }

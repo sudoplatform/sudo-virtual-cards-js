@@ -89,6 +89,7 @@ describe('ListVirtualCards Test Suite', () => {
           },
         )
       }
+
       // Create 5 cards
       // To avoid race condition, create one card first
       cards.push(await provisionCardFn())

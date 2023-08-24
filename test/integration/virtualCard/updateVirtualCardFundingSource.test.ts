@@ -120,9 +120,8 @@ describe('UpdateVirtualCardFundingSource Test Suite', () => {
       const oldFundingSourceId = card.fundingSourceId
 
       // Cancel funding source of the card
-      const cancelled = await instanceUnderTest.cancelFundingSource(
-        oldFundingSourceId,
-      )
+      const cancelled =
+        await instanceUnderTest.cancelFundingSource(oldFundingSourceId)
       expect(cancelled.id).toEqual(oldFundingSourceId)
       expect(cancelled.state).toEqual(FundingSourceState.Inactive)
 

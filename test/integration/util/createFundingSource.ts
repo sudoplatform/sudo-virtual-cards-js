@@ -319,9 +319,13 @@ export const createCardFundingSource = async (
       throw 'Failed to get payment_method from setup intent'
     }
 
+    const paymentMethod =
+      typeof setupIntent.payment_method === 'string'
+        ? setupIntent.payment_method
+        : setupIntent.payment_method.id
     completionData = {
       provider: 'stripe',
-      paymentMethod: setupIntent.payment_method.toString(),
+      paymentMethod,
     }
   } else if (
     isCheckoutCardProvisionalFundingSourceProvisioningData(provisioningData)

@@ -37,7 +37,12 @@ export interface FundingSourceServiceStripeCardCompletionData {
 export interface FundingSourceServiceCheckoutCardCompletionData {
   provider: 'checkout'
   type: FundingSourceType.CreditCard
-  paymentToken: string
+
+  /**
+   * Payment token associated with funding source card or undefined
+   * if a subsequent call to completeFundingSource after user interaction.
+   */
+  paymentToken?: string
 }
 
 export interface FundingSourceServiceCheckoutBankAccountCompletionData {
