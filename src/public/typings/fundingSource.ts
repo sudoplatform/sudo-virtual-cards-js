@@ -294,6 +294,15 @@ export type BaseProvisionalFundingSourceInteractionData =
  * @property {'checkout'} provider Provider of the interaction data.
  * @property {1} version Version of the format of the interaction data.
  * @property {FundingSourceType.CreditCard} type Type of funding source provider
+ * @property {string} redirectUrl
+ *  URL that user should be redirected to to complete interactive strong
+ *  card authentication required to add the card as a funding source.
+ * @property {string} successUrl
+ *  URL that user will be redirected to upon successful completion of
+ *  strong authentication.
+ * @property {string} failureUrl
+ *  URL that user will be redirected to upon unsuccessful completion of
+ *  strong authentication.
  */
 export interface CheckoutCardProvisionalFundingSourceInteractionData
   extends BaseProvisionalFundingSourceInteractionData {
@@ -301,6 +310,8 @@ export interface CheckoutCardProvisionalFundingSourceInteractionData
   version: 1
   type: FundingSourceType.CreditCard
   redirectUrl: string
+  successUrl: string
+  failureUrl: string
 }
 
 export interface CheckoutBankAccountRefreshFundingSourceInteractionData

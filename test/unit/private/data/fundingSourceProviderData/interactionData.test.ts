@@ -150,6 +150,8 @@ describe('Interaction Data Test Suite', () => {
             version: 1,
             type: FundingSourceType.CreditCard,
             redirectUrl: 'https://some.com/address',
+            successUrl: 'https://some.com/success',
+            failureUrl: 'https://some.com/failure',
           }
 
         const checkoutData = {
@@ -157,6 +159,8 @@ describe('Interaction Data Test Suite', () => {
           version: checkoutDataDecoded.version,
           type: 'CREDIT_CARD',
           redirectUrl: checkoutDataDecoded.redirectUrl,
+          successUrl: checkoutDataDecoded.successUrl,
+          failureUrl: checkoutDataDecoded.failureUrl,
         }
 
         const checkoutDataString = JSON.stringify(checkoutData)

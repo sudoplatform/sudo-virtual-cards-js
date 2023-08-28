@@ -85,6 +85,8 @@ export class GraphQLDataFactory {
         version: 1,
         type: 'CREDIT_CARD',
         redirectUrl: 'https://some.com/url',
+        successUrl: 'https://some.com/success-url',
+        failureUrl: 'https://some.com/failure-url',
       }),
     ),
   }

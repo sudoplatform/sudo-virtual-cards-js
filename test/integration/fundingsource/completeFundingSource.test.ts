@@ -623,6 +623,8 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
           type: FundingSourceType.CreditCard,
           version: 1,
           redirectUrl: expect.stringMatching(/^https:\/\/.*/),
+          successUrl: expect.stringMatching(/^https:\/\/.*/),
+          failureUrl: expect.stringMatching(/^https:\/\/.*/),
         })
       })
 

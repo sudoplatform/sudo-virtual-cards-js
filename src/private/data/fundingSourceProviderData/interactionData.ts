@@ -29,6 +29,8 @@ const CheckoutCardProvisionalFundingSourceInteractionDataProperties = {
   version: t.literal(1),
   type: t.literal('CREDIT_CARD'),
   redirectUrl: t.string,
+  successUrl: t.string,
+  failureUrl: t.string,
 }
 
 const CheckoutCardProvisionalFundingSourceInteractionDataCodec = t.type(
@@ -116,6 +118,8 @@ export function decodeFundingSourceInteractionData(
       type: FundingSourceType.CreditCard,
       version: 1,
       redirectUrl: decoded.redirectUrl,
+      successUrl: decoded.successUrl,
+      failureUrl: decoded.failureUrl,
     }
   } else if (
     CheckoutBankAccountRefreshFundingSourceInteractionDataCodec.is(decoded)
