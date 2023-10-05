@@ -700,8 +700,14 @@ export type VirtualCardApplicationsConfiguration = {
   data: Scalars['ID']['output']
 }
 
+export type VirtualCardPricingPolicy = {
+  __typename?: 'VirtualCardPricingPolicy'
+  data: Scalars['ID']['output']
+}
+
 export type VirtualCardsConfig = {
   __typename?: 'VirtualCardsConfig'
+  bankAccountFundingSourceCreationEnabled?: Maybe<Scalars['Boolean']['output']>
   bankAccountFundingSourceExpendableEnabled: Scalars['Boolean']['output']
   clientApplicationsConfiguration?: Maybe<VirtualCardApplicationsConfiguration>
   fundingSourceClientConfiguration?: Maybe<FundingSourceClientConfiguration>
@@ -711,6 +717,7 @@ export type VirtualCardsConfig = {
   maxFundingSourceVelocity: Array<Scalars['String']['output']>
   maxTransactionAmount: Array<CurrencyAmount>
   maxTransactionVelocity: Array<CurrencyVelocity>
+  pricingPolicy?: Maybe<VirtualCardPricingPolicy>
   virtualCardCurrencies: Array<Scalars['String']['output']>
 }
 
@@ -1116,6 +1123,7 @@ export type VirtualCardsConfigFragment = {
   maxCardCreationVelocity: Array<string>
   virtualCardCurrencies: Array<string>
   bankAccountFundingSourceExpendableEnabled: boolean
+  bankAccountFundingSourceCreationEnabled?: boolean | null
   maxTransactionVelocity: Array<{
     __typename?: 'CurrencyVelocity'
     currency: string
@@ -1142,6 +1150,10 @@ export type VirtualCardsConfigFragment = {
   } | null
   clientApplicationsConfiguration?: {
     __typename?: 'VirtualCardApplicationsConfiguration'
+    data: string
+  } | null
+  pricingPolicy?: {
+    __typename?: 'VirtualCardPricingPolicy'
     data: string
   } | null
 }
@@ -1751,6 +1763,7 @@ export type GetVirtualCardsConfigQuery = {
     maxCardCreationVelocity: Array<string>
     virtualCardCurrencies: Array<string>
     bankAccountFundingSourceExpendableEnabled: boolean
+    bankAccountFundingSourceCreationEnabled?: boolean | null
     maxTransactionVelocity: Array<{
       __typename?: 'CurrencyVelocity'
       currency: string
@@ -1777,6 +1790,10 @@ export type GetVirtualCardsConfigQuery = {
     } | null
     clientApplicationsConfiguration?: {
       __typename?: 'VirtualCardApplicationsConfiguration'
+      data: string
+    } | null
+    pricingPolicy?: {
+      __typename?: 'VirtualCardPricingPolicy'
       data: string
     } | null
   }
@@ -4083,6 +4100,13 @@ export const VirtualCardsConfigFragmentDoc = {
           },
           {
             kind: 'Field',
+            name: {
+              kind: 'Name',
+              value: 'bankAccountFundingSourceCreationEnabled',
+            },
+          },
+          {
+            kind: 'Field',
             name: { kind: 'Name', value: 'fundingSourceClientConfiguration' },
             selectionSet: {
               kind: 'SelectionSet',
@@ -4094,6 +4118,16 @@ export const VirtualCardsConfigFragmentDoc = {
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'clientApplicationsConfiguration' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'data' } },
+              ],
+            },
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'pricingPolicy' },
             selectionSet: {
               kind: 'SelectionSet',
               selections: [
@@ -6494,6 +6528,13 @@ export const GetVirtualCardsConfigDocument = {
           },
           {
             kind: 'Field',
+            name: {
+              kind: 'Name',
+              value: 'bankAccountFundingSourceCreationEnabled',
+            },
+          },
+          {
+            kind: 'Field',
             name: { kind: 'Name', value: 'fundingSourceClientConfiguration' },
             selectionSet: {
               kind: 'SelectionSet',
@@ -6505,6 +6546,16 @@ export const GetVirtualCardsConfigDocument = {
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'clientApplicationsConfiguration' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'data' } },
+              ],
+            },
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'pricingPolicy' },
             selectionSet: {
               kind: 'SelectionSet',
               selections: [

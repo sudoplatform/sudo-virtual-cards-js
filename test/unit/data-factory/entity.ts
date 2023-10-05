@@ -267,6 +267,7 @@ export class EntityDataFactory {
     ],
     virtualCardCurrencies: ['USD'],
     bankAccountFundingSourceExpendableEnabled: true,
+    bankAccountFundingSourceCreationEnabled: true,
     fundingSourceClientConfiguration: {
       data: Base64.encodeString(
         JSON.stringify({
@@ -289,6 +290,62 @@ export class EntityDataFactory {
               plaid: {
                 client_name: 'dummyClientName',
                 redirect_uri: 'dummyRedirectUri',
+              },
+            },
+          },
+        }),
+      ),
+    },
+    pricingPolicy: {
+      data: Base64.encodeString(
+        JSON.stringify({
+          stripe: {
+            creditCard: {
+              DEFAULT: {
+                tiers: [
+                  {
+                    minThreshold: 0,
+                    markup: {
+                      flat: 1000,
+                      percent: 10,
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          checkout: {
+            creditCard: {
+              DEFAULT: {
+                tiers: [
+                  {
+                    minThreshold: 0,
+                    markup: {
+                      flat: 2500,
+                      percent: 25,
+                    },
+                  },
+                ],
+              },
+            },
+            bankAccount: {
+              DEFAULT: {
+                tiers: [
+                  {
+                    minThreshold: 0,
+                    markup: {
+                      flat: 1000,
+                      percent: 0,
+                    },
+                  },
+                  {
+                    minThreshold: 10000,
+                    markup: {
+                      flat: 2000,
+                      percent: 0,
+                    },
+                  },
+                ],
               },
             },
           },

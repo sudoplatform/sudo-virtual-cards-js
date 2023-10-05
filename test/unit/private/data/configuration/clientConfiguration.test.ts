@@ -8,6 +8,7 @@ import { Base64, FatalError } from '@sudoplatform/sudo-common'
 import {
   decodeClientApplicationConfiguration,
   decodeFundingSourceClientConfiguration,
+  decodePricingPolicy,
 } from '../../../../../src/private/data/configuration/clientConfiguration'
 import { ApiDataFactory } from '../../../data-factory/api'
 import { EntityDataFactory } from '../../../data-factory/entity'
@@ -69,6 +70,31 @@ describe('Client Configuration Test Suite', () => {
       expect(caught).toBeInstanceOf(FatalError)
       expect(caught?.message).toEqual(
         'client application configuration cannot be decoded: JSON parsing failed: this is not JSON: Unexpected token h in JSON at position 1',
+      )
+    })
+  })
+
+  describe('decodePricingPolicy', () => {
+    it('should decode successfully', () => {
+      expect(
+        decodePricingPolicy(
+          EntityDataFactory.configurationData.pricingPolicy!.data,
+        ),
+      ).toEqual(ApiDataFactory.configurationData.pricingPolicy)
+    })
+    it('should throw a FatalError if encoded config data is not valid JSON', () => {
+      let caught: Error | undefined
+      let decoded: any
+      try {
+        decoded = decodePricingPolicy(Base64.encodeString('this is not JSON'))
+      } catch (err) {
+        caught = err as Error
+      }
+      expect(decoded).toBeUndefined()
+      expect(caught).toBeDefined()
+      expect(caught).toBeInstanceOf(FatalError)
+      expect(caught?.message).toEqual(
+        'pricing policy cannot be decoded: JSON parsing failed: this is not JSON: Unexpected token h in JSON at position 1',
       )
     })
   })

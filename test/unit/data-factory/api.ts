@@ -251,6 +251,7 @@ export class ApiDataFactory {
     ],
     virtualCardCurrencies: ['USD'],
     bankAccountFundingSourceExpendableEnabled: true,
+    bankAccountFundingSourceCreationEnabled: true,
     fundingSourceClientConfiguration: [
       {
         type: 'checkout',
@@ -265,6 +266,58 @@ export class ApiDataFactory {
           plaid: {
             client_name: 'dummyClientName',
             redirect_uri: 'dummyRedirectUri',
+          },
+        },
+      },
+    },
+    pricingPolicy: {
+      stripe: {
+        creditCard: {
+          DEFAULT: {
+            tiers: [
+              {
+                minThreshold: 0,
+                markup: {
+                  flat: 1000,
+                  percent: 10,
+                },
+              },
+            ],
+          },
+        },
+      },
+      checkout: {
+        creditCard: {
+          DEFAULT: {
+            tiers: [
+              {
+                minThreshold: 0,
+                markup: {
+                  flat: 2500,
+                  percent: 25,
+                },
+              },
+            ],
+          },
+        },
+        bankAccount: {
+          DEFAULT: {
+            tiers: [
+              {
+                minThreshold: 0,
+                markup: {
+                  flat: 1000,
+                  percent: 0,
+                },
+              },
+              {
+                minThreshold: 10000,
+                markup: {
+                  flat: 2000,
+                  percent: 0,
+                },
+              },
+            ],
           },
         },
       },

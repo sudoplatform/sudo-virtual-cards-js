@@ -12,6 +12,7 @@ import {
 import {
   ClientApplicationConfigurationEntity,
   CurrencyVelocityEntity,
+  PricingPolicyEntity,
   VirtualCardsConfigEntity,
 } from '../../../domain/entities/configuration/virtualCardsConfigEntity'
 import { FundingSourceClientConfigurationEntity } from '../../../domain/entities/fundingSource/fundingSourceEntity'
@@ -31,6 +32,10 @@ export class VirtualCardsConfigEntityTransformer {
       virtualCardCurrencies: data.virtualCardCurrencies,
       bankAccountFundingSourceExpendableEnabled:
         data.bankAccountFundingSourceExpendableEnabled,
+      bankAccountFundingSourceCreationEnabled:
+        data.bankAccountFundingSourceCreationEnabled
+          ? data.bankAccountFundingSourceCreationEnabled
+          : undefined,
       fundingSourceClientConfiguration: data.fundingSourceClientConfiguration
         ? {
             data: (
@@ -43,6 +48,11 @@ export class VirtualCardsConfigEntityTransformer {
             data: (
               data.clientApplicationsConfiguration as ClientApplicationConfigurationEntity
             ).data,
+          }
+        : undefined,
+      pricingPolicy: data.pricingPolicy
+        ? {
+            data: (data.pricingPolicy as PricingPolicyEntity).data,
           }
         : undefined,
     }

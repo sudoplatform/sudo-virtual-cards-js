@@ -77,7 +77,7 @@ fragment BankAccountFundingSource on BankAccountFundingSource {
     signature
     keyId
     algorithm
-    data  
+    data
   }
   last4
   institutionName {
@@ -247,10 +247,14 @@ fragment VirtualCardsConfig on VirtualCardsConfig {
     ...FundingSourceSupportInfo
   }
   bankAccountFundingSourceExpendableEnabled
+  bankAccountFundingSourceCreationEnabled
   fundingSourceClientConfiguration {
     data
   }
   clientApplicationsConfiguration {
+    data
+  }
+  pricingPolicy {
     data
   }
 }

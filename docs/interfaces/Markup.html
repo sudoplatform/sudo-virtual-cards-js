@@ -16,7 +16,7 @@
 <li><a href="Markup.html">Markup</a></li></ul>
 <h1>Interface Markup</h1></div>
 <section class="tsd-panel tsd-comment">
-<div class="tsd-comment tsd-typography"><p>Markup information.</p>
+<div class="tsd-comment tsd-typography"><p>The rates of markup applied to a transaction when calculating the fees.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div></section>
 <section class="tsd-panel tsd-hierarchy">
@@ -24,7 +24,7 @@
 <ul class="tsd-hierarchy">
 <li><span class="target">Markup</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/typings/transaction.ts:102</li></ul></aside>
+<li>Defined in src/public/typings/markup.ts:19</li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -40,19 +40,33 @@
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member"><a id="flat" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>flat</span><a href="#flat" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><g stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" id="icon-anchor"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5"></path><path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5"></path></g></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">flat</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">flat</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+<div class="tsd-comment tsd-typography"><p>Flat amount applied in calculating total markup in minor currency unit of billed currency
+ in containing transaction detail e.g. 31 for $0.31.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/typings/transaction.ts:104</li></ul></aside></section>
+<li>Defined in src/public/typings/markup.ts:21</li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="minCharge" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>min<wbr/>Charge</span><a href="#minCharge" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">min<wbr/>Charge</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">min<wbr/>Charge</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
+<div class="tsd-comment tsd-typography"><p>The minimum charge that will be made to the funding source. For example, if a small
+ charge of $0.10 were made with a 2.99%+$0.31 fee formula then the resultant fee would be $0.31 cents resulting in
+ an expected funding source charge of $0.41 cents. If <code>minCharge</code> is set and more than this amount then the
+ <code>minCharge</code> will be charged instead.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/typings/transaction.ts:105</li></ul></aside></section>
+<li>Defined in src/public/typings/markup.ts:22</li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="percent" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>percent</span><a href="#percent" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">percent</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">percent</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+<div class="tsd-comment tsd-typography"><p>Floating point percentage amount applied in calculating total markup multiplied by 1000.
+ For example: 2990 for 2.99%. 1/1000th of a percent is the smallest granularity that can be represented.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/public/typings/transaction.ts:103</li></ul></aside></section></section></div>
+<li>Defined in src/public/typings/markup.ts:20</li></ul></aside></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -121,6 +135,7 @@
 <li><a href="CheckoutCardFundingSourceClientConfiguration.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Checkout<wbr/>Card<wbr/>Funding<wbr/>Source<wbr/>Client<wbr/>Configuration</span></a></li>
 <li><a href="CheckoutCardProvisionalFundingSourceInteractionData.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Checkout<wbr/>Card<wbr/>Provisional<wbr/>Funding<wbr/>Source<wbr/>Interaction<wbr/>Data</span></a></li>
 <li><a href="CheckoutCardProvisionalFundingSourceProvisioningData.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Checkout<wbr/>Card<wbr/>Provisional<wbr/>Funding<wbr/>Source<wbr/>Provisioning<wbr/>Data</span></a></li>
+<li><a href="CheckoutPricingPolicy.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Checkout<wbr/>Pricing<wbr/>Policy</span></a></li>
 <li><a href="ClientApplicationConfiguration.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Application<wbr/>Configuration</span></a></li>
 <li><a href="CompleteFundingSourceCheckoutBankAccountCompletionDataInput.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Complete<wbr/>Funding<wbr/>Source<wbr/>Checkout<wbr/>Bank<wbr/>Account<wbr/>Completion<wbr/>Data<wbr/>Input</span></a></li>
 <li><a href="CompleteFundingSourceCheckoutCardCompletionDataInput.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Complete<wbr/>Funding<wbr/>Source<wbr/>Checkout<wbr/>Card<wbr/>Completion<wbr/>Data<wbr/>Input</span></a></li>
@@ -151,6 +166,7 @@
 <li><a href="Markup.html" class="current"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Markup</span></a></li>
 <li><a href="PlaidAccountMetadata.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Plaid<wbr/>Account<wbr/>Metadata</span></a></li>
 <li><a href="PlaidApplicationConfiguration.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Plaid<wbr/>Application<wbr/>Configuration</span></a></li>
+<li><a href="PricingPolicy.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Pricing<wbr/>Policy</span></a></li>
 <li><a href="ProvisionVirtualCardBillingAddressInput.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Provision<wbr/>Virtual<wbr/>Card<wbr/>Billing<wbr/>Address<wbr/>Input</span></a></li>
 <li><a href="ProvisionVirtualCardInput.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Provision<wbr/>Virtual<wbr/>Card<wbr/>Input</span></a></li>
 <li><a href="ProvisionalFundingSource.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Provisional<wbr/>Funding<wbr/>Source</span></a></li>
@@ -163,7 +179,10 @@
 <li><a href="SetupFundingSourceInput.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Setup<wbr/>Funding<wbr/>Source<wbr/>Input</span></a></li>
 <li><a href="StripeCardFundingSourceClientConfiguration.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Stripe<wbr/>Card<wbr/>Funding<wbr/>Source<wbr/>Client<wbr/>Configuration</span></a></li>
 <li><a href="StripeCardProvisionalFundingSourceProvisioningData.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Stripe<wbr/>Card<wbr/>Provisional<wbr/>Funding<wbr/>Source<wbr/>Provisioning<wbr/>Data</span></a></li>
+<li><a href="StripePricingPolicy.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Stripe<wbr/>Pricing<wbr/>Policy</span></a></li>
 <li><a href="SudoVirtualCardsClient.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Sudo<wbr/>Virtual<wbr/>Cards<wbr/>Client</span></a></li>
+<li><a href="TieredMarkup.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Tiered<wbr/>Markup</span></a></li>
+<li><a href="TieredMarkupPolicy.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Tiered<wbr/>Markup<wbr/>Policy</span></a></li>
 <li><a href="Transaction.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Transaction</span></a></li>
 <li><a href="TransactionDetailCharge.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Transaction<wbr/>Detail<wbr/>Charge</span></a></li>
 <li><a href="TransactionVelocity.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Transaction<wbr/>Velocity</span></a></li>

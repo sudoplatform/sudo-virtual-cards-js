@@ -7,6 +7,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Base64, FatalError } from '@sudoplatform/sudo-common'
+import { PricingPolicy } from '../../../public'
 import { FundingSourceClientConfiguration } from '../../../public/typings/fundingSource'
 import { ClientApplicationConfiguration } from '../../../public/typings/virtualCardsConfig'
 
@@ -97,4 +98,30 @@ export function decodeClientApplicationConfiguration(configData: string): {
     }
   }
   return clientApplicationConfig
+}
+
+export function decodePricingPolicy(pricingPolicyData: string): PricingPolicy {
+  const msg = 'pricing policy cannot be decoded'
+
+  let decodedString: string
+  try {
+    decodedString = Base64.decodeString(pricingPolicyData)
+  } catch (err) {
+    const error = err as Error
+    throw new FatalError(
+      `${msg}: Base64 decoding failed: ${pricingPolicyData}: ${error.message}`,
+    )
+  }
+
+  let decodedObject: PricingPolicy
+  try {
+    decodedObject = JSON.parse(decodedString)
+  } catch (err) {
+    const error = err as Error
+    throw new FatalError(
+      `${msg}: JSON parsing failed: ${decodedString}: ${error.message}`,
+    )
+  }
+
+  return decodedObject
 }

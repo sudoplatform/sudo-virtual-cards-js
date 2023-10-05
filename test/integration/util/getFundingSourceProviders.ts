@@ -26,7 +26,7 @@ export interface FundingSourceProviders {
 export const getFundingSourceProviders = async (
   vcClient: SudoVirtualCardsClient,
 ): Promise<FundingSourceProviders> => {
-  const config = await vcClient.getFundingSourceClientConfiguration()
+  const config = await vcClient.getVirtualCardsConfig()
 
   let stripe: Stripe | undefined
   let checkout: Checkout | undefined
@@ -35,7 +35,7 @@ export const getFundingSourceProviders = async (
   let checkoutCardEnabled = false
   let checkoutBankAccountEnabled = false
 
-  for (const fsConfig of config) {
+  for (const fsConfig of config.fundingSourceClientConfiguration) {
     if (isStripeCardFundingSourceClientConfiguration(fsConfig)) {
       stripe = new Stripe(fsConfig.apiKey, {
         apiVersion: '2022-11-15',
@@ -52,7 +52,10 @@ export const getFundingSourceProviders = async (
       if (isCheckoutCardFundingSourceClientConfiguration(fsConfig)) {
         checkoutCardEnabled = true
       }
-      if (isCheckoutBankAccountFundingSourceClientConfiguration(fsConfig)) {
+      if (
+        isCheckoutBankAccountFundingSourceClientConfiguration(fsConfig) &&
+        config.bankAccountFundingSourceCreationEnabled
+      ) {
         checkoutBankAccountEnabled = true
       }
     }

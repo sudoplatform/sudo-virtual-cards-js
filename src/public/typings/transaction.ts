@@ -5,6 +5,7 @@
  */
 
 import { CurrencyAmount } from './currencyAmount'
+import { Markup } from './markup'
 
 /**
  * @property {string} id Identifier of the transaction.
@@ -94,13 +95,4 @@ export interface TransactionDetailCharge {
   description: string
   state: ChargeDetailState
   continuationOfExistingCharge: boolean
-}
-
-/**
- * Markup information.
- */
-export interface Markup {
-  percent: number
-  flat: number
-  minCharge?: number
 }

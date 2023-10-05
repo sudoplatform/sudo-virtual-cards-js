@@ -17,6 +17,10 @@ export interface ClientApplicationConfigurationEntity {
   data: string
 }
 
+export interface PricingPolicyEntity {
+  data: string
+}
+
 export interface VirtualCardsConfigEntity {
   maxFundingSourceVelocity: string[]
   maxFundingSourceFailureVelocity: string[]
@@ -26,6 +30,8 @@ export interface VirtualCardsConfigEntity {
   virtualCardCurrencies: string[]
   fundingSourceSupportInfo: FundingSourceSupportInfo[]
   bankAccountFundingSourceExpendableEnabled: boolean
+  bankAccountFundingSourceCreationEnabled?: boolean
   fundingSourceClientConfiguration?: FundingSourceClientConfigurationEntity
   clientApplicationConfiguration?: ClientApplicationConfigurationEntity
+  pricingPolicy?: PricingPolicyEntity
 }
