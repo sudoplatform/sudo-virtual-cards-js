@@ -233,6 +233,7 @@ fragment FundingSourceSupportInfo on FundingSourceSupportInfo {
 fragment VirtualCardsConfig on VirtualCardsConfig {
   maxFundingSourceVelocity
   maxFundingSourceFailureVelocity
+  maxFundingSourcePendingVelocity
   maxCardCreationVelocity
   maxTransactionVelocity {
     currency

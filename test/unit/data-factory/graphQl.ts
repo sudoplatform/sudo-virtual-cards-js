@@ -325,6 +325,7 @@ export class GraphQLDataFactory {
     maxCardCreationVelocity: ['5/P1D'],
     maxFundingSourceVelocity: ['5/P1D'],
     maxFundingSourceFailureVelocity: [''],
+    maxFundingSourcePendingVelocity: [''],
     maxTransactionAmount: [
       {
         currency: 'USD',

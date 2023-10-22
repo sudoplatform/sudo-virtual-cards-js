@@ -24,6 +24,8 @@ export class VirtualCardsConfigEntityTransformer {
       fundingSourceSupportInfo: data.fundingSourceSupportInfo,
       maxCardCreationVelocity: data.maxCardCreationVelocity,
       maxFundingSourceFailureVelocity: data.maxFundingSourceFailureVelocity,
+      maxFundingSourcePendingVelocity:
+        data.maxFundingSourcePendingVelocity ?? [],
       maxFundingSourceVelocity: data.maxFundingSourceVelocity,
       maxTransactionAmount: transformCurrencyAmount(data.maxTransactionAmount),
       maxTransactionVelocity: transformCurrencyVelocity(

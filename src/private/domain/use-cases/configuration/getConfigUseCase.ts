@@ -24,6 +24,7 @@ export interface CurrencyVelocityEntity {
 export interface VirtualCardsConfigUseCaseOutput {
   maxFundingSourceVelocity: string[]
   maxFundingSourceFailureVelocity: string[]
+  maxFundingSourcePendingVelocity: string[]
   maxCardCreationVelocity: string[]
   maxTransactionVelocity: CurrencyVelocityEntity[]
   maxTransactionAmount: CurrencyAmountEntity[]

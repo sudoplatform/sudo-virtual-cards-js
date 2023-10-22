@@ -14,7 +14,8 @@ import { PricingPolicy } from './pricingPolicy'
  *
  * @interface VirtualCardsConfig
  * @property {string[]} maxFundingSourceVelocity The maximum number of funding sources that can be created within a defined period.
- * @property {string[]} maxFundingSourceFailureVelocity The maximum number of funding sources that can be created within a defined period.
+ * @property {string[]} maxFundingSourceFailureVelocity The maximum number of failed funding sources that can be created within a defined period.
+ * @property {string[]} maxFundingSourcePendingVelocity The maximum number of pending funding sources that can be created within a defined period.
  * @property {string[]} maxCardCreationVelocity The maximum number of virtual cards that can be created within a defined period.
  * @property {CurrencyVelocity[]} maxTransactionVelocity The maximum number of transactions that can be created within a defined period.
  * @property {CurrencyAmount[]} maxTransactionAmount The maximum transaction amount per currency.
@@ -30,6 +31,7 @@ import { PricingPolicy } from './pricingPolicy'
 export interface VirtualCardsConfig {
   maxFundingSourceVelocity: string[]
   maxFundingSourceFailureVelocity: string[]
+  maxFundingSourcePendingVelocity: string[]
   maxCardCreationVelocity: string[]
   maxTransactionVelocity: CurrencyVelocity[]
   maxTransactionAmount: CurrencyAmount[]

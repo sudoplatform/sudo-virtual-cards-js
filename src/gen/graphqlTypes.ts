@@ -714,6 +714,7 @@ export type VirtualCardsConfig = {
   fundingSourceSupportInfo: Array<FundingSourceSupportInfo>
   maxCardCreationVelocity: Array<Scalars['String']['output']>
   maxFundingSourceFailureVelocity: Array<Scalars['String']['output']>
+  maxFundingSourcePendingVelocity?: Maybe<Array<Scalars['String']['output']>>
   maxFundingSourceVelocity: Array<Scalars['String']['output']>
   maxTransactionAmount: Array<CurrencyAmount>
   maxTransactionVelocity: Array<CurrencyVelocity>
@@ -1120,6 +1121,7 @@ export type VirtualCardsConfigFragment = {
   __typename?: 'VirtualCardsConfig'
   maxFundingSourceVelocity: Array<string>
   maxFundingSourceFailureVelocity: Array<string>
+  maxFundingSourcePendingVelocity?: Array<string> | null
   maxCardCreationVelocity: Array<string>
   virtualCardCurrencies: Array<string>
   bankAccountFundingSourceExpendableEnabled: boolean
@@ -1760,6 +1762,7 @@ export type GetVirtualCardsConfigQuery = {
     __typename?: 'VirtualCardsConfig'
     maxFundingSourceVelocity: Array<string>
     maxFundingSourceFailureVelocity: Array<string>
+    maxFundingSourcePendingVelocity?: Array<string> | null
     maxCardCreationVelocity: Array<string>
     virtualCardCurrencies: Array<string>
     bankAccountFundingSourceExpendableEnabled: boolean
@@ -4047,6 +4050,10 @@ export const VirtualCardsConfigFragmentDoc = {
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'maxFundingSourceFailureVelocity' },
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'maxFundingSourcePendingVelocity' },
           },
           {
             kind: 'Field',
@@ -6475,6 +6482,10 @@ export const GetVirtualCardsConfigDocument = {
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'maxFundingSourceFailureVelocity' },
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'maxFundingSourcePendingVelocity' },
           },
           {
             kind: 'Field',

@@ -38,6 +38,7 @@ describe('SudoVirtualCardsClient GetConfigurationData Test Suite', () => {
 
       config.maxCardCreationVelocity.forEach(verifyVelocity)
       config.maxFundingSourceFailureVelocity.forEach(verifyVelocity)
+      config.maxFundingSourcePendingVelocity.forEach(verifyVelocity)
       config.maxFundingSourceVelocity.forEach(verifyVelocity)
       expect(config.maxTransactionAmount.length).toBeGreaterThanOrEqual(1)
       expect(config.maxTransactionVelocity.length).toBeGreaterThanOrEqual(1)

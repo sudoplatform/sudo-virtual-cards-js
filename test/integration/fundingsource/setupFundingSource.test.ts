@@ -11,6 +11,7 @@ import {
   FundingSourceType,
   ProvisionalFundingSourceState,
   SudoVirtualCardsClient,
+  VirtualCardsConfig,
 } from '../../../src'
 import { uuidV4Regex } from '../../utility/uuidV4Regex'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
@@ -20,16 +21,15 @@ describe('SudoVirtualCardsClient SetupFundingSource Test Suite', () => {
   const log = new DefaultLogger('SudoVirtualCardsClientIntegrationTests')
   let instanceUnderTest: SudoVirtualCardsClient
   let userClient: SudoUserClient
-  let fsClientConfig: FundingSourceClientConfiguration[]
+  let clientConfig: VirtualCardsConfig
   let defaultFsClientConfig: FundingSourceClientConfiguration
 
   beforeEach(async () => {
     const result = await setupVirtualCardsClient(log)
     instanceUnderTest = result.virtualCardsClient
     userClient = result.userClient
-    fsClientConfig =
-      await instanceUnderTest.getFundingSourceClientConfiguration()
-    defaultFsClientConfig = fsClientConfig[0]
+    clientConfig = await instanceUnderTest.getVirtualCardsConfig()
+    defaultFsClientConfig = clientConfig.fundingSourceClientConfiguration[0]
   })
 
   describe('SetupFundingSource', () => {
@@ -63,11 +63,12 @@ describe('SudoVirtualCardsClient SetupFundingSource Test Suite', () => {
 
     describe('checkout specific tests', () => {
       it('should return a checkout card provisional funding source', async () => {
-        const checkoutCardFsConfig = fsClientConfig.find(
-          (config) =>
-            config.type === 'checkout' &&
-            config.fundingSourceType === FundingSourceType.CreditCard,
-        )
+        const checkoutCardFsConfig =
+          clientConfig.fundingSourceClientConfiguration.find(
+            (config) =>
+              config.type === 'checkout' &&
+              config.fundingSourceType === FundingSourceType.CreditCard,
+          )
         if (!checkoutCardFsConfig) {
           return
         }
@@ -87,12 +88,16 @@ describe('SudoVirtualCardsClient SetupFundingSource Test Suite', () => {
       })
 
       it('should return a checkout bank account provisional funding source', async () => {
-        const checkoutBankAccountFsConfig = fsClientConfig.find(
-          (config) =>
-            config.type === 'checkout' &&
-            config.fundingSourceType === FundingSourceType.BankAccount,
-        )
-        if (!checkoutBankAccountFsConfig) {
+        const checkoutBankAccountFsConfig =
+          clientConfig.fundingSourceClientConfiguration.find(
+            (config) =>
+              config.type === 'checkout' &&
+              config.fundingSourceType === FundingSourceType.BankAccount,
+          )
+        if (
+          !checkoutBankAccountFsConfig ||
+          !clientConfig.bankAccountFundingSourceCreationEnabled
+        ) {
           return
         }
 
