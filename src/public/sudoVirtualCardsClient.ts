@@ -802,6 +802,20 @@ export interface SudoVirtualCardsClient {
   ): Promise<FundingSource>
 
   /**
+   * Export the cryptographic keys to a key archive.
+   *
+   * @return Key archive data.
+   */
+  exportKeys(): Promise<ArrayBuffer>
+
+  /**
+   * Imports cryptographic keys from a key archive.
+   *
+   * @param archiveData Key archive data to import the keys from.
+   */
+  importKeys(archiveData: ArrayBuffer): Promise<void>
+
+  /**
    * Removes any cached data maintained by this client.
    */
   reset(): Promise<void>
@@ -873,7 +887,6 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
       throw new VirtualCardsServiceConfigNotFoundError()
     }
   }
-
   /**
    * Create key pair and secret key for use by the Virtual Cards Client if
    * they have not already been created.
@@ -1187,6 +1200,14 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
       )
       return await useCase.execute(input)
     })
+  }
+
+  async exportKeys(): Promise<ArrayBuffer> {
+    return await this.keyService.exportKeys()
+  }
+
+  async importKeys(archiveData: ArrayBuffer): Promise<void> {
+    await this.keyService.importKeys(archiveData)
   }
 
   async reset(): Promise<void> {

@@ -70,6 +70,7 @@ export enum DeclineReason {
   ExpiryCheckFailed = 'EXPIRY_CHECK_FAILED',
   ProcessingError = 'PROCESSING_ERROR',
   VelocityExceeded = 'VELOCITY_EXCEEDED',
+  ServiceUnavailable = 'SERVICE_UNAVAILABLE',
   Declined = 'DECLINED',
 }
 

@@ -9,4 +9,6 @@ import { CreateKeyIfAbsentResult } from '../../../../public/typings/createKeysIf
 export interface KeyService {
   createSymmetricKeyIfAbsent(): Promise<CreateKeyIfAbsentResult>
   createAndRegisterKeyPairIfAbsent(): Promise<CreateKeyIfAbsentResult>
+  exportKeys(): Promise<ArrayBuffer>
+  importKeys(archiveData: ArrayBuffer): Promise<void>
 }

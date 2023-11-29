@@ -487,4 +487,12 @@ describe('DeviceKeyWorker Test Suite', () => {
       },
     )
   })
+
+  describe('importKeys', () => {
+    it('throws InvalidArgumentError if no data provided to import', async () => {
+      await expect(
+        instanceUnderTest.importKeys(new ArrayBuffer(0)),
+      ).rejects.toThrow(IllegalArgumentError)
+    })
+  })
 })

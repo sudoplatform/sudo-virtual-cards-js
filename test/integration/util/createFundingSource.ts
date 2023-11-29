@@ -127,9 +127,9 @@ export const CheckoutTestCards: Record<TestCardName, TestCard | undefined> = {
     cardType: CardType.Credit,
   },
   'Visa-No3DS-1': {
-    number: '4532432452900131',
+    number: '4484070000035519',
     cvv: '257',
-    last4: '0131',
+    last4: '5519',
     address: DefaultTestCardBillingAddress['checkout'],
     cardType: CardType.Credit,
   },
@@ -141,9 +141,9 @@ export const CheckoutTestCards: Record<TestCardName, TestCard | undefined> = {
     cardType: CardType.Debit,
   },
   BadAddress: {
-    number: '4532432452900131',
+    number: '4484070000035519',
     cvv: '257',
-    last4: '0131',
+    last4: '5519',
     // See https://www.checkout.com/docs/testing/avs-check-testing
     address: new TestCardBillingAddress({ addressLine1: 'Test_N' }),
     cardType: CardType.Credit,

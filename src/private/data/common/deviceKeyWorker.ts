@@ -9,6 +9,7 @@ import {
   Buffer,
   DecodeError,
   DefaultLogger,
+  DefaultSudoKeyArchive,
   EncryptionAlgorithm,
   FatalError,
   IllegalArgumentError,
@@ -80,6 +81,10 @@ export interface DeviceKeyWorker {
   unsealString(input: UnsealInput): Promise<string>
 
   signString(input: SignInput): Promise<string>
+
+  exportKeys(): Promise<ArrayBuffer>
+
+  importKeys(archiveData: ArrayBuffer): Promise<void>
 }
 
 export class DefaultDeviceKeyWorker implements DeviceKeyWorker {
@@ -410,5 +415,22 @@ export class DefaultDeviceKeyWorker implements DeviceKeyWorker {
       throw new NotSignedInError()
     }
     return `${KEY_RING_SERVICE_NAME}.${subject}`
+  }
+
+  public async exportKeys(): Promise<ArrayBuffer> {
+    const keyArchive = new DefaultSudoKeyArchive(this.keyManager)
+    await keyArchive.loadKeys()
+    return await keyArchive.archive(undefined)
+  }
+
+  public async importKeys(archiveData: ArrayBuffer): Promise<void> {
+    if (archiveData.byteLength === 0) {
+      throw new IllegalArgumentError()
+    }
+    const unarchiver = new DefaultSudoKeyArchive(this.keyManager, {
+      archiveData,
+    })
+    await unarchiver.unarchive(undefined)
+    await unarchiver.saveKeys()
   }
 }

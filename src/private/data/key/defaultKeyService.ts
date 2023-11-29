@@ -83,4 +83,12 @@ export class DefaultKeyService implements KeyService {
       keyId: publicKey.id,
     }
   }
+
+  async exportKeys(): Promise<ArrayBuffer> {
+    return await this.deviceKeyWorker.exportKeys()
+  }
+
+  async importKeys(archiveData: ArrayBuffer): Promise<void> {
+    await this.deviceKeyWorker.importKeys(archiveData)
+  }
 }
