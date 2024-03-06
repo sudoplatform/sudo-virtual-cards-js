@@ -55,6 +55,7 @@ export type BankAccountFundingSource = CommonFundingSource &
     bankAccountType: BankAccountType
     createdAtEpochMs: Scalars['Float']['output']
     currency: Scalars['String']['output']
+    flags: Array<FundingSourceFlags>
     id: Scalars['ID']['output']
     institutionLogo?: Maybe<SealedAttribute>
     institutionName: SealedAttribute
@@ -116,6 +117,7 @@ export type CardUpdateRequest = {
 export type CommonFundingSource = {
   createdAtEpochMs: Scalars['Float']['output']
   currency: Scalars['String']['output']
+  flags: Array<FundingSourceFlags>
   id: Scalars['ID']['output']
   owner: Scalars['ID']['output']
   state: FundingSourceState
@@ -152,6 +154,7 @@ export type CreditCardFundingSource = CommonFundingSource &
     cardType: CardType
     createdAtEpochMs: Scalars['Float']['output']
     currency: Scalars['String']['output']
+    flags: Array<FundingSourceFlags>
     id: Scalars['ID']['output']
     last4: Scalars['String']['output']
     network: CreditCardNetwork
@@ -219,6 +222,10 @@ export type FundingSourceConnection = {
   __typename?: 'FundingSourceConnection'
   items: Array<FundingSource>
   nextToken?: Maybe<Scalars['String']['output']>
+}
+
+export enum FundingSourceFlags {
+  Unfunded = 'UNFUNDED',
 }
 
 export enum FundingSourceState {
@@ -783,6 +790,7 @@ export type CreditCardFundingSourceFragment = {
   createdAtEpochMs: number
   updatedAtEpochMs: number
   state: FundingSourceState
+  flags: Array<FundingSourceFlags>
   currency: string
   last4: string
   network: CreditCardNetwork
@@ -802,6 +810,7 @@ export type BankAccountFundingSourceFragment = {
   createdAtEpochMs: number
   updatedAtEpochMs: number
   state: FundingSourceState
+  flags: Array<FundingSourceFlags>
   currency: string
   bankAccountType: BankAccountType
   last4: string
@@ -1214,6 +1223,7 @@ export type CompleteFundingSourceMutation = {
         createdAtEpochMs: number
         updatedAtEpochMs: number
         state: FundingSourceState
+        flags: Array<FundingSourceFlags>
         currency: string
         bankAccountType: BankAccountType
         last4: string
@@ -1255,6 +1265,7 @@ export type CompleteFundingSourceMutation = {
         createdAtEpochMs: number
         updatedAtEpochMs: number
         state: FundingSourceState
+        flags: Array<FundingSourceFlags>
         currency: string
         last4: string
         network: CreditCardNetwork
@@ -1282,6 +1293,7 @@ export type RefreshFundingSourceMutation = {
         createdAtEpochMs: number
         updatedAtEpochMs: number
         state: FundingSourceState
+        flags: Array<FundingSourceFlags>
         currency: string
         bankAccountType: BankAccountType
         last4: string
@@ -1323,6 +1335,7 @@ export type RefreshFundingSourceMutation = {
         createdAtEpochMs: number
         updatedAtEpochMs: number
         state: FundingSourceState
+        flags: Array<FundingSourceFlags>
         currency: string
         last4: string
         network: CreditCardNetwork
@@ -1350,6 +1363,7 @@ export type CancelFundingSourceMutation = {
         createdAtEpochMs: number
         updatedAtEpochMs: number
         state: FundingSourceState
+        flags: Array<FundingSourceFlags>
         currency: string
         bankAccountType: BankAccountType
         last4: string
@@ -1391,6 +1405,7 @@ export type CancelFundingSourceMutation = {
         createdAtEpochMs: number
         updatedAtEpochMs: number
         state: FundingSourceState
+        flags: Array<FundingSourceFlags>
         currency: string
         last4: string
         network: CreditCardNetwork
@@ -1681,6 +1696,7 @@ export type SandboxSetFundingSourceToRequireRefreshMutation = {
         createdAtEpochMs: number
         updatedAtEpochMs: number
         state: FundingSourceState
+        flags: Array<FundingSourceFlags>
         currency: string
         bankAccountType: BankAccountType
         last4: string
@@ -1722,6 +1738,7 @@ export type SandboxSetFundingSourceToRequireRefreshMutation = {
         createdAtEpochMs: number
         updatedAtEpochMs: number
         state: FundingSourceState
+        flags: Array<FundingSourceFlags>
         currency: string
         last4: string
         network: CreditCardNetwork
@@ -1905,6 +1922,7 @@ export type GetFundingSourceQuery = {
         createdAtEpochMs: number
         updatedAtEpochMs: number
         state: FundingSourceState
+        flags: Array<FundingSourceFlags>
         currency: string
         bankAccountType: BankAccountType
         last4: string
@@ -1946,6 +1964,7 @@ export type GetFundingSourceQuery = {
         createdAtEpochMs: number
         updatedAtEpochMs: number
         state: FundingSourceState
+        flags: Array<FundingSourceFlags>
         currency: string
         last4: string
         network: CreditCardNetwork
@@ -1978,6 +1997,7 @@ export type ListFundingSourcesQuery = {
           createdAtEpochMs: number
           updatedAtEpochMs: number
           state: FundingSourceState
+          flags: Array<FundingSourceFlags>
           currency: string
           bankAccountType: BankAccountType
           last4: string
@@ -2019,6 +2039,7 @@ export type ListFundingSourcesQuery = {
           createdAtEpochMs: number
           updatedAtEpochMs: number
           state: FundingSourceState
+          flags: Array<FundingSourceFlags>
           currency: string
           last4: string
           network: CreditCardNetwork
@@ -2679,6 +2700,7 @@ export type OnFundingSourceUpdateSubscription = {
         createdAtEpochMs: number
         updatedAtEpochMs: number
         state: FundingSourceState
+        flags: Array<FundingSourceFlags>
         currency: string
         bankAccountType: BankAccountType
         last4: string
@@ -2720,6 +2742,7 @@ export type OnFundingSourceUpdateSubscription = {
         createdAtEpochMs: number
         updatedAtEpochMs: number
         state: FundingSourceState
+        flags: Array<FundingSourceFlags>
         currency: string
         last4: string
         network: CreditCardNetwork
@@ -2860,6 +2883,7 @@ export const CreditCardFundingSourceFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'flags' } },
           { kind: 'Field', name: { kind: 'Name', value: 'currency' } },
           {
             kind: 'Field',
@@ -2924,6 +2948,7 @@ export const BankAccountFundingSourceFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'flags' } },
           { kind: 'Field', name: { kind: 'Name', value: 'currency' } },
           {
             kind: 'Field',
@@ -4469,6 +4494,7 @@ export const CompleteFundingSourceDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'flags' } },
           { kind: 'Field', name: { kind: 'Name', value: 'currency' } },
           {
             kind: 'Field',
@@ -4503,6 +4529,7 @@ export const CompleteFundingSourceDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'flags' } },
           { kind: 'Field', name: { kind: 'Name', value: 'currency' } },
           {
             kind: 'Field',
@@ -4689,6 +4716,7 @@ export const RefreshFundingSourceDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'flags' } },
           { kind: 'Field', name: { kind: 'Name', value: 'currency' } },
           {
             kind: 'Field',
@@ -4723,6 +4751,7 @@ export const RefreshFundingSourceDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'flags' } },
           { kind: 'Field', name: { kind: 'Name', value: 'currency' } },
           {
             kind: 'Field',
@@ -4909,6 +4938,7 @@ export const CancelFundingSourceDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'flags' } },
           { kind: 'Field', name: { kind: 'Name', value: 'currency' } },
           {
             kind: 'Field',
@@ -4943,6 +4973,7 @@ export const CancelFundingSourceDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'flags' } },
           { kind: 'Field', name: { kind: 'Name', value: 'currency' } },
           {
             kind: 'Field',
@@ -6196,6 +6227,7 @@ export const SandboxSetFundingSourceToRequireRefreshDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'flags' } },
           { kind: 'Field', name: { kind: 'Name', value: 'currency' } },
           {
             kind: 'Field',
@@ -6230,6 +6262,7 @@ export const SandboxSetFundingSourceToRequireRefreshDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'flags' } },
           { kind: 'Field', name: { kind: 'Name', value: 'currency' } },
           {
             kind: 'Field',
@@ -7106,6 +7139,7 @@ export const GetFundingSourceDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'flags' } },
           { kind: 'Field', name: { kind: 'Name', value: 'currency' } },
           {
             kind: 'Field',
@@ -7140,6 +7174,7 @@ export const GetFundingSourceDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'flags' } },
           { kind: 'Field', name: { kind: 'Name', value: 'currency' } },
           {
             kind: 'Field',
@@ -7352,6 +7387,7 @@ export const ListFundingSourcesDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'flags' } },
           { kind: 'Field', name: { kind: 'Name', value: 'currency' } },
           {
             kind: 'Field',
@@ -7386,6 +7422,7 @@ export const ListFundingSourcesDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'flags' } },
           { kind: 'Field', name: { kind: 'Name', value: 'currency' } },
           {
             kind: 'Field',
@@ -10067,6 +10104,7 @@ export const OnFundingSourceUpdateDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'flags' } },
           { kind: 'Field', name: { kind: 'Name', value: 'currency' } },
           {
             kind: 'Field',
@@ -10101,6 +10139,7 @@ export const OnFundingSourceUpdateDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'flags' } },
           { kind: 'Field', name: { kind: 'Name', value: 'currency' } },
           {
             kind: 'Field',

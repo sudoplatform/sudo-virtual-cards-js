@@ -26,6 +26,7 @@ export class FundingSourceEntityTransformer {
       updatedAt: new Date(data.updatedAtEpochMs),
       currency: data.currency,
       state: data.state,
+      flags: data.flags,
       version: data.version,
       transactionVelocity: TransactionVelocityTransformer.transformGraphQL(
         data.transactionVelocity,

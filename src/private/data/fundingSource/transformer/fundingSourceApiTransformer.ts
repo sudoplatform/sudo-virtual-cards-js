@@ -27,6 +27,7 @@ export class FundingSourceAPITransformer {
       updatedAt: entity.updatedAt,
       currency: entity.currency,
       state: entity.state,
+      flags: entity.flags,
       version: entity.version,
       transactionVelocity: entity.transactionVelocity,
     }

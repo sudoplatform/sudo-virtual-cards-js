@@ -13,6 +13,7 @@ interface CommonFundingSource {
   createdAtEpochMs: Float!
   updatedAtEpochMs: Float!
   state: FundingSourceState!
+  flags: [FundingSourceFlags!]!
   currency: String!
   transactionVelocity: TransactionVelocity
 }
@@ -144,6 +145,7 @@ type CreditCardFundingSource implements CommonObject & CommonFundingSource {
   createdAtEpochMs: Float!
   updatedAtEpochMs: Float!
   state: FundingSourceState!
+  flags: [FundingSourceFlags!]!
   currency: String!
   transactionVelocity: TransactionVelocity
   last4: String!
@@ -168,6 +170,7 @@ type BankAccountFundingSource implements CommonObject & CommonFundingSource {
   createdAtEpochMs: Float!
   updatedAtEpochMs: Float!
   state: FundingSourceState!
+  flags: [FundingSourceFlags!]!
   currency: String!
   transactionVelocity: TransactionVelocity
   bankAccountType: BankAccountType!
@@ -322,6 +325,10 @@ enum FundingSourceState {
   ACTIVE
   INACTIVE
   REFRESH
+}
+
+enum FundingSourceFlags {
+  UNFUNDED
 }
 
 enum FundingSourceType {

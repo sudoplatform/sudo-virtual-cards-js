@@ -33,20 +33,21 @@ export class IdentityAdminClient {
             apiKey: apiKey,
           }
         : jwtToken
-        ? {
-            type: AUTH_TYPE.AMAZON_COGNITO_USER_POOLS,
-            jwtToken,
-          }
-        : {
-            type: AUTH_TYPE.AWS_IAM,
-            credentials: {
-              accessKeyId: process.env.AWS_ACCESS_KEY_ID ?? 'aws-access-key-id',
-              secretAccessKey:
-                process.env.AWS_SECRET_ACCESS_KEY ?? 'aws-secret-access-key',
-              sessionToken:
-                process.env.AWS_SESSION_TOKEN ?? 'aws-session-token',
+          ? {
+              type: AUTH_TYPE.AMAZON_COGNITO_USER_POOLS,
+              jwtToken,
+            }
+          : {
+              type: AUTH_TYPE.AWS_IAM,
+              credentials: {
+                accessKeyId:
+                  process.env.AWS_ACCESS_KEY_ID ?? 'aws-access-key-id',
+                secretAccessKey:
+                  process.env.AWS_SECRET_ACCESS_KEY ?? 'aws-secret-access-key',
+                sessionToken:
+                  process.env.AWS_SESSION_TOKEN ?? 'aws-session-token',
+              },
             },
-          },
       disableOffline: true,
     })
   }

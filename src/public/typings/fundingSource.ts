@@ -115,6 +115,7 @@ export interface BaseFundingSource {
   updatedAt: Date
   type: FundingSourceType
   state: FundingSourceState
+  flags: FundingSourceFlags[]
   currency: string
   transactionVelocity?: TransactionVelocity
 }
@@ -424,6 +425,19 @@ export enum FundingSourceState {
   Active = 'ACTIVE',
   Inactive = 'INACTIVE',
   Refresh = 'REFRESH',
+}
+
+/**
+ * The Sudo Platform SDK representation of an enumeration depicting the set of possible funding source flags.
+ *
+ * @enum FundingSourceFlags
+ */
+export enum FundingSourceFlags {
+  Unfunded = 'UNFUNDED',
+}
+
+export function isFundingSourceUnfunded(fs: FundingSource): boolean {
+  return fs.flags.includes(FundingSourceFlags.Unfunded)
 }
 
 /**

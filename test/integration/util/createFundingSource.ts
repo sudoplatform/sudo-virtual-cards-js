@@ -172,11 +172,11 @@ export const StripeTestCards: Record<TestCardName, TestCard | undefined> = {
     cardType: CardType.Credit,
   },
   'MC-No3DS-1': {
-    number: '5555555555554444',
+    number: '5200828282828210',
     cvv: '123',
-    last4: '4444',
+    last4: '8210',
     address: DefaultTestCardBillingAddress['stripe'],
-    cardType: CardType.Credit,
+    cardType: CardType.Debit,
   },
   BadAddress: {
     number: '4000000000000010',

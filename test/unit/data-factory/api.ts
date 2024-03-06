@@ -80,6 +80,7 @@ export class ApiDataFactory {
     id: 'dummyFundingSourceId',
     currency: 'dummyCurrency',
     state: FundingSourceState.Active,
+    flags: [],
     transactionVelocity: {
       maximum: 10000,
       velocity: ['10000/P1D'],

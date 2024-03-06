@@ -111,6 +111,7 @@ export class GraphQLDataFactory {
     id: 'dummyFundingSourceId',
     currency: 'dummyCurrency',
     state: FundingSourceState.Active,
+    flags: [],
     transactionVelocity: {
       __typename: 'TransactionVelocity' as const,
       maximum: 10000,

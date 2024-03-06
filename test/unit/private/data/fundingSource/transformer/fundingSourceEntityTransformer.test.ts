@@ -12,6 +12,7 @@ import {
 import { CardType } from '../../../../../../src/public/typings/cardType'
 import { EntityDataFactory } from '../../../../data-factory/entity'
 import { GraphQLDataFactory } from '../../../../data-factory/graphQl'
+import { FundingSourceFlags } from '../../../../../../src/public/typings/fundingSource'
 
 describe('FundingSourceEntityTransformer Test Suite', () => {
   describe('FundingSourceEntityTransformer', () => {
@@ -25,6 +26,18 @@ describe('FundingSourceEntityTransformer Test Suite', () => {
         expect(
           FundingSourceEntityTransformer.transformGraphQL(graphql),
         ).toStrictEqual(entity)
+
+        const modifiedGraphql = {
+          ...graphql,
+          flags: ['UNFUNDED'],
+        }
+        const modifiedEntity = {
+          ...entity,
+          flags: [FundingSourceFlags.Unfunded],
+        }
+        expect(
+          FundingSourceEntityTransformer.transformGraphQL(modifiedGraphql),
+        ).toStrictEqual(modifiedEntity)
       },
     )
   })

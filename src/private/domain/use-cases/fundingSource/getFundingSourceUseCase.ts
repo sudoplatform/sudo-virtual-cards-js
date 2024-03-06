@@ -16,6 +16,7 @@ import {
   CreditCardNetwork,
   FundingSourceState,
   FundingSourceType,
+  FundingSourceFlags,
 } from '../../../../public/typings/fundingSource'
 import { FundingSourceService } from '../../entities/fundingSource/fundingSourceService'
 import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
@@ -40,6 +41,7 @@ interface BaseGetFundingSourceUseCaseOutput {
   updatedAt: Date
   type: FundingSourceType
   state: FundingSourceState
+  flags: FundingSourceFlags[]
   currency: string
 }
 

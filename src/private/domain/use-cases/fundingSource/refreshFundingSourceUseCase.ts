@@ -15,6 +15,7 @@ import { CardType } from '../../../../public/typings/cardType'
 import {
   CreditCardNetwork,
   FundingSourceState,
+  FundingSourceFlags,
 } from '../../../../public/typings/fundingSource'
 import { FundingSourceService } from '../../entities/fundingSource/fundingSourceService'
 import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
@@ -43,6 +44,7 @@ interface BaseRefreshFundingSourceUseCaseOutput {
   createdAt: Date
   updatedAt: Date
   state: FundingSourceState
+  flags: FundingSourceFlags[]
   type: FundingSourceType
   currency: string
 }

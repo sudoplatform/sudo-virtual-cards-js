@@ -10,6 +10,7 @@ import {
   CreditCardNetwork,
   FundingSourceState,
   FundingSourceType,
+  FundingSourceFlags,
 } from '../../../../public/typings/fundingSource'
 
 export interface FundingSourceClientConfigurationEntity {
@@ -23,6 +24,7 @@ export interface BaseFundingSourceEntity {
   createdAt: Date
   updatedAt: Date
   state: FundingSourceState
+  flags: FundingSourceFlags[]
   type: FundingSourceType
   currency: string
   transactionVelocity?: {
