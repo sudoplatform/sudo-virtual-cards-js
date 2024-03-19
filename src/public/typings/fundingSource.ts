@@ -8,6 +8,7 @@ import { AuthorizationText } from './authorizationText'
 import { BankAccountType } from './bankAccountType'
 import { CardType } from './cardType'
 import { TransactionVelocity } from './transactionVelocity'
+import { CurrencyAmount } from './currencyAmount'
 
 export interface BaseFundingSourceClientConfiguration {
   type: string
@@ -153,6 +154,9 @@ export interface CreditCardFundingSource extends BaseFundingSource {
  *   Mime type of institution logo if any
  * @property {string} institutionLogo.data
  *   Base64 encoded image data of institution logo if any
+ * @property { CurrencyAmount} unfundedAmount
+ *   If this bank account funding source is unfunded, the amount by which it is unfunded
+ *   in the funding source's currency. Undefined otherwise
  */
 export interface BankAccountFundingSource extends BaseFundingSource {
   type: FundingSourceType.BankAccount
@@ -163,6 +167,7 @@ export interface BankAccountFundingSource extends BaseFundingSource {
     type: string
     data: string
   }
+  unfundedAmount?: CurrencyAmount
 }
 
 export type FundingSource = CreditCardFundingSource | BankAccountFundingSource

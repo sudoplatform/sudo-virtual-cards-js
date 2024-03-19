@@ -149,10 +149,20 @@ export interface FundingSourceServiceListFundingSourcesOutput {
 /**
  * Input for {@link FundingSourceService.cancelFundingSource} method.
  *
- * @interface CancelFundingSourceInput
+ * @interface FundingSourceServiceCancelFundingSourceInput
  * @property {string} id The identifier of the funding source to cancel.
  */
 export interface FundingSourceServiceCancelFundingSourceInput {
+  id: string
+}
+
+/**
+ * Input for {@link FundingSourceService.reviewUnfundedFundingSource} method.
+ *
+ * @interface FundingSourceServiceReviewUnfundedFundingSourceInput
+ * @property {string} id The identifier of the funding source to review.
+ */
+export interface FundingSourceServiceReviewUnfundedFundingSourceInput {
   id: string
 }
 
@@ -214,6 +224,16 @@ export interface FundingSourceService {
    */
   cancelFundingSource(
     input: FundingSourceServiceCancelFundingSourceInput,
+  ): Promise<FundingSourceEntity>
+
+  /**
+   * Review a funding source.
+   *
+   * @param {FundingSourceServiceReviewUnfundedFundingSourceInput} input Parameters used to review a funding source.
+   * @returns {FundingSourceEntity} The funding source that was cancelled.
+   */
+  reviewUnfundedFundingSource(
+    input: FundingSourceServiceReviewUnfundedFundingSourceInput,
   ): Promise<FundingSourceEntity>
 
   subscribeToFundingSourceChanges(

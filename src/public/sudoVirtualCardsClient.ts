@@ -47,6 +47,7 @@ import { GetFundingSourceClientConfigurationUseCase } from '../private/domain/us
 import { GetFundingSourceUseCase } from '../private/domain/use-cases/fundingSource/getFundingSourceUseCase'
 import { ListFundingSourcesUseCase } from '../private/domain/use-cases/fundingSource/listFundingSourcesUseCase'
 import { RefreshFundingSourceUseCase } from '../private/domain/use-cases/fundingSource/refreshFundingSourceUseCase'
+import { ReviewUnfundedFundingSourceUseCase } from '../private/domain/use-cases/fundingSource/reviewUnfundedFundingSourceUseCase'
 import { SandboxGetPlaidDataUseCase } from '../private/domain/use-cases/fundingSource/sandboxGetPlaidDataUseCase'
 import { SandboxSetFundingSourceToRequireRefreshUseCase } from '../private/domain/use-cases/fundingSource/sandboxSetFundingSourceToRequireRefreshUseCase'
 import { SetupFundingSourceUseCase } from '../private/domain/use-cases/fundingSource/setupFundingSourceUseCase'
@@ -645,6 +646,19 @@ export interface SudoVirtualCardsClient {
   cancelFundingSource(id: string): Promise<FundingSource>
 
   /**
+   * Request a review of an unfunded funding source, identified by id.
+   * Note that reviewing a funding source which is not unfunded will
+   * be a no-op but is not an error.
+   *
+   * @param {string} id The identifier of the funding source to review.
+   * @returns {FundingSource} The funding source that was reviewed.
+   *
+   * @throws {@link FundingSourceNotFoundError}
+   *   No funding source matching the specified ID could be found.
+   */
+  reviewUnfundedFundingSource(id: string): Promise<FundingSource>
+
+  /**
    * Provision a virtual card.
    *
    * @param {ProvisionVirtualCardInput} input Parameters used to provision a virtual card.
@@ -1028,6 +1042,19 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
         id,
       })
       const useCase = new CancelFundingSourceUseCase(
+        this.fundingSourceService,
+        this.sudoUserService,
+      )
+      return await useCase.execute(id)
+    })
+  }
+
+  public async reviewUnfundedFundingSource(id: string): Promise<FundingSource> {
+    return this.serialise.runExclusive(async () => {
+      this.log.debug(this.reviewUnfundedFundingSource.name, {
+        id,
+      })
+      const useCase = new ReviewUnfundedFundingSourceUseCase(
         this.fundingSourceService,
         this.sudoUserService,
       )

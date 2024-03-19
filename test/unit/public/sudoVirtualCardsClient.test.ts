@@ -43,6 +43,7 @@ import { GetFundingSourceClientConfigurationUseCase } from '../../../src/private
 import { GetFundingSourceUseCase } from '../../../src/private/domain/use-cases/fundingSource/getFundingSourceUseCase'
 import { ListFundingSourcesUseCase } from '../../../src/private/domain/use-cases/fundingSource/listFundingSourcesUseCase'
 import { RefreshFundingSourceUseCase } from '../../../src/private/domain/use-cases/fundingSource/refreshFundingSourceUseCase'
+import { ReviewUnfundedFundingSourceUseCase } from '../../../src/private/domain/use-cases/fundingSource/reviewUnfundedFundingSourceUseCase'
 import { SandboxGetPlaidDataUseCase } from '../../../src/private/domain/use-cases/fundingSource/sandboxGetPlaidDataUseCase'
 import { SandboxSetFundingSourceToRequireRefreshUseCase } from '../../../src/private/domain/use-cases/fundingSource/sandboxSetFundingSourceToRequireRefreshUseCase'
 import { SetupFundingSourceUseCase } from '../../../src/private/domain/use-cases/fundingSource/setupFundingSourceUseCase'
@@ -168,6 +169,13 @@ const JestMockCancelFundingSourceUseCase =
     typeof CancelFundingSourceUseCase
   >
 jest.mock(
+  '../../../src/private/domain/use-cases/fundingSource/reviewUnfundedFundingSourceUseCase',
+)
+const JestMockReviewUnfundedFundingSourceUseCase =
+  ReviewUnfundedFundingSourceUseCase as jest.MockedClass<
+    typeof ReviewUnfundedFundingSourceUseCase
+  >
+jest.mock(
   '../../../src/private/domain/use-cases/virtualCard/provisionVirtualCardUseCase',
 )
 const JestMockProvisionVirtualCardUseCase =
@@ -288,6 +296,8 @@ describe('SudoVirtualCardsClient Test Suite', () => {
   const mockGetFundingSourceUseCase = mock<GetFundingSourceUseCase>()
   const mockListFundingSourcesUseCase = mock<ListFundingSourcesUseCase>()
   const mockCancelFundingSourceUseCase = mock<CancelFundingSourceUseCase>()
+  const mockReviewUnfundedFundingSourceUseCase =
+    mock<ReviewUnfundedFundingSourceUseCase>()
   const mockProvisionVirtualCardUseCase = mock<ProvisionVirtualCardUseCase>()
   const mockGetProvisionalCardUseCase = mock<GetProvisionalCardUseCase>()
   const mockListProvisionalCardsUseCase = mock<ListProvisionalCardsUseCase>()
@@ -326,6 +336,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     reset(mockGetFundingSourceUseCase)
     reset(mockListFundingSourcesUseCase)
     reset(mockCancelFundingSourceUseCase)
+    reset(mockReviewUnfundedFundingSourceUseCase)
     reset(mockProvisionVirtualCardUseCase)
     reset(mockGetProvisionalCardUseCase)
     reset(mockListProvisionalCardsUseCase)
@@ -355,6 +366,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     JestMockGetFundingSourceUseCase.mockClear()
     JestMockListFundingSourcesUseCase.mockClear()
     JestMockCancelFundingSourceUseCase.mockClear()
+    JestMockReviewUnfundedFundingSourceUseCase.mockClear()
     JestMockProvisionVirtualCardUseCase.mockClear()
     JestMockGetProvisionalCardUseCase.mockClear()
     JestMockListProvisionalCardsUseCase.mockClear()
@@ -402,6 +414,9 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     )
     JestMockCancelFundingSourceUseCase.mockImplementation(() =>
       instance(mockCancelFundingSourceUseCase),
+    )
+    JestMockReviewUnfundedFundingSourceUseCase.mockImplementation(() =>
+      instance(mockReviewUnfundedFundingSourceUseCase),
     )
     JestMockProvisionVirtualCardUseCase.mockImplementation(() =>
       instance(mockProvisionVirtualCardUseCase),
@@ -939,6 +954,35 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       await expect(instanceUnderTest.cancelFundingSource('')).resolves.toEqual(
         ApiDataFactory.defaultFundingSource,
       )
+    })
+  })
+
+  describe('reviewUnfundedFundingSource', () => {
+    beforeEach(() => {
+      when(
+        mockReviewUnfundedFundingSourceUseCase.execute(anything()),
+      ).thenResolve(EntityDataFactory.defaultFundingSource)
+      when(mockSudoUserClient.isSignedIn()).thenResolve(true)
+    })
+    it('generates use case', async () => {
+      await instanceUnderTest.reviewUnfundedFundingSource('')
+      expect(JestMockReviewUnfundedFundingSourceUseCase).toHaveBeenCalledTimes(
+        1,
+      )
+    })
+    it('calls use case as expected', async () => {
+      const id = v4()
+      await instanceUnderTest.reviewUnfundedFundingSource(id)
+      verify(mockReviewUnfundedFundingSourceUseCase.execute(anything())).once()
+      const [actualId] = capture(
+        mockReviewUnfundedFundingSourceUseCase.execute,
+      ).first()
+      expect(actualId).toEqual(id)
+    })
+    it('returns expected result', async () => {
+      await expect(
+        instanceUnderTest.reviewUnfundedFundingSource(''),
+      ).resolves.toEqual(ApiDataFactory.defaultFundingSource)
     })
   })
 

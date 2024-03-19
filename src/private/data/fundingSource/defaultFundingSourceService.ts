@@ -36,6 +36,7 @@ import {
   FundingSourceServiceListFundingSourcesInput,
   FundingSourceServiceListFundingSourcesOutput,
   FundingSourceServiceRefreshFundingSourceInput,
+  FundingSourceServiceReviewUnfundedFundingSourceInput,
   FundingSourceServiceSetupFundingSourceInput,
   FundingSourceServiceSubscribeToFundingSourceChangesInput,
   FundingSourceServiceUnsubscribeFromFundingSourceChangesInput,
@@ -292,6 +293,14 @@ export class DefaultFundingSourceService implements FundingSourceService {
     id,
   }: FundingSourceServiceCancelFundingSourceInput): Promise<FundingSourceEntity> {
     const result = await this.appSync.cancelFundingSource({ id })
+    const unsealed = await this.unsealFundingSource(result)
+    return FundingSourceEntityTransformer.transformGraphQL(unsealed)
+  }
+
+  async reviewUnfundedFundingSource({
+    id,
+  }: FundingSourceServiceReviewUnfundedFundingSourceInput): Promise<FundingSourceEntity> {
+    const result = await this.appSync.reviewUnfundedFundingSource({ id })
     const unsealed = await this.unsealFundingSource(result)
     return FundingSourceEntityTransformer.transformGraphQL(unsealed)
   }

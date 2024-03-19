@@ -17,6 +17,7 @@ import {
 } from '../../../domain/entities/configuration/virtualCardsConfigEntity'
 import { FundingSourceClientConfigurationEntity } from '../../../domain/entities/fundingSource/fundingSourceEntity'
 import { CurrencyAmountEntity } from '../../../domain/entities/transaction/transactionEntity'
+import { CurrencyAmountTransformer } from '../../common/transformer/currencyAmountTransformer'
 
 export class VirtualCardsConfigEntityTransformer {
   static transformGraphQL(data: VirtualCardsConfig): VirtualCardsConfigEntity {
@@ -27,7 +28,7 @@ export class VirtualCardsConfigEntityTransformer {
       maxFundingSourcePendingVelocity:
         data.maxFundingSourcePendingVelocity ?? [],
       maxFundingSourceVelocity: data.maxFundingSourceVelocity,
-      maxTransactionAmount: transformCurrencyAmount(data.maxTransactionAmount),
+      maxTransactionAmount: transformCurrencyAmounts(data.maxTransactionAmount),
       maxTransactionVelocity: transformCurrencyVelocity(
         data.maxTransactionVelocity,
       ),
@@ -61,20 +62,12 @@ export class VirtualCardsConfigEntityTransformer {
   }
 }
 
-function transformCurrencyAmount(
+function transformCurrencyAmounts(
   data: CurrencyAmount[],
 ): CurrencyAmountEntity[] {
-  const transformedEntities: CurrencyAmountEntity[] = []
-
-  data.forEach((item) => {
-    const transformed: CurrencyAmountEntity = {
-      currency: item.currency,
-      amount: Number(item.amount),
-    }
-    transformedEntities.push(transformed)
-  })
-
-  return transformedEntities
+  return data.map((c) =>
+    CurrencyAmountTransformer.transformToCurrencyAmountEntity(c),
+  )
 }
 
 function transformCurrencyVelocity(

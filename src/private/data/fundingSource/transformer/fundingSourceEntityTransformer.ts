@@ -16,6 +16,7 @@ import { FundingSourceEntity } from '../../../domain/entities/fundingSource/fund
  */
 
 import { FundingSourceUnsealed } from '../fundingSourceSealedAttributes'
+import { CurrencyAmountTransformer } from '../../common/transformer/currencyAmountTransformer'
 
 export class FundingSourceEntityTransformer {
   static transformGraphQL(data: FundingSourceUnsealed): FundingSourceEntity {
@@ -51,6 +52,11 @@ export class FundingSourceEntityTransformer {
           last4: data.last4,
           institutionName: data.institutionName,
           institutionLogo: data.institutionLogo,
+          unfundedAmount: data.unfundedAmount
+            ? CurrencyAmountTransformer.transformToCurrencyAmountEntity(
+                data.unfundedAmount,
+              )
+            : undefined,
         }
       default:
         throw new FatalError('Unrecognized funding source type')

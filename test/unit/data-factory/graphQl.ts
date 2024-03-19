@@ -330,7 +330,7 @@ export class GraphQLDataFactory {
     maxTransactionAmount: [
       {
         currency: 'USD',
-        amount: '25000',
+        amount: 25000,
       },
     ],
     maxTransactionVelocity: [

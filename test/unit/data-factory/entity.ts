@@ -120,6 +120,7 @@ export class EntityDataFactory {
       type: 'image/png',
       data: 'dummyInstitutionLogo',
     },
+    unfundedAmount: undefined,
   }
 
   static readonly provisionalVirtualCard: ProvisionalVirtualCardEntity = {

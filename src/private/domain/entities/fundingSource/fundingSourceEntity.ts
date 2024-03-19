@@ -12,6 +12,7 @@ import {
   FundingSourceType,
   FundingSourceFlags,
 } from '../../../../public/typings/fundingSource'
+import { CurrencyAmount } from '../../../../public/typings/currencyAmount'
 
 export interface FundingSourceClientConfigurationEntity {
   data: string
@@ -48,6 +49,7 @@ export interface BankAccountFundingSourceEntity
     type: string
     data: string
   }
+  unfundedAmount?: CurrencyAmount
 }
 
 export type FundingSourceEntity =

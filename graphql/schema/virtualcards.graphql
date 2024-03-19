@@ -70,7 +70,7 @@ type CurrencyVelocity {
 
 type CurrencyAmount {
   currency: String!
-  amount: String!
+  amount: Int!
 }
 
 type TransactionVelocity {
@@ -178,6 +178,7 @@ type BankAccountFundingSource implements CommonObject & CommonFundingSource {
   last4: String!
   institutionName: SealedAttribute!
   institutionLogo: SealedAttribute
+  unfundedAmount: CurrencyAmount
 }
 
 union FundingSource = CreditCardFundingSource | BankAccountFundingSource
@@ -478,6 +479,7 @@ type Mutation {
   completeFundingSource(input: CompleteFundingSourceRequest!): FundingSource!
   refreshFundingSource(input: RefreshFundingSourceRequest!): FundingSource!
   cancelFundingSource(input: IdInput!): FundingSource!
+  reviewUnfundedFundingSource(input: IdInput!): FundingSource!
   cardProvision(input: CardProvisionRequest!): ProvisionalCard!
   updateCard(input: CardUpdateRequest): SealedCard!
   cancelCard(input: CardCancelRequest!): SealedCard!

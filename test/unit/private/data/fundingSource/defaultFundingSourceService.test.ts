@@ -624,6 +624,29 @@ describe('DefaultFundingSourceService Test Suite', () => {
     })
   })
 
+  describe('reviewUnfundedFundingSource', () => {
+    it.each`
+      graphql                                        | entity
+      ${GraphQLDataFactory.creditCardfundingSource}  | ${EntityDataFactory.creditCardFundingSource}
+      ${GraphQLDataFactory.bankAccountfundingSource} | ${EntityDataFactory.bankAccountFundingSource}
+    `('calls appsync correctly: $entity.type', async ({ graphql, entity }) => {
+      when(mockAppSync.reviewUnfundedFundingSource(anything())).thenResolve(
+        graphql,
+      )
+      const result = await instanceUnderTest.reviewUnfundedFundingSource({
+        id: entity.id,
+      })
+      expect(result).toEqual(entity)
+      const [inputArgs] = capture(
+        mockAppSync.reviewUnfundedFundingSource,
+      ).first()
+      expect(inputArgs).toEqual<typeof inputArgs>({
+        id: entity.id,
+      })
+      verify(mockAppSync.reviewUnfundedFundingSource(anything())).once()
+    })
+  })
+
   describe('sandboxGetPlaidData', () => {
     const input: SandboxGetPlaidDataInput = {
       institutionId: 'institution-id',

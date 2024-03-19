@@ -19,6 +19,7 @@ import {
   decodeFundingSourceClientConfiguration,
   decodePricingPolicy,
 } from '../clientConfiguration'
+import { CurrencyAmountTransformer } from '../../common/transformer/currencyAmountTransformer'
 
 export class VirtualCardsConfigAPITransformer {
   static transformEntity(entity: VirtualCardsConfigEntity): VirtualCardsConfig {
@@ -61,10 +62,8 @@ export class VirtualCardsConfigAPITransformer {
     const transformedCurrencyAmounts: CurrencyAmount[] = []
 
     entity.forEach((item) => {
-      const transformed: CurrencyAmount = {
-        currency: item.currency,
-        amount: Number(item.amount),
-      }
+      const transformed: CurrencyAmount =
+        CurrencyAmountTransformer.transformToCurrencyAmount(item)
       transformedCurrencyAmounts.push(transformed)
     })
 

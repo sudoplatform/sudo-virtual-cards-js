@@ -49,6 +49,9 @@ export class FundingSourceAPITransformer {
         last4: entity.last4,
         institutionName: entity.institutionName,
         institutionLogo: entity.institutionLogo,
+        unfundedAmount: entity.unfundedAmount
+          ? entity.unfundedAmount
+          : undefined,
       }
       return transformed
     }

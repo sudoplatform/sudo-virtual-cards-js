@@ -84,15 +84,17 @@ import {
   OnFundingSourceUpdateDocument,
   OnFundingSourceUpdateSubscription,
   PaginatedPublicKey,
-  ProvisionVirtualCardDocument,
-  ProvisionVirtualCardMutation,
   ProvisionalCard,
   ProvisionalCardConnection,
   ProvisionalFundingSource,
+  ProvisionVirtualCardDocument,
+  ProvisionVirtualCardMutation,
   PublicKey,
   RefreshFundingSourceDocument,
   RefreshFundingSourceMutation,
   RefreshFundingSourceRequest,
+  ReviewUnfundedFundingSourceDocument,
+  ReviewUnfundedFundingSourceMutation,
   SandboxGetPlaidDataDocument,
   SandboxGetPlaidDataQuery,
   SandboxGetPlaidDataQueryVariables,
@@ -112,6 +114,7 @@ import {
   VirtualCardsConfig,
 } from '../../../gen/graphqlTypes'
 import { ErrorTransformer } from './transformer/errorTransformer'
+
 export class ApiClient {
   private readonly log: Logger
   private readonly client: AWSAppSyncClient<NormalizedCacheObject>
@@ -282,6 +285,18 @@ export class ApiClient {
       calleeName: this.cancelFundingSource.name,
     })
     return data.cancelFundingSource
+  }
+
+  public async reviewUnfundedFundingSource(
+    input: IdInput,
+  ): Promise<FundingSource> {
+    const data =
+      await this.performMutation<ReviewUnfundedFundingSourceMutation>({
+        mutation: ReviewUnfundedFundingSourceDocument,
+        variables: { input },
+        calleeName: this.reviewUnfundedFundingSource.name,
+      })
+    return data.reviewUnfundedFundingSource
   }
 
   async provisionVirtualCard(

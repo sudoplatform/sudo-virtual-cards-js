@@ -259,6 +259,7 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
           type: FundingSourceType.BankAccount,
           bankAccountType: BankAccountType.Checking,
           institutionName: 'First Platypus Bank',
+          unfundedAmount: undefined,
         })
       })
 

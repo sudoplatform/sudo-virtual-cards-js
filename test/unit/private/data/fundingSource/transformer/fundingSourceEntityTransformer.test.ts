@@ -5,6 +5,7 @@
  */
 
 import { CardType as CardTypeGraphQL } from '../../../../../../src/gen/graphqlTypes'
+import { FundingSourceFlags as FundingSourceFlagsGraphQL } from '../../../../../../src/gen/graphqlTypes'
 import {
   CardTypeTransformer,
   FundingSourceEntityTransformer,
@@ -26,20 +27,30 @@ describe('FundingSourceEntityTransformer Test Suite', () => {
         expect(
           FundingSourceEntityTransformer.transformGraphQL(graphql),
         ).toStrictEqual(entity)
-
-        const modifiedGraphql = {
-          ...graphql,
-          flags: ['UNFUNDED'],
-        }
-        const modifiedEntity = {
-          ...entity,
-          flags: [FundingSourceFlags.Unfunded],
-        }
-        expect(
-          FundingSourceEntityTransformer.transformGraphQL(modifiedGraphql),
-        ).toStrictEqual(modifiedEntity)
       },
     )
+    it('successfully transforms unfunded bank account funding source graphql to entity format', () => {
+      const modifiedGraphql = {
+        ...GraphQLDataFactory.bankAccountFundingSourceUnsealed,
+        flags: [FundingSourceFlagsGraphQL.Unfunded],
+        unfundedAmount: {
+          currency:
+            GraphQLDataFactory.bankAccountFundingSourceUnsealed.currency,
+          amount: 123,
+        },
+      }
+      const modifiedEntity = {
+        ...EntityDataFactory.bankAccountFundingSource,
+        flags: [FundingSourceFlags.Unfunded],
+        unfundedAmount: {
+          currency: EntityDataFactory.bankAccountFundingSource.currency,
+          amount: 123,
+        },
+      }
+      expect(
+        FundingSourceEntityTransformer.transformGraphQL(modifiedGraphql),
+      ).toStrictEqual(modifiedEntity)
+    })
   })
 
   describe('CardTypeTransformer', () => {
