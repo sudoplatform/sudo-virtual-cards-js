@@ -226,13 +226,13 @@ export type FundingSourceConnection = {
 }
 
 export enum FundingSourceFlags {
+  Refresh = 'REFRESH',
   Unfunded = 'UNFUNDED',
 }
 
 export enum FundingSourceState {
   Active = 'ACTIVE',
   Inactive = 'INACTIVE',
-  Refresh = 'REFRESH',
 }
 
 export type FundingSourceSupportDetail = {

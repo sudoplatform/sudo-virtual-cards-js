@@ -7,9 +7,10 @@
 import { DefaultLogger } from '@sudoplatform/sudo-common'
 import { v4 } from 'uuid'
 import {
+  FundingSourceFlags,
   FundingSourceNotFoundError,
   FundingSourceState,
-  FundingSourceStateError,
+  FundingSourceRequiresUserInteractionError,
   FundingSourceType,
   RefreshFundingSourceInput,
   RefreshFundingSourceRefreshDataInput,
@@ -18,6 +19,7 @@ import {
 import { createBankAccountFundingSource } from '../util/createFundingSource'
 import { FundingSourceProviders } from '../util/getFundingSourceProviders'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
+import waitForExpect from 'wait-for-expect'
 
 describe('SudoVirtualCardsClient RefreshFundingSource Test Suite', () => {
   jest.setTimeout(240000)
@@ -103,7 +105,7 @@ describe('SudoVirtualCardsClient RefreshFundingSource Test Suite', () => {
         ).resolves.toMatchObject(fundingSource)
       })
 
-      it('returns FundingSourceStateError from refresh if funding source is inactive', async () => {
+      it('Successfully requests refresh if funding source is inactive', async () => {
         if (skip) return
 
         await instanceUnderTest.createKeysIfAbsent()
@@ -135,7 +137,52 @@ describe('SudoVirtualCardsClient RefreshFundingSource Test Suite', () => {
         }
         await expect(
           instanceUnderTest.refreshFundingSource(refreshInput),
-        ).rejects.toThrow(FundingSourceStateError)
+        ).resolves.toMatchObject(cancelledFundingSource)
+      })
+
+      // Plaid sandbox currently does not automatically set webhooks correctly
+      // when creating an item. Thus we cannot expect the refresh processing to fire.
+      // eslint-disable-next-line jest/no-disabled-tests
+      it.skip('initiates refresh when refresh is required', async () => {
+        if (skip) return
+
+        await instanceUnderTest.createKeysIfAbsent()
+
+        const fundingSource = await createBankAccountFundingSource(
+          instanceUnderTest,
+          {
+            username: 'custom_checking_500',
+            supportedProviders: ['checkout'],
+          },
+        )
+        expect(fundingSource).toBeDefined()
+
+        await instanceUnderTest.sandboxSetFundingSourceToRequireRefresh({
+          fundingSourceId: fundingSource.id,
+        })
+        await waitForExpect(async () => {
+          const refreshableFundingSource =
+            await instanceUnderTest.getFundingSource({ id: fundingSource.id })
+          expect(
+            refreshableFundingSource?.flags?.includes(
+              FundingSourceFlags.Refresh,
+            ),
+          ).toBeTruthy()
+        })
+
+        const refreshData: RefreshFundingSourceRefreshDataInput = {
+          provider: 'checkout',
+          type: FundingSourceType.BankAccount,
+          applicationName: 'webApplication',
+        }
+        const refreshInput: RefreshFundingSourceInput = {
+          id: fundingSource.id,
+          language: 'en-US',
+          refreshData,
+        }
+        await expect(
+          instanceUnderTest.refreshFundingSource(refreshInput),
+        ).rejects.toThrow(FundingSourceRequiresUserInteractionError)
       })
     })
   })

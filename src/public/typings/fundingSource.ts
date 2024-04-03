@@ -429,7 +429,6 @@ export enum ProvisionalFundingSourceState {
 export enum FundingSourceState {
   Active = 'ACTIVE',
   Inactive = 'INACTIVE',
-  Refresh = 'REFRESH',
 }
 
 /**
@@ -439,10 +438,15 @@ export enum FundingSourceState {
  */
 export enum FundingSourceFlags {
   Unfunded = 'UNFUNDED',
+  Refresh = 'REFRESH',
 }
 
 export function isFundingSourceUnfunded(fs: FundingSource): boolean {
   return fs.flags.includes(FundingSourceFlags.Unfunded)
+}
+
+export function fundingSourceNeedsRefresh(fs: FundingSource): boolean {
+  return fs.flags.includes(FundingSourceFlags.Refresh)
 }
 
 /**

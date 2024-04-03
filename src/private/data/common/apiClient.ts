@@ -454,7 +454,7 @@ export class ApiClient {
       await this.performMutation<SandboxSetFundingSourceToRequireRefreshMutation>(
         {
           mutation: SandboxSetFundingSourceToRequireRefreshDocument,
-          variables: { input },
+          variables: input,
           calleeName: this.sandboxSetFundingSourceToRequireRefresh.name,
         },
       )
