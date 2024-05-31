@@ -24,6 +24,7 @@ import { createCardFundingSource } from '../util/createFundingSource'
 import { FundingSourceProviders } from '../util/getFundingSourceProviders'
 import { provisionVirtualCard } from '../util/provisionVirtualCard'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
+import { runTestsIfSimulatorAvailable } from '../util/runTestsIf'
 
 describe('ListVirtualCards Test Suite', () => {
   jest.setTimeout(240000)
@@ -33,82 +34,59 @@ describe('ListVirtualCards Test Suite', () => {
   const log = new DefaultLogger('SudoVirtualCardsClientIntegrationTests')
   let instanceUnderTest: SudoVirtualCardsClient
   let profilesClient: SudoProfilesClient
-  let vcSimulator: SudoVirtualCardsSimulatorClient
+  let optionalSimulator: SudoVirtualCardsSimulatorClient | undefined
   let sudo: Sudo
   let fundingSourceProviders: FundingSourceProviders
-  let merchant: SimulatorMerchant
-  let beforeEachComplete = false
+  const cards: VirtualCard[] = []
+  let beforeAllComplete = false
 
   beforeAll(async () => {
     const result = await setupVirtualCardsClient(log)
     instanceUnderTest = result.virtualCardsClient
     profilesClient = result.profilesClient
-    vcSimulator = result.virtualCardsSimulatorClient
+    optionalSimulator = result.virtualCardsSimulatorClient
     sudo = result.sudo
     fundingSourceProviders = result.fundingSourceProviders
-    const merchants = await vcSimulator.listSimulatorMerchants()
 
-    const usdApprovingMerchant = merchants.find(
-      (m) =>
-        m.currency === 'USD' &&
-        !m.declineAfterAuthorization &&
-        !m.declineBeforeAuthorization,
+    const fundingSource = await createCardFundingSource(
+      instanceUnderTest,
+      fundingSourceProviders,
     )
-    if (!usdApprovingMerchant) {
-      fail('Could not find a USD approving simulator merchant')
+    const provisionCardFn = async (): Promise<VirtualCard> => {
+      return await provisionVirtualCard(
+        instanceUnderTest,
+        profilesClient,
+        sudo,
+        fundingSourceProviders,
+        {
+          fundingSourceId: fundingSource.id,
+        },
+      )
     }
-    merchant = usdApprovingMerchant
 
-    beforeEachComplete = true
+    // Create 5 cards
+    // To avoid race condition, create one card first
+    cards.push(await provisionCardFn())
+    const created = await Promise.all([
+      provisionCardFn(),
+      provisionCardFn(),
+      provisionCardFn(),
+      provisionCardFn(),
+    ])
+    cards.push(...created)
+    expect(cards).toHaveLength(5)
+
+    beforeAllComplete = true
   })
 
   describe('listVirtualCards', () => {
-    let cards: VirtualCard[] = []
-    let innerBeforeAllComplete = false
-
     function expectSetupComplete(): void {
-      expect({ beforeEachComplete, innerBeforeAllComplete }).toEqual({
-        beforeEachComplete: true,
-        innerBeforeAllComplete: true,
+      expect({
+        beforeAllComplete,
+      }).toEqual({
+        beforeAllComplete: true,
       })
     }
-
-    beforeAll(async () => {
-      const fundingSource = await createCardFundingSource(
-        instanceUnderTest,
-        fundingSourceProviders,
-      )
-      const provisionCardFn = async (): Promise<VirtualCard> => {
-        return await provisionVirtualCard(
-          instanceUnderTest,
-          profilesClient,
-          sudo,
-          fundingSourceProviders,
-          {
-            fundingSourceId: fundingSource.id,
-          },
-        )
-      }
-
-      // Create 5 cards
-      // To avoid race condition, create one card first
-      cards.push(await provisionCardFn())
-      const created = await Promise.all([
-        provisionCardFn(),
-        provisionCardFn(),
-        provisionCardFn(),
-        provisionCardFn(),
-      ])
-      cards.push(...created)
-      expect(cards).toHaveLength(5)
-
-      innerBeforeAllComplete = true
-    })
-
-    afterAll(() => {
-      cards = []
-      innerBeforeAllComplete = false
-    })
 
     it('returns expected output', async () => {
       expectSetupComplete()
@@ -142,7 +120,9 @@ describe('ListVirtualCards Test Suite', () => {
       let calls = 0
       do {
         calls++
-        const result = await instanceUnderTest.listVirtualCards({ limit: 1 })
+        const result = await instanceUnderTest.listVirtualCards({
+          limit: 1,
+        })
         if (result.status !== ListOperationResultStatus.Success) {
           fail(`Wrong status: ${result.status}`)
         }
@@ -151,53 +131,92 @@ describe('ListVirtualCards Test Suite', () => {
       expect(calls).toEqual(5)
       expect(cardResult).toHaveLength(5)
     })
+  })
 
-    it('includes last transaction information', async () => {
-      expectSetupComplete()
+  runTestsIfSimulatorAvailable(
+    'listVirtualCards - if simulator available',
+    () => {
+      describe('listVirtualCards - if simulator available', () => {
+        let simulator: SudoVirtualCardsSimulatorClient
+        let merchant: SimulatorMerchant
 
-      const approvalResults = await Promise.all(
-        cards.map((card) =>
-          vcSimulator.simulateAuthorization({
-            pan: card.pan,
-            amount: 50,
-            merchantId: merchant.id,
-            expiry: card.expiry,
-            billingAddress: card.billingAddress,
-            csc: card.csc,
-          }),
-        ),
-      )
+        let innerBeforeAllComplete = false
 
-      approvalResults.forEach((result, index) => {
-        expect({
-          approved: result.approved,
-          declineReason: result.declineReason,
-          index,
-          cardId: cards[index].id,
-        }).toEqual({
-          approved: true,
-          declineReason: undefined,
-          index,
-          cardId: cards[index].id,
+        beforeAll(async () => {
+          simulator = optionalSimulator!
+          const merchants = await simulator.listSimulatorMerchants()
+
+          const usdApprovingMerchant = merchants.find(
+            (m) =>
+              m.currency === 'USD' &&
+              !m.declineAfterAuthorization &&
+              !m.declineBeforeAuthorization,
+          )
+          if (!usdApprovingMerchant) {
+            fail('Could not find a USD approving simulator merchant')
+          }
+          merchant = usdApprovingMerchant
+
+          innerBeforeAllComplete = true
         })
-      })
 
-      await waitForExpect(async () => {
-        const result = await instanceUnderTest.listVirtualCards()
-        if (result.status !== ListOperationResultStatus.Success) {
-          fail(`Wrong status: ${result.status}`)
+        function expectSetupComplete(): void {
+          expect({
+            beforeEachComplete: beforeAllComplete,
+            innerBeforeAllComplete,
+          }).toEqual({
+            beforeEachComplete: true,
+            innerBeforeAllComplete: true,
+          })
         }
+        it('includes last transaction information', async () => {
+          expectSetupComplete()
 
-        expect(result.items).toHaveLength(5)
-        result.items.forEach((item) => {
-          expect(item.lastTransaction).toMatchObject<Partial<Transaction>>({
-            billedAmount: { currency: 'USD', amount: 50 },
-            transactedAmount: { currency: 'USD', amount: 50 },
-            description: merchant.name,
-            type: TransactionType.Pending,
+          const approvalResults = await Promise.all(
+            cards.map((card) =>
+              simulator.simulateAuthorization({
+                pan: card.pan,
+                amount: 50,
+                merchantId: merchant.id,
+                expiry: card.expiry,
+                billingAddress: card.billingAddress,
+                csc: card.csc,
+              }),
+            ),
+          )
+
+          approvalResults.forEach((result, index) => {
+            expect({
+              approved: result.approved,
+              declineReason: result.declineReason,
+              index,
+              cardId: cards[index].id,
+            }).toEqual({
+              approved: true,
+              declineReason: undefined,
+              index,
+              cardId: cards[index].id,
+            })
+          })
+
+          await waitForExpect(async () => {
+            const result = await instanceUnderTest.listVirtualCards()
+            if (result.status !== ListOperationResultStatus.Success) {
+              fail(`Wrong status: ${result.status}`)
+            }
+
+            expect(result.items).toHaveLength(5)
+            result.items.forEach((item) => {
+              expect(item.lastTransaction).toMatchObject<Partial<Transaction>>({
+                billedAmount: { currency: 'USD', amount: 50 },
+                transactedAmount: { currency: 'USD', amount: 50 },
+                description: merchant.name,
+                type: TransactionType.Pending,
+              })
+            })
           })
         })
       })
-    })
-  })
+    },
+  )
 })

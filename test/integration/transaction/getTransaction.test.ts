@@ -21,6 +21,7 @@ import {
 import { FundingSourceProviders } from '../util/getFundingSourceProviders'
 import { provisionVirtualCard } from '../util/provisionVirtualCard'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
+import { runTestsIfSimulatorAvailable } from '../util/runTestsIf'
 
 describe('GetTransaction Test Suite', () => {
   jest.setTimeout(240000)
@@ -29,14 +30,11 @@ describe('GetTransaction Test Suite', () => {
 
   const log = new DefaultLogger('SudoVirtualCardsClientIntegrationTests')
   let instanceUnderTest: SudoVirtualCardsClient
-  let vcSimulator: SudoVirtualCardsSimulatorClient
+  let optionalSimulator: SudoVirtualCardsSimulatorClient | undefined
   let profilesClient: SudoProfilesClient
   let fundingSourceProviders: FundingSourceProviders
 
   let sudo: Sudo
-  let card: VirtualCard
-
-  let authorization: Transaction
 
   beforeEach(async () => {
     const result = await setupVirtualCardsClient(log)
@@ -44,55 +42,82 @@ describe('GetTransaction Test Suite', () => {
     profilesClient = result.profilesClient
     sudo = result.sudo
     fundingSourceProviders = result.fundingSourceProviders
-    vcSimulator = result.virtualCardsSimulatorClient
-
-    card = await provisionVirtualCard(
-      instanceUnderTest,
-      profilesClient,
-      sudo,
-      fundingSourceProviders,
-    )
-    const merchant = (await vcSimulator.listSimulatorMerchants())[0]
-    await vcSimulator.simulateAuthorization({
-      pan: card.pan,
-      amount: 50,
-      merchantId: merchant.id,
-      expiry: card.expiry,
-      billingAddress: card.billingAddress,
-      csc: card.csc,
-    })
-
-    let authorizationResult: ListTransactionsResults | undefined
-    await waitForExpect(async () => {
-      authorizationResult = await instanceUnderTest.listTransactionsByCardId({
-        cardId: card.id,
-      })
-      if (authorizationResult.status !== ListOperationResultStatus.Success) {
-        fail('failed to get successful transactions')
-      }
-      expect(authorizationResult.items).toHaveLength(1)
-    })
-
-    if (authorizationResult?.status !== ListOperationResultStatus.Success) {
-      fail('transaction result unexpectedly falsy')
-    }
-    authorization = authorizationResult.items[0]
+    optionalSimulator = result.virtualCardsSimulatorClient!
   })
 
   describe('getTransaction', () => {
-    it('returns expected result for an authorization', async () => {
-      const result = await instanceUnderTest.getTransaction({
-        id: authorization.id,
-      })
-      expect(result).toStrictEqual(authorization)
-    })
-
-    it('returns undefined for non-existent transaction', async () => {
+    it('should return undefined if transaction does not exist', async () => {
       await expect(
-        instanceUnderTest.getTransaction({
-          id: v4(),
-        }),
+        instanceUnderTest.getTransaction({ id: v4() }),
       ).resolves.toBeUndefined()
     })
   })
+
+  runTestsIfSimulatorAvailable(
+    'getTransaction - if simulator available',
+    () => {
+      describe('getTransaction - if simulator available', () => {
+        let simulator: SudoVirtualCardsSimulatorClient
+        let card: VirtualCard
+        let authorization: Transaction
+
+        beforeEach(async () => {
+          simulator = optionalSimulator!
+
+          card = await provisionVirtualCard(
+            instanceUnderTest,
+            profilesClient,
+            sudo,
+            fundingSourceProviders,
+          )
+
+          const merchant = (await simulator.listSimulatorMerchants())[0]
+          await simulator.simulateAuthorization({
+            pan: card.pan,
+            amount: 50,
+            merchantId: merchant.id,
+            expiry: card.expiry,
+            billingAddress: card.billingAddress,
+            csc: card.csc,
+          })
+
+          let authorizationResult: ListTransactionsResults | undefined
+          await waitForExpect(async () => {
+            authorizationResult =
+              await instanceUnderTest.listTransactionsByCardId({
+                cardId: card.id,
+              })
+            if (
+              authorizationResult.status !== ListOperationResultStatus.Success
+            ) {
+              fail('failed to get successful transactions')
+            }
+            expect(authorizationResult.items).toHaveLength(1)
+          })
+
+          if (
+            authorizationResult?.status !== ListOperationResultStatus.Success
+          ) {
+            fail('transaction result unexpectedly falsy')
+          }
+          authorization = authorizationResult.items[0]
+        })
+
+        it('returns expected result for an authorization', async () => {
+          const result = await instanceUnderTest.getTransaction({
+            id: authorization.id,
+          })
+          expect(result).toStrictEqual(authorization)
+        })
+
+        it('returns undefined for non-existent transaction', async () => {
+          await expect(
+            instanceUnderTest.getTransaction({
+              id: v4(),
+            }),
+          ).resolves.toBeUndefined()
+        })
+      })
+    },
+  )
 })

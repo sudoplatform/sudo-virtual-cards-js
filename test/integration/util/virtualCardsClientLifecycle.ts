@@ -72,6 +72,13 @@ if (fs.existsSync(adminApiKeyFile)) {
   adminApiKey = process.env.ADMIN_API_KEY?.trim() || 'IAM'
 }
 
+DefaultConfigurationManager.getInstance().setConfig(
+  fs.readFileSync(configFile).toString(),
+)
+
+export const isSimulatorAvailable =
+  !!DefaultConfigurationManager.getInstance().getConfigSet('vcSimulator')
+
 const testAuthenticationProvider = new TESTAuthenticationProvider(
   'vc-js-test',
   registerKey,
@@ -124,7 +131,7 @@ interface SetupVirtualCardsClientOutput {
   sudo: Sudo
   ownershipProofToken: string
   virtualCardsClient: SudoVirtualCardsClient
-  virtualCardsSimulatorClient: SudoVirtualCardsSimulatorClient
+  virtualCardsSimulatorClient?: SudoVirtualCardsSimulatorClient
   userClient: SudoUserClient
   entitlementsClient: SudoEntitlementsClient
   entitlementsAdminClient: SudoEntitlementsAdminClient
@@ -163,9 +170,6 @@ export const setupVirtualCardsClient = async (
       throw new Error('ADMIN_API_KEY must be set')
     }
 
-    DefaultConfigurationManager.getInstance().setConfig(
-      fs.readFileSync(configFile).toString(),
-    )
     const userClient = new DefaultSudoUserClient({ logger: log })
 
     const username = await userClient.registerWithAuthenticationProvider(
@@ -183,10 +187,14 @@ export const setupVirtualCardsClient = async (
       adminApiKey,
     )
 
-    const virtualCardsSimulatorClient =
-      new DefaultSudoVirtualCardsSimulatorClient({
-        appSyncClient: setupSimulatorApiClient(),
-      })
+    const virtualCardsSimulatorClient = isSimulatorAvailable
+      ? new DefaultSudoVirtualCardsSimulatorClient({
+          appSyncClient: setupSimulatorApiClient(),
+        })
+      : undefined
+    if (!virtualCardsSimulatorClient) {
+      log.info('Virtual Cards Simulator not available')
+    }
 
     const options: SudoVirtualCardsClientPrivateOptions = {
       sudoUserClient: userClient,

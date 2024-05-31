@@ -21,6 +21,7 @@ import {
 import { FundingSourceProviders } from '../util/getFundingSourceProviders'
 import { provisionVirtualCard } from '../util/provisionVirtualCard'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
+import { runTestsIfSimulatorAvailable } from '../util/runTestsIf'
 
 describe('GetVirtualCard Test Suite', () => {
   jest.setTimeout(240000)
@@ -30,32 +31,18 @@ describe('GetVirtualCard Test Suite', () => {
   const log = new DefaultLogger('SudoVirtualCardsClientIntegrationTests')
   let instanceUnderTest: SudoVirtualCardsClient
   let profilesClient: SudoProfilesClient
-  let vcSimulator: SudoVirtualCardsSimulatorClient
+  let optionalSimulator: SudoVirtualCardsSimulatorClient | undefined
   let sudo: Sudo
   let fundingSourceProviders: FundingSourceProviders
-  let merchant: SimulatorMerchant
   let beforeEachComplete = false
 
   beforeEach(async () => {
     const result = await setupVirtualCardsClient(log)
     instanceUnderTest = result.virtualCardsClient
     profilesClient = result.profilesClient
-    vcSimulator = result.virtualCardsSimulatorClient
+    optionalSimulator = result.virtualCardsSimulatorClient
     sudo = result.sudo
     fundingSourceProviders = result.fundingSourceProviders
-
-    const merchants = await vcSimulator.listSimulatorMerchants()
-
-    const usdApprovingMerchant = merchants.find(
-      (m) =>
-        m.currency === 'USD' &&
-        !m.declineAfterAuthorization &&
-        !m.declineBeforeAuthorization,
-    )
-    if (!usdApprovingMerchant) {
-      fail('Could not find a USD approving simulator merchant')
-    }
-    merchant = usdApprovingMerchant
 
     beforeEachComplete = true
   })
@@ -63,6 +50,70 @@ describe('GetVirtualCard Test Suite', () => {
   function expectSetupComplete(): void {
     expect({ beforeEachComplete }).toEqual({ beforeEachComplete: true })
   }
+
+  runTestsIfSimulatorAvailable('getVirtualCard', () => {
+    describe('getVirtualCard - if simulator available', () => {
+      let simulator: SudoVirtualCardsSimulatorClient
+
+      let merchant: SimulatorMerchant
+      let card: VirtualCard
+
+      beforeEach(async () => {
+        simulator = optionalSimulator!
+
+        const merchants = await simulator.listSimulatorMerchants()
+
+        const usdApprovingMerchant = merchants.find(
+          (m) =>
+            m.currency === 'USD' &&
+            !m.declineAfterAuthorization &&
+            !m.declineBeforeAuthorization,
+        )
+        if (!usdApprovingMerchant) {
+          fail('Could not find a USD approving simulator merchant')
+        }
+        merchant = usdApprovingMerchant
+
+        card = await provisionVirtualCard(
+          instanceUnderTest,
+          profilesClient,
+          sudo,
+          fundingSourceProviders,
+        )
+      })
+
+      it('returns expected output with last transaction', async () => {
+        expectSetupComplete()
+
+        await expect(
+          simulator.simulateAuthorization({
+            pan: card.pan,
+            amount: 50,
+            merchantId: merchant.id,
+            expiry: card.expiry,
+            billingAddress: card.billingAddress,
+            csc: card.csc,
+          }),
+        ).resolves.toMatchObject({ approved: true })
+
+        await waitForExpect(async () => {
+          const gottenCard = await instanceUnderTest.getVirtualCard({
+            id: card.id,
+            cachePolicy: CachePolicy.RemoteOnly,
+          })
+
+          expect(gottenCard?.lastTransaction).toMatchObject<
+            Partial<Transaction>
+          >({
+            billedAmount: { currency: 'USD', amount: 50 },
+            transactedAmount: { currency: 'USD', amount: 50 },
+            description: merchant.name,
+            type: TransactionType.Pending,
+          })
+        })
+      })
+    })
+  })
 
   describe('getVirtualCard', () => {
     let card: VirtualCard
@@ -73,37 +124,6 @@ describe('GetVirtualCard Test Suite', () => {
         sudo,
         fundingSourceProviders,
       )
-    })
-
-    it('returns expected output with last transaction', async () => {
-      expectSetupComplete()
-
-      await expect(
-        vcSimulator.simulateAuthorization({
-          pan: card.pan,
-          amount: 50,
-          merchantId: merchant.id,
-          expiry: card.expiry,
-          billingAddress: card.billingAddress,
-          csc: card.csc,
-        }),
-      ).resolves.toMatchObject({ approved: true })
-
-      await waitForExpect(async () => {
-        const gottenCard = await instanceUnderTest.getVirtualCard({
-          id: card.id,
-          cachePolicy: CachePolicy.RemoteOnly,
-        })
-
-        expect(gottenCard?.lastTransaction).toMatchObject<Partial<Transaction>>(
-          {
-            billedAmount: { currency: 'USD', amount: 50 },
-            transactedAmount: { currency: 'USD', amount: 50 },
-            description: merchant.name,
-            type: TransactionType.Pending,
-          },
-        )
-      })
     })
 
     it('returns expected output', async () => {

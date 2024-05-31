@@ -23,6 +23,7 @@ import {
 import { FundingSourceProviders } from '../util/getFundingSourceProviders'
 import { provisionVirtualCard } from '../util/provisionVirtualCard'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
+import { runTestsIfSimulatorAvailable } from '../util/runTestsIf'
 
 describe('UpdateVirtualCard Test Suite', () => {
   jest.setTimeout(240000)
@@ -32,55 +33,64 @@ describe('UpdateVirtualCard Test Suite', () => {
   const log = new DefaultLogger('SudoVirtualCardsClientIntegrationTests')
   let instanceUnderTest: SudoVirtualCardsClient
   let profilesClient: SudoProfilesClient
-  let vcSimulator: SudoVirtualCardsSimulatorClient
+  let optionalSimulator: SudoVirtualCardsSimulatorClient | undefined
   let sudo: Sudo
   let fundingSourceProviders: FundingSourceProviders
-  let merchant: SimulatorMerchant
+  let fundingSourceId: string | undefined = undefined
+  let card: VirtualCard
+  let cardToCancel: VirtualCard | undefined
+
+  let beforeAllComplete = false
   let beforeEachComplete = false
 
-  beforeEach(async () => {
+  function expectSetupComplete(): void {
+    expect({
+      beforeAllComplete,
+      beforeEachComplete,
+    }).toEqual({
+      beforeAllComplete: true,
+      beforeEachComplete: true,
+    })
+  }
+
+  beforeAll(async () => {
     const result = await setupVirtualCardsClient(log)
     instanceUnderTest = result.virtualCardsClient
     profilesClient = result.profilesClient
-    vcSimulator = result.virtualCardsSimulatorClient
+    optionalSimulator = result.virtualCardsSimulatorClient
     sudo = result.sudo
     fundingSourceProviders = result.fundingSourceProviders
 
-    const merchants = await vcSimulator.listSimulatorMerchants()
-    const usdApprovingMerchant = merchants.find(
-      (m) =>
-        m.currency === 'USD' &&
-        !m.declineAfterAuthorization &&
-        !m.declineBeforeAuthorization,
-    )
-    if (!usdApprovingMerchant) {
-      fail('Could not find a USD approving simulator merchant')
-    }
-    merchant = usdApprovingMerchant
+    beforeAllComplete = true
+  })
 
+  beforeEach(async () => {
+    card = await provisionVirtualCard(
+      instanceUnderTest,
+      profilesClient,
+      sudo,
+      fundingSourceProviders,
+      { fundingSourceId },
+    )
+    cardToCancel = card
+    fundingSourceId = card.fundingSourceId
     beforeEachComplete = true
   })
 
-  describe('updateVirtualCard', () => {
-    let card: VirtualCard
-    let innerBeforeEachComplete = false
-    beforeEach(async () => {
-      card = await provisionVirtualCard(
-        instanceUnderTest,
-        profilesClient,
-        sudo,
-        fundingSourceProviders,
-      )
-      innerBeforeEachComplete = true
-    })
-
-    function expectSetupComplete(): void {
-      expect({ beforeEachComplete, innerBeforeEachComplete }).toEqual({
-        beforeEachComplete: true,
-        innerBeforeEachComplete: true,
-      })
+  afterEach(async () => {
+    beforeEachComplete = false
+    if (cardToCancel) {
+      const cardToCancelId = cardToCancel.id
+      cardToCancel = undefined
+      await instanceUnderTest
+        .cancelVirtualCard({ id: cardToCancelId })
+        .catch((err) =>
+          log.error(`Cannot cancel card ${cardToCancelId}: ${err.message}`),
+        )
     }
+  })
 
+  describe('updateVirtualCard', () => {
     it('returns expected output', async () => {
       expectSetupComplete()
 
@@ -98,56 +108,6 @@ describe('UpdateVirtualCard Test Suite', () => {
         cardHolder: 'newCardHolder',
         alias: 'newAlias',
         billingAddress: card.billingAddress,
-      })
-    })
-
-    it('returns expected output with last transaction', async () => {
-      expectSetupComplete()
-
-      await expect(
-        vcSimulator.simulateAuthorization({
-          pan: card.pan,
-          amount: 50,
-          merchantId: merchant.id,
-          expiry: card.expiry,
-          billingAddress: card.billingAddress,
-          csc: card.csc,
-        }),
-      ).resolves.toMatchObject({ approved: true })
-
-      let lastTransaction: Transaction | undefined
-      await waitForExpect(async () => {
-        const gottenCard = await instanceUnderTest.getVirtualCard({
-          id: card.id,
-          cachePolicy: CachePolicy.RemoteOnly,
-        })
-
-        lastTransaction = gottenCard?.lastTransaction
-        expect(lastTransaction).toBeDefined()
-      })
-
-      expect(lastTransaction).toMatchObject<Partial<Transaction>>({
-        billedAmount: { currency: 'USD', amount: 50 },
-        transactedAmount: { currency: 'USD', amount: 50 },
-        description: merchant.name,
-        type: TransactionType.Pending,
-      })
-
-      const result = await instanceUnderTest.updateVirtualCard({
-        id: card.id,
-        expectedCardVersion: card.version,
-        cardHolder: 'newCardHolder',
-        alias: 'newAlias',
-        billingAddress: card.billingAddress,
-      })
-      expect(result).toBeDefined()
-      expect(result.status).toBe(APIResultStatus.Success)
-      expect(result.result).toMatchObject({
-        id: card.id,
-        cardHolder: 'newCardHolder',
-        alias: 'newAlias',
-        billingAddress: card.billingAddress,
-        lastTransaction,
       })
     })
 
@@ -210,4 +170,92 @@ describe('UpdateVirtualCard Test Suite', () => {
       })
     })
   })
+
+  runTestsIfSimulatorAvailable(
+    'updateVirtualCard - if simulator available',
+    () => {
+      describe('updateVirtualCard - if simulator available', () => {
+        let simulator: SudoVirtualCardsSimulatorClient
+        let merchant: SimulatorMerchant
+
+        let innerBeforeAllComplete = false
+        beforeAll(async () => {
+          simulator = optionalSimulator!
+
+          const merchants = await simulator.listSimulatorMerchants()
+          const usdApprovingMerchant = merchants.find(
+            (m) =>
+              m.currency === 'USD' &&
+              !m.declineAfterAuthorization &&
+              !m.declineBeforeAuthorization,
+          )
+          if (!usdApprovingMerchant) {
+            fail('Could not find a USD approving simulator merchant')
+          }
+          merchant = usdApprovingMerchant
+          innerBeforeAllComplete = true
+        })
+
+        function expectSetupComplete(): void {
+          expect({
+            beforeAllComplete,
+            innerBeforeAllComplete,
+          }).toEqual({
+            beforeAllComplete: true,
+            innerBeforeAllComplete: true,
+          })
+        }
+
+        it('returns expected output with last transaction', async () => {
+          expectSetupComplete()
+
+          await expect(
+            simulator.simulateAuthorization({
+              pan: card.pan,
+              amount: 50,
+              merchantId: merchant.id,
+              expiry: card.expiry,
+              billingAddress: card.billingAddress,
+              csc: card.csc,
+            }),
+          ).resolves.toMatchObject({ approved: true })
+
+          let lastTransaction: Transaction | undefined
+          await waitForExpect(async () => {
+            const gottenCard = await instanceUnderTest.getVirtualCard({
+              id: card.id,
+              cachePolicy: CachePolicy.RemoteOnly,
+            })
+
+            lastTransaction = gottenCard?.lastTransaction
+            expect(lastTransaction).toBeDefined()
+          })
+
+          expect(lastTransaction).toMatchObject<Partial<Transaction>>({
+            billedAmount: { currency: 'USD', amount: 50 },
+            transactedAmount: { currency: 'USD', amount: 50 },
+            description: merchant.name,
+            type: TransactionType.Pending,
+          })
+
+          const result = await instanceUnderTest.updateVirtualCard({
+            id: card.id,
+            expectedCardVersion: card.version,
+            cardHolder: 'newCardHolder',
+            alias: 'newAlias',
+            billingAddress: card.billingAddress,
+          })
+          expect(result).toBeDefined()
+          expect(result.status).toBe(APIResultStatus.Success)
+          expect(result.result).toMatchObject({
+            id: card.id,
+            cardHolder: 'newCardHolder',
+            alias: 'newAlias',
+            billingAddress: card.billingAddress,
+            lastTransaction,
+          })
+        })
+      })
+    },
+  )
 })
