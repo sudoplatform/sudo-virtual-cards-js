@@ -253,6 +253,19 @@ export enum FundingSourceType {
   CreditCard = 'CREDIT_CARD',
 }
 
+export type IdFilterInput = {
+  beginsWith?: InputMaybe<Scalars['ID']['input']>
+  between?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>
+  contains?: InputMaybe<Scalars['ID']['input']>
+  eq?: InputMaybe<Scalars['ID']['input']>
+  ge?: InputMaybe<Scalars['ID']['input']>
+  gt?: InputMaybe<Scalars['ID']['input']>
+  le?: InputMaybe<Scalars['ID']['input']>
+  lt?: InputMaybe<Scalars['ID']['input']>
+  ne?: InputMaybe<Scalars['ID']['input']>
+  notContains?: InputMaybe<Scalars['ID']['input']>
+}
+
 export type IdInput = {
   id: Scalars['ID']['input']
 }
@@ -266,6 +279,7 @@ export type Mutation = {
   __typename?: 'Mutation'
   cancelCard: SealedCard
   cancelFundingSource: FundingSource
+  cancelProvisionalFundingSource: ProvisionalFundingSource
   cardProvision: ProvisionalCard
   completeFundingSource: FundingSource
   createPublicKeyForVirtualCards: PublicKey
@@ -290,6 +304,10 @@ export type MutationCancelCardArgs = {
 }
 
 export type MutationCancelFundingSourceArgs = {
+  input: IdInput
+}
+
+export type MutationCancelProvisionalFundingSourceArgs = {
   input: IdInput
 }
 
@@ -375,6 +393,7 @@ export type ProvisionalFundingSource = CommonObject & {
   __typename?: 'ProvisionalFundingSource'
   createdAtEpochMs: Scalars['Float']['output']
   id: Scalars['ID']['output']
+  last4?: Maybe<Scalars['String']['output']>
   owner: Scalars['ID']['output']
   provisioningData: Scalars['ID']['output']
   state: ProvisionalFundingSourceState
@@ -382,11 +401,30 @@ export type ProvisionalFundingSource = CommonObject & {
   version: Scalars['Int']['output']
 }
 
+export type ProvisionalFundingSourceConnection = {
+  __typename?: 'ProvisionalFundingSourceConnection'
+  items: Array<ProvisionalFundingSource>
+  nextToken?: Maybe<Scalars['String']['output']>
+}
+
+export type ProvisionalFundingSourceFilterInput = {
+  and?: InputMaybe<Array<ProvisionalFundingSourceFilterInput>>
+  id?: InputMaybe<IdFilterInput>
+  not?: InputMaybe<ProvisionalFundingSourceFilterInput>
+  or?: InputMaybe<Array<ProvisionalFundingSourceFilterInput>>
+  state?: InputMaybe<ProvisionalFundingSourceStateFilterInput>
+}
+
 export enum ProvisionalFundingSourceState {
   Completed = 'COMPLETED',
   Failed = 'FAILED',
   Pending = 'PENDING',
   Provisioning = 'PROVISIONING',
+}
+
+export type ProvisionalFundingSourceStateFilterInput = {
+  eq?: InputMaybe<ProvisionalFundingSourceState>
+  ne?: InputMaybe<ProvisionalFundingSourceState>
 }
 
 export enum ProvisioningState {
@@ -423,6 +461,7 @@ export type Query = {
   listCards: SealedCardConnection
   listFundingSources: FundingSourceConnection
   listProvisionalCards: ProvisionalCardConnection
+  listProvisionalFundingSources: ProvisionalFundingSourceConnection
   listTransactions2: SealedTransactionConnection
   listTransactionsByCardId2: SealedTransactionConnection
   listTransactionsByCardIdAndType: SealedTransactionConnection
@@ -482,6 +521,12 @@ export type QueryListFundingSourcesArgs = {
 }
 
 export type QueryListProvisionalCardsArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>
+  nextToken?: InputMaybe<Scalars['String']['input']>
+}
+
+export type QueryListProvisionalFundingSourcesArgs = {
+  filter?: InputMaybe<ProvisionalFundingSourceFilterInput>
   limit?: InputMaybe<Scalars['Int']['input']>
   nextToken?: InputMaybe<Scalars['String']['input']>
 }
@@ -786,6 +831,7 @@ export type ProvisionalFundingSourceFragment = {
   updatedAtEpochMs: number
   provisioningData: string
   state: ProvisionalFundingSourceState
+  last4?: string | null
 }
 
 export type CreditCardFundingSourceFragment = {
@@ -1216,6 +1262,7 @@ export type SetupFundingSourceMutation = {
     updatedAtEpochMs: number
     provisioningData: string
     state: ProvisionalFundingSourceState
+    last4?: string | null
   }
 }
 
@@ -1442,6 +1489,25 @@ export type CancelFundingSourceMutation = {
           velocity?: Array<string> | null
         } | null
       }
+}
+
+export type CancelProvisionalFundingSourceMutationVariables = Exact<{
+  input: IdInput
+}>
+
+export type CancelProvisionalFundingSourceMutation = {
+  __typename?: 'Mutation'
+  cancelProvisionalFundingSource: {
+    __typename?: 'ProvisionalFundingSource'
+    id: string
+    owner: string
+    version: number
+    createdAtEpochMs: number
+    updatedAtEpochMs: number
+    provisioningData: string
+    state: ProvisionalFundingSourceState
+    last4?: string | null
+  }
 }
 
 export type ReviewUnfundedFundingSourceMutationVariables = Exact<{
@@ -2167,6 +2233,31 @@ export type ListFundingSourcesQuery = {
           } | null
         }
     >
+  }
+}
+
+export type ListProvisionalFundingSourcesQueryVariables = Exact<{
+  filter?: InputMaybe<ProvisionalFundingSourceFilterInput>
+  limit?: InputMaybe<Scalars['Int']['input']>
+  nextToken?: InputMaybe<Scalars['String']['input']>
+}>
+
+export type ListProvisionalFundingSourcesQuery = {
+  __typename?: 'Query'
+  listProvisionalFundingSources: {
+    __typename?: 'ProvisionalFundingSourceConnection'
+    nextToken?: string | null
+    items: Array<{
+      __typename?: 'ProvisionalFundingSource'
+      id: string
+      owner: string
+      version: number
+      createdAtEpochMs: number
+      updatedAtEpochMs: number
+      provisioningData: string
+      state: ProvisionalFundingSourceState
+      last4?: string | null
+    }>
   }
 }
 
@@ -2980,6 +3071,7 @@ export const ProvisionalFundingSourceFragmentDoc = {
           { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'provisioningData' } },
           { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'last4' } },
         ],
       },
     },
@@ -4496,6 +4588,7 @@ export const SetupFundingSourceDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
           { kind: 'Field', name: { kind: 'Name', value: 'provisioningData' } },
           { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'last4' } },
         ],
       },
     },
@@ -5202,6 +5295,84 @@ export const CancelFundingSourceDocument = {
 } as unknown as DocumentNode<
   CancelFundingSourceMutation,
   CancelFundingSourceMutationVariables
+>
+export const CancelProvisionalFundingSourceDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'CancelProvisionalFundingSource' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'input' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'IdInput' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'cancelProvisionalFundingSource' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'input' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'FragmentSpread',
+                  name: { kind: 'Name', value: 'ProvisionalFundingSource' },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'ProvisionalFundingSource' },
+      typeCondition: {
+        kind: 'NamedType',
+        name: { kind: 'Name', value: 'ProvisionalFundingSource' },
+      },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'version' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'provisioningData' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'last4' } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  CancelProvisionalFundingSourceMutation,
+  CancelProvisionalFundingSourceMutationVariables
 >
 export const ReviewUnfundedFundingSourceDocument = {
   kind: 'Document',
@@ -7917,6 +8088,129 @@ export const ListFundingSourcesDocument = {
 } as unknown as DocumentNode<
   ListFundingSourcesQuery,
   ListFundingSourcesQueryVariables
+>
+export const ListProvisionalFundingSourcesDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'ListProvisionalFundingSources' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'filter' },
+          },
+          type: {
+            kind: 'NamedType',
+            name: {
+              kind: 'Name',
+              value: 'ProvisionalFundingSourceFilterInput',
+            },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'limit' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'nextToken' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'listProvisionalFundingSources' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'filter' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'filter' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'limit' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'limit' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'nextToken' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'nextToken' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'FragmentSpread',
+                        name: {
+                          kind: 'Name',
+                          value: 'ProvisionalFundingSource',
+                        },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'nextToken' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'ProvisionalFundingSource' },
+      typeCondition: {
+        kind: 'NamedType',
+        name: { kind: 'Name', value: 'ProvisionalFundingSource' },
+      },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'version' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'createdAtEpochMs' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'updatedAtEpochMs' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'provisioningData' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'last4' } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  ListProvisionalFundingSourcesQuery,
+  ListProvisionalFundingSourcesQueryVariables
 >
 export const GetProvisionalCardDocument = {
   kind: 'Document',

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2024 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -16,19 +16,19 @@ import {
 } from 'ts-mockito'
 import { FundingSourceService } from '../../../../../../src/private/domain/entities/fundingSource/fundingSourceService'
 import { SudoUserService } from '../../../../../../src/private/domain/entities/sudoUser/sudoUserService'
-import { ListFundingSourcesUseCase } from '../../../../../../src/private/domain/use-cases/fundingSource/listFundingSourcesUseCase'
 import { EntityDataFactory } from '../../../../data-factory/entity'
+import { ListProvisionalFundingSourcesUseCase } from '../../../../../../src/private/domain/use-cases/fundingSource/listProvisionalFundingSourcesUseCase'
 
-describe('ListFundingSourcesUseCase Test Suite', () => {
+describe('ListProvisionalFundingSourcesUseCase Test Suite', () => {
   const mockFundingSourceService = mock<FundingSourceService>()
   const mockUserService = mock<SudoUserService>()
 
-  let instanceUnderTest: ListFundingSourcesUseCase
+  let instanceUnderTest: ListProvisionalFundingSourcesUseCase
 
   beforeEach(() => {
     reset(mockFundingSourceService)
     reset(mockUserService)
-    instanceUnderTest = new ListFundingSourcesUseCase(
+    instanceUnderTest = new ListProvisionalFundingSourcesUseCase(
       instance(mockFundingSourceService),
       instance(mockUserService),
     )
@@ -45,48 +45,54 @@ describe('ListFundingSourcesUseCase Test Suite', () => {
       ).rejects.toThrow(NotSignedInError)
     })
     it('completes successfully', async () => {
-      when(mockFundingSourceService.listFundingSources(anything())).thenResolve(
-        {
-          fundingSources: [EntityDataFactory.defaultFundingSource],
-        },
-      )
+      when(
+        mockFundingSourceService.listProvisionalFundingSources(anything()),
+      ).thenResolve({
+        provisionalFundingSources: [EntityDataFactory.provisionalFundingSource],
+      })
       const result = await instanceUnderTest.execute({
         cachePolicy: CachePolicy.CacheOnly,
       })
-      verify(mockFundingSourceService.listFundingSources(anything())).once()
+      verify(
+        mockFundingSourceService.listProvisionalFundingSources(anything()),
+      ).once()
       const [inputArgs] = capture(
-        mockFundingSourceService.listFundingSources,
+        mockFundingSourceService.listProvisionalFundingSources,
       ).first()
       expect(inputArgs).toStrictEqual<typeof inputArgs>({
+        filterInput: undefined,
         cachePolicy: CachePolicy.CacheOnly,
         limit: undefined,
         nextToken: undefined,
       })
       expect(result).toStrictEqual({
-        fundingSources: [EntityDataFactory.defaultFundingSource],
+        provisionalFundingSources: [EntityDataFactory.provisionalFundingSource],
       })
     })
 
     it('completes successfully with empty result items', async () => {
-      when(mockFundingSourceService.listFundingSources(anything())).thenResolve(
-        {
-          fundingSources: [],
-        },
-      )
+      when(
+        mockFundingSourceService.listProvisionalFundingSources(anything()),
+      ).thenResolve({
+        provisionalFundingSources: [],
+      })
       const result = await instanceUnderTest.execute({
         cachePolicy: CachePolicy.CacheOnly,
       })
-      verify(mockFundingSourceService.listFundingSources(anything())).once()
+      verify(
+        mockFundingSourceService.listProvisionalFundingSources(anything()),
+      ).once()
       const [inputArgs] = capture(
-        mockFundingSourceService.listFundingSources,
+        mockFundingSourceService.listProvisionalFundingSources,
       ).first()
       expect(inputArgs).toStrictEqual<typeof inputArgs>({
+        filterInput: undefined,
         cachePolicy: CachePolicy.CacheOnly,
         limit: undefined,
         nextToken: undefined,
       })
       expect(result).toStrictEqual({
-        fundingSources: [],
+        provisionalFundingSources: [],
       })
     })
   })

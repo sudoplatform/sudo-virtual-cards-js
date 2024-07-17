@@ -23,6 +23,7 @@ export class ProvisionalFundingSourceEntityTransformer {
       updatedAt: new Date(data.updatedAtEpochMs),
       state: data.state,
       type: provisioningData.type,
+      last4: data.last4 ?? '',
       provisioningData: data.provisioningData,
     }
   }

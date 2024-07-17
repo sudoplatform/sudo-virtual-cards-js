@@ -289,14 +289,14 @@ export const createCardFundingSource = async (
     updateCardFundingSource?: boolean
   },
 ): Promise<FundingSource> => {
-  const provisionalCard = await virtualCardsClient.setupFundingSource({
+  const provisionalFundingSource = await virtualCardsClient.setupFundingSource({
     currency: 'USD',
     type: FundingSourceType.CreditCard,
     supportedProviders: options?.supportedProviders,
     applicationName: options?.applicationName ?? 'webApplication',
   })
 
-  const provisioningData = provisionalCard.provisioningData
+  const provisioningData = provisionalFundingSource.provisioningData
   const provider = provisioningData.provider
   if (!isCardProviderName(provider)) {
     throw new Error(
@@ -348,7 +348,7 @@ export const createCardFundingSource = async (
   }
 
   const fundingSource = (await virtualCardsClient.completeFundingSource({
-    id: provisionalCard.id,
+    id: provisionalFundingSource.id,
     completionData,
     updateCardFundingSource: options?.updateCardFundingSource,
   })) as CreditCardFundingSource

@@ -24,6 +24,7 @@ export class ProvisionalFundingSourceApiTransformer {
       updatedAt: entity.updatedAt,
       state: entity.state,
       type: entity.type,
+      last4: entity.last4,
       provisioningData,
     }
   }

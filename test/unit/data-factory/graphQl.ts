@@ -19,6 +19,8 @@ import {
   KeyFormat,
   ProvisionalCard,
   ProvisionalFundingSource,
+  ProvisionalFundingSourceConnection,
+  ProvisionalFundingSourceFilterInput,
   ProvisionalFundingSourceState,
   ProvisioningState,
   PublicKey,
@@ -96,6 +98,7 @@ export class GraphQLDataFactory {
     id: 'dummyFundingSourceId',
     state: ProvisionalFundingSourceState.Completed,
     provisioningData: this.provisioningData,
+    last4: '1234',
   }
 
   static readonly provisionalBankAccountFundingSource: ProvisionalFundingSource =
@@ -104,6 +107,53 @@ export class GraphQLDataFactory {
       id: 'dummyFundingSourceId',
       state: ProvisionalFundingSourceState.Completed,
       provisioningData: this.bankAccountProvisioningData,
+      last4: '1234',
+    }
+
+  static readonly provisionalFundingSourceFilter: ProvisionalFundingSourceFilterInput =
+    {
+      id: { eq: 'dummyFundingSourceId' },
+      state: { eq: ProvisionalFundingSourceState.Completed },
+    }
+
+  static readonly provisionalFundingSourceFilterID: ProvisionalFundingSourceFilterInput =
+    {
+      id: { eq: 'dummyFundingSourceId' },
+    }
+
+  static readonly provisionalFundingSourceFilterState: ProvisionalFundingSourceFilterInput =
+    {
+      state: { eq: ProvisionalFundingSourceState.Completed },
+    }
+
+  static readonly provisionalFundingSourceFilterAnd: ProvisionalFundingSourceFilterInput =
+    {
+      and: [
+        GraphQLDataFactory.provisionalFundingSourceFilterID,
+        GraphQLDataFactory.provisionalFundingSourceFilterState,
+      ],
+    }
+
+  static readonly provisionalFundingSourceFilterOr: ProvisionalFundingSourceFilterInput =
+    {
+      or: [
+        GraphQLDataFactory.provisionalFundingSourceFilterID,
+        GraphQLDataFactory.provisionalFundingSourceFilterState,
+      ],
+    }
+
+  static readonly provisionalFundingSourceFilterNot: ProvisionalFundingSourceFilterInput =
+    {
+      not: GraphQLDataFactory.provisionalFundingSourceFilterOr,
+    }
+
+  static readonly provisionalFundingSourceConnection: ProvisionalFundingSourceConnection =
+    {
+      items: [
+        GraphQLDataFactory.provisionalFundingSource,
+        GraphQLDataFactory.provisionalBankAccountFundingSource,
+      ],
+      nextToken: undefined,
     }
 
   private static readonly commonFundingSourceUnsealedProps = {

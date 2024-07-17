@@ -647,6 +647,98 @@ describe('DefaultFundingSourceService Test Suite', () => {
     })
   })
 
+  describe('cancelProvisionalFundingSource', () => {
+    it('calls appsync correctly', async () => {
+      when(mockAppSync.cancelProvisionalFundingSource(anything())).thenResolve(
+        GraphQLDataFactory.provisionalFundingSource,
+      )
+      const entity = EntityDataFactory.provisionalFundingSource
+      const result = await instanceUnderTest.cancelProvisionalFundingSource({
+        id: entity.id,
+      })
+      expect(result).toEqual(entity)
+      const [inputArgs] = capture(
+        mockAppSync.cancelProvisionalFundingSource,
+      ).first()
+      expect(inputArgs).toEqual<typeof inputArgs>({
+        id: entity.id,
+      })
+      verify(mockAppSync.cancelProvisionalFundingSource(anything())).once()
+    })
+  })
+
+  describe('listProvisionalFundingSources', () => {
+    it('calls appsync correctly', async () => {
+      when(
+        mockAppSync.listProvisionalFundingSources(
+          anything(),
+          anything(),
+          anything(),
+          anything(),
+        ),
+      ).thenResolve(GraphQLDataFactory.provisionalFundingSourceConnection)
+      const result = await instanceUnderTest.listProvisionalFundingSources({
+        cachePolicy: CachePolicy.CacheOnly,
+      })
+      verify(
+        mockAppSync.listProvisionalFundingSources(
+          anything(),
+          anything(),
+          anything(),
+          anything(),
+        ),
+      ).once()
+      const [policyArg] = capture(
+        mockAppSync.listProvisionalFundingSources,
+      ).first()
+      expect(policyArg).toEqual<typeof policyArg>('cache-only')
+      expect(result).toEqual({
+        provisionalFundingSources: [
+          EntityDataFactory.provisionalFundingSource,
+          EntityDataFactory.provisionalBankAccountFundingSource,
+        ],
+        nextToken: undefined,
+      })
+    })
+
+    it.each`
+      cachePolicy               | test
+      ${CachePolicy.CacheOnly}  | ${'cache'}
+      ${CachePolicy.RemoteOnly} | ${'remote'}
+    `(
+      'returns transformed result when calling $test',
+      async ({ cachePolicy }) => {
+        when(
+          mockAppSync.listProvisionalFundingSources(
+            anything(),
+            anything(),
+            anything(),
+            anything(),
+          ),
+        ).thenResolve(GraphQLDataFactory.provisionalFundingSourceConnection)
+        await expect(
+          instanceUnderTest.listProvisionalFundingSources({
+            cachePolicy,
+          }),
+        ).resolves.toEqual({
+          provisionalFundingSources: [
+            EntityDataFactory.provisionalFundingSource,
+            EntityDataFactory.provisionalBankAccountFundingSource,
+          ],
+          nextToken: undefined,
+        })
+        verify(
+          mockAppSync.listProvisionalFundingSources(
+            anything(),
+            anything(),
+            anything(),
+            anything(),
+          ),
+        ).once()
+      },
+    )
+  })
+
   describe('sandboxGetPlaidData', () => {
     const input: SandboxGetPlaidDataInput = {
       institutionId: 'institution-id',

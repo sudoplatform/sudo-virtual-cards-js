@@ -17,5 +17,6 @@ export interface ProvisionalFundingSourceEntity {
   updatedAt: Date
   type: FundingSourceType
   state: ProvisionalFundingSourceState
+  last4: string
   provisioningData: string
 }

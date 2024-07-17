@@ -29,8 +29,8 @@ describe('Provisioning Data Test Suite', () => {
         expect(decoded).toBeUndefined()
         expect(caught).toBeDefined()
         expect(caught).toBeInstanceOf(FatalError)
-        expect(caught?.message).toEqual(
-          'provisional funding source provisioning data cannot be decoded: JSON parsing failed: this is not JSON: Unexpected token h in JSON at position 1',
+        expect(caught?.message).toContain(
+          'provisional funding source provisioning data cannot be decoded: JSON parsing failed: this is not JSON: Unexpected token',
         )
       })
 

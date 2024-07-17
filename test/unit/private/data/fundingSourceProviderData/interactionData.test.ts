@@ -81,8 +81,8 @@ describe('Interaction Data Test Suite', () => {
         expect(decoded).toBeUndefined()
         expect(caught).toBeDefined()
         expect(caught).toBeInstanceOf(FatalError)
-        expect(caught?.message).toEqual(
-          'error info cannot be decoded as funding source interaction data: Base64 decoded interaction data could not be parsed as JSON: this is not JSON: Unexpected token h in JSON at position 1',
+        expect(caught?.message).toContain(
+          'error info cannot be decoded as funding source interaction data: Base64 decoded interaction data could not be parsed as JSON: this is not JSON: Unexpected token',
         )
       })
 

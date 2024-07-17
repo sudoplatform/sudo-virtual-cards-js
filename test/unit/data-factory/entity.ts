@@ -19,6 +19,7 @@ import {
   CreditCardNetwork,
   FundingSourceState,
   FundingSourceType,
+  ProvisionalFundingSourceFilterInput,
   ProvisionalFundingSourceState,
 } from '../../../src/public/typings/fundingSource'
 import { ProvisioningState } from '../../../src/public/typings/provisionalCard'
@@ -77,6 +78,7 @@ export class EntityDataFactory {
     provisioningData: this.provisioningData,
     state: ProvisionalFundingSourceState.Completed,
     type: FundingSourceType.CreditCard,
+    last4: '1234',
   }
 
   static readonly provisionalBankAccountFundingSource: ProvisionalFundingSourceEntity =
@@ -86,6 +88,7 @@ export class EntityDataFactory {
       provisioningData: this.bankAccountProvisioningData,
       state: ProvisionalFundingSourceState.Completed,
       type: FundingSourceType.BankAccount,
+      last4: '1234',
     }
 
   private static readonly commonFundingSourceProps = {
@@ -122,6 +125,43 @@ export class EntityDataFactory {
     },
     unfundedAmount: undefined,
   }
+
+  static readonly provisionalFundingSourceFilter: ProvisionalFundingSourceFilterInput =
+    {
+      id: { eq: 'dummyFundingSourceId' },
+      state: { eq: ProvisionalFundingSourceState.Completed },
+    }
+
+  static readonly provisionalFundingSourceFilterID: ProvisionalFundingSourceFilterInput =
+    {
+      id: { eq: 'dummyFundingSourceId' },
+    }
+
+  static readonly provisionalFundingSourceFilterState: ProvisionalFundingSourceFilterInput =
+    {
+      state: { eq: ProvisionalFundingSourceState.Completed },
+    }
+
+  static readonly provisionalFundingSourceFilterAnd: ProvisionalFundingSourceFilterInput =
+    {
+      and: [
+        EntityDataFactory.provisionalFundingSourceFilterID,
+        EntityDataFactory.provisionalFundingSourceFilterState,
+      ],
+    }
+
+  static readonly provisionalFundingSourceFilterOr: ProvisionalFundingSourceFilterInput =
+    {
+      or: [
+        EntityDataFactory.provisionalFundingSourceFilterID,
+        EntityDataFactory.provisionalFundingSourceFilterState,
+      ],
+    }
+
+  static readonly provisionalFundingSourceFilterNot: ProvisionalFundingSourceFilterInput =
+    {
+      not: EntityDataFactory.provisionalFundingSourceFilterOr,
+    }
 
   static readonly provisionalVirtualCard: ProvisionalVirtualCardEntity = {
     ...this.commonProps,

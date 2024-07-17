@@ -190,6 +190,7 @@ type ProvisionalFundingSource implements CommonObject {
   createdAtEpochMs: Float!
   updatedAtEpochMs: Float!
   state: ProvisionalFundingSourceState!
+  last4: String
   provisioningData: ID!
 }
 
@@ -413,6 +414,37 @@ type FundingSourceConnection {
   nextToken: String
 }
 
+type ProvisionalFundingSourceConnection {
+	items: [ProvisionalFundingSource!]!
+	nextToken: String
+}
+
+input ProvisionalFundingSourceFilterInput {
+  id: IDFilterInput
+  state: ProvisionalFundingSourceStateFilterInput
+  and: [ProvisionalFundingSourceFilterInput!]
+  or: [ProvisionalFundingSourceFilterInput!]
+  not: ProvisionalFundingSourceFilterInput
+}
+
+input ProvisionalFundingSourceStateFilterInput {
+  eq: ProvisionalFundingSourceState
+  ne: ProvisionalFundingSourceState
+}
+
+input IDFilterInput {
+  ne: ID
+  eq: ID
+  le: ID
+  lt: ID
+  ge: ID
+  gt: ID
+  contains: ID
+  notContains: ID
+  between: [ID]
+  beginsWith: ID
+}
+
 input DateRangeInput {
   startDateEpochMs: Float!
   endDateEpochMs: Float!
@@ -442,6 +474,11 @@ type Query {
   getFundingSourceClientConfiguration: FundingSourceClientConfiguration!
   getFundingSource(id: ID!): FundingSource
   listFundingSources(limit: Int, nextToken: String): FundingSourceConnection!
+  listProvisionalFundingSources(
+    filter: ProvisionalFundingSourceFilterInput
+    limit: Int
+    nextToken: String
+  ): ProvisionalFundingSourceConnection!
   getProvisionalCard(id: ID!): ProvisionalCard
   listProvisionalCards(
     limit: Int
@@ -479,6 +516,7 @@ type Mutation {
   completeFundingSource(input: CompleteFundingSourceRequest!): FundingSource!
   refreshFundingSource(input: RefreshFundingSourceRequest!): FundingSource!
   cancelFundingSource(input: IdInput!): FundingSource!
+  cancelProvisionalFundingSource(input: IdInput!): ProvisionalFundingSource!
   reviewUnfundedFundingSource(input: IdInput!): FundingSource!
   cardProvision(input: CardProvisionRequest!): ProvisionalCard!
   updateCard(input: CardUpdateRequest): SealedCard!

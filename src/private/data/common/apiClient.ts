@@ -30,6 +30,8 @@ import AWSAppSyncClient from 'aws-appsync'
 import {
   CancelFundingSourceDocument,
   CancelFundingSourceMutation,
+  CancelProvisionalFundingSourceDocument,
+  CancelProvisionalFundingSourceMutation,
   CancelVirtualCardDocument,
   CancelVirtualCardMutation,
   CardCancelRequest,
@@ -72,6 +74,8 @@ import {
   ListFundingSourcesQuery,
   ListProvisionalCardsDocument,
   ListProvisionalCardsQuery,
+  ListProvisionalFundingSourcesDocument,
+  ListProvisionalFundingSourcesQuery,
   ListTransactionsByCardIdAndTypeDocument,
   ListTransactionsByCardIdAndTypeQuery,
   ListTransactionsByCardIdAndTypeQueryVariables,
@@ -87,6 +91,8 @@ import {
   ProvisionalCard,
   ProvisionalCardConnection,
   ProvisionalFundingSource,
+  ProvisionalFundingSourceConnection,
+  ProvisionalFundingSourceFilterInput,
   ProvisionVirtualCardDocument,
   ProvisionVirtualCardMutation,
   PublicKey,
@@ -297,6 +303,33 @@ export class ApiClient {
         calleeName: this.reviewUnfundedFundingSource.name,
       })
     return data.reviewUnfundedFundingSource
+  }
+
+  public async cancelProvisionalFundingSource(
+    input: IdInput,
+  ): Promise<ProvisionalFundingSource> {
+    const data =
+      await this.performMutation<CancelProvisionalFundingSourceMutation>({
+        mutation: CancelProvisionalFundingSourceDocument,
+        variables: { input },
+        calleeName: this.cancelProvisionalFundingSource.name,
+      })
+    return data.cancelProvisionalFundingSource
+  }
+
+  public async listProvisionalFundingSources(
+    fetchPolicy: FetchPolicy = 'network-only',
+    filter?: ProvisionalFundingSourceFilterInput,
+    limit?: number,
+    nextToken?: string,
+  ): Promise<ProvisionalFundingSourceConnection> {
+    const data = await this.performQuery<ListProvisionalFundingSourcesQuery>({
+      query: ListProvisionalFundingSourcesDocument,
+      variables: { filter, limit, nextToken },
+      fetchPolicy,
+      calleeName: this.listFundingSources.name,
+    })
+    return data.listProvisionalFundingSources
   }
 
   async provisionVirtualCard(

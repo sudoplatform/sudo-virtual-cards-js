@@ -29,6 +29,7 @@ interface SetupFundingSourceUseCaseOutput {
   updatedAt: Date
   type: FundingSourceType
   state: ProvisionalFundingSourceState
+  last4: string
   provisioningData: string
 }
 

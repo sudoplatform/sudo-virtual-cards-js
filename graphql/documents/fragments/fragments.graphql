@@ -38,6 +38,7 @@ fragment ProvisionalFundingSource on ProvisionalFundingSource {
   updatedAtEpochMs
   provisioningData
   state
+  last4
 }
 
 fragment CreditCardFundingSource on CreditCardFundingSource {

@@ -43,6 +43,12 @@ mutation CancelFundingSource($input: IdInput!) {
   }
 }
 
+mutation CancelProvisionalFundingSource($input: IdInput!) {
+  cancelProvisionalFundingSource(input: $input) {
+    ...ProvisionalFundingSource
+  }
+}
+
 mutation ReviewUnfundedFundingSource($input: IdInput!) {
   reviewUnfundedFundingSource(input: $input) {
     ... on CreditCardFundingSource {

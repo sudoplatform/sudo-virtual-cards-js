@@ -355,7 +355,7 @@ export function isCheckoutBankAccountRefreshFundingSourceInteractionData(
 }
 
 /**
- * The Sudo Platform SDK representation of a funding source.
+ * The Sudo Platform SDK representation of a provisional funding source.
  *
  * @interface ProvisionalFundingSource
  * @property {string} id Unique identifier of the provisional funding source.
@@ -363,6 +363,7 @@ export function isCheckoutBankAccountRefreshFundingSourceInteractionData(
  * @property {number} version Current version of the provisional funding source.
  * @property {number} createdAt Date when the provisional funding source was created.
  * @property {number} updatedAt Date when the provisional funding source was last updated.
+ * @property {string} last4 The last 4 digits of the funding source account number.
  * @property {ProvisionalFundingSourceState} state The provisional funding source state.
  * @property {string} provisioningData Provisioning data provided by the funding source provider.
  */
@@ -374,6 +375,7 @@ export interface ProvisionalFundingSource {
   updatedAt: Date
   type: FundingSourceType
   state: ProvisionalFundingSourceState
+  last4: string
   provisioningData: ProvisionalFundingSourceProvisioningData
 }
 
@@ -419,6 +421,62 @@ export enum ProvisionalFundingSourceState {
   Failed = 'FAILED',
   Pending = 'PENDING',
   Provisioning = 'PROVISIONING',
+}
+
+/**
+ * The Sudo Platform SDK representation of a filter used to filter entities based on their id field.
+ *
+ * @property {string} beginsWith The id field must begin with this string.
+ * @property {string[]} between The id field falls alphabetically between the strings in the given array.
+ * @property {string} contains The id field must contain this string.
+ * @property {string} eq The id field must equal this string.
+ * @property {string} ge The id field is alphabetically equal to or greater than this string.
+ * @property {string} gt The id field is alphabetically greater than this string.
+ * @property {string} le The id field is alphabetically equal to or less than this string.
+ * @property {string} ne The id field must not be equal to this string.
+ * @property {string} notContains The id field must not contain this string.
+ */
+export type IDFilterInput = {
+  beginsWith?: string
+  between?: string[]
+  contains?: string
+  eq?: string
+  ge?: string
+  gt?: string
+  le?: string
+  ne?: string
+  notContains?: string
+}
+
+/**
+ * The Sudo Platform SDK representation of a filter used to filter provisional funding source entities based
+ * on their provisional funding source state.
+ *
+ * @property {ProvisionalFundingSourceState} eq The provisional funding source state must be equal to this field.
+ * @property {ProvisionalFundingSourceState} ne The provisional funding source state must not be equal to this field.
+ */
+export type ProvisionalFundingSourceStateFilterInput = {
+  eq?: ProvisionalFundingSourceState
+  ne?: ProvisionalFundingSourceState
+}
+
+/**
+ * The Sudo Platform SDK representation of a filter used to filter provisional funding source entities.
+ *
+ * @property {IDFilterInput} id The provisional funding source id must match this filter.
+ * @property {ProvisionalFundingSourceStateFilterInput} state The provisional funding source state must match this filter.
+ * @property {ProvisionalFundingSourceFilterInput[]} and The provisional funding sources must match the logical and
+ *  of the `ProvisionalFundingSourceFilterInput` entries in this array.
+ * @property {ProvisionalFundingSourceFilterInput} not The provisional funding source must not match this filter.
+ * @property {ProvisionalFundingSourceFilterInput[]} or The provisional funding sources must match the logical or
+ *  of the `ProvisionalFundingSourceFilterInput` entries in this array.
+ */
+export type ProvisionalFundingSourceFilterInput = {
+  id?: IDFilterInput
+  state?: ProvisionalFundingSourceStateFilterInput
+  and?: ProvisionalFundingSourceFilterInput[]
+  not?: ProvisionalFundingSourceFilterInput
+  or?: ProvisionalFundingSourceFilterInput[]
 }
 
 /**

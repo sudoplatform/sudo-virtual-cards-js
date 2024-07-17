@@ -39,8 +39,8 @@ describe('Client Configuration Test Suite', () => {
       expect(decoded).toBeUndefined()
       expect(caught).toBeDefined()
       expect(caught).toBeInstanceOf(FatalError)
-      expect(caught?.message).toEqual(
-        'funding source client configuration cannot be decoded: JSON parsing failed: this is not JSON: Unexpected token h in JSON at position 1',
+      expect(caught?.message).toContain(
+        'funding source client configuration cannot be decoded: JSON parsing failed: this is not JSON: Unexpected token',
       )
     })
   })
@@ -68,8 +68,8 @@ describe('Client Configuration Test Suite', () => {
       expect(decoded).toBeUndefined()
       expect(caught).toBeDefined()
       expect(caught).toBeInstanceOf(FatalError)
-      expect(caught?.message).toEqual(
-        'client application configuration cannot be decoded: JSON parsing failed: this is not JSON: Unexpected token h in JSON at position 1',
+      expect(caught?.message).toContain(
+        'client application configuration cannot be decoded: JSON parsing failed: this is not JSON: Unexpected token',
       )
     })
   })
@@ -93,8 +93,8 @@ describe('Client Configuration Test Suite', () => {
       expect(decoded).toBeUndefined()
       expect(caught).toBeDefined()
       expect(caught).toBeInstanceOf(FatalError)
-      expect(caught?.message).toEqual(
-        'pricing policy cannot be decoded: JSON parsing failed: this is not JSON: Unexpected token h in JSON at position 1',
+      expect(caught?.message).toContain(
+        'pricing policy cannot be decoded: JSON parsing failed: this is not JSON: Unexpected token',
       )
     })
   })

@@ -23,6 +23,7 @@ import {
 import { v4 } from 'uuid'
 import {
   CancelFundingSourceDocument,
+  CancelProvisionalFundingSourceDocument,
   CancelVirtualCardDocument,
   CompleteFundingSourceDocument,
   CreatePublicKeyDocument,
@@ -39,6 +40,7 @@ import {
   ListCardsDocument,
   ListFundingSourcesDocument,
   ListProvisionalCardsDocument,
+  ListProvisionalFundingSourcesDocument,
   ListTransactionsByCardIdAndTypeDocument,
   ListTransactionsByCardIdDocument,
   ListTransactionsDocument,
@@ -416,6 +418,62 @@ describe('ApiClient Test Suite', () => {
       ).rejects.toThrow(UnknownGraphQLError)
     })
   })
+  describe('listProvisionalFundingSources', () => {
+    it('performs successfully', async () => {
+      when(mockClient.query(anything())).thenResolve({
+        data: {
+          listProvisionalFundingSources: {
+            items: [GraphQLDataFactory.provisionalFundingSource],
+            nextToken: undefined,
+          },
+        },
+      } as any)
+      const fetchPolicy = 'cache-only'
+      const filter = undefined
+      const limit = 100
+      const nextToken = v4()
+      await expect(
+        instanceUnderTest.listProvisionalFundingSources(
+          fetchPolicy,
+          filter,
+          limit,
+          nextToken,
+        ),
+      ).resolves.toStrictEqual({
+        items: [GraphQLDataFactory.provisionalFundingSource],
+        nextToken: undefined,
+      })
+      verify(mockClient.query(anything())).once()
+      const [args] = capture(mockClient.query as any).first()
+      expect(args).toStrictEqual({
+        fetchPolicy: 'cache-only',
+        variables: { filter, limit, nextToken },
+        query: ListProvisionalFundingSourcesDocument,
+      })
+    })
+    it('handles thrown error from app sync call', async () => {
+      when(mockClient.query(anything())).thenReject(
+        new ApolloError({
+          graphQLErrors: [new GraphQLError('appsync failure')],
+        }),
+      )
+      await expect(
+        instanceUnderTest.listProvisionalFundingSources('cache-only'),
+      ).rejects.toThrow(UnknownGraphQLError)
+    })
+    it('handles error from graphQl', async () => {
+      when(mockClient.query(anything())).thenResolve({
+        data: null,
+        errors: [new GraphQLError('failed')],
+        loading: false,
+        networkStatus: NetworkStatus.error,
+        stale: false,
+      })
+      await expect(
+        instanceUnderTest.listProvisionalFundingSources('cache-only'),
+      ).rejects.toThrow(UnknownGraphQLError)
+    })
+  })
   describe('setupFundingSource', () => {
     it('performs successfully', async () => {
       when(mockClient.mutate(anything())).thenResolve({
@@ -577,30 +635,95 @@ describe('ApiClient Test Suite', () => {
         }),
       ).rejects.toThrow(UnknownGraphQLError)
     })
-    describe('provisionVirtualCard', () => {
-      it('performs successfully', async () => {
-        when(mockClient.mutate(anything())).thenResolve({
-          data: {
-            cardProvision: GraphQLDataFactory.provisionalCard,
+  })
+  describe('cancelProvisiionalFundingSource', () => {
+    it('performs successfully', async () => {
+      when(mockClient.mutate(anything())).thenResolve({
+        data: {
+          cancelProvisionalFundingSource:
+            GraphQLDataFactory.provisionalFundingSource,
+        },
+      } as any)
+      const id = v4()
+      await expect(
+        instanceUnderTest.cancelProvisionalFundingSource({
+          id,
+        }),
+      ).resolves.toStrictEqual(GraphQLDataFactory.provisionalFundingSource)
+      verify(mockClient.mutate(anything())).once()
+      const [args] = capture(mockClient.mutate as any).first()
+      expect(args).toStrictEqual({
+        mutation: CancelProvisionalFundingSourceDocument,
+        variables: {
+          input: {
+            id,
           },
-        } as any)
-        const alias = v4()
-        const billingAddress = {
-          addressLine1: v4(),
-          addressLine2: v4(),
-          city: v4(),
-          state: v4(),
-          country: v4(),
-          postalCode: v4(),
-        }
-        const cardHolder = v4()
-        const clientRefId = v4()
-        const currency = v4()
-        const fundingSourceId = v4()
-        const keyRingId = v4()
-        const ownerProofs = [v4()]
-        await expect(
-          instanceUnderTest.provisionVirtualCard({
+        },
+      })
+    })
+    it('handles thrown error from app sync call', async () => {
+      when(mockClient.mutate(anything())).thenReject(
+        new ApolloError({
+          graphQLErrors: [new GraphQLError('appsync failure')],
+        }),
+      )
+      await expect(
+        instanceUnderTest.cancelProvisionalFundingSource({
+          id: '',
+        }),
+      ).rejects.toThrow(UnknownGraphQLError)
+    })
+    it('handles error from graphQl', async () => {
+      when(mockClient.mutate(anything())).thenResolve({
+        errors: [new GraphQLError('failed')],
+      })
+      await expect(
+        instanceUnderTest.cancelProvisionalFundingSource({
+          id: '',
+        }),
+      ).rejects.toThrow(UnknownGraphQLError)
+    })
+  })
+  describe('provisionVirtualCard', () => {
+    it('performs successfully', async () => {
+      when(mockClient.mutate(anything())).thenResolve({
+        data: {
+          cardProvision: GraphQLDataFactory.provisionalCard,
+        },
+      } as any)
+      const alias = v4()
+      const billingAddress = {
+        addressLine1: v4(),
+        addressLine2: v4(),
+        city: v4(),
+        state: v4(),
+        country: v4(),
+        postalCode: v4(),
+      }
+      const cardHolder = v4()
+      const clientRefId = v4()
+      const currency = v4()
+      const fundingSourceId = v4()
+      const keyRingId = v4()
+      const ownerProofs = [v4()]
+      await expect(
+        instanceUnderTest.provisionVirtualCard({
+          alias,
+          billingAddress,
+          cardHolder,
+          clientRefId,
+          currency,
+          fundingSourceId,
+          keyRingId,
+          ownerProofs,
+        }),
+      ).resolves.toStrictEqual(GraphQLDataFactory.provisionalCard)
+      verify(mockClient.mutate(anything())).once()
+      const [args] = capture(mockClient.mutate as any).first()
+      expect(args).toStrictEqual({
+        mutation: ProvisionVirtualCardDocument,
+        variables: {
+          input: {
             alias,
             billingAddress,
             cardHolder,
@@ -609,60 +732,43 @@ describe('ApiClient Test Suite', () => {
             fundingSourceId,
             keyRingId,
             ownerProofs,
-          }),
-        ).resolves.toStrictEqual(GraphQLDataFactory.provisionalCard)
-        verify(mockClient.mutate(anything())).once()
-        const [args] = capture(mockClient.mutate as any).first()
-        expect(args).toStrictEqual({
-          mutation: ProvisionVirtualCardDocument,
-          variables: {
-            input: {
-              alias,
-              billingAddress,
-              cardHolder,
-              clientRefId,
-              currency,
-              fundingSourceId,
-              keyRingId,
-              ownerProofs,
-            },
           },
-        })
+        },
       })
-      it('handles thrown error from app sync call', async () => {
-        when(mockClient.mutate(anything())).thenReject(
-          new ApolloError({
-            graphQLErrors: [new GraphQLError('appsync failure')],
-          }),
-        )
-        await expect(
-          instanceUnderTest.provisionVirtualCard({
-            alias: '',
-            cardHolder: '',
-            clientRefId: '',
-            currency: '',
-            fundingSourceId: '',
-            keyRingId: '',
-            ownerProofs: [],
-          }),
-        ).rejects.toThrow(UnknownGraphQLError)
+    })
+    it('handles thrown error from app sync call', async () => {
+      when(mockClient.mutate(anything())).thenReject(
+        new ApolloError({
+          graphQLErrors: [new GraphQLError('appsync failure')],
+        }),
+      )
+      await expect(
+        instanceUnderTest.provisionVirtualCard({
+          alias: '',
+          cardHolder: '',
+          clientRefId: '',
+          currency: '',
+          fundingSourceId: '',
+          keyRingId: '',
+          ownerProofs: [],
+        }),
+      ).rejects.toThrow(UnknownGraphQLError)
+    })
+    it('handles error from graphQl', async () => {
+      when(mockClient.mutate(anything())).thenResolve({
+        errors: [new GraphQLError('failed')],
       })
-      it('handles error from graphQl', async () => {
-        when(mockClient.mutate(anything())).thenResolve({
-          errors: [new GraphQLError('failed')],
-        })
-        await expect(
-          instanceUnderTest.provisionVirtualCard({
-            alias: '',
-            cardHolder: '',
-            clientRefId: '',
-            currency: '',
-            fundingSourceId: '',
-            keyRingId: '',
-            ownerProofs: [],
-          }),
-        ).rejects.toThrow(UnknownGraphQLError)
-      })
+      await expect(
+        instanceUnderTest.provisionVirtualCard({
+          alias: '',
+          cardHolder: '',
+          clientRefId: '',
+          currency: '',
+          fundingSourceId: '',
+          keyRingId: '',
+          ownerProofs: [],
+        }),
+      ).rejects.toThrow(UnknownGraphQLError)
     })
   })
   describe('getProvisionalCard', () => {

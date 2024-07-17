@@ -76,6 +76,8 @@ import {
 import { SortOrder } from '../../../src/public/typings/sortOrder'
 import { ApiDataFactory } from '../data-factory/api'
 import { EntityDataFactory } from '../data-factory/entity'
+import { ListProvisionalFundingSourcesUseCase } from '../../../src/private/domain/use-cases/fundingSource/listProvisionalFundingSourcesUseCase'
+import { CancelProvisionalFundingSourceUseCase } from '../../../src/private/domain/use-cases/fundingSource/cancelProvisionalFundingSourceUseCase'
 
 DefaultConfigurationManager.getInstance().setConfig(
   JSON.stringify({
@@ -174,6 +176,20 @@ jest.mock(
 const JestMockReviewUnfundedFundingSourceUseCase =
   ReviewUnfundedFundingSourceUseCase as jest.MockedClass<
     typeof ReviewUnfundedFundingSourceUseCase
+  >
+jest.mock(
+  '../../../src/private/domain/use-cases/fundingSource/cancelProvisionalFundingSourceUseCase',
+)
+const JestMockCancelProvisionalFundingSourceUseCase =
+  CancelProvisionalFundingSourceUseCase as jest.MockedClass<
+    typeof CancelProvisionalFundingSourceUseCase
+  >
+jest.mock(
+  '../../../src/private/domain/use-cases/fundingSource/listProvisionalFundingSourcesUseCase',
+)
+const JestMockListProvisionalFundingSourcesUseCase =
+  ListProvisionalFundingSourcesUseCase as jest.MockedClass<
+    typeof ListProvisionalFundingSourcesUseCase
   >
 jest.mock(
   '../../../src/private/domain/use-cases/virtualCard/provisionVirtualCardUseCase',
@@ -295,9 +311,13 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     mock<UnsubscribeFromFundingSourceChangesUseCase>()
   const mockGetFundingSourceUseCase = mock<GetFundingSourceUseCase>()
   const mockListFundingSourcesUseCase = mock<ListFundingSourcesUseCase>()
+  const mockListProvisionalFundingSourcesUseCase =
+    mock<ListProvisionalFundingSourcesUseCase>()
   const mockCancelFundingSourceUseCase = mock<CancelFundingSourceUseCase>()
   const mockReviewUnfundedFundingSourceUseCase =
     mock<ReviewUnfundedFundingSourceUseCase>()
+  const mockCancelProvisionalFundingSourceUseCase =
+    mock<CancelProvisionalFundingSourceUseCase>()
   const mockProvisionVirtualCardUseCase = mock<ProvisionVirtualCardUseCase>()
   const mockGetProvisionalCardUseCase = mock<GetProvisionalCardUseCase>()
   const mockListProvisionalCardsUseCase = mock<ListProvisionalCardsUseCase>()
@@ -335,7 +355,9 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     reset(mockUnsubscribeFromFundingSourceChangesUseCase)
     reset(mockGetFundingSourceUseCase)
     reset(mockListFundingSourcesUseCase)
+    reset(mockListProvisionalFundingSourcesUseCase)
     reset(mockCancelFundingSourceUseCase)
+    reset(mockCancelProvisionalFundingSourceUseCase)
     reset(mockReviewUnfundedFundingSourceUseCase)
     reset(mockProvisionVirtualCardUseCase)
     reset(mockGetProvisionalCardUseCase)
@@ -365,6 +387,7 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     JestMockUnsubscribeFromFundingSourceChangesUseCase.mockClear()
     JestMockGetFundingSourceUseCase.mockClear()
     JestMockListFundingSourcesUseCase.mockClear()
+    JestMockListProvisionalFundingSourcesUseCase.mockClear()
     JestMockCancelFundingSourceUseCase.mockClear()
     JestMockReviewUnfundedFundingSourceUseCase.mockClear()
     JestMockProvisionVirtualCardUseCase.mockClear()
@@ -417,6 +440,12 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     )
     JestMockReviewUnfundedFundingSourceUseCase.mockImplementation(() =>
       instance(mockReviewUnfundedFundingSourceUseCase),
+    )
+    JestMockCancelProvisionalFundingSourceUseCase.mockImplementation(() =>
+      instance(mockCancelProvisionalFundingSourceUseCase),
+    )
+    JestMockListProvisionalFundingSourcesUseCase.mockImplementation(() =>
+      instance(mockListProvisionalFundingSourcesUseCase),
     )
     JestMockProvisionVirtualCardUseCase.mockImplementation(() =>
       instance(mockProvisionVirtualCardUseCase),
@@ -983,6 +1012,103 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       await expect(
         instanceUnderTest.reviewUnfundedFundingSource(''),
       ).resolves.toEqual(ApiDataFactory.defaultFundingSource)
+    })
+  })
+
+  describe('cancelProvisionalFundingSource', () => {
+    beforeEach(() => {
+      when(
+        mockCancelProvisionalFundingSourceUseCase.execute(anything()),
+      ).thenResolve(EntityDataFactory.provisionalFundingSource)
+      when(mockSudoUserClient.isSignedIn()).thenResolve(true)
+    })
+    it('generates use case', async () => {
+      await instanceUnderTest.cancelProvisionalFundingSource('')
+      expect(
+        JestMockCancelProvisionalFundingSourceUseCase,
+      ).toHaveBeenCalledTimes(1)
+    })
+    it('calls use case as expected', async () => {
+      const id = v4()
+      await instanceUnderTest.cancelProvisionalFundingSource(id)
+      verify(
+        mockCancelProvisionalFundingSourceUseCase.execute(anything()),
+      ).once()
+      const [actualId] = capture(
+        mockCancelProvisionalFundingSourceUseCase.execute,
+      ).first()
+      expect(actualId).toEqual(id)
+    })
+    it('returns expected result', async () => {
+      await expect(
+        instanceUnderTest.cancelProvisionalFundingSource(''),
+      ).resolves.toEqual(ApiDataFactory.provisionalFundingSource)
+    })
+  })
+
+  describe('listProvisionalFundingSources', () => {
+    beforeEach(() => {
+      when(
+        mockListProvisionalFundingSourcesUseCase.execute(anything()),
+      ).thenResolve({
+        provisionalFundingSources: [EntityDataFactory.provisionalFundingSource],
+        nextToken: 'nextToken',
+      })
+      when(mockSudoUserClient.isSignedIn()).thenResolve(true)
+    })
+    it('generates use case', async () => {
+      await instanceUnderTest.listProvisionalFundingSources({
+        cachePolicy: CachePolicy.CacheOnly,
+        limit: 0,
+        nextToken: '',
+      })
+      expect(
+        JestMockListProvisionalFundingSourcesUseCase,
+      ).toHaveBeenCalledTimes(1)
+    })
+    it('calls use case as expected', async () => {
+      const cachePolicy = CachePolicy.CacheOnly
+      const limit = 100
+      const nextToken = v4()
+      await instanceUnderTest.listProvisionalFundingSources({
+        cachePolicy,
+        limit,
+        nextToken,
+      })
+      verify(
+        mockListProvisionalFundingSourcesUseCase.execute(anything()),
+      ).once()
+      const [actualArgs] = capture(
+        mockListProvisionalFundingSourcesUseCase.execute,
+      ).first()
+      expect(actualArgs).toEqual<typeof actualArgs>({
+        cachePolicy,
+        limit,
+        nextToken,
+      })
+    })
+    it('returns empty list if use case result is empty list', async () => {
+      when(
+        mockListProvisionalFundingSourcesUseCase.execute(anything()),
+      ).thenResolve({
+        provisionalFundingSources: [],
+        nextToken: undefined,
+      })
+      await expect(
+        instanceUnderTest.listProvisionalFundingSources({
+          cachePolicy: CachePolicy.CacheOnly,
+        }),
+      ).resolves.toEqual({ items: [], nextToken: undefined })
+    })
+    it('returns expected result', async () => {
+      await expect(
+        instanceUnderTest.listProvisionalFundingSources({
+          cachePolicy: CachePolicy.CacheOnly,
+        }),
+      ).resolves.toEqual({
+        items: [ApiDataFactory.provisionalFundingSource],
+        nextToken: 'nextToken',
+      })
     })
   })
 

@@ -35,6 +35,7 @@ export class ApiDataFactory {
     ...this.commonProps,
     id: 'dummyFundingSourceId',
     type: FundingSourceType.CreditCard,
+    last4: '1234',
     provisioningData: {
       version: 1,
       provider: 'stripe',
@@ -50,6 +51,7 @@ export class ApiDataFactory {
       ...this.commonProps,
       id: 'dummyFundingSourceId',
       type: FundingSourceType.BankAccount,
+      last4: '1234',
       provisioningData: {
         version: 1,
         provider: 'checkout',

@@ -31,10 +31,13 @@ import { FundingSourceEntity } from '../../domain/entities/fundingSource/funding
 import {
   FundingSourceService,
   FundingSourceServiceCancelFundingSourceInput,
+  FundingSourceServiceCancelProvisionalFundingSourceInput,
   FundingSourceServiceCompleteFundingSourceInput,
   FundingSourceServiceGetFundingSourceInput,
   FundingSourceServiceListFundingSourcesInput,
   FundingSourceServiceListFundingSourcesOutput,
+  FundingSourceServiceListProvisionalFundingSourcesInput,
+  FundingSourceServiceListProvisionalFundingSourcesOutput,
   FundingSourceServiceRefreshFundingSourceInput,
   FundingSourceServiceReviewUnfundedFundingSourceInput,
   FundingSourceServiceSetupFundingSourceInput,
@@ -57,6 +60,7 @@ import { FundingSourceUnsealed } from './fundingSourceSealedAttributes'
 import { FundingSourceEntityTransformer } from './transformer/fundingSourceEntityTransformer'
 import { ProvisionalFundingSourceEntityTransformer } from './transformer/provisionalFundingSourceEntityTransformer'
 import { SandboxPlaidDataEntityTransformer } from './transformer/sandboxPlaidDataTransformer'
+import { ProvisionalFundingSourceFilterTransformer } from './transformer/provisionalFundingSourceFilterTransformer'
 
 export interface FundingSourceSetup {
   provider: string
@@ -303,6 +307,45 @@ export class DefaultFundingSourceService implements FundingSourceService {
     const result = await this.appSync.reviewUnfundedFundingSource({ id })
     const unsealed = await this.unsealFundingSource(result)
     return FundingSourceEntityTransformer.transformGraphQL(unsealed)
+  }
+
+  async cancelProvisionalFundingSource({
+    id,
+  }: FundingSourceServiceCancelProvisionalFundingSourceInput): Promise<ProvisionalFundingSourceEntity> {
+    const result = await this.appSync.cancelProvisionalFundingSource({ id })
+    return ProvisionalFundingSourceEntityTransformer.transformGraphQL(result)
+  }
+
+  async listProvisionalFundingSources({
+    filterInput,
+    cachePolicy,
+    limit,
+    nextToken,
+  }: FundingSourceServiceListProvisionalFundingSourcesInput): Promise<FundingSourceServiceListProvisionalFundingSourcesOutput> {
+    const filterInputGraphQL = filterInput
+      ? ProvisionalFundingSourceFilterTransformer.transformToGraphQL(
+          filterInput,
+        )
+      : undefined
+    const fetchPolicy = cachePolicy
+      ? FetchPolicyTransformer.transformCachePolicy(cachePolicy)
+      : undefined
+    const result = await this.appSync.listProvisionalFundingSources(
+      fetchPolicy,
+      filterInputGraphQL,
+      limit,
+      nextToken,
+    )
+    let provisionalFundingSources: ProvisionalFundingSourceEntity[] = []
+    if (result.items) {
+      provisionalFundingSources = result.items.map((item) =>
+        ProvisionalFundingSourceEntityTransformer.transformGraphQL(item),
+      )
+    }
+    return {
+      provisionalFundingSources,
+      nextToken: result.nextToken ?? undefined,
+    }
   }
 
   subscribeToFundingSourceChanges(
