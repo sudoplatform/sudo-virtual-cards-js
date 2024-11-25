@@ -15,8 +15,11 @@ import {
   VirtualCardSealedAttributesUseCaseOutput,
   VirtualCardUseCaseOutput,
 } from './outputs'
+import { SortOrder, VirtualCardFilterInput } from '../../../../public'
 
 export interface ListVirtualCardsUseCaseInput {
+  filterInput?: VirtualCardFilterInput
+  sortOrder?: SortOrder
   cachePolicy?: CachePolicy
   limit?: number
   nextToken?: string

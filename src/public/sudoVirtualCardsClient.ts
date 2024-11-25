@@ -74,6 +74,7 @@ import {
   FundingSource,
   FundingSourceChangeSubscriber,
   FundingSourceClientConfiguration,
+  FundingSourceFilterInput,
   FundingSourceType,
   ProvisionalFundingSource,
   ProvisionalFundingSourceFilterInput,
@@ -91,6 +92,7 @@ import { Transaction, TransactionType } from './typings/transaction'
 import {
   BillingAddress,
   VirtualCard,
+  VirtualCardFilterInput,
   VirtualCardSealedAttributes,
 } from './typings/virtualCard'
 import { VirtualCardsConfig } from './typings/virtualCardsConfig'
@@ -256,11 +258,17 @@ export interface GetFundingSourceInput {
 /**
  * Input for {@link SudoVirtualCardsClient.listFundingSources}.
  *
+ * @property {FundingSourceFilterInput} filter The filter to be applied to the list of
+ *   funding sources to return.
+ * @property {SortOrder} sortOrder Order in which records are returned (based on date/time at which
+ *   the funding source was updated). The default order is descending, ie, most recently updated first.
  * @property {CachePolicy} cachePolicy Determines how the funding sources will be fetched.
  * @property {number} limit Maximum number of items to return.  Will be defaulted if omitted.
  * @property {string} nextToken Paginated next token.
  */
 export interface ListFundingSourcesInput {
+  filter?: FundingSourceFilterInput
+  sortOrder?: SortOrder
   cachePolicy?: CachePolicy
   limit?: number
   nextToken?: string
@@ -271,12 +279,16 @@ export interface ListFundingSourcesInput {
  *
  * @property {ProvisionalFundingSourceFilterInput} filter The filter to be applied to the list of
  *            provisional funding sources to return.
+ * @property {SortOrder} sortOrder Order in which records are returned (based on date/time at which
+ *   the provisional funding source was updated). The default order is descending, ie, most recently
+ *   updated first.
  * @property {CachePolicy} cachePolicy Determines how the funding sources will be fetched.
  * @property {number} limit Maximum number of items to return.  Will be defaulted if omitted.
  * @property {string} nextToken Paginated next token.
  */
 export interface ListProvisionalFundingSourcesInput {
   filter?: ProvisionalFundingSourceFilterInput
+  sortOrder?: SortOrder
   cachePolicy?: CachePolicy
   limit?: number
   nextToken?: string
@@ -396,11 +408,17 @@ export interface GetVirtualCardInput {
 /**
  * Input for {@link SudoVirtualCardsClient.listVirtualCards}.
  *
+ * @property {VirtualCardFilterInput} filter The filter to be applied to the list of
+ *   virtual cards to return.
+ * @property {SortOrder} sortOrder Order in which records are returned (based on date/time at which
+ *   the virtual card was updated). The default order is descending, ie, most recently updated first.
  * @property {CachePolicy} cachePolicy Cache Policy to use to access virtual cards.
  * @property {number} limit Maximum number of cards to return.
  * @property {string} nextToken Paginated next token.
  */
 export interface ListVirtualCardsInput {
+  filter?: VirtualCardFilterInput
+  sortOrder?: SortOrder
   cachePolicy?: CachePolicy
   limit?: number
   nextToken?: string
@@ -1054,10 +1072,14 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
   public async listFundingSources(
     input?: ListFundingSourcesInput,
   ): Promise<ListOutput<FundingSource>> {
+    const filterInput = input?.filter
+    const sortOrder = input?.sortOrder
     const cachePolicy = input?.cachePolicy
     const limit = input?.limit
     const nextToken = input?.nextToken
     this.log.debug(this.listFundingSources.name, {
+      filterInput,
+      sortOrder,
       cachePolicy,
       limit,
       nextToken,
@@ -1068,6 +1090,8 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
     )
     const { fundingSources, nextToken: resultNextToken } =
       await useCase.execute({
+        filterInput,
+        sortOrder,
         cachePolicy,
         limit,
         nextToken,
@@ -1219,12 +1243,24 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
   async listVirtualCards(
     input: ListVirtualCardsInput,
   ): Promise<ListVirtualCardsResults> {
+    const filterInput = input?.filter
+    const sortOrder = input?.sortOrder
+    const cachePolicy = input?.cachePolicy
+    const limit = input?.limit
+    const nextToken = input?.nextToken
+
     return this.serialise.runExclusive(async () => {
       const useCase = new ListVirtualCardsUseCase(
         this.virtualCardService,
         this.sudoUserService,
       )
-      return await useCase.execute(input)
+      return await useCase.execute({
+        filterInput,
+        sortOrder,
+        cachePolicy,
+        limit,
+        nextToken,
+      })
     })
   }
 

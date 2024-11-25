@@ -79,6 +79,15 @@ export type CardCancelRequest = {
   keyId?: InputMaybe<Scalars['String']['input']>
 }
 
+export type CardFilterInput = {
+  and?: InputMaybe<Array<CardFilterInput>>
+  id?: InputMaybe<IdFilterInput>
+  keyId?: InputMaybe<IdFilterInput>
+  not?: InputMaybe<CardFilterInput>
+  or?: InputMaybe<Array<CardFilterInput>>
+  state?: InputMaybe<IdFilterInput>
+}
+
 export type CardProvisionRequest = {
   alias?: InputMaybe<Scalars['String']['input']>
   billingAddress?: InputMaybe<AddressInput>
@@ -225,6 +234,14 @@ export type FundingSourceConnection = {
   nextToken?: Maybe<Scalars['String']['output']>
 }
 
+export type FundingSourceFilterInput = {
+  and?: InputMaybe<Array<FundingSourceFilterInput>>
+  id?: InputMaybe<IdFilterInput>
+  not?: InputMaybe<FundingSourceFilterInput>
+  or?: InputMaybe<Array<FundingSourceFilterInput>>
+  state?: InputMaybe<FundingSourceStateFilterInput>
+}
+
 export enum FundingSourceFlags {
   Refresh = 'REFRESH',
   Unfunded = 'UNFUNDED',
@@ -233,6 +250,11 @@ export enum FundingSourceFlags {
 export enum FundingSourceState {
   Active = 'ACTIVE',
   Inactive = 'INACTIVE',
+}
+
+export type FundingSourceStateFilterInput = {
+  eq?: InputMaybe<FundingSourceState>
+  ne?: InputMaybe<FundingSourceState>
 }
 
 export type FundingSourceSupportDetail = {
@@ -511,13 +533,17 @@ export type QueryGetTransactionArgs = {
 }
 
 export type QueryListCardsArgs = {
+  filter?: InputMaybe<CardFilterInput>
   limit?: InputMaybe<Scalars['Int']['input']>
   nextToken?: InputMaybe<Scalars['String']['input']>
+  sortOrder?: InputMaybe<SortOrder>
 }
 
 export type QueryListFundingSourcesArgs = {
+  filter?: InputMaybe<FundingSourceFilterInput>
   limit?: InputMaybe<Scalars['Int']['input']>
   nextToken?: InputMaybe<Scalars['String']['input']>
+  sortOrder?: InputMaybe<SortOrder>
 }
 
 export type QueryListProvisionalCardsArgs = {
@@ -529,6 +555,7 @@ export type QueryListProvisionalFundingSourcesArgs = {
   filter?: InputMaybe<ProvisionalFundingSourceFilterInput>
   limit?: InputMaybe<Scalars['Int']['input']>
   nextToken?: InputMaybe<Scalars['String']['input']>
+  sortOrder?: InputMaybe<SortOrder>
 }
 
 export type QueryListTransactions2Args = {
@@ -2156,6 +2183,8 @@ export type GetFundingSourceQuery = {
 }
 
 export type ListFundingSourcesQueryVariables = Exact<{
+  filter?: InputMaybe<FundingSourceFilterInput>
+  sortOrder?: InputMaybe<SortOrder>
   limit?: InputMaybe<Scalars['Int']['input']>
   nextToken?: InputMaybe<Scalars['String']['input']>
 }>
@@ -2238,6 +2267,7 @@ export type ListFundingSourcesQuery = {
 
 export type ListProvisionalFundingSourcesQueryVariables = Exact<{
   filter?: InputMaybe<ProvisionalFundingSourceFilterInput>
+  sortOrder?: InputMaybe<SortOrder>
   limit?: InputMaybe<Scalars['Int']['input']>
   nextToken?: InputMaybe<Scalars['String']['input']>
 }>
@@ -2489,6 +2519,8 @@ export type GetCardQuery = {
 }
 
 export type ListCardsQueryVariables = Exact<{
+  filter?: InputMaybe<CardFilterInput>
+  sortOrder?: InputMaybe<SortOrder>
   limit?: InputMaybe<Scalars['Int']['input']>
   nextToken?: InputMaybe<Scalars['String']['input']>
 }>
@@ -7842,6 +7874,28 @@ export const ListFundingSourcesDocument = {
           kind: 'VariableDefinition',
           variable: {
             kind: 'Variable',
+            name: { kind: 'Name', value: 'filter' },
+          },
+          type: {
+            kind: 'NamedType',
+            name: { kind: 'Name', value: 'FundingSourceFilterInput' },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'sortOrder' },
+          },
+          type: {
+            kind: 'NamedType',
+            name: { kind: 'Name', value: 'SortOrder' },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
             name: { kind: 'Name', value: 'limit' },
           },
           type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
@@ -7862,6 +7916,22 @@ export const ListFundingSourcesDocument = {
             kind: 'Field',
             name: { kind: 'Name', value: 'listFundingSources' },
             arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'filter' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'filter' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'sortOrder' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'sortOrder' },
+                },
+              },
               {
                 kind: 'Argument',
                 name: { kind: 'Name', value: 'limit' },
@@ -8115,6 +8185,17 @@ export const ListProvisionalFundingSourcesDocument = {
           kind: 'VariableDefinition',
           variable: {
             kind: 'Variable',
+            name: { kind: 'Name', value: 'sortOrder' },
+          },
+          type: {
+            kind: 'NamedType',
+            name: { kind: 'Name', value: 'SortOrder' },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
             name: { kind: 'Name', value: 'limit' },
           },
           type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
@@ -8141,6 +8222,14 @@ export const ListProvisionalFundingSourcesDocument = {
                 value: {
                   kind: 'Variable',
                   name: { kind: 'Name', value: 'filter' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'sortOrder' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'sortOrder' },
                 },
               },
               {
@@ -9143,6 +9232,28 @@ export const ListCardsDocument = {
           kind: 'VariableDefinition',
           variable: {
             kind: 'Variable',
+            name: { kind: 'Name', value: 'filter' },
+          },
+          type: {
+            kind: 'NamedType',
+            name: { kind: 'Name', value: 'CardFilterInput' },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'sortOrder' },
+          },
+          type: {
+            kind: 'NamedType',
+            name: { kind: 'Name', value: 'SortOrder' },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
             name: { kind: 'Name', value: 'limit' },
           },
           type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
@@ -9163,6 +9274,22 @@ export const ListCardsDocument = {
             kind: 'Field',
             name: { kind: 'Name', value: 'listCards' },
             arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'filter' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'filter' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'sortOrder' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'sortOrder' },
+                },
+              },
               {
                 kind: 'Argument',
                 name: { kind: 'Name', value: 'limit' },

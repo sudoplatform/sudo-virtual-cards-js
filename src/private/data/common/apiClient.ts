@@ -35,6 +35,7 @@ import {
   CancelVirtualCardDocument,
   CancelVirtualCardMutation,
   CardCancelRequest,
+  CardFilterInput,
   CardProvisionRequest,
   CardUpdateRequest,
   CompleteFundingSourceDocument,
@@ -46,6 +47,7 @@ import {
   FundingSource,
   FundingSourceClientConfiguration,
   FundingSourceConnection,
+  FundingSourceFilterInput,
   GetCardDocument,
   GetCardQuery,
   GetCardQueryVariables,
@@ -115,6 +117,7 @@ import {
   SetupFundingSourceDocument,
   SetupFundingSourceMutation,
   SetupFundingSourceRequest,
+  SortOrder,
   UpdateVirtualCardDocument,
   UpdateVirtualCardMutation,
   VirtualCardsConfig,
@@ -228,12 +231,14 @@ export class ApiClient {
 
   public async listFundingSources(
     fetchPolicy: FetchPolicy = 'network-only',
+    filter?: FundingSourceFilterInput,
+    sortOrder?: SortOrder,
     limit?: number,
     nextToken?: string,
   ): Promise<FundingSourceConnection> {
     const data = await this.performQuery<ListFundingSourcesQuery>({
       query: ListFundingSourcesDocument,
-      variables: { limit, nextToken },
+      variables: { filter, sortOrder, limit, nextToken },
       fetchPolicy,
       calleeName: this.listFundingSources.name,
     })
@@ -320,12 +325,13 @@ export class ApiClient {
   public async listProvisionalFundingSources(
     fetchPolicy: FetchPolicy = 'network-only',
     filter?: ProvisionalFundingSourceFilterInput,
+    sortOrder?: SortOrder,
     limit?: number,
     nextToken?: string,
   ): Promise<ProvisionalFundingSourceConnection> {
     const data = await this.performQuery<ListProvisionalFundingSourcesQuery>({
       query: ListProvisionalFundingSourcesDocument,
-      variables: { filter, limit, nextToken },
+      variables: { filter, sortOrder, limit, nextToken },
       fetchPolicy,
       calleeName: this.listFundingSources.name,
     })
@@ -384,6 +390,8 @@ export class ApiClient {
   }
 
   public async listCards(
+    filter?: CardFilterInput,
+    sortOrder?: SortOrder,
     limit?: number,
     nextToken?: string,
     fetchPolicy: FetchPolicy = 'network-only',
@@ -391,7 +399,7 @@ export class ApiClient {
     const data = await this.performQuery<ListCardsQuery>({
       query: ListCardsDocument,
       fetchPolicy,
-      variables: { limit, nextToken },
+      variables: { filter, sortOrder, limit, nextToken },
       calleeName: this.listCards.name,
     })
     return data.listCards

@@ -10,6 +10,7 @@ import { Metadata } from '../../../../public/typings/metadata'
 import { VirtualCardSealedAttributes } from '../../../data/virtualCard/virtualCardSealedAttributes'
 import { ProvisionalVirtualCardEntity } from './provisionalVirtualCardEntity'
 import { VirtualCardEntity } from './virtualCardEntity'
+import { SortOrder, VirtualCardFilterInput } from '../../../../public'
 
 export interface VirtualCardServiceProvisionVirtualCardInput {
   clientRefId?: string
@@ -57,6 +58,8 @@ export interface VirtualCardServiceUpdateVirtualCardUseCaseInput {
 }
 
 export interface VirtualCardServiceListVirtualCardsInput {
+  filterInput?: VirtualCardFilterInput
+  sortOrder?: SortOrder
   cachePolicy?: CachePolicy
   limit?: number
   nextToken?: string

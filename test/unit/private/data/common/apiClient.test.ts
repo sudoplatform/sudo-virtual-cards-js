@@ -381,8 +381,16 @@ describe('ApiClient Test Suite', () => {
       const fetchPolicy = 'cache-only'
       const limit = 100
       const nextToken = v4()
+      const filter = undefined
+      const sortOrder = undefined
       await expect(
-        instanceUnderTest.listFundingSources(fetchPolicy, limit, nextToken),
+        instanceUnderTest.listFundingSources(
+          fetchPolicy,
+          filter,
+          sortOrder,
+          limit,
+          nextToken,
+        ),
       ).resolves.toStrictEqual({
         items: [GraphQLDataFactory.defaultFundingSource],
         nextToken: undefined,
@@ -391,7 +399,7 @@ describe('ApiClient Test Suite', () => {
       const [args] = capture(mockClient.query as any).first()
       expect(args).toStrictEqual({
         fetchPolicy: 'cache-only',
-        variables: { limit, nextToken },
+        variables: { filter, sortOrder, limit, nextToken },
         query: ListFundingSourcesDocument,
       })
     })
@@ -430,12 +438,14 @@ describe('ApiClient Test Suite', () => {
       } as any)
       const fetchPolicy = 'cache-only'
       const filter = undefined
+      const sortOrder = undefined
       const limit = 100
       const nextToken = v4()
       await expect(
         instanceUnderTest.listProvisionalFundingSources(
           fetchPolicy,
           filter,
+          sortOrder,
           limit,
           nextToken,
         ),
@@ -447,7 +457,7 @@ describe('ApiClient Test Suite', () => {
       const [args] = capture(mockClient.query as any).first()
       expect(args).toStrictEqual({
         fetchPolicy: 'cache-only',
-        variables: { filter, limit, nextToken },
+        variables: { filter, sortOrder, limit, nextToken },
         query: ListProvisionalFundingSourcesDocument,
       })
     })
@@ -918,11 +928,19 @@ describe('ApiClient Test Suite', () => {
           },
         },
       } as any)
+      const filter = undefined
+      const sortOrder = undefined
       const fetchPolicy = 'cache-only'
       const limit = 100
       const nextToken = v4()
       await expect(
-        instanceUnderTest.listCards(limit, nextToken, fetchPolicy),
+        instanceUnderTest.listCards(
+          filter,
+          sortOrder,
+          limit,
+          nextToken,
+          fetchPolicy,
+        ),
       ).resolves.toStrictEqual({
         items: [GraphQLDataFactory.sealedCard],
         nextToken: undefined,
@@ -931,7 +949,7 @@ describe('ApiClient Test Suite', () => {
       const [args] = capture(mockClient.query as any).first()
       expect(args).toStrictEqual({
         fetchPolicy: 'cache-only',
-        variables: { limit, nextToken },
+        variables: { filter, sortOrder, limit, nextToken },
         query: ListCardsDocument,
       })
     })

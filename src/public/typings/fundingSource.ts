@@ -9,6 +9,7 @@ import { BankAccountType } from './bankAccountType'
 import { CardType } from './cardType'
 import { TransactionVelocity } from './transactionVelocity'
 import { CurrencyAmount } from './currencyAmount'
+import { IDFilterInput } from './identifier'
 
 export interface BaseFundingSourceClientConfiguration {
   type: string
@@ -424,31 +425,6 @@ export enum ProvisionalFundingSourceState {
 }
 
 /**
- * The Sudo Platform SDK representation of a filter used to filter entities based on their id field.
- *
- * @property {string} beginsWith The id field must begin with this string.
- * @property {string[]} between The id field falls alphabetically between the strings in the given array.
- * @property {string} contains The id field must contain this string.
- * @property {string} eq The id field must equal this string.
- * @property {string} ge The id field is alphabetically equal to or greater than this string.
- * @property {string} gt The id field is alphabetically greater than this string.
- * @property {string} le The id field is alphabetically equal to or less than this string.
- * @property {string} ne The id field must not be equal to this string.
- * @property {string} notContains The id field must not contain this string.
- */
-export type IDFilterInput = {
-  beginsWith?: string
-  between?: string[]
-  contains?: string
-  eq?: string
-  ge?: string
-  gt?: string
-  le?: string
-  ne?: string
-  notContains?: string
-}
-
-/**
  * The Sudo Platform SDK representation of a filter used to filter provisional funding source entities based
  * on their provisional funding source state.
  *
@@ -497,6 +473,37 @@ export enum FundingSourceState {
 export enum FundingSourceFlags {
   Unfunded = 'UNFUNDED',
   Refresh = 'REFRESH',
+}
+
+/**
+ * The Sudo Platform SDK representation of a filter used to filter funding source entities based
+ * on their funding source state.
+ *
+ * @property {FundingSourceState} eq The funding source state must be equal to this field.
+ * @property {FundingSourceState} ne The funding source state must not be equal to this field.
+ */
+export type FundingSourceStateFilterInput = {
+  eq?: FundingSourceState
+  ne?: FundingSourceState
+}
+
+/**
+ * The Sudo Platform SDK representation of a filter used to filter funding source entities.
+ *
+ * @property {IDFilterInput} id The funding source id must match this filter.
+ * @property {FundingSourceStateFilterInput} state The funding source state must match this filter.
+ * @property {FundingSourceFilterInput[]} and The funding sources must match the logical and
+ *  of the `FundingSourceFilterInput` entries in this array.
+ * @property {FundingSourceFilterInput} not The funding source must not match this filter.
+ * @property {FundingSourceFilterInput[]} or The funding sources must match the logical or
+ *  of the `FundingSourceFilterInput` entries in this array.
+ */
+export type FundingSourceFilterInput = {
+  id?: IDFilterInput
+  state?: FundingSourceStateFilterInput
+  and?: FundingSourceFilterInput[]
+  not?: FundingSourceFilterInput
+  or?: FundingSourceFilterInput[]
 }
 
 export function isFundingSourceUnfunded(fs: FundingSource): boolean {

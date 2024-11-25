@@ -10,6 +10,7 @@ import {
   ProvisionalFundingSource,
   ProvisionalFundingSourceFilterInput,
   ProvisionalFundingSourceState,
+  SortOrder,
   SudoVirtualCardsClient,
 } from '../../../src'
 import { FundingSourceProviders } from '../util/getFundingSourceProviders'
@@ -91,6 +92,35 @@ describe('SudoVirtualCardsClient ListProvisionalFundingSources Test Suite', () =
           expect(result.items).toStrictEqual(
             expect.arrayContaining(provisionalFundingSources),
           )
+          const listedProvisionalFundingSources = result.items
+          // default sort order is descending
+          for (let i = 1; i < listedProvisionalFundingSources.length; i++) {
+            expect(
+              listedProvisionalFundingSources[i - 1].updatedAt.getTime(),
+            ).toBeGreaterThan(
+              listedProvisionalFundingSources[i].updatedAt.getTime(),
+            )
+          }
+          // check ascending sort order
+          const ascendingResult =
+            await instanceUnderTest.listProvisionalFundingSources({
+              sortOrder: SortOrder.Asc,
+              cachePolicy: CachePolicy.RemoteOnly,
+            })
+          expect(ascendingResult.items).toHaveLength(
+            provisionalFundingSources.length,
+          )
+          expect(ascendingResult.items).toStrictEqual(
+            expect.arrayContaining(provisionalFundingSources),
+          )
+          const ascendingProvisionalFundingSources = ascendingResult.items
+          for (let i = 1; i < listedProvisionalFundingSources.length; i++) {
+            expect(
+              ascendingProvisionalFundingSources[i - 1].updatedAt.getTime(),
+            ).toBeLessThan(
+              ascendingProvisionalFundingSources[i].updatedAt.getTime(),
+            )
+          }
         })
 
         it('returns empty list result for no matching funding sources', async () => {

@@ -7,6 +7,7 @@
 import { Owner } from '@sudoplatform/sudo-common'
 import { Metadata } from './metadata'
 import { Transaction } from './transaction'
+import { IDFilterInput } from './identifier'
 
 /**
  * Virtual Card sealed attributes.
@@ -114,4 +115,23 @@ export enum CardState {
   Failed = 'FAILED',
   Closed = 'CLOSED',
   Suspended = 'SUSPENDED',
+}
+
+/**
+ * The Sudo Platform SDK representation of a filter used to filter virtual card entities.
+ *
+ * @property {IDFilterInput} id The virtual card id must match this filter.
+ * @property {IDFilterInput} state The virtual card state must match this filter.
+ * @property {VirtualCardFilterInput[]} and The virtual cards must match the logical and
+ *  of the `VirtualCardFilterInput` entries in this array.
+ * @property {VirtualCardFilterInput} not The virtual card must not match this filter.
+ * @property {VirtualCardFilterInput[]} or The virtual cards must match the logical or
+ *  of the `VirtualCardFilterInput` entries in this array.
+ */
+export type VirtualCardFilterInput = {
+  id?: IDFilterInput
+  state?: IDFilterInput
+  and?: VirtualCardFilterInput[]
+  not?: VirtualCardFilterInput
+  or?: VirtualCardFilterInput[]
 }

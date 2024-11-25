@@ -558,13 +558,25 @@ describe('DefaultFundingSourceService Test Suite', () => {
   describe('listFundingSources', () => {
     it('calls appsync correctly', async () => {
       when(
-        mockAppSync.listFundingSources(anything(), anything(), anything()),
+        mockAppSync.listFundingSources(
+          anything(),
+          anything(),
+          anything(),
+          anything(),
+          anything(),
+        ),
       ).thenResolve(GraphQLDataFactory.fundingSourceConnection)
       const result = await instanceUnderTest.listFundingSources({
         cachePolicy: CachePolicy.CacheOnly,
       })
       verify(
-        mockAppSync.listFundingSources(anything(), anything(), anything()),
+        mockAppSync.listFundingSources(
+          anything(),
+          anything(),
+          anything(),
+          anything(),
+          anything(),
+        ),
       ).once()
       const [policyArg] = capture(mockAppSync.listFundingSources).first()
       expect(policyArg).toEqual<typeof policyArg>('cache-only')
@@ -585,7 +597,13 @@ describe('DefaultFundingSourceService Test Suite', () => {
       'returns transformed result when calling $test',
       async ({ cachePolicy }) => {
         when(
-          mockAppSync.listFundingSources(anything(), anything(), anything()),
+          mockAppSync.listFundingSources(
+            anything(),
+            anything(),
+            anything(),
+            anything(),
+            anything(),
+          ),
         ).thenResolve(GraphQLDataFactory.fundingSourceConnection)
         await expect(
           instanceUnderTest.listFundingSources({
@@ -599,7 +617,13 @@ describe('DefaultFundingSourceService Test Suite', () => {
           nextToken: undefined,
         })
         verify(
-          mockAppSync.listFundingSources(anything(), anything(), anything()),
+          mockAppSync.listFundingSources(
+            anything(),
+            anything(),
+            anything(),
+            anything(),
+            anything(),
+          ),
         ).once()
       },
     )
@@ -675,6 +699,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
           anything(),
           anything(),
           anything(),
+          anything(),
         ),
       ).thenResolve(GraphQLDataFactory.provisionalFundingSourceConnection)
       const result = await instanceUnderTest.listProvisionalFundingSources({
@@ -682,6 +707,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
       })
       verify(
         mockAppSync.listProvisionalFundingSources(
+          anything(),
           anything(),
           anything(),
           anything(),
@@ -714,6 +740,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
             anything(),
             anything(),
             anything(),
+            anything(),
           ),
         ).thenResolve(GraphQLDataFactory.provisionalFundingSourceConnection)
         await expect(
@@ -729,6 +756,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
         })
         verify(
           mockAppSync.listProvisionalFundingSources(
+            anything(),
             anything(),
             anything(),
             anything(),

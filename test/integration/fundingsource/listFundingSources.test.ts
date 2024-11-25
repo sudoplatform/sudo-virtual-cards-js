@@ -7,7 +7,10 @@
 import { CachePolicy, DefaultLogger } from '@sudoplatform/sudo-common'
 import {
   FundingSource,
+  FundingSourceFilterInput,
+  FundingSourceState,
   FundingSourceType,
+  SortOrder,
   SudoVirtualCardsClient,
 } from '../../../src'
 import { createCardFundingSource } from '../util/createFundingSource'
@@ -90,6 +93,28 @@ describe('SudoVirtualCardsClient ListFundingSources Test Suite', () => {
           expect(result.items).toStrictEqual(
             expect.arrayContaining(fundingSources),
           )
+          const listedFundingSources = result.items
+          // default sort order is descending
+          for (let i = 1; i < listedFundingSources.length; i++) {
+            expect(
+              listedFundingSources[i - 1].updatedAt.getTime(),
+            ).toBeGreaterThan(listedFundingSources[i].updatedAt.getTime())
+          }
+          // check ascending sort order
+          const ascendingResult = await instanceUnderTest.listFundingSources({
+            sortOrder: SortOrder.Asc,
+            cachePolicy: CachePolicy.RemoteOnly,
+          })
+          expect(ascendingResult.items).toHaveLength(fundingSources.length)
+          expect(ascendingResult.items).toStrictEqual(
+            expect.arrayContaining(fundingSources),
+          )
+          const ascendingFundingSources = ascendingResult.items
+          for (let i = 1; i < listedFundingSources.length; i++) {
+            expect(
+              ascendingFundingSources[i - 1].updatedAt.getTime(),
+            ).toBeLessThan(ascendingFundingSources[i].updatedAt.getTime())
+          }
         })
 
         it('returns empty list result for no matching funding sources', async () => {
@@ -137,6 +162,62 @@ describe('SudoVirtualCardsClient ListFundingSources Test Suite', () => {
           expect([fs1, fs2]).toContainEqual(result2.items[0])
 
           expect(result.items[0]).not.toEqual(result2.items[0])
+        })
+
+        it('returns expected result when filter specified', async () => {
+          if (skip) return
+
+          const visaFundingSource = await createCardFundingSource(
+            instanceUnderTest,
+            fundingSourceProviders,
+            {
+              testCard: 'Visa-No3DS-1',
+              supportedProviders: [provider],
+            },
+          )
+          const mastercardFundingSource = await createCardFundingSource(
+            instanceUnderTest,
+            fundingSourceProviders,
+            {
+              testCard: 'MC-No3DS-1',
+              supportedProviders: [provider],
+            },
+          )
+          fundingSources.push(visaFundingSource)
+          fundingSources.push(mastercardFundingSource)
+
+          let filter: FundingSourceFilterInput = {
+            and: [
+              { id: { eq: visaFundingSource.id } },
+              { state: { eq: FundingSourceState.Active } },
+            ],
+          }
+          const result1 = await instanceUnderTest.listFundingSources({
+            filter,
+            cachePolicy: CachePolicy.RemoteOnly,
+          })
+          expect(result1.items).toHaveLength(1)
+          expect(result1.items[0].id).toStrictEqual(visaFundingSource.id)
+
+          filter = {
+            or: [
+              { id: { eq: mastercardFundingSource.id } },
+              { state: { eq: FundingSourceState.Active } },
+            ],
+          }
+          const result2 = await instanceUnderTest.listFundingSources({
+            filter,
+            cachePolicy: CachePolicy.RemoteOnly,
+          })
+          expect(result2.items).toHaveLength(2)
+          expect(result2.items[0].id).toStrictEqual(mastercardFundingSource.id)
+
+          filter = { state: { eq: FundingSourceState.Inactive } }
+          const result3 = await instanceUnderTest.listFundingSources({
+            filter,
+            cachePolicy: CachePolicy.RemoteOnly,
+          })
+          expect(result3.items).toEqual([])
         })
       },
     )

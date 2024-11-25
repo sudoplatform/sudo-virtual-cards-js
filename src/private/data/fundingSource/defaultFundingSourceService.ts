@@ -61,6 +61,8 @@ import { FundingSourceEntityTransformer } from './transformer/fundingSourceEntit
 import { ProvisionalFundingSourceEntityTransformer } from './transformer/provisionalFundingSourceEntityTransformer'
 import { SandboxPlaidDataEntityTransformer } from './transformer/sandboxPlaidDataTransformer'
 import { ProvisionalFundingSourceFilterTransformer } from './transformer/provisionalFundingSourceFilterTransformer'
+import { SortOrderTransformer } from '../common/transformer/sortOrderTransformer'
+import { FundingSourceFilterTransformer } from './transformer/fundingSourceFilterTransformer'
 
 export interface FundingSourceSetup {
   provider: string
@@ -266,15 +268,25 @@ export class DefaultFundingSourceService implements FundingSourceService {
   }
 
   async listFundingSources({
+    filterInput,
+    sortOrder,
     cachePolicy,
     limit,
     nextToken,
   }: FundingSourceServiceListFundingSourcesInput): Promise<FundingSourceServiceListFundingSourcesOutput> {
+    const filterInputGraphQL = filterInput
+      ? FundingSourceFilterTransformer.transformToGraphQL(filterInput)
+      : undefined
+    const sortOrderGraphQL = sortOrder
+      ? SortOrderTransformer.transformToGraphQL(sortOrder)
+      : undefined
     const fetchPolicy = cachePolicy
       ? FetchPolicyTransformer.transformCachePolicy(cachePolicy)
       : undefined
     const result = await this.appSync.listFundingSources(
       fetchPolicy,
+      filterInputGraphQL,
+      sortOrderGraphQL,
       limit,
       nextToken,
     )
@@ -318,6 +330,7 @@ export class DefaultFundingSourceService implements FundingSourceService {
 
   async listProvisionalFundingSources({
     filterInput,
+    sortOrder,
     cachePolicy,
     limit,
     nextToken,
@@ -327,12 +340,16 @@ export class DefaultFundingSourceService implements FundingSourceService {
           filterInput,
         )
       : undefined
+    const sortOrderGraphQL = sortOrder
+      ? SortOrderTransformer.transformToGraphQL(sortOrder)
+      : undefined
     const fetchPolicy = cachePolicy
       ? FetchPolicyTransformer.transformCachePolicy(cachePolicy)
       : undefined
     const result = await this.appSync.listProvisionalFundingSources(
       fetchPolicy,
       filterInputGraphQL,
+      sortOrderGraphQL,
       limit,
       nextToken,
     )

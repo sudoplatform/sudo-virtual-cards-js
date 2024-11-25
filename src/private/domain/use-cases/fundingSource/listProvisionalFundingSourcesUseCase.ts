@@ -17,6 +17,7 @@ import {
 } from '../../../../public/typings/fundingSource'
 import { FundingSourceService } from '../../entities/fundingSource/fundingSourceService'
 import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
+import { SortOrder } from '../../../../public'
 
 /**
  * Input for {@link ListFundingSourcesUseCase}.
@@ -30,6 +31,7 @@ import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
  */
 interface ListProvisionalFundingSourcesUseCaseInput {
   filter?: ProvisionalFundingSourceFilterInput
+  sortOrder?: SortOrder
   cachePolicy?: CachePolicy
   limit?: number | undefined
   nextToken?: string | undefined
@@ -74,12 +76,14 @@ export class ListProvisionalFundingSourcesUseCase {
 
   async execute({
     filter,
+    sortOrder,
     cachePolicy,
     limit,
     nextToken,
   }: ListProvisionalFundingSourcesUseCaseInput): Promise<ListProvisionalFundingSourcesUseCaseOutput> {
     this.log.debug(this.constructor.name, {
       filter,
+      sortOrder,
       cachePolicy,
       limit,
       nextToken,
@@ -89,6 +93,7 @@ export class ListProvisionalFundingSourcesUseCase {
     }
     return await this.fundingSourceService.listProvisionalFundingSources({
       filterInput: filter,
+      sortOrder: sortOrder,
       cachePolicy,
       limit,
       nextToken,

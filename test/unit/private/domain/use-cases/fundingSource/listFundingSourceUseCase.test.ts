@@ -58,6 +58,8 @@ describe('ListFundingSourcesUseCase Test Suite', () => {
         mockFundingSourceService.listFundingSources,
       ).first()
       expect(inputArgs).toStrictEqual<typeof inputArgs>({
+        filterInput: undefined,
+        sortOrder: undefined,
         cachePolicy: CachePolicy.CacheOnly,
         limit: undefined,
         nextToken: undefined,
@@ -81,6 +83,8 @@ describe('ListFundingSourcesUseCase Test Suite', () => {
         mockFundingSourceService.listFundingSources,
       ).first()
       expect(inputArgs).toStrictEqual<typeof inputArgs>({
+        filterInput: undefined,
+        sortOrder: undefined,
         cachePolicy: CachePolicy.CacheOnly,
         limit: undefined,
         nextToken: undefined,

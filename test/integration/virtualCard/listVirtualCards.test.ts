@@ -5,6 +5,7 @@
  */
 
 import {
+  CachePolicy,
   DefaultLogger,
   ListOperationResultStatus,
 } from '@sudoplatform/sudo-common'
@@ -15,10 +16,12 @@ import {
 } from '@sudoplatform/sudo-virtual-cards-simulator'
 import waitForExpect from 'wait-for-expect'
 import {
+  SortOrder,
   SudoVirtualCardsClient,
   Transaction,
   TransactionType,
   VirtualCard,
+  VirtualCardFilterInput,
 } from '../../../src'
 import { createCardFundingSource } from '../util/createFundingSource'
 import { FundingSourceProviders } from '../util/getFundingSourceProviders'
@@ -101,6 +104,29 @@ describe('ListVirtualCards Test Suite', () => {
         items: expect.arrayContaining(cards),
         nextToken: undefined,
       })
+      const listedCards = result.items
+      // default sort order is descending
+      for (let i = 1; i < listedCards.length; i++) {
+        expect(listedCards[i - 1].updatedAt.getTime()).toBeGreaterThan(
+          listedCards[i].updatedAt.getTime(),
+        )
+      }
+      // check ascending sort order
+      const ascendingResult = await instanceUnderTest.listVirtualCards({
+        sortOrder: SortOrder.Asc,
+        cachePolicy: CachePolicy.RemoteOnly,
+      })
+      if (ascendingResult.status !== ListOperationResultStatus.Success) {
+        fail(`Wrong status: ${ascendingResult.status}`)
+      }
+      expect(ascendingResult.items).toHaveLength(cards.length)
+      expect(ascendingResult.items).toStrictEqual(expect.arrayContaining(cards))
+      const ascendingCards = ascendingResult.items
+      for (let i = 1; i < listedCards.length; i++) {
+        expect(ascendingCards[i - 1].updatedAt.getTime()).toBeLessThan(
+          ascendingCards[i].updatedAt.getTime(),
+        )
+      }
     })
 
     it('limits cards as expected', async () => {
@@ -130,6 +156,47 @@ describe('ListVirtualCards Test Suite', () => {
       } while (calls < 5)
       expect(calls).toEqual(5)
       expect(cardResult).toHaveLength(5)
+    })
+
+    it('returns expected result when filter specified', async () => {
+      // sort our saved cards in the default order returned by listVirtualCards, ie,
+      // descending by updatedAt
+      cards.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
+      let filter: VirtualCardFilterInput = {
+        and: [{ id: { eq: cards[0].id } }, { state: { eq: 'ISSUED' } }],
+      }
+      const result1 = await instanceUnderTest.listVirtualCards({
+        filter,
+        cachePolicy: CachePolicy.RemoteOnly,
+      })
+      if (result1.status !== ListOperationResultStatus.Success) {
+        fail(`Wrong status: ${result1.status}`)
+      }
+      expect(result1.items).toHaveLength(1)
+      expect(result1.items[0].id).toStrictEqual(cards[0].id)
+
+      filter = {
+        or: [{ id: { eq: cards[0].id } }, { state: { eq: 'ISSUED' } }],
+      }
+      const result2 = await instanceUnderTest.listVirtualCards({
+        filter,
+        cachePolicy: CachePolicy.RemoteOnly,
+      })
+      if (result2.status !== ListOperationResultStatus.Success) {
+        fail(`Wrong status: ${result2.status}`)
+      }
+      expect(result2.items).toHaveLength(5)
+      expect(result2.items[0].id).toStrictEqual(cards[0].id)
+
+      filter = { state: { eq: 'FAILED' } }
+      const result3 = await instanceUnderTest.listVirtualCards({
+        filter,
+        cachePolicy: CachePolicy.RemoteOnly,
+      })
+      if (result3.status !== ListOperationResultStatus.Success) {
+        fail(`Wrong status: ${result3.status}`)
+      }
+      expect(result3.items).toEqual([])
     })
   })
 

@@ -52,6 +52,8 @@ import {
   VirtualCardSealedAttributes,
   VirtualCardUnsealed,
 } from './virtualCardSealedAttributes'
+import { VirtualCardFilterTransformer } from './transformer/virtualCardFilterTransformer'
+import { SortOrderTransformer } from '../common/transformer/sortOrderTransformer'
 
 /**
  * Used to omit from the {@link ListOperationResult}.
@@ -184,11 +186,23 @@ export class DefaultVirtualCardService implements VirtualCardService {
   ): Promise<
     ListOperationResult<VirtualCardEntity, VirtualCardSealedAttributes>
   > {
+    const filterInputGraphQL = input?.filterInput
+      ? VirtualCardFilterTransformer.transformToGraphQL(input?.filterInput)
+      : undefined
+    const sortOrderGraphQL = input?.sortOrder
+      ? SortOrderTransformer.transformToGraphQL(input?.sortOrder)
+      : undefined
     const fetchPolicy = input?.cachePolicy
       ? FetchPolicyTransformer.transformCachePolicy(input.cachePolicy)
       : undefined
     const { items: sealedCards, nextToken: newNextToken } =
-      await this.appSync.listCards(input?.limit, input?.nextToken, fetchPolicy)
+      await this.appSync.listCards(
+        filterInputGraphQL,
+        sortOrderGraphQL,
+        input?.limit,
+        input?.nextToken,
+        fetchPolicy,
+      )
     const success: VirtualCardUnsealed[] = []
     const failed: {
       item: Omit<VirtualCardUnsealed, keyof VirtualCardSealedAttributes>

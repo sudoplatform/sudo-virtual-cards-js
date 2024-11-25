@@ -61,6 +61,7 @@ describe('ListProvisionalFundingSourcesUseCase Test Suite', () => {
       ).first()
       expect(inputArgs).toStrictEqual<typeof inputArgs>({
         filterInput: undefined,
+        sortOrder: undefined,
         cachePolicy: CachePolicy.CacheOnly,
         limit: undefined,
         nextToken: undefined,
@@ -87,6 +88,7 @@ describe('ListProvisionalFundingSourcesUseCase Test Suite', () => {
       ).first()
       expect(inputArgs).toStrictEqual<typeof inputArgs>({
         filterInput: undefined,
+        sortOrder: undefined,
         cachePolicy: CachePolicy.CacheOnly,
         limit: undefined,
         nextToken: undefined,
