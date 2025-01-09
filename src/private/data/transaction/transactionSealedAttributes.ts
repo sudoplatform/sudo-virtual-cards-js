@@ -24,6 +24,10 @@ export interface TransactionSealedAttributes {
     markup: MarkupEntity
     markupAmount: CurrencyAmountEntity
     fundingSourceAmount: CurrencyAmountEntity
+    transactedAtEpochMs?: undefined
+    transactedAt?: Date
+    settledAtEpochMs?: undefined
+    settledAt?: Date
     fundingSourceId: string
     description: string
   }[]

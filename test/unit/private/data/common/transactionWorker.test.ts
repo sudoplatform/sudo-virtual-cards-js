@@ -221,4 +221,56 @@ describe('DefaultTransactionWorker test suite', () => {
       ],
     })
   })
+
+  it('should unseal chargeDetailState correctly with no timestamps', async () => {
+    when(
+      mockDeviceKeyWorker.unsealString(
+        objectContaining({
+          encrypted: 'dummyChargeDetailState',
+        }),
+      ),
+    ).thenResolve(ChargeDetailState.Pending)
+    const unsealedAmount = {
+      currency: 'UNSEALED-STRING',
+      amount: 100,
+    }
+    if (!GraphQLDataFactory.sealedTransaction.detail) {
+      fail('Invalid data setup')
+    }
+    const noTimestampsDetail = {
+      ...GraphQLDataFactory.sealedTransaction.detail[0],
+      transactedAtEpochMs: undefined,
+      settledAtEpochMs: undefined,
+    }
+
+    await expect(
+      iut.unsealTransaction({
+        ...GraphQLDataFactory.sealedTransaction,
+        detail: [noTimestampsDetail],
+      }),
+    ).resolves.toEqual<TransactionUnsealed>({
+      ...ServiceDataFactory.transactionUnsealed,
+      billedAmount: unsealedAmount,
+      transactedAmount: unsealedAmount,
+      description: 'UNSEALED-STRING',
+      declineReason: DeclineReason.Declined,
+      detail: [
+        ...(ServiceDataFactory.transactionUnsealed.detail?.map((d) => ({
+          ...d,
+          description: 'UNSEALED-STRING',
+          fundingSourceAmount: unsealedAmount,
+          markup: {
+            flat: 100,
+            minCharge: 100,
+            percent: 100,
+          },
+          transactedAt: undefined,
+          settledAt: undefined,
+          markupAmount: unsealedAmount,
+          virtualCardAmount: unsealedAmount,
+          state: ChargeDetailState.Pending,
+        })) ?? []),
+      ],
+    })
+  })
 })

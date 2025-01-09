@@ -20,6 +20,8 @@ export interface TransactionDetailChargeUseCaseOutput {
   }
   markupAmount: CurrencyAmountUseCaseOutput
   fundingSourceAmount: CurrencyAmountUseCaseOutput
+  transactedAt?: Date
+  settledAt?: Date
   fundingSourceId: string
   description: string
 }

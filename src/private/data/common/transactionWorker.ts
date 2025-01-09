@@ -44,6 +44,8 @@ export interface TransactionUnsealed {
     markup: MarkupEntity
     markupAmount: CurrencyAmountEntity
     fundingSourceAmount: CurrencyAmountEntity
+    transactedAt?: Date
+    settledAt?: Date
     fundingSourceId: string
     description: string
     state: ChargeDetailState
@@ -123,32 +125,61 @@ export class DefaultTransactionWorker implements TransactionWorker {
     const unsealDetail = async (
       encrypted: SealedTransactionDetailChargeAttribute,
     ): Promise<TransactionDetailChargeEntity> => {
+      const [
+        virtualCardAmount,
+        markupPercent,
+        markupFlat,
+        markupMinCharge,
+        markupAmount,
+        fundingSourceAmount,
+        transactedAtEpochMs,
+        settledAtEpochMs,
+        description,
+        state,
+      ] = await Promise.all([
+        unsealCurrencyAmount(encrypted.virtualCardAmount),
+        unsealNumber(encrypted.markup.percent, 'markup.percent'),
+        unsealNumber(encrypted.markup.flat, 'markup.flat'),
+        encrypted.markup.minCharge
+          ? unsealNumber(encrypted.markup.minCharge, 'markup.minCharge')
+          : Promise.resolve(undefined),
+        unsealCurrencyAmount(encrypted.markupAmount),
+        unsealCurrencyAmount(encrypted.fundingSourceAmount),
+        encrypted.transactedAtEpochMs
+          ? unsealNumber(
+              encrypted.transactedAtEpochMs,
+              'detail.transactedAtEpochMs',
+            )
+          : Promise.resolve(undefined),
+        encrypted.settledAtEpochMs
+          ? unsealNumber(encrypted.settledAtEpochMs, 'detail.settledAtEpochMs')
+          : Promise.resolve(undefined),
+        unseal(encrypted.description),
+        encrypted.state
+          ? unsealChargeDetailState(encrypted.state)
+          : Promise.resolve(ChargeDetailState.Cleared),
+      ])
+
       return {
-        virtualCardAmount: await unsealCurrencyAmount(
-          encrypted.virtualCardAmount,
-        ),
+        virtualCardAmount: virtualCardAmount,
         markup: {
-          percent: await unsealNumber(
-            encrypted.markup.percent,
-            'markup.percent',
-          ),
-          flat: await unsealNumber(encrypted.markup.flat, 'markup.flat'),
-          minCharge: encrypted.markup.minCharge
-            ? await unsealNumber(encrypted.markup.minCharge, 'markup.minCharge')
-            : undefined,
+          percent: markupPercent,
+          flat: markupFlat,
+          minCharge: markupMinCharge,
         },
-        markupAmount: await unsealCurrencyAmount(encrypted.markupAmount),
-        fundingSourceAmount: await unsealCurrencyAmount(
-          encrypted.fundingSourceAmount,
-        ),
+        markupAmount,
+        fundingSourceAmount,
+        transactedAt: transactedAtEpochMs
+          ? new Date(transactedAtEpochMs)
+          : undefined,
+        settledAt: settledAtEpochMs ? new Date(settledAtEpochMs) : undefined,
         fundingSourceId: encrypted.fundingSourceId,
-        description: await unseal(encrypted.description),
-        state: encrypted.state
-          ? await unsealChargeDetailState(encrypted.state)
-          : ChargeDetailState.Cleared,
+        description,
+        state,
         continuationOfExistingCharge: !!encrypted.continuationOfExistingCharge,
       }
     }
+
     let transactionDetail: TransactionDetailChargeEntity[] | undefined
     if (transaction.detail) {
       transactionDetail = await Promise.all(
@@ -157,6 +188,25 @@ export class DefaultTransactionWorker implements TransactionWorker {
         }),
       )
     }
+    const [
+      billedAmount,
+      transactedAmount,
+      description,
+      transactedAtEpochMs,
+      settledAtEpochMs,
+      declineReason,
+    ] = await Promise.all([
+      unsealCurrencyAmount(transaction.billedAmount),
+      unsealCurrencyAmount(transaction.transactedAmount),
+      unseal(transaction.description),
+      unsealNumber(transaction.transactedAtEpochMs, 'transactedAtEpochMs'),
+      transaction.settledAtEpochMs
+        ? unsealNumber(transaction.settledAtEpochMs, 'settledAtEpochMs')
+        : Promise.resolve(undefined),
+      transaction.declineReason
+        ? unsealDeclineReason(transaction.declineReason)
+        : Promise.resolve(undefined),
+    ])
     return {
       id: transaction.id,
       owner: transaction.owner,
@@ -167,21 +217,12 @@ export class DefaultTransactionWorker implements TransactionWorker {
       cardId: transaction.cardId,
       sequenceId: transaction.sequenceId,
       type: transaction.type,
-      billedAmount: await unsealCurrencyAmount(transaction.billedAmount),
-      transactedAmount: await unsealCurrencyAmount(
-        transaction.transactedAmount,
-      ),
-      description: await unseal(transaction.description),
-      transactedAtEpochMs: await unsealNumber(
-        transaction.transactedAtEpochMs,
-        'transactedAtEpochMs',
-      ),
-      settledAtEpochMs: transaction.settledAtEpochMs
-        ? await unsealNumber(transaction.settledAtEpochMs, 'settledAtEpochMs')
-        : undefined,
-      declineReason: transaction.declineReason
-        ? await unsealDeclineReason(transaction.declineReason)
-        : undefined,
+      billedAmount,
+      transactedAmount,
+      description,
+      transactedAtEpochMs,
+      settledAtEpochMs,
+      declineReason,
       detail: transactionDetail,
     }
   }

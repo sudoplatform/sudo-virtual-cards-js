@@ -93,6 +93,8 @@ export interface TransactionDetailCharge {
   markup: Markup
   markupAmount: CurrencyAmount
   fundingSourceAmount: CurrencyAmount
+  transactedAt?: Date
+  settledAt?: Date
   fundingSourceId: string
   description: string
   state: ChargeDetailState

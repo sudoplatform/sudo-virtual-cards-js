@@ -730,7 +730,9 @@ export type SealedTransactionDetailChargeAttribute = {
   fundingSourceId: Scalars['ID']['output']
   markup: SealedMarkupAttribute
   markupAmount: SealedCurrencyAmountAttribute
+  settledAtEpochMs?: Maybe<Scalars['String']['output']>
   state?: Maybe<Scalars['String']['output']>
+  transactedAtEpochMs?: Maybe<Scalars['String']['output']>
   virtualCardAmount: SealedCurrencyAmountAttribute
 }
 
@@ -1084,6 +1086,8 @@ export type SealedCardWithLastTransactionFragment = {
     }
     detail?: Array<{
       __typename?: 'SealedTransactionDetailChargeAttribute'
+      transactedAtEpochMs?: string | null
+      settledAtEpochMs?: string | null
       fundingSourceId: string
       description: string
       state?: string | null
@@ -1166,6 +1170,8 @@ export type SealedTransactionFragment = {
   }
   detail?: Array<{
     __typename?: 'SealedTransactionDetailChargeAttribute'
+    transactedAtEpochMs?: string | null
+    settledAtEpochMs?: string | null
     fundingSourceId: string
     description: string
     state?: string | null
@@ -1724,6 +1730,8 @@ export type UpdateVirtualCardMutation = {
       }
       detail?: Array<{
         __typename?: 'SealedTransactionDetailChargeAttribute'
+        transactedAtEpochMs?: string | null
+        settledAtEpochMs?: string | null
         fundingSourceId: string
         description: string
         state?: string | null
@@ -1827,6 +1835,8 @@ export type CancelVirtualCardMutation = {
       }
       detail?: Array<{
         __typename?: 'SealedTransactionDetailChargeAttribute'
+        transactedAtEpochMs?: string | null
+        settledAtEpochMs?: string | null
         fundingSourceId: string
         description: string
         state?: string | null
@@ -2470,6 +2480,8 @@ export type GetCardQuery = {
       }
       detail?: Array<{
         __typename?: 'SealedTransactionDetailChargeAttribute'
+        transactedAtEpochMs?: string | null
+        settledAtEpochMs?: string | null
         fundingSourceId: string
         description: string
         state?: string | null
@@ -2579,6 +2591,8 @@ export type ListCardsQuery = {
         }
         detail?: Array<{
           __typename?: 'SealedTransactionDetailChargeAttribute'
+          transactedAtEpochMs?: string | null
+          settledAtEpochMs?: string | null
           fundingSourceId: string
           description: string
           state?: string | null
@@ -2664,6 +2678,8 @@ export type GetTransactionQuery = {
     }
     detail?: Array<{
       __typename?: 'SealedTransactionDetailChargeAttribute'
+      transactedAtEpochMs?: string | null
+      settledAtEpochMs?: string | null
       fundingSourceId: string
       description: string
       state?: string | null
@@ -2734,6 +2750,8 @@ export type ListTransactionsQuery = {
       }
       detail?: Array<{
         __typename?: 'SealedTransactionDetailChargeAttribute'
+        transactedAtEpochMs?: string | null
+        settledAtEpochMs?: string | null
         fundingSourceId: string
         description: string
         state?: string | null
@@ -2806,6 +2824,8 @@ export type ListTransactionsByCardIdQuery = {
       }
       detail?: Array<{
         __typename?: 'SealedTransactionDetailChargeAttribute'
+        transactedAtEpochMs?: string | null
+        settledAtEpochMs?: string | null
         fundingSourceId: string
         description: string
         state?: string | null
@@ -2877,6 +2897,8 @@ export type ListTransactionsByCardIdAndTypeQuery = {
       }
       detail?: Array<{
         __typename?: 'SealedTransactionDetailChargeAttribute'
+        transactedAtEpochMs?: string | null
+        settledAtEpochMs?: string | null
         fundingSourceId: string
         description: string
         state?: string | null
@@ -3860,6 +3882,14 @@ export const SealedTransactionFragmentDoc = {
                 },
                 {
                   kind: 'Field',
+                  name: { kind: 'Name', value: 'transactedAtEpochMs' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'settledAtEpochMs' },
+                },
+                {
+                  kind: 'Field',
                   name: { kind: 'Name', value: 'fundingSourceId' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'description' } },
@@ -4225,6 +4255,14 @@ export const SealedCardWithLastTransactionFragmentDoc = {
                       },
                     ],
                   },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'transactedAtEpochMs' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'settledAtEpochMs' },
                 },
                 {
                   kind: 'Field',
@@ -6243,6 +6281,14 @@ export const UpdateVirtualCardDocument = {
                 },
                 {
                   kind: 'Field',
+                  name: { kind: 'Name', value: 'transactedAtEpochMs' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'settledAtEpochMs' },
+                },
+                {
+                  kind: 'Field',
                   name: { kind: 'Name', value: 'fundingSourceId' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'description' } },
@@ -6648,6 +6694,14 @@ export const CancelVirtualCardDocument = {
                       },
                     ],
                   },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'transactedAtEpochMs' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'settledAtEpochMs' },
                 },
                 {
                   kind: 'Field',
@@ -9174,6 +9228,14 @@ export const GetCardDocument = {
                 },
                 {
                   kind: 'Field',
+                  name: { kind: 'Name', value: 'transactedAtEpochMs' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'settledAtEpochMs' },
+                },
+                {
+                  kind: 'Field',
                   name: { kind: 'Name', value: 'fundingSourceId' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'description' } },
@@ -9637,6 +9699,14 @@ export const ListCardsDocument = {
                 },
                 {
                   kind: 'Field',
+                  name: { kind: 'Name', value: 'transactedAtEpochMs' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'settledAtEpochMs' },
+                },
+                {
+                  kind: 'Field',
                   name: { kind: 'Name', value: 'fundingSourceId' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'description' } },
@@ -9891,6 +9961,14 @@ export const GetTransactionDocument = {
                       },
                     ],
                   },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'transactedAtEpochMs' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'settledAtEpochMs' },
                 },
                 {
                   kind: 'Field',
@@ -10166,6 +10244,14 @@ export const ListTransactionsDocument = {
                       },
                     ],
                   },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'transactedAtEpochMs' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'settledAtEpochMs' },
                 },
                 {
                   kind: 'Field',
@@ -10466,6 +10552,14 @@ export const ListTransactionsByCardIdDocument = {
                 },
                 {
                   kind: 'Field',
+                  name: { kind: 'Name', value: 'transactedAtEpochMs' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'settledAtEpochMs' },
+                },
+                {
+                  kind: 'Field',
                   name: { kind: 'Name', value: 'fundingSourceId' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'description' } },
@@ -10744,6 +10838,14 @@ export const ListTransactionsByCardIdAndTypeDocument = {
                       },
                     ],
                   },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'transactedAtEpochMs' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'settledAtEpochMs' },
                 },
                 {
                   kind: 'Field',

@@ -140,10 +140,7 @@ describe('SudoVirtualCardsClient RefreshFundingSource Test Suite', () => {
         ).resolves.toMatchObject(cancelledFundingSource)
       })
 
-      // Plaid sandbox currently does not automatically set webhooks correctly
-      // when creating an item. Thus we cannot expect the refresh processing to fire.
-      // eslint-disable-next-line jest/no-disabled-tests
-      it.skip('initiates refresh when refresh is required', async () => {
+      it('initiates refresh when refresh is required', async () => {
         if (skip) return
 
         await instanceUnderTest.createKeysIfAbsent()

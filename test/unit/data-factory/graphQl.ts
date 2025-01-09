@@ -314,6 +314,8 @@ export class GraphQLDataFactory {
       {
         description: 'dummyDescription',
         fundingSourceAmount: this.sealedCurrencyAmount,
+        transactedAtEpochMs: 'SEALED-NUMBER',
+        settledAtEpochMs: 'SEALED-NUMBER',
         fundingSourceId: 'dummyFundingSourceId',
         markup: {
           percent: 'SEALED-NUMBER',
@@ -346,6 +348,8 @@ export class GraphQLDataFactory {
       {
         description: 'dummyDescription',
         fundingSourceAmount: this.sealedCurrencyAmount,
+        transactedAtEpochMs: 'SEALED-NUMBER',
+        settledAtEpochMs: 'SEALED-NUMBER',
         fundingSourceId: 'dummyFundingSourceId',
         markup: {
           percent: 'SEALED-NUMBER',
