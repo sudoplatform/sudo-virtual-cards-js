@@ -19,7 +19,6 @@ import {
   FundingSourceType,
   ProvisionalFundingSource,
   SudoVirtualCardsClient,
-  isCheckoutCardProvisionalFundingSourceProvisioningData,
   isStripeCardProvisionalFundingSourceProvisioningData,
 } from '../../../src'
 import { ApiClient } from '../../../src/private/data/common/apiClient'
@@ -32,7 +31,6 @@ import { delay } from '../../utility/delay'
 import { uuidV4Regex } from '../../utility/uuidV4Regex'
 import {
   confirmStripeSetupIntent,
-  generateCheckoutPaymentToken,
   getTestCard,
 } from '../util/createFundingSource'
 import { FundingSourceProviders } from '../util/getFundingSourceProviders'
@@ -79,9 +77,8 @@ describe('SudoVirtualCardsClient SubscribeToFundingSourceUpdates Test Suite', ()
     // notifications since the behaviour of that is presently global to the
     // client rather than individual subscriptions.
     describe.each`
-      provider      | providerEnabled
-      ${'stripe'}   | ${'stripeCardEnabled'}
-      ${'checkout'} | ${'checkoutCardEnabled'}
+      provider    | providerEnabled
+      ${'stripe'} | ${'stripeCardEnabled'}
     `(
       'for card provider $provider',
       ({
@@ -150,22 +147,6 @@ describe('SudoVirtualCardsClient SubscribeToFundingSourceUpdates Test Suite', ()
               provider: 'stripe',
               type: FundingSourceType.CreditCard,
               paymentMethod: setupIntent.payment_method,
-            }
-          } else if (
-            fundingSourceProviders.apis.checkout &&
-            isCheckoutCardProvisionalFundingSourceProvisioningData(
-              provisionalFundingSource.provisioningData,
-            )
-          ) {
-            const paymentToken = await generateCheckoutPaymentToken(
-              fundingSourceProviders.apis.checkout,
-              card,
-              provisionalFundingSource.provisioningData,
-            )
-            completionData = {
-              provider: 'checkout',
-              type: FundingSourceType.CreditCard,
-              paymentToken,
             }
           } else {
             fail('unrecognized provisioning data')

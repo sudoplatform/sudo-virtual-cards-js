@@ -12,3 +12,4 @@ build
 .vscode/launch.json
 package.json.old
 package.json.yarn
+.idea/

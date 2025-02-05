@@ -24,20 +24,6 @@ const BaseProvisionalFundingSourceInteractionDataCodec = t.type(
   'BaseProvisionalFundingSourceInteractionData',
 )
 
-const CheckoutCardProvisionalFundingSourceInteractionDataProperties = {
-  provider: t.literal('checkout'),
-  version: t.literal(1),
-  type: t.literal('CREDIT_CARD'),
-  redirectUrl: t.string,
-  successUrl: t.string,
-  failureUrl: t.string,
-}
-
-const CheckoutCardProvisionalFundingSourceInteractionDataCodec = t.type(
-  CheckoutCardProvisionalFundingSourceInteractionDataProperties,
-  'CheckoutProvisionalFundingSourceInteractionData',
-)
-
 const CheckoutBankAccountRefreshFundingSourceInteractionDataProperties = {
   provider: t.literal('checkout'),
   version: t.literal(1),
@@ -53,7 +39,6 @@ const CheckoutBankAccountRefreshFundingSourceInteractionDataCodec = t.type(
 
 const ProvisionalFundingSourceInteractionDataCodec = t.union(
   [
-    CheckoutCardProvisionalFundingSourceInteractionDataCodec,
     CheckoutBankAccountRefreshFundingSourceInteractionDataCodec,
     BaseProvisionalFundingSourceInteractionDataCodec,
   ],
@@ -112,18 +97,7 @@ export function decodeFundingSourceInteractionData(
     )
   }
 
-  if (CheckoutCardProvisionalFundingSourceInteractionDataCodec.is(decoded)) {
-    return {
-      provider: 'checkout',
-      type: FundingSourceType.CreditCard,
-      version: 1,
-      redirectUrl: decoded.redirectUrl,
-      successUrl: decoded.successUrl,
-      failureUrl: decoded.failureUrl,
-    }
-  } else if (
-    CheckoutBankAccountRefreshFundingSourceInteractionDataCodec.is(decoded)
-  ) {
+  if (CheckoutBankAccountRefreshFundingSourceInteractionDataCodec.is(decoded)) {
     return {
       provider: 'checkout',
       type: FundingSourceType.BankAccount,

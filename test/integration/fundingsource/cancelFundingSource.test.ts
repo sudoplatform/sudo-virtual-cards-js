@@ -29,9 +29,8 @@ describe('SudoVirtualCardsClient CancelFundingSource Test Suite', () => {
 
   describe('CancelFundingSource', () => {
     describe.each`
-      provider      | type                            | providerEnabled
-      ${'stripe'}   | ${FundingSourceType.CreditCard} | ${'stripeCardEnabled'}
-      ${'checkout'} | ${FundingSourceType.CreditCard} | ${'checkoutCardEnabled'}
+      provider    | type                            | providerEnabled
+      ${'stripe'} | ${FundingSourceType.CreditCard} | ${'stripeCardEnabled'}
     `(
       'for $type provider $provider',
       ({

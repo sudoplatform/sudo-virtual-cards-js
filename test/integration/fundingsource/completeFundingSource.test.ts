@@ -17,26 +17,20 @@ import {
   BankAccountType,
   CompleteFundingSourceCompletionDataInput,
   CreditCardNetwork,
-  FundingSource,
   FundingSourceCompletionDataInvalidError,
   FundingSourceNotSetupError,
-  FundingSourceRequiresUserInteractionError,
   FundingSourceState,
   FundingSourceType,
   IdentityVerificationNotVerifiedError,
   ProvisionalFundingSourceNotFoundError,
   SudoVirtualCardsClient,
-  UnacceptableFundingSourceError,
   isCheckoutBankAccountProvisionalFundingSourceProvisioningData,
-  isCheckoutCardProvisionalFundingSourceInteractionData,
-  isCheckoutCardProvisionalFundingSourceProvisioningData,
   isStripeCardProvisionalFundingSourceProvisioningData,
 } from '../../../src'
 import { uuidV4Regex } from '../../utility/uuidV4Regex'
 import {
   confirmStripeSetupIntent,
   createBankAccountFundingSource,
-  generateCheckoutPaymentToken,
   getTestCard,
 } from '../util/createFundingSource'
 import { FundingSourceProviders } from '../util/getFundingSourceProviders'
@@ -86,11 +80,6 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
     stripe: {
       provider: 'stripe',
       paymentMethod: 'dummyPaymentMethod',
-    },
-    checkout: {
-      provider: 'checkout',
-      type: FundingSourceType.CreditCard,
-      paymentToken: 'dummyPaymentToken',
     },
     checkoutBankAccount: {
       provider: 'checkout',
@@ -218,7 +207,8 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
         await expect(
           instanceUnderTest.completeFundingSource({
             id: v4(),
-            completionData: dummyCompletionDataForProvider['checkout'],
+            completionData:
+              dummyCompletionDataForProvider['checkoutBankAccount'],
           }),
         ).rejects.toThrow(ProvisionalFundingSourceNotFoundError)
       })
@@ -342,9 +332,8 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
     })
 
     describe.each`
-      provider      | providerEnabled
-      ${'stripe'}   | ${'stripeCardEnabled'}
-      ${'checkout'} | ${'checkoutCardEnabled'}
+      provider    | providerEnabled
+      ${'stripe'} | ${'stripeCardEnabled'}
     `(
       'for card provider $provider',
       ({
@@ -409,17 +398,6 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
             if (!setupIntent.payment_method) {
               throw 'Failed to get payment_method from setup intent'
             }
-          } else if (
-            fundingSourceProviders.apis.checkout &&
-            isCheckoutCardProvisionalFundingSourceProvisioningData(
-              provisionalCard.provisioningData,
-            )
-          ) {
-            await generateCheckoutPaymentToken(
-              fundingSourceProviders.apis.checkout,
-              card,
-              provisionalCard.provisioningData,
-            )
           } else {
             fail(
               'No API defined for provider or provisioning data does not match known provider',
@@ -466,22 +444,6 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
               provider: 'stripe',
               type: FundingSourceType.CreditCard,
               paymentMethod: setupIntent.payment_method,
-            }
-          } else if (
-            fundingSourceProviders.apis.checkout &&
-            isCheckoutCardProvisionalFundingSourceProvisioningData(
-              provisionalCard.provisioningData,
-            )
-          ) {
-            const paymentToken = await generateCheckoutPaymentToken(
-              fundingSourceProviders.apis.checkout,
-              card,
-              provisionalCard.provisioningData,
-            )
-            completionData = {
-              provider: 'checkout',
-              type: FundingSourceType.CreditCard,
-              paymentToken,
             }
           } else {
             fail('unrecognized provisioning data')
@@ -537,147 +499,6 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
             completionData: dummyCompletionDataForProvider.stripe,
           }),
         ).rejects.toThrow(FundingSourceNotSetupError)
-      })
-    })
-
-    // Checkout specific tests
-    describe('for provider checkout:card', () => {
-      let skip = false
-      beforeAll(() => {
-        // Since we determine availability of provider
-        // asynchronously we can't use that knowledge
-        // to control the set of providers we iterate
-        // over so we have to use a flag
-        if (!fundingSourceProviders.checkoutCardEnabled) {
-          console.warn(`Checkout card provider not enabled. Skipping tests.`)
-          skip = true
-        }
-      })
-
-      it('should throw a valid FundingSourceRequiresUserInteractionError for a card requiring 3DS authentication', async () => {
-        if (skip) return
-
-        expectSetupComplete()
-
-        const provisionalFundingSource =
-          await instanceUnderTest.setupFundingSource({
-            currency: 'USD',
-            type: FundingSourceType.CreditCard,
-            supportedProviders: ['checkout'],
-            applicationName: 'system-test-app',
-          })
-
-        if (
-          !fundingSourceProviders.apis.checkout ||
-          !isCheckoutCardProvisionalFundingSourceProvisioningData(
-            provisionalFundingSource.provisioningData,
-          )
-        ) {
-          fail('No checkout provider or provisioning data is not for checkout')
-        }
-
-        const card = getTestCard('checkout', 'Visa-3DS2-1')
-
-        const paymentToken = await generateCheckoutPaymentToken(
-          fundingSourceProviders.apis.checkout,
-          card,
-          provisionalFundingSource.provisioningData,
-        )
-        const completionData: CompleteFundingSourceCompletionDataInput = {
-          provider: 'checkout',
-          type: FundingSourceType.CreditCard,
-          paymentToken,
-        }
-
-        let caught: Error | undefined
-        let completed: FundingSource | undefined
-        try {
-          completed = await instanceUnderTest.completeFundingSource({
-            id: provisionalFundingSource.id,
-            completionData,
-          })
-        } catch (err) {
-          caught = err as Error
-        }
-
-        expect(completed).toBeUndefined()
-        expect(caught).toBeDefined()
-        expect(caught).toBeInstanceOf(FundingSourceRequiresUserInteractionError)
-        const requiresInteractionError =
-          caught as FundingSourceRequiresUserInteractionError
-        expect(
-          isCheckoutCardProvisionalFundingSourceInteractionData(
-            requiresInteractionError.interactionData,
-          ),
-        ).toEqual(true)
-        if (
-          !isCheckoutCardProvisionalFundingSourceInteractionData(
-            requiresInteractionError.interactionData,
-          )
-        ) {
-          fail(
-            'interactionData unexpectedly not for checkout card funding source',
-          )
-        }
-        expect(requiresInteractionError.interactionData).toEqual({
-          provider: 'checkout',
-          type: FundingSourceType.CreditCard,
-          version: 1,
-          redirectUrl: expect.stringMatching(/^https:\/\/.*/),
-          successUrl: expect.stringMatching(/^https:\/\/.*/),
-          failureUrl: expect.stringMatching(/^https:\/\/.*/),
-        })
-      })
-
-      it('should throw an UnacceptableFundingSourceError for a card failing AVS check', async () => {
-        if (skip) return
-
-        expectSetupComplete()
-
-        const provisionalFundingSource =
-          await instanceUnderTest.setupFundingSource({
-            currency: 'USD',
-            type: FundingSourceType.CreditCard,
-            supportedProviders: ['checkout'],
-            applicationName: 'system-test-app',
-          })
-
-        if (
-          !fundingSourceProviders.apis.checkout ||
-          !isCheckoutCardProvisionalFundingSourceProvisioningData(
-            provisionalFundingSource.provisioningData,
-          )
-        ) {
-          fail('No checkout provider or provisioning data is not for checkout')
-        }
-
-        const card = getTestCard('checkout', 'BadAddress')
-
-        const paymentToken = await generateCheckoutPaymentToken(
-          fundingSourceProviders.apis.checkout,
-          card,
-          provisionalFundingSource.provisioningData,
-        )
-        const completionData: CompleteFundingSourceCompletionDataInput = {
-          provider: 'checkout',
-          type: FundingSourceType.CreditCard,
-          paymentToken,
-        }
-
-        let caught: Error | undefined
-        let completed: FundingSource | undefined
-        try {
-          completed = await instanceUnderTest.completeFundingSource({
-            id: provisionalFundingSource.id,
-            completionData,
-          })
-        } catch (err) {
-          caught = err as Error
-        }
-
-        expect(completed).toBeUndefined()
-        expect(caught).toBeDefined()
-        expect(caught).toBeInstanceOf(UnacceptableFundingSourceError)
       })
     })
   })

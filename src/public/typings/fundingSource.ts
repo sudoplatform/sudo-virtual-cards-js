@@ -39,14 +39,6 @@ export interface StripeCardFundingSourceClientConfiguration
 export type StripeFundingSourceClientConfiguration =
   StripeCardFundingSourceClientConfiguration
 
-export interface CheckoutCardFundingSourceClientConfiguration
-  extends BaseFundingSourceClientConfiguration {
-  type: 'checkout'
-  fundingSourceType: FundingSourceType.CreditCard
-  version: number
-  apiKey: string
-}
-
 export interface CheckoutBankAccountFundingSourceClientConfiguration
   extends BaseFundingSourceClientConfiguration {
   type: 'checkout'
@@ -57,7 +49,6 @@ export interface CheckoutBankAccountFundingSourceClientConfiguration
 
 export type FundingSourceClientConfiguration =
   | StripeCardFundingSourceClientConfiguration
-  | CheckoutCardFundingSourceClientConfiguration
   | CheckoutBankAccountFundingSourceClientConfiguration
 
   // Allow this so that future additions are not breaking. Consumers
@@ -69,15 +60,6 @@ export function isStripeCardFundingSourceClientConfiguration(
 ): config is StripeCardFundingSourceClientConfiguration {
   return (
     config.type === 'stripe' &&
-    config.fundingSourceType === FundingSourceType.CreditCard
-  )
-}
-
-export function isCheckoutCardFundingSourceClientConfiguration(
-  config: FundingSourceClientConfiguration,
-): config is CheckoutCardFundingSourceClientConfiguration {
-  return (
-    config.type === 'checkout' &&
     config.fundingSourceType === FundingSourceType.CreditCard
   )
 }
@@ -212,25 +194,6 @@ export interface StripeCardProvisionalFundingSourceProvisioningData
 }
 
 /**
- * @deprecated Use StripeCardProvisionalFundingSourceProvisioningData
- */
-export type StripeProvisionalFundingSourceProvisioningData =
-  StripeCardProvisionalFundingSourceProvisioningData
-
-/**
- * Provisioning data for Checkout card provisional funding source.
- *
- * @property {'checkout'} provider Provider of the provisioning data.
- * @property {1} version Version of the format of the provisioning data.
- * @property {FundingSourceType.CreditCard} type Type of funding source provider.
- */
-export interface CheckoutCardProvisionalFundingSourceProvisioningData {
-  provider: 'checkout'
-  version: 1
-  type: FundingSourceType.CreditCard
-}
-
-/**
  * Provisioning data for Checkout bank account provisional funding source.
  *
  * @property {'checkout'} provider Provider of the provisioning data.
@@ -252,7 +215,6 @@ export interface CheckoutBankAccountProvisionalFundingSourceProvisioningData {
 
 export type ProvisionalFundingSourceProvisioningData =
   | StripeCardProvisionalFundingSourceProvisioningData
-  | CheckoutCardProvisionalFundingSourceProvisioningData
   | CheckoutBankAccountProvisionalFundingSourceProvisioningData
   | BaseProvisionalFundingSourceProvisioningData
 
@@ -261,16 +223,6 @@ export function isStripeCardProvisionalFundingSourceProvisioningData(
 ): data is StripeCardProvisionalFundingSourceProvisioningData {
   return (
     data.provider === 'stripe' &&
-    data.type === FundingSourceType.CreditCard &&
-    data.version === 1
-  )
-}
-
-export function isCheckoutCardProvisionalFundingSourceProvisioningData(
-  data: ProvisionalFundingSourceProvisioningData,
-): data is CheckoutCardProvisionalFundingSourceProvisioningData {
-  return (
-    data.provider === 'checkout' &&
     data.type === FundingSourceType.CreditCard &&
     data.version === 1
   )
@@ -295,32 +247,6 @@ export function isCheckoutBankAccountProvisionalFundingSourceProvisioningData(
 export type BaseProvisionalFundingSourceInteractionData =
   BaseProvisionalFundingSourceProvisioningData
 
-/**
- * Interaction data for Checkout provisional funding source.
- *
- * @property {'checkout'} provider Provider of the interaction data.
- * @property {1} version Version of the format of the interaction data.
- * @property {FundingSourceType.CreditCard} type Type of funding source provider
- * @property {string} redirectUrl
- *  URL that user should be redirected to to complete interactive strong
- *  card authentication required to add the card as a funding source.
- * @property {string} successUrl
- *  URL that user will be redirected to upon successful completion of
- *  strong authentication.
- * @property {string} failureUrl
- *  URL that user will be redirected to upon unsuccessful completion of
- *  strong authentication.
- */
-export interface CheckoutCardProvisionalFundingSourceInteractionData
-  extends BaseProvisionalFundingSourceInteractionData {
-  provider: 'checkout'
-  version: 1
-  type: FundingSourceType.CreditCard
-  redirectUrl: string
-  successUrl: string
-  failureUrl: string
-}
-
 export interface CheckoutBankAccountRefreshFundingSourceInteractionData
   extends BaseProvisionalFundingSourceInteractionData {
   provider: 'checkout'
@@ -331,19 +257,8 @@ export interface CheckoutBankAccountRefreshFundingSourceInteractionData
 }
 
 export type FundingSourceInteractionData =
-  | CheckoutCardProvisionalFundingSourceInteractionData
   | CheckoutBankAccountRefreshFundingSourceInteractionData
   | BaseProvisionalFundingSourceProvisioningData
-
-export function isCheckoutCardProvisionalFundingSourceInteractionData(
-  data: FundingSourceInteractionData,
-): data is CheckoutCardProvisionalFundingSourceInteractionData {
-  return (
-    data.provider === 'checkout' &&
-    data.type === FundingSourceType.CreditCard &&
-    data.version === 1
-  )
-}
 
 export function isCheckoutBankAccountRefreshFundingSourceInteractionData(
   data: FundingSourceInteractionData,

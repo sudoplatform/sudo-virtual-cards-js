@@ -45,7 +45,6 @@ import {
   FundingSourceServiceUnsubscribeFromFundingSourceChangesInput,
   isFundingSourceServiceCheckoutBankAccountCompletionData,
   isFundingSourceServiceCheckoutBankAccountRefreshData,
-  isFundingSourceServiceCheckoutCardCompletionData,
   isFundingSourceServiceStripeCardCompletionData,
 } from '../../domain/entities/fundingSource/fundingSourceService'
 import { ProvisionalFundingSourceEntity } from '../../domain/entities/fundingSource/provisionalFundingSourceEntity'
@@ -124,17 +123,6 @@ export class DefaultFundingSourceService implements FundingSourceService {
           version: 1,
           type,
           payment_method: completionData.paymentMethod,
-        }),
-      )
-    } else if (
-      isFundingSourceServiceCheckoutCardCompletionData(completionData)
-    ) {
-      encodedCompletionData = Base64.encodeString(
-        JSON.stringify({
-          provider,
-          version: 1,
-          type,
-          payment_token: completionData.paymentToken,
         }),
       )
     } else if (

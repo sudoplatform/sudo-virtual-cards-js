@@ -25,17 +25,6 @@ const BaseProvisionalFundingSourceProvisioningDataCodec = t.type(
   'BaseProvisionalFundingSourceProvisioningData',
 )
 
-const CheckoutCardProvisionalFundingSourceProvisioningDataProperties = {
-  provider: t.literal('checkout'),
-  version: t.literal(1),
-  type: t.literal('CREDIT_CARD'),
-}
-
-const CheckoutCardProvisionalFundingSourceProvisioningDataCodec = t.type(
-  CheckoutCardProvisionalFundingSourceProvisioningDataProperties,
-  'CheckoutCardProvisionalFundingSourceProvisioningData',
-)
-
 const PlaidLinkTokenProps = {
   link_token: t.string,
   expiration: t.string,
@@ -95,7 +84,6 @@ const StripeCardProvisionalFundingSourceProvisioningDataCodec = t.intersection(
 
 const ProvisionalFundingSourceProvisioningDataCodec = t.union(
   [
-    CheckoutCardProvisionalFundingSourceProvisioningDataCodec,
     CheckoutBankAccountProvisionalFundingSourceProvisioningDataCodec,
     StripeCardProvisionalFundingSourceProvisioningDataCodec,
     BaseProvisionalFundingSourceProvisioningDataCodec,
@@ -156,14 +144,6 @@ export function decodeProvisionalFundingSourceProvisioningData(
       type: FundingSourceType.CreditCard,
       clientSecret: decoded.client_secret,
       intent: decoded.intent,
-    }
-  } else if (
-    CheckoutCardProvisionalFundingSourceProvisioningDataCodec.is(decoded)
-  ) {
-    return {
-      provider: decoded.provider,
-      version: decoded.version,
-      type: FundingSourceType.CreditCard,
     }
   } else if (
     CheckoutBankAccountProvisionalFundingSourceProvisioningDataCodec.is(decoded)

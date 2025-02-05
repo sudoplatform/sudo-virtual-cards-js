@@ -25,11 +25,6 @@ interface CompleteFundingSourceUseCaseStripeCompletionData {
   type?: FundingSourceType.CreditCard
   paymentMethod: string
 }
-interface CompleteFundingSourceUseCaseCheckoutCardCompletionData {
-  provider: 'checkout'
-  type: FundingSourceType.CreditCard
-  paymentToken: string
-}
 
 interface CompleteFundingSourceUseCaseCheckoutBankAccountCompletionData {
   provider: 'checkout'
@@ -42,7 +37,6 @@ interface CompleteFundingSourceUseCaseCheckoutBankAccountCompletionData {
 
 type CompleteFundingSourceUseCaseCompletionData =
   | CompleteFundingSourceUseCaseStripeCompletionData
-  | CompleteFundingSourceUseCaseCheckoutCardCompletionData
   | CompleteFundingSourceUseCaseCheckoutBankAccountCompletionData
 
 interface CompleteFundingSourceUseCaseInput {

@@ -37,16 +37,6 @@ export interface FundingSourceServiceStripeCardCompletionData {
   type?: FundingSourceType.CreditCard
   paymentMethod: string
 }
-export interface FundingSourceServiceCheckoutCardCompletionData {
-  provider: 'checkout'
-  type: FundingSourceType.CreditCard
-
-  /**
-   * Payment token associated with funding source card or undefined
-   * if a subsequent call to completeFundingSource after user interaction.
-   */
-  paymentToken?: string
-}
 
 export interface FundingSourceServiceCheckoutBankAccountCompletionData {
   provider: 'checkout'
@@ -59,7 +49,6 @@ export interface FundingSourceServiceCheckoutBankAccountCompletionData {
 
 export type FundingSourceServiceCompletionData =
   | FundingSourceServiceStripeCardCompletionData
-  | FundingSourceServiceCheckoutCardCompletionData
   | FundingSourceServiceCheckoutBankAccountCompletionData
 
 export interface FundingSourceServiceCheckoutBankAccountRefreshData {
@@ -80,12 +69,6 @@ export function isFundingSourceServiceStripeCardCompletionData(
     d.provider === 'stripe' &&
     (d.type === undefined || d.type === FundingSourceType.CreditCard)
   )
-}
-
-export function isFundingSourceServiceCheckoutCardCompletionData(
-  d: FundingSourceServiceCompletionData,
-): d is FundingSourceServiceCheckoutCardCompletionData {
-  return d.provider === 'checkout' && d.type === FundingSourceType.CreditCard
 }
 
 export function isFundingSourceServiceCheckoutBankAccountCompletionData(

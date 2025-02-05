@@ -8,7 +8,6 @@ import { Base64, FatalError } from '@sudoplatform/sudo-common'
 import { decodeProvisionalFundingSourceProvisioningData } from '../../../../../src/private/data/fundingSourceProviderData/provisioningData'
 import {
   CheckoutBankAccountProvisionalFundingSourceProvisioningData,
-  CheckoutCardProvisionalFundingSourceProvisioningData,
   FundingSourceType,
   StripeCardProvisionalFundingSourceProvisioningData,
 } from '../../../../../src/public/typings/fundingSource'
@@ -180,89 +179,6 @@ describe('Provisioning Data Test Suite', () => {
     })
 
     describe('for provider checkout', () => {
-      describe('and type card', () => {
-        const checkoutDataDecoded: CheckoutCardProvisionalFundingSourceProvisioningData =
-          {
-            provider: 'checkout',
-            version: 1,
-            type: FundingSourceType.CreditCard,
-          }
-        const checkoutData = {
-          provider: 'checkout',
-          version: 1,
-          type: 'CREDIT_CARD',
-        }
-
-        const checkoutDataString = JSON.stringify(checkoutData)
-        const checkoutDataEncoded = Base64.encodeString(checkoutDataString)
-
-        const checkoutDataWrongType = {
-          ...checkoutData,
-          type: 'CRAZY_COIN',
-        }
-
-        const checkoutDataWrongTypeString = JSON.stringify(
-          checkoutDataWrongType,
-        )
-        const checkoutDataWrongTypeEncoded = Base64.encodeString(
-          checkoutDataWrongTypeString,
-        )
-
-        const checkoutDataWrongVersion = {
-          ...checkoutData,
-          version: 2,
-        }
-
-        const checkoutDataWrongVersionString = JSON.stringify(
-          checkoutDataWrongVersion,
-        )
-        const checkoutDataWrongVersionEncoded = Base64.encodeString(
-          checkoutDataWrongVersionString,
-        )
-
-        it('should decode provisioning data with correct type', () => {
-          expect(
-            decodeProvisionalFundingSourceProvisioningData(checkoutDataEncoded),
-          ).toEqual(checkoutDataDecoded)
-        })
-
-        it('should throw a FatalError if provisioning data has unrecognized type', () => {
-          let caught: Error | undefined
-          let decoded: any
-          try {
-            decoded = decodeProvisionalFundingSourceProvisioningData(
-              checkoutDataWrongTypeEncoded,
-            )
-          } catch (err) {
-            caught = err as Error
-          }
-          expect(decoded).toBeUndefined()
-          expect(caught).toBeDefined()
-          expect(caught).toBeInstanceOf(FatalError)
-          expect(caught?.message).toEqual(
-            'provisional funding source provisioning data cannot be decoded: Unrecognized funding source type: checkout:1:CRAZY_COIN',
-          )
-        })
-
-        it('should throw a FatalError if provisioning data has unrecognized version', () => {
-          let caught: Error | undefined
-          let decoded: any
-          try {
-            decoded = decodeProvisionalFundingSourceProvisioningData(
-              checkoutDataWrongVersionEncoded,
-            )
-          } catch (err) {
-            caught = err as Error
-          }
-          expect(decoded).toBeUndefined()
-          expect(caught).toBeDefined()
-          expect(caught).toBeInstanceOf(FatalError)
-          expect(caught?.message).toEqual(
-            'provisional funding source provisioning data cannot be decoded: Unrecognized funding source type: checkout:2:CREDIT_CARD',
-          )
-        })
-      })
-
       describe('and type bankAccount', () => {
         const checkoutBankAccountDataDecoded: CheckoutBankAccountProvisionalFundingSourceProvisioningData =
           {

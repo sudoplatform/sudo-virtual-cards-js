@@ -37,9 +37,8 @@ describe('SudoVirtualCardsClient ListFundingSources Test Suite', () => {
 
   describe('listFundingSources', () => {
     describe.each`
-      provider      | type                            | providerEnabled
-      ${'stripe'}   | ${FundingSourceType.CreditCard} | ${'stripeCardEnabled'}
-      ${'checkout'} | ${FundingSourceType.CreditCard} | ${'checkoutCardEnabled'}
+      provider    | type                            | providerEnabled
+      ${'stripe'} | ${FundingSourceType.CreditCard} | ${'stripeCardEnabled'}
     `(
       'for $type provider $provider',
       ({

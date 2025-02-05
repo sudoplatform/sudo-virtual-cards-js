@@ -83,12 +83,24 @@ export class GraphQLDataFactory {
   static readonly interactionDataErrorInfo = {
     provisioningData: Base64.encodeString(
       JSON.stringify({
+        __typename: 'CheckoutBankAccountRefreshFundingSourceInteractionData',
         provider: 'checkout',
         version: 1,
-        type: 'CREDIT_CARD',
-        redirectUrl: 'https://some.com/url',
-        successUrl: 'https://some.com/success-url',
-        failureUrl: 'https://some.com/failure-url',
+        type: 'BANK_ACCOUNT',
+        plaidLinkToken: {
+          link_token: 'link_token',
+          expiration: 'expiration',
+          request_id: 'request_id',
+        },
+        authorizationText: [
+          {
+            content: 'authorization-text-0',
+            contentType: 'authorization-text-0-content-type',
+            language: 'authorization-text-0-language',
+            hash: 'authorization-text-0-hash',
+            hashAlgorithm: 'authorization-text-0-hash-algorithm',
+          },
+        ],
       }),
     ),
   }

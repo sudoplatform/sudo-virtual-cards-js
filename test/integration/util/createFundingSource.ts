@@ -9,14 +9,12 @@ import Stripe from 'stripe'
 import {
   BankAccountFundingSource,
   CardType,
-  CheckoutCardProvisionalFundingSourceProvisioningData,
   CompleteFundingSourceCheckoutBankAccountCompletionDataInput,
   CompleteFundingSourceCompletionDataInput,
   CreditCardFundingSource,
   FundingSource,
   FundingSourceType,
   isCheckoutBankAccountProvisionalFundingSourceProvisioningData,
-  isCheckoutCardProvisionalFundingSourceProvisioningData,
   isStripeCardProvisionalFundingSourceProvisioningData,
   StripeCardProvisionalFundingSourceProvisioningData,
   SudoVirtualCardsClient,
@@ -250,7 +248,7 @@ export async function generateCheckoutPaymentToken(
   checkout: Checkout,
   card: TestCard,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _provisioningData: CheckoutCardProvisionalFundingSourceProvisioningData,
+  _provisioningData: StripeCardProvisionalFundingSourceProvisioningData,
 ): Promise<string> {
   const exp = new Date()
   exp.setUTCFullYear(exp.getUTCFullYear() + 1)
@@ -326,22 +324,6 @@ export const createCardFundingSource = async (
     completionData = {
       provider: 'stripe',
       paymentMethod,
-    }
-  } else if (
-    isCheckoutCardProvisionalFundingSourceProvisioningData(provisioningData)
-  ) {
-    if (!fundingSourceProviders.apis.checkout) {
-      throw new Error('No checkout API but provisioning data is for checkout')
-    }
-    const token = await generateCheckoutPaymentToken(
-      fundingSourceProviders.apis.checkout,
-      card,
-      provisioningData,
-    )
-    completionData = {
-      provider: 'checkout',
-      type: FundingSourceType.CreditCard,
-      paymentToken: token,
     }
   } else {
     throw new Error('Unsupported funding source type')

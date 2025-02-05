@@ -9,14 +9,12 @@ import { Checkout } from 'checkout-sdk-node'
 import Stripe from 'stripe'
 import {
   isCheckoutBankAccountFundingSourceClientConfiguration,
-  isCheckoutCardFundingSourceClientConfiguration,
   isStripeCardFundingSourceClientConfiguration,
   SudoVirtualCardsClient,
 } from '../../../src'
 
 export interface FundingSourceProviders {
   stripeCardEnabled: boolean
-  checkoutCardEnabled: boolean
   checkoutBankAccountEnabled: boolean
   apis: {
     stripe: Stripe
@@ -32,7 +30,6 @@ export const getFundingSourceProviders = async (
   let checkout: Checkout | undefined
 
   let stripeCardEnabled = false
-  let checkoutCardEnabled = false
   let checkoutBankAccountEnabled = false
 
   for (const fsConfig of config.fundingSourceClientConfiguration) {
@@ -43,15 +40,11 @@ export const getFundingSourceProviders = async (
       })
       stripeCardEnabled = true
     } else if (
-      isCheckoutCardFundingSourceClientConfiguration(fsConfig) ||
       isCheckoutBankAccountFundingSourceClientConfiguration(fsConfig)
     ) {
       checkout = new Checkout(undefined, {
         pk: fsConfig.apiKey,
       })
-      if (isCheckoutCardFundingSourceClientConfiguration(fsConfig)) {
-        checkoutCardEnabled = true
-      }
       if (
         isCheckoutBankAccountFundingSourceClientConfiguration(fsConfig) &&
         config.bankAccountFundingSourceCreationEnabled
@@ -69,7 +62,6 @@ export const getFundingSourceProviders = async (
 
   return {
     stripeCardEnabled,
-    checkoutCardEnabled,
     checkoutBankAccountEnabled,
     apis: {
       stripe,

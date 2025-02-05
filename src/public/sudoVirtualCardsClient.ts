@@ -144,27 +144,6 @@ export interface CompleteFundingSourceStripeCardCompletionDataInput {
 }
 
 /**
- * Alias for CompleteFundingSourceStripeCardCompletionDataInput
- *
- * @deprecated Use CompleteFundingSourceStripeCardCompletionDataInput
- */
-export type CompleteFundingSourceStripeCompletionDataInput =
-  CompleteFundingSourceStripeCardCompletionDataInput
-
-/**
- * Input for the completion data of {@link SudoVirtualCardsClient#completeFundingSource}.
- *
- * @property {string} provider Provider used to save the funding source information.
- * @property {FundingSourceType.CreditCard} type Funding source provider type. Must be CreditCard.
- * @property {string} paymentToken Identifier of the payment token to be used.
- */
-export interface CompleteFundingSourceCheckoutCardCompletionDataInput {
-  provider: 'checkout'
-  type: FundingSourceType.CreditCard
-  paymentToken: string
-}
-
-/**
  * Input for the completion data of {@link SudoVirtualCardsClient#completeFundingSource}.
  *
  * @property {string} provider Provider used to save the funding source information.
@@ -184,7 +163,6 @@ export interface CompleteFundingSourceCheckoutBankAccountCompletionDataInput {
 }
 
 export type CompleteFundingSourceCompletionDataInput =
-  | CompleteFundingSourceCheckoutCardCompletionDataInput
   | CompleteFundingSourceCheckoutBankAccountCompletionDataInput
   | CompleteFundingSourceStripeCardCompletionDataInput
 

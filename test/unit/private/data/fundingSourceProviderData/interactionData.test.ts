@@ -6,10 +6,6 @@
 
 import { Base64, FatalError } from '@sudoplatform/sudo-common'
 import { decodeFundingSourceInteractionData } from '../../../../../src/private/data/fundingSourceProviderData/interactionData'
-import {
-  CheckoutCardProvisionalFundingSourceInteractionData,
-  FundingSourceType,
-} from '../../../../../src/public/typings/fundingSource'
 
 describe('Interaction Data Test Suite', () => {
   describe('decodeProvisionalFundingSourceInteractionData', () => {
@@ -140,39 +136,6 @@ describe('Interaction Data Test Suite', () => {
         expect(caught?.message).toEqual(
           'error info cannot be decoded as funding source interaction data: Unrecognized interaction data: stripe:1:CREDIT_CARD',
         )
-      })
-    })
-    describe('for provider checkout', () => {
-      describe('and type card', () => {
-        const checkoutDataDecoded: CheckoutCardProvisionalFundingSourceInteractionData =
-          {
-            provider: 'checkout',
-            version: 1,
-            type: FundingSourceType.CreditCard,
-            redirectUrl: 'https://some.com/address',
-            successUrl: 'https://some.com/success',
-            failureUrl: 'https://some.com/failure',
-          }
-
-        const checkoutData = {
-          provider: checkoutDataDecoded.provider,
-          version: checkoutDataDecoded.version,
-          type: 'CREDIT_CARD',
-          redirectUrl: checkoutDataDecoded.redirectUrl,
-          successUrl: checkoutDataDecoded.successUrl,
-          failureUrl: checkoutDataDecoded.failureUrl,
-        }
-
-        const checkoutDataString = JSON.stringify(checkoutData)
-        const checkoutDataEncoded = Base64.encodeString(checkoutDataString)
-
-        it('should decode interaction data with correct type', () => {
-          expect(
-            decodeFundingSourceInteractionData({
-              provisioningData: checkoutDataEncoded,
-            }),
-          ).toEqual(checkoutDataDecoded)
-        })
       })
     })
   })
