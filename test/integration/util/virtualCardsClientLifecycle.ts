@@ -162,7 +162,7 @@ export const setupVirtualCardsClient = async (
     ? optsOrLog.log
     : optsOrLog
   let entitlements = isSetupVirtualCardsClientOpts(optsOrLog)
-    ? optsOrLog.entitlements ?? undefined
+    ? (optsOrLog.entitlements ?? undefined)
     : undefined
 
   try {

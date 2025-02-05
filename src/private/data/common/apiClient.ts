@@ -281,7 +281,9 @@ export class ApiClient {
   public onFundingSourceUpdate(
     owner: string,
   ): Observable<FetchResult<OnFundingSourceUpdateSubscription>> {
-    return this.client.subscribe<OnFundingSourceUpdateSubscription>({
+    return this.client.subscribe<
+      FetchResult<OnFundingSourceUpdateSubscription>
+    >({
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       query: OnFundingSourceUpdateDocument,
       variables: { owner },
@@ -588,7 +590,7 @@ export class ApiClient {
   }): Observable<FetchResult<S>> | undefined {
     let result
     try {
-      result = this.client.subscribe<S>({
+      result = this.client.subscribe<FetchResult<S>>({
         query,
         variables,
       })

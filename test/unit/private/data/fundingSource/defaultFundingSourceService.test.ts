@@ -177,7 +177,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
           GraphQLDataFactory.bankAccountfundingSource,
         )
 
-        jest.useFakeTimers('modern').setSystemTime(now)
+        jest.useFakeTimers().setSystemTime(now)
 
         when(mockDeviceKeyWorker.signString(anything())).thenResolve(signature)
       })
@@ -349,7 +349,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
           GraphQLDataFactory.bankAccountfundingSource,
         )
 
-        jest.useFakeTimers('modern').setSystemTime(now)
+        jest.useFakeTimers().setSystemTime(now)
 
         when(mockDeviceKeyWorker.signString(anything())).thenResolve(signature)
       })

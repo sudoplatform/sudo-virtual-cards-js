@@ -13,5 +13,10 @@ global.TextDecoder = TextDecoder as typeof global.TextDecoder
 // [START] - Polyfills
 global.fetch = require('node-fetch')
 require('isomorphic-fetch')
-global.crypto = require('isomorphic-webcrypto')
+// jsdom does some crypto polyfill magic but we want to use crypto.subtle so we need to add it back in
+const localCrypto = require('crypto').webcrypto
+global.crypto = localCrypto
+// @ts-ignore
+global.crypto.subtle = localCrypto.subtle
+
 // [END] - Polyfills

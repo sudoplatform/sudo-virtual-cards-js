@@ -35,7 +35,7 @@ export const getFundingSourceProviders = async (
   for (const fsConfig of config.fundingSourceClientConfiguration) {
     if (isStripeCardFundingSourceClientConfiguration(fsConfig)) {
       stripe = new Stripe(fsConfig.apiKey, {
-        apiVersion: '2024-12-18.acacia',
+        apiVersion: '2025-01-27.acacia',
         typescript: true,
       })
       stripeCardEnabled = true
@@ -68,4 +68,15 @@ export const getFundingSourceProviders = async (
       checkout,
     },
   }
+}
+
+export const getStripe = async (
+  vcClient: SudoVirtualCardsClient,
+): Promise<Stripe> => {
+  const fundingSourceProviders = await getFundingSourceProviders(vcClient)
+
+  if (!fundingSourceProviders.apis.stripe) {
+    throw new Error('Stripe config not found')
+  }
+  return fundingSourceProviders.apis.stripe
 }

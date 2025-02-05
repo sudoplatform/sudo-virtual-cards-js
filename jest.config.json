@@ -21,9 +21,7 @@
       "lines": 75.61
     }
   },
-  "globals": {
-    "ts-jest": {
-      "tsconfig": "./tsconfig.test.json"
-    }
+  "transform": {
+    ".*\\.ts$": ["ts-jest", { "tsconfig": "tsconfig.test.json" }]
   }
 }
