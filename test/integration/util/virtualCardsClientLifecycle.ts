@@ -155,6 +155,30 @@ function isSetupVirtualCardsClientOpts(
   return 'log' in optsOrLog && 'debug' in optsOrLog.log
 }
 
+async function grantIdentityVerificationConsent(
+  identityVerificationClient: DefaultSudoSecureIdVerificationClient,
+) {
+  const status =
+    await identityVerificationClient.getIdentityDataProcessingConsentStatus()
+  if (status.consented) {
+    return
+  }
+  const consentContent =
+    await identityVerificationClient.getIdentityDataProcessingConsentContent({
+      preferredLanguage: 'en-AU',
+      preferredContentType: 'text/plain',
+    })
+  // Tests do not present consent to the user
+  await identityVerificationClient.provideIdentityDataProcessingConsent(
+    consentContent,
+  )
+  const consentedStatus =
+    await identityVerificationClient.getIdentityDataProcessingConsentStatus()
+  if (!consentedStatus.consented) {
+    throw new Error('Identity verification consent not granted')
+  }
+}
+
 export const setupVirtualCardsClient = async (
   optsOrLog: Logger | SetupVirtualCardsClientOpts,
 ): Promise<SetupVirtualCardsClientOutput> => {
@@ -245,6 +269,10 @@ export const setupVirtualCardsClient = async (
       new DefaultSudoSecureIdVerificationClient({
         sudoUserClient: userClient,
       })
+    if (await identityVerificationClient.isConsentRequiredForVerification()) {
+      await grantIdentityVerificationConsent(identityVerificationClient)
+    }
+
     await identityVerificationClient.verifyIdentity({
       firstName: 'John',
       lastName: 'Smith',

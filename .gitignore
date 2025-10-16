@@ -13,3 +13,5 @@ build
 package.json.old
 package.json.yarn
 .idea/
+
+.yarn/install-state.gz

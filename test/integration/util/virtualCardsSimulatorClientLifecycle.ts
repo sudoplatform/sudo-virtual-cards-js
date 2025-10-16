@@ -93,6 +93,29 @@ interface SetupVirtualCardsClientOutput {
   stripe: Stripe
 }
 
+async function grantIdentityVerificationConsent(
+  identityVerificationClient: DefaultSudoSecureIdVerificationClient,
+) {
+  const status =
+    await identityVerificationClient.getIdentityDataProcessingConsentStatus()
+  if (status.consented) {
+    return
+  }
+  const consentContent =
+    await identityVerificationClient.getIdentityDataProcessingConsentContent({
+      preferredLanguage: 'en-AU',
+      preferredContentType: 'text/plain',
+    })
+  // Test apps do not present consent to the user
+  await identityVerificationClient.provideIdentityDataProcessingConsent(
+    consentContent,
+  )
+  const consentedStatus =
+    await identityVerificationClient.getIdentityDataProcessingConsentStatus()
+  if (!consentedStatus.consented) {
+    throw new Error('Identity verification consent not granted')
+  }
+}
 export const setupVirtualCardsSimulatorClient = async (
   log: DefaultLogger,
 ): Promise<SetupVirtualCardsClientOutput> => {
@@ -139,6 +162,9 @@ export const setupVirtualCardsSimulatorClient = async (
       new DefaultSudoSecureIdVerificationClient({
         sudoUserClient: userClient,
       })
+    if (await identityVerificationClient.isConsentRequiredForVerification()) {
+      await grantIdentityVerificationConsent(identityVerificationClient)
+    }
     await identityVerificationClient.verifyIdentity({
       firstName: 'John',
       lastName: 'Smith',
