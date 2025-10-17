@@ -64,7 +64,7 @@ jobs:
         working-directory: ${{ env.PACKAGE_DIR }}
 
       - name: Test project # Secrets will be empty if not defined
-        env: |
+        env:
           ADMIN_API_KEY: ${{ secrets.ADMIN_API_KEY }}        
           REGISTER_KEY_ID: ${{ secrets.REGISTER_KEY_ID }}        
           REGISTER_KEY: ${{ secrets.REGISTER_KEY }}        

@@ -5,7 +5,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sudoplatform/sudo-virtual-cards-js.git"
+    "url": "git+https://github.com/sudoplatform/sudo-virtual-cards-js.git"
   },
   "scripts": {
     "lint": "concurrently \"yarn lint:eslint\" \"yarn lint:prettier\" \"yarn lint:circular\"",
