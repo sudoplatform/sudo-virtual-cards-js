@@ -24,7 +24,6 @@ jobs:
         with:
           node-version: 20
           registry-url: 'https://registry.npmjs.org/'
-          always-auth: true
 
       - name: Parse tag and set package directory/version
         run: |
@@ -64,9 +63,21 @@ jobs:
           yarn build
         working-directory: ${{ env.PACKAGE_DIR }}
 
-      - name: Test project
+      - name: Test project # Secrets will be empty if not defined
+        env: |
+          ADMIN_API_KEY: ${{ secrets.ADMIN_API_KEY }}        
+          REGISTER_KEY_ID: ${{ secrets.REGISTER_KEY_ID }}        
+          REGISTER_KEY: ${{ secrets.REGISTER_KEY }}        
+          SUDO_PLATFORM_CONFIG: ${{ secrets.SUDO_PLATFORM_CONFIG }}
+          ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}          
+          TENANT: ${{ secrets.TENANT }}          
+          AWS_DEFAULT_REGION: us-east-1 
+          LOG_LEVEL: fatal
         run: |
-          yarn unit-test
+          mkdir -p config
+          rm -rf config/*
+          echo "" > config/sudoplatformconfig.json
+          yarn smoketest
         working-directory: ${{ env.PACKAGE_DIR }}
 
       - name: Ensure latest npm

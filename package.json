@@ -16,13 +16,14 @@
     "verify": "true",
     "unit-test": "jest --verbose test/unit --coverage",
     "integration-test": "jest --verbose test/integration",
+    "smoketest": "yarn unit-test && jest --verbose test/integration/external",
     "clean": "rm -rf lib docs",
     "build": "yarn codegen && yarn build:transpile && yarn build:docs",
     "build:transpile": "concurrently \"yarn build:transpile:declarations\" \"yarn build:transpile:cjs\" \"yarn build:transpile:esm\"",
     "build:transpile:cjs": "tsc --project tsconfig.commonjs.json",
     "build:transpile:esm": "tsc",
     "build:transpile:declarations": "tsc --project tsconfig.declarations.json",
-    "build:docs": "typedoc --readme README.external.md --treatWarningsAsErrors --excludePrivate --out docs src/index.ts"
+    "build:docs": "typedoc --readme \"${README_FILE:-$(test -f README.external.md && echo README.external.md || echo README.md)}\" --treatWarningsAsErrors --excludePrivate --out docs src/index.ts"
   },
   "main": "./cjs/index.js",
   "types": "./types/index.d.ts",

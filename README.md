@@ -11,8 +11,8 @@ Please see the [Sudo Platform Developer Docs](https://sudoplatform.com/docs) for
 
 ## Version Support
 | Engine            | Supported version |
-| ----------------- | ----------------- |
-| Node              | >= 10.4.2         |
+| ----------------- |-------------------|
+| Node              | >= 20              |
 | Safari            | >= 14             |
 | Firefox           | last 2 versions   |
 | Chromium and Edge | last 2 versions   |
