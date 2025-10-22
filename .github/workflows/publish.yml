@@ -72,6 +72,7 @@ jobs:
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}          
           TENANT: ${{ secrets.TENANT }}          
           AWS_DEFAULT_REGION: us-east-1 
+          SMOKETEST_TENANT: gc-dev
           LOG_LEVEL: fatal
         run: |
           mkdir -p config
