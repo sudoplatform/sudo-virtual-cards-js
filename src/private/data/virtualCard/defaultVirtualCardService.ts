@@ -42,7 +42,6 @@ import { ApiClient } from '../common/apiClient'
 import { DeviceKey, DeviceKeyWorker, KeyType } from '../common/deviceKeyWorker'
 import { TransactionWorker } from '../common/transactionWorker'
 import { AlgorithmTransformer } from '../common/transformer/algorithmTransformer'
-import { FetchPolicyTransformer } from '../common/transformer/fetchPolicyTransformer'
 import { ProvisionalVirtualCardEntityTransformer } from './transformer/provisionalVirtualCardEntityTransformer'
 import { VirtualCardEntityTransformer } from './transformer/virtualCardEntityTransformer'
 import {
@@ -166,14 +165,10 @@ export class DefaultVirtualCardService implements VirtualCardService {
 
   async getVirtualCard({
     id,
-    cachePolicy,
   }: VirtualCardServiceGetVirtualCardInput): Promise<
     VirtualCardEntity | undefined
   > {
-    const fetchPolicy = cachePolicy
-      ? FetchPolicyTransformer.transformCachePolicy(cachePolicy)
-      : undefined
-    const sealedCard = await this.appSync.getCard({ id }, fetchPolicy)
+    const sealedCard = await this.appSync.getCard({ id })
     if (!sealedCard) {
       return undefined
     }
@@ -192,16 +187,12 @@ export class DefaultVirtualCardService implements VirtualCardService {
     const sortOrderGraphQL = input?.sortOrder
       ? SortOrderTransformer.transformToGraphQL(input?.sortOrder)
       : undefined
-    const fetchPolicy = input?.cachePolicy
-      ? FetchPolicyTransformer.transformCachePolicy(input.cachePolicy)
-      : undefined
     const { items: sealedCards, nextToken: newNextToken } =
       await this.appSync.listCards(
         filterInputGraphQL,
         sortOrderGraphQL,
         input?.limit,
         input?.nextToken,
-        fetchPolicy,
       )
     const success: VirtualCardUnsealed[] = []
     const failed: {
@@ -244,14 +235,10 @@ export class DefaultVirtualCardService implements VirtualCardService {
 
   async getProvisionalCard({
     id,
-    cachePolicy,
   }: VirtualCardServiceGetProvisionalCardInput): Promise<
     ProvisionalVirtualCardEntity | undefined
   > {
-    const fetchPolicy = cachePolicy
-      ? FetchPolicyTransformer.transformCachePolicy(cachePolicy)
-      : undefined
-    const data = await this.appSync.getProvisionalCard(id, fetchPolicy)
+    const data = await this.appSync.getProvisionalCard(id)
     if (!data) {
       return undefined
     }
@@ -277,15 +264,8 @@ export class DefaultVirtualCardService implements VirtualCardService {
   async listProvisionalCards(
     input?: VirtualCardServiceListProvisionalCardsInput,
   ): Promise<ListOperationResult<ProvisionalVirtualCardEntity>> {
-    const fetchPolicy = input?.cachePolicy
-      ? FetchPolicyTransformer.transformCachePolicy(input.cachePolicy)
-      : undefined
     const { items, nextToken: newNextToken } =
-      await this.appSync.listProvisionalCards(
-        input?.limit,
-        input?.nextToken,
-        fetchPolicy,
-      )
+      await this.appSync.listProvisionalCards(input?.limit, input?.nextToken)
     const success: ProvisionalCardUnsealed[] = []
     const failed: {
       item: Omit<ProvisionalCard, 'card'>

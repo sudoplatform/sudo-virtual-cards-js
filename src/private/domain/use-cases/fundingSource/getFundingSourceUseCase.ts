@@ -45,16 +45,14 @@ interface BaseGetFundingSourceUseCaseOutput {
   currency: string
 }
 
-export interface GetCreditCardFundingSourceUseCaseOutput
-  extends BaseGetFundingSourceUseCaseOutput {
+export interface GetCreditCardFundingSourceUseCaseOutput extends BaseGetFundingSourceUseCaseOutput {
   type: FundingSourceType.CreditCard
   last4: string
   network: CreditCardNetwork
   cardType: CardType
 }
 
-export interface GetBankAccountFundingSourceUseCaseOutput
-  extends BaseGetFundingSourceUseCaseOutput {
+export interface GetBankAccountFundingSourceUseCaseOutput extends BaseGetFundingSourceUseCaseOutput {
   type: FundingSourceType.BankAccount
   bankAccountType: BankAccountType
   last4: string

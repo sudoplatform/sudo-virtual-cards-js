@@ -25,8 +25,7 @@ export interface BaseFundingSourceClientConfiguration {
  * @property {number} version Configuration version.
  * @property {string} apiKey API Key for configuring calls to the provider.
  */
-export interface StripeCardFundingSourceClientConfiguration
-  extends BaseFundingSourceClientConfiguration {
+export interface StripeCardFundingSourceClientConfiguration extends BaseFundingSourceClientConfiguration {
   type: 'stripe'
   fundingSourceType: FundingSourceType.CreditCard
   version: number
@@ -39,8 +38,7 @@ export interface StripeCardFundingSourceClientConfiguration
 export type StripeFundingSourceClientConfiguration =
   StripeCardFundingSourceClientConfiguration
 
-export interface CheckoutBankAccountFundingSourceClientConfiguration
-  extends BaseFundingSourceClientConfiguration {
+export interface CheckoutBankAccountFundingSourceClientConfiguration extends BaseFundingSourceClientConfiguration {
   type: 'checkout'
   fundingSourceType: FundingSourceType.BankAccount
   version: number
@@ -184,8 +182,7 @@ export interface BaseProvisionalFundingSourceProvisioningData {
  * @property {string} clientSecret Client secret used to call stripe setup intent.
  * @property {string} intent intent of setup data.
  */
-export interface StripeCardProvisionalFundingSourceProvisioningData
-  extends BaseProvisionalFundingSourceProvisioningData {
+export interface StripeCardProvisionalFundingSourceProvisioningData extends BaseProvisionalFundingSourceProvisioningData {
   provider: 'stripe'
   version: 1
   type: FundingSourceType.CreditCard
@@ -247,8 +244,7 @@ export function isCheckoutBankAccountProvisionalFundingSourceProvisioningData(
 export type BaseProvisionalFundingSourceInteractionData =
   BaseProvisionalFundingSourceProvisioningData
 
-export interface CheckoutBankAccountRefreshFundingSourceInteractionData
-  extends BaseProvisionalFundingSourceInteractionData {
+export interface CheckoutBankAccountRefreshFundingSourceInteractionData extends BaseProvisionalFundingSourceInteractionData {
   provider: 'checkout'
   version: 1
   type: FundingSourceType.BankAccount

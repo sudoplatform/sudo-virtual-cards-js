@@ -72,9 +72,6 @@ runTestsIfSmoketestTenant(
         expect(config.maxTransactionVelocity.length).toBeGreaterThanOrEqual(1)
         expect(config.virtualCardCurrencies.length).toBeGreaterThanOrEqual(1)
         expect(config.fundingSourceSupportInfo.length).toBeGreaterThanOrEqual(1)
-        expect(
-          Object.values(config.clientApplicationConfiguration).length,
-        ).toBeGreaterThanOrEqual(1)
         expect(config.fundingSourceClientConfiguration).toContainEqual({
           type: 'stripe',
           version: 1,

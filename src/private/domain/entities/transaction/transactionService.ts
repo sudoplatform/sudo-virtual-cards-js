@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CachePolicy, ListOperationResult } from '@sudoplatform/sudo-common'
+import { ListOperationResult } from '@sudoplatform/sudo-common'
 import { TransactionType } from '../../../../public'
 import { DateRange } from '../../../../public/typings/dateRange'
 import { SortOrder } from '../../../../public/typings/sortOrder'
@@ -13,11 +13,9 @@ import { TransactionEntity } from './transactionEntity'
 
 export interface TransactionServiceGetTransactionInput {
   id: string
-  cachePolicy?: CachePolicy
 }
 
 export interface TransactionServiceListTransactionsInput {
-  cachePolicy?: CachePolicy
   limit?: number
   nextToken?: string
   dateRange?: DateRange
@@ -26,7 +24,6 @@ export interface TransactionServiceListTransactionsInput {
 
 export interface TransactionServiceListTransactionsByCardIdInput {
   cardId: string
-  cachePolicy?: CachePolicy
   limit?: number
   nextToken?: string
   dateRange?: DateRange
@@ -36,7 +33,6 @@ export interface TransactionServiceListTransactionsByCardIdInput {
 export interface TransactionServiceListTransactionsByCardIdAndTypeInput {
   cardId: string
   transactionType: TransactionType
-  cachePolicy?: CachePolicy
   limit?: number
   nextToken?: string
 }

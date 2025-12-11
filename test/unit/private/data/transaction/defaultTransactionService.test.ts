@@ -4,10 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  CachePolicy,
-  ListOperationResultStatus,
-} from '@sudoplatform/sudo-common'
+import { ListOperationResultStatus } from '@sudoplatform/sudo-common'
 import {
   anything,
   capture,
@@ -67,7 +64,7 @@ describe('DefaultTransactionService Test Suite', () => {
 
   describe('getTransaction', () => {
     beforeEach(() => {
-      when(mockAppSync.getTransaction(anything(), anything())).thenResolve(
+      when(mockAppSync.getTransaction(anything())).thenResolve(
         GraphQLDataFactory.sealedTransaction,
       )
     })
@@ -76,26 +73,19 @@ describe('DefaultTransactionService Test Suite', () => {
       const id = v4()
       await instanceUnderTest.getTransaction({
         id,
-        cachePolicy: CachePolicy.CacheOnly,
       })
 
-      verify(mockAppSync.getTransaction(anything(), anything())).once()
-      const [appSyncArgs, appSyncFetchPolicy] = capture(
-        mockAppSync.getTransaction,
-      ).first()
+      verify(mockAppSync.getTransaction(anything())).once()
+      const [appSyncArgs] = capture(mockAppSync.getTransaction).first()
       expect(appSyncArgs).toStrictEqual<typeof appSyncArgs>({ id })
-      expect(appSyncFetchPolicy).toStrictEqual('cache-only')
       verify(mockTransactionWorker.unsealTransaction(anything())).atLeast(1)
     })
 
     it('returns undefined if appsync returns undefined', async () => {
-      when(mockAppSync.getTransaction(anything(), anything())).thenResolve(
-        undefined,
-      )
+      when(mockAppSync.getTransaction(anything())).thenResolve(undefined)
       await expect(
         instanceUnderTest.getTransaction({
           id: '',
-          cachePolicy: CachePolicy.CacheOnly,
         }),
       ).resolves.toBeUndefined()
     })
@@ -103,13 +93,12 @@ describe('DefaultTransactionService Test Suite', () => {
     it('returns expected pending transaction result', async () => {
       const result = await instanceUnderTest.getTransaction({
         id: '',
-        cachePolicy: CachePolicy.CacheOnly,
       })
       expect(result).toEqual<typeof result>(EntityDataFactory.transaction)
     })
 
     it('returns expected settled transaction result', async () => {
-      when(mockAppSync.getTransaction(anything(), anything())).thenResolve(
+      when(mockAppSync.getTransaction(anything())).thenResolve(
         GraphQLDataFactory.sealedSettledTransaction,
       )
       when(mockTransactionWorker.unsealTransaction(anything())).thenResolve(
@@ -117,7 +106,6 @@ describe('DefaultTransactionService Test Suite', () => {
       )
       const result = await instanceUnderTest.getTransaction({
         id: '',
-        cachePolicy: CachePolicy.CacheOnly,
       })
       expect(result).toEqual<typeof result>(
         EntityDataFactory.settledTransaction,
@@ -127,29 +115,25 @@ describe('DefaultTransactionService Test Suite', () => {
 
   describe('listTransactions', () => {
     beforeEach(() => {
-      when(mockAppSync.listTransactions(anything(), anything())).thenResolve({
+      when(mockAppSync.listTransactions(anything())).thenResolve({
         items: [GraphQLDataFactory.sealedTransaction],
         nextToken: undefined,
       })
     })
 
     it('calls expected methods', async () => {
-      const cachePolicy = CachePolicy.CacheOnly
       const limit = 4
       const nextToken = v4()
       const dateRange = { startDate: new Date(), endDate: new Date() }
       const sortOrder = SortOrder.Asc
       await instanceUnderTest.listTransactions({
-        cachePolicy,
         limit,
         nextToken,
         dateRange,
         sortOrder,
       })
-      verify(mockAppSync.listTransactions(anything(), anything())).once()
-      const [appSyncArgs, fetchPolicy] = capture(
-        mockAppSync.listTransactions,
-      ).first()
+      verify(mockAppSync.listTransactions(anything())).once()
+      const [appSyncArgs] = capture(mockAppSync.listTransactions).first()
       expect(appSyncArgs).toEqual<typeof appSyncArgs>({
         limit,
         nextToken,
@@ -159,12 +143,11 @@ describe('DefaultTransactionService Test Suite', () => {
         },
         sortOrder,
       })
-      expect(fetchPolicy).toEqual<typeof fetchPolicy>('cache-only')
       verify(mockTransactionWorker.unsealTransaction(anything())).atLeast(1)
     })
 
     it('returns empty list if appsync returns empty list', async () => {
-      when(mockAppSync.listTransactions(anything(), anything())).thenResolve({
+      when(mockAppSync.listTransactions(anything())).thenResolve({
         items: [],
       })
       await expect(
@@ -186,7 +169,7 @@ describe('DefaultTransactionService Test Suite', () => {
     })
 
     it('returns partial results when all unsealing fails', async () => {
-      when(mockAppSync.listTransactions(anything(), anything())).thenResolve({
+      when(mockAppSync.listTransactions(anything())).thenResolve({
         items: [
           { ...GraphQLDataFactory.sealedTransaction, id: '1' },
           { ...GraphQLDataFactory.sealedTransaction, id: '2' },
@@ -221,7 +204,7 @@ describe('DefaultTransactionService Test Suite', () => {
     })
 
     it('returns partial results when some unsealing fails', async () => {
-      when(mockAppSync.listTransactions(anything(), anything())).thenResolve({
+      when(mockAppSync.listTransactions(anything())).thenResolve({
         items: [
           { ...GraphQLDataFactory.sealedTransaction, id: '1' },
           { ...GraphQLDataFactory.sealedTransaction, id: '2' },
@@ -253,7 +236,7 @@ describe('DefaultTransactionService Test Suite', () => {
     })
 
     it('succeeds when at least one instance of sealed transaction can be unsealed', async () => {
-      when(mockAppSync.listTransactions(anything(), anything())).thenResolve({
+      when(mockAppSync.listTransactions(anything())).thenResolve({
         items: [
           { ...GraphQLDataFactory.sealedTransaction, id: '1', keyId: 'key-1' },
           { ...GraphQLDataFactory.sealedTransaction, id: '1', keyId: 'key-2' },
@@ -279,7 +262,7 @@ describe('DefaultTransactionService Test Suite', () => {
     })
 
     it('returns only a single instance of a transaction sealed with multiple keys', async () => {
-      when(mockAppSync.listTransactions(anything(), anything())).thenResolve({
+      when(mockAppSync.listTransactions(anything())).thenResolve({
         items: [
           { ...GraphQLDataFactory.sealedTransaction, id: '1', keyId: 'key-1' },
           { ...GraphQLDataFactory.sealedTransaction, id: '1', keyId: 'key-2' },
@@ -304,9 +287,7 @@ describe('DefaultTransactionService Test Suite', () => {
   })
   describe('listTransactionsByCardId', () => {
     beforeEach(() => {
-      when(
-        mockAppSync.listTransactionsByCardId(anything(), anything()),
-      ).thenResolve({
+      when(mockAppSync.listTransactionsByCardId(anything())).thenResolve({
         items: [GraphQLDataFactory.sealedTransaction],
         nextToken: undefined,
       })
@@ -314,23 +295,19 @@ describe('DefaultTransactionService Test Suite', () => {
 
     it('calls expected methods', async () => {
       const cardId = v4()
-      const cachePolicy = CachePolicy.CacheOnly
       const limit = 4
       const nextToken = v4()
       const dateRange = { startDate: new Date(), endDate: new Date() }
       const sortOrder = SortOrder.Asc
       await instanceUnderTest.listTransactionsByCardId({
         cardId,
-        cachePolicy,
         limit,
         nextToken,
         dateRange,
         sortOrder,
       })
-      verify(
-        mockAppSync.listTransactionsByCardId(anything(), anything()),
-      ).once()
-      const [appSyncArgs, fetchPolicy] = capture(
+      verify(mockAppSync.listTransactionsByCardId(anything())).once()
+      const [appSyncArgs] = capture(
         mockAppSync.listTransactionsByCardId,
       ).first()
       expect(appSyncArgs).toEqual<typeof appSyncArgs>({
@@ -343,14 +320,13 @@ describe('DefaultTransactionService Test Suite', () => {
         },
         sortOrder,
       })
-      expect(fetchPolicy).toEqual<typeof fetchPolicy>('cache-only')
       verify(mockTransactionWorker.unsealTransaction(anything())).atLeast(1)
     })
 
     it('returns empty list if appsync returns empty list', async () => {
-      when(
-        mockAppSync.listTransactionsByCardId(anything(), anything()),
-      ).thenResolve({ items: [] })
+      when(mockAppSync.listTransactionsByCardId(anything())).thenResolve({
+        items: [],
+      })
       await expect(
         instanceUnderTest.listTransactionsByCardId({ cardId: '' }),
       ).resolves.toStrictEqual({
@@ -372,9 +348,7 @@ describe('DefaultTransactionService Test Suite', () => {
     })
 
     it('returns partial results when all unsealing fails', async () => {
-      when(
-        mockAppSync.listTransactionsByCardId(anything(), anything()),
-      ).thenResolve({
+      when(mockAppSync.listTransactionsByCardId(anything())).thenResolve({
         items: [
           { ...GraphQLDataFactory.sealedTransaction, id: '1' },
           { ...GraphQLDataFactory.sealedTransaction, id: '2' },
@@ -411,9 +385,7 @@ describe('DefaultTransactionService Test Suite', () => {
     })
 
     it('returns partial results when some unsealing fails', async () => {
-      when(
-        mockAppSync.listTransactionsByCardId(anything(), anything()),
-      ).thenResolve({
+      when(mockAppSync.listTransactionsByCardId(anything())).thenResolve({
         items: [
           { ...GraphQLDataFactory.sealedTransaction, id: '1' },
           { ...GraphQLDataFactory.sealedTransaction, id: '2' },
@@ -447,9 +419,7 @@ describe('DefaultTransactionService Test Suite', () => {
     })
 
     it('succeeds when at least one instance of sealed transaction can be unsealed', async () => {
-      when(
-        mockAppSync.listTransactionsByCardId(anything(), anything()),
-      ).thenResolve({
+      when(mockAppSync.listTransactionsByCardId(anything())).thenResolve({
         items: [
           { ...GraphQLDataFactory.sealedTransaction, id: '1', keyId: 'key-1' },
           { ...GraphQLDataFactory.sealedTransaction, id: '1', keyId: 'key-2' },
@@ -477,9 +447,7 @@ describe('DefaultTransactionService Test Suite', () => {
     })
 
     it('returns only a single instance of a transaction sealed with multiple keys', async () => {
-      when(
-        mockAppSync.listTransactionsByCardId(anything(), anything()),
-      ).thenResolve({
+      when(mockAppSync.listTransactionsByCardId(anything())).thenResolve({
         items: [
           { ...GraphQLDataFactory.sealedTransaction, id: '1', keyId: 'key-1' },
           { ...GraphQLDataFactory.sealedTransaction, id: '1', keyId: 'key-2' },
@@ -507,31 +475,27 @@ describe('DefaultTransactionService Test Suite', () => {
 
   describe('listTransactionsByCardIdAndType', () => {
     beforeEach(() => {
-      when(
-        mockAppSync.listTransactionsByCardIdAndType(anything(), anything()),
-      ).thenResolve({
-        items: [GraphQLDataFactory.sealedTransaction],
-        nextToken: undefined,
-      })
+      when(mockAppSync.listTransactionsByCardIdAndType(anything())).thenResolve(
+        {
+          items: [GraphQLDataFactory.sealedTransaction],
+          nextToken: undefined,
+        },
+      )
     })
 
     it('calls expected methods', async () => {
       const cardId = v4()
       const transactionType = TransactionType.Pending
-      const cachePolicy = CachePolicy.CacheOnly
       const limit = 4
       const nextToken = v4()
       await instanceUnderTest.listTransactionsByCardIdAndType({
         cardId,
         transactionType,
-        cachePolicy,
         limit,
         nextToken,
       })
-      verify(
-        mockAppSync.listTransactionsByCardIdAndType(anything(), anything()),
-      ).once()
-      const [appSyncArgs, fetchPolicy] = capture(
+      verify(mockAppSync.listTransactionsByCardIdAndType(anything())).once()
+      const [appSyncArgs] = capture(
         mockAppSync.listTransactionsByCardIdAndType,
       ).first()
       expect(appSyncArgs).toEqual<typeof appSyncArgs>({
@@ -540,14 +504,13 @@ describe('DefaultTransactionService Test Suite', () => {
         limit,
         nextToken,
       })
-      expect(fetchPolicy).toEqual<typeof fetchPolicy>('cache-only')
       verify(mockTransactionWorker.unsealTransaction(anything())).atLeast(1)
     })
 
     it('returns empty list if appsync returns empty list', async () => {
-      when(
-        mockAppSync.listTransactionsByCardIdAndType(anything(), anything()),
-      ).thenResolve({ items: [] })
+      when(mockAppSync.listTransactionsByCardIdAndType(anything())).thenResolve(
+        { items: [] },
+      )
       await expect(
         instanceUnderTest.listTransactionsByCardIdAndType({
           cardId: '',
@@ -573,14 +536,14 @@ describe('DefaultTransactionService Test Suite', () => {
     })
 
     it('returns partial results when all unsealing fails', async () => {
-      when(
-        mockAppSync.listTransactionsByCardIdAndType(anything(), anything()),
-      ).thenResolve({
-        items: [
-          { ...GraphQLDataFactory.sealedTransaction, id: '1' },
-          { ...GraphQLDataFactory.sealedTransaction, id: '2' },
-        ],
-      })
+      when(mockAppSync.listTransactionsByCardIdAndType(anything())).thenResolve(
+        {
+          items: [
+            { ...GraphQLDataFactory.sealedTransaction, id: '1' },
+            { ...GraphQLDataFactory.sealedTransaction, id: '2' },
+          ],
+        },
+      )
       when(mockTransactionWorker.unsealTransaction(anything())).thenReject(
         new Error('failed to unseal 1'),
         new Error('failed to unseal 2'),
@@ -615,14 +578,14 @@ describe('DefaultTransactionService Test Suite', () => {
     })
 
     it('returns partial results when some unsealing fails', async () => {
-      when(
-        mockAppSync.listTransactionsByCardIdAndType(anything(), anything()),
-      ).thenResolve({
-        items: [
-          { ...GraphQLDataFactory.sealedTransaction, id: '1' },
-          { ...GraphQLDataFactory.sealedTransaction, id: '2' },
-        ],
-      })
+      when(mockAppSync.listTransactionsByCardIdAndType(anything())).thenResolve(
+        {
+          items: [
+            { ...GraphQLDataFactory.sealedTransaction, id: '1' },
+            { ...GraphQLDataFactory.sealedTransaction, id: '2' },
+          ],
+        },
+      )
       when(mockTransactionWorker.unsealTransaction(anything()))
         .thenReject(new Error('failed to unseal 1'))
         .thenResolve({ ...ServiceDataFactory.transactionUnsealed, id: '2' })
@@ -654,14 +617,22 @@ describe('DefaultTransactionService Test Suite', () => {
     })
 
     it('succeeds when at least one instance of sealed transaction can be unsealed', async () => {
-      when(
-        mockAppSync.listTransactionsByCardIdAndType(anything(), anything()),
-      ).thenResolve({
-        items: [
-          { ...GraphQLDataFactory.sealedTransaction, id: '1', keyId: 'key-1' },
-          { ...GraphQLDataFactory.sealedTransaction, id: '1', keyId: 'key-2' },
-        ],
-      })
+      when(mockAppSync.listTransactionsByCardIdAndType(anything())).thenResolve(
+        {
+          items: [
+            {
+              ...GraphQLDataFactory.sealedTransaction,
+              id: '1',
+              keyId: 'key-1',
+            },
+            {
+              ...GraphQLDataFactory.sealedTransaction,
+              id: '1',
+              keyId: 'key-2',
+            },
+          ],
+        },
+      )
       when(mockTransactionWorker.unsealTransaction(anything()))
         .thenReject(new Error('failed to unseal key-1'))
         .thenResolve({
@@ -687,14 +658,22 @@ describe('DefaultTransactionService Test Suite', () => {
     })
 
     it('returns only a single instance of a transaction sealed with multiple keys', async () => {
-      when(
-        mockAppSync.listTransactionsByCardIdAndType(anything(), anything()),
-      ).thenResolve({
-        items: [
-          { ...GraphQLDataFactory.sealedTransaction, id: '1', keyId: 'key-1' },
-          { ...GraphQLDataFactory.sealedTransaction, id: '1', keyId: 'key-2' },
-        ],
-      })
+      when(mockAppSync.listTransactionsByCardIdAndType(anything())).thenResolve(
+        {
+          items: [
+            {
+              ...GraphQLDataFactory.sealedTransaction,
+              id: '1',
+              keyId: 'key-1',
+            },
+            {
+              ...GraphQLDataFactory.sealedTransaction,
+              id: '1',
+              keyId: 'key-2',
+            },
+          ],
+        },
+      )
       when(mockTransactionWorker.unsealTransaction(anything())).thenResolve({
         ...ServiceDataFactory.transactionUnsealed,
         id: '1',

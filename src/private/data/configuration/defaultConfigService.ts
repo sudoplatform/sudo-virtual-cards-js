@@ -9,9 +9,7 @@ import { VirtualCardsConfigService } from '../../domain/entities/configuration/v
 import { ApiClient } from '../common/apiClient'
 import { VirtualCardsConfigEntityTransformer } from './transformer/virtualCardsConfigEntityTransformer'
 
-export class DefaultVirtualCardsConfigService
-  implements VirtualCardsConfigService
-{
+export class DefaultVirtualCardsConfigService implements VirtualCardsConfigService {
   constructor(private readonly appSync: ApiClient) {}
 
   async getVirtualCardsConfig(): Promise<VirtualCardsConfigEntity> {

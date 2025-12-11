@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CachePolicy, NotSignedInError } from '@sudoplatform/sudo-common'
+import { NotSignedInError } from '@sudoplatform/sudo-common'
 import {
   anything,
   capture,
@@ -46,7 +46,6 @@ describe('GetTransactionUseCase Test Suite', () => {
       await expect(
         instanceUnderTest.execute({
           id: '',
-          cachePolicy: CachePolicy.CacheOnly,
         }),
       ).rejects.toThrow(NotSignedInError)
     })
@@ -54,13 +53,11 @@ describe('GetTransactionUseCase Test Suite', () => {
       const id = v4()
       const result = await instanceUnderTest.execute({
         id,
-        cachePolicy: CachePolicy.CacheOnly,
       })
       verify(mockTransactionService.getTransaction(anything())).once()
       const [args] = capture(mockTransactionService.getTransaction).first()
       expect(args).toStrictEqual<typeof args>({
         id,
-        cachePolicy: CachePolicy.CacheOnly,
       })
       expect(result).toStrictEqual(EntityDataFactory.transaction)
     })

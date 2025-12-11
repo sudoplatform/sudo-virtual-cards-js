@@ -13,7 +13,6 @@ import {
   Logger,
   SignatureAlgorithm,
 } from '@sudoplatform/sudo-common'
-import { FetchResult } from 'apollo-link'
 import { isLeft } from 'fp-ts/lib/Either'
 import { PathReporter } from 'io-ts/lib/PathReporter'
 import {
@@ -51,9 +50,11 @@ import { ProvisionalFundingSourceEntity } from '../../domain/entities/fundingSou
 import { SandboxPlaidDataEntity } from '../../domain/entities/fundingSource/sandboxPlaidDataEntity'
 import { ApiClient } from '../common/apiClient'
 import { DeviceKeyWorker, KeyType } from '../common/deviceKeyWorker'
-import { SubscriptionManager } from '../common/subscriptionManager'
+import {
+  SubscriptionManager,
+  SubscriptionResult,
+} from '../common/subscriptionManager'
 import { AlgorithmTransformer } from '../common/transformer/algorithmTransformer'
-import { FetchPolicyTransformer } from '../common/transformer/fetchPolicyTransformer'
 import { decodeBankAccountFundingSourceInstitutionLogo } from '../fundingSourceProviderData/sealedData'
 import { FundingSourceUnsealed } from './fundingSourceSealedAttributes'
 import { FundingSourceEntityTransformer } from './transformer/fundingSourceEntityTransformer'
@@ -243,10 +244,7 @@ export class DefaultFundingSourceService implements FundingSourceService {
   async getFundingSource(
     input: FundingSourceServiceGetFundingSourceInput,
   ): Promise<FundingSourceEntity | undefined> {
-    const fetchPolicy = input.cachePolicy
-      ? FetchPolicyTransformer.transformCachePolicy(input.cachePolicy)
-      : undefined
-    const result = await this.appSync.getFundingSource(input.id, fetchPolicy)
+    const result = await this.appSync.getFundingSource(input.id)
     if (!result) {
       return undefined
     }
@@ -258,7 +256,6 @@ export class DefaultFundingSourceService implements FundingSourceService {
   async listFundingSources({
     filterInput,
     sortOrder,
-    cachePolicy,
     limit,
     nextToken,
   }: FundingSourceServiceListFundingSourcesInput): Promise<FundingSourceServiceListFundingSourcesOutput> {
@@ -268,11 +265,7 @@ export class DefaultFundingSourceService implements FundingSourceService {
     const sortOrderGraphQL = sortOrder
       ? SortOrderTransformer.transformToGraphQL(sortOrder)
       : undefined
-    const fetchPolicy = cachePolicy
-      ? FetchPolicyTransformer.transformCachePolicy(cachePolicy)
-      : undefined
     const result = await this.appSync.listFundingSources(
-      fetchPolicy,
       filterInputGraphQL,
       sortOrderGraphQL,
       limit,
@@ -319,7 +312,6 @@ export class DefaultFundingSourceService implements FundingSourceService {
   async listProvisionalFundingSources({
     filterInput,
     sortOrder,
-    cachePolicy,
     limit,
     nextToken,
   }: FundingSourceServiceListProvisionalFundingSourcesInput): Promise<FundingSourceServiceListProvisionalFundingSourcesOutput> {
@@ -331,11 +323,7 @@ export class DefaultFundingSourceService implements FundingSourceService {
     const sortOrderGraphQL = sortOrder
       ? SortOrderTransformer.transformToGraphQL(sortOrder)
       : undefined
-    const fetchPolicy = cachePolicy
-      ? FetchPolicyTransformer.transformCachePolicy(cachePolicy)
-      : undefined
     const result = await this.appSync.listProvisionalFundingSources(
-      fetchPolicy,
       filterInputGraphQL,
       sortOrderGraphQL,
       limit,
@@ -353,16 +341,15 @@ export class DefaultFundingSourceService implements FundingSourceService {
     }
   }
 
-  subscribeToFundingSourceChanges(
+  async subscribeToFundingSourceChanges(
     input: FundingSourceServiceSubscribeToFundingSourceChangesInput,
-  ): void {
+  ): Promise<void> {
     this.subscriptionManager.subscribe(input.id, input.subscriber)
     // if subscription manager watcher and subscription hasn't been setup yet
     // create them and watch for funding source changes per `owner`
     if (!this.subscriptionManager.getWatcher()) {
-      this.subscriptionManager.setWatcher(
-        this.appSync.onFundingSourceUpdate(input.owner),
-      )
+      const watcher = await this.appSync.onFundingSourceUpdate(input.owner)
+      this.subscriptionManager.setWatcher(watcher)
 
       this.subscriptionManager.setSubscription(
         this.setupFundingSourceUpdateSubscription(),
@@ -488,9 +475,9 @@ export class DefaultFundingSourceService implements FundingSourceService {
           ConnectionState.Disconnected,
         )
       },
-      next: (result: FetchResult<OnFundingSourceUpdateSubscription>) => {
+      next: (result: SubscriptionResult<OnFundingSourceUpdateSubscription>) => {
         return void (async (
-          result: FetchResult<OnFundingSourceUpdateSubscription>,
+          result: SubscriptionResult<OnFundingSourceUpdateSubscription>,
         ): Promise<void> => {
           this.log.info('executing onFundingSourceUpdate subscription', {
             result,

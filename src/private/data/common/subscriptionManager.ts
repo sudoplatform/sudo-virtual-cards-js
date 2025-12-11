@@ -5,8 +5,7 @@
  */
 
 import { DefaultLogger, Logger } from '@sudoplatform/sudo-common'
-import { Observable } from 'apollo-client/util/Observable'
-import { FetchResult } from 'apollo-link'
+import Observable from 'zen-observable'
 import { OnFundingSourceUpdateSubscription } from '../../../gen/graphqlTypes'
 import {
   ConnectionState,
@@ -14,18 +13,19 @@ import {
   FundingSourceChangeSubscriber,
 } from '../../../public'
 
+export type SubscriptionResult<T> = { data: T }
+
 export type Subscribable = OnFundingSourceUpdateSubscription
 export class SubscriptionManager<
   T extends Subscribable,
   S extends FundingSourceChangeSubscriber,
-> implements FundingSourceChangeSubscriber
-{
+> implements FundingSourceChangeSubscriber {
   private readonly log: Logger
   private subscribers: Record<string, S | undefined> = {}
 
   private _subscription: ZenObservable.Subscription | undefined = undefined
 
-  private _watcher: Observable<FetchResult<T>> | undefined = undefined
+  private _watcher: Observable<SubscriptionResult<T>> | undefined = undefined
 
   public constructor() {
     this.log = new DefaultLogger(this.constructor.name)
@@ -39,12 +39,12 @@ export class SubscriptionManager<
     this.subscribers[id] = undefined
   }
 
-  public getWatcher(): Observable<FetchResult<T>> | undefined {
+  public getWatcher(): Observable<SubscriptionResult<T>> | undefined {
     return this._watcher
   }
 
   public setWatcher(
-    value: Observable<FetchResult<T>> | undefined,
+    value: Observable<SubscriptionResult<T>> | undefined,
   ): SubscriptionManager<T, S> {
     this._watcher = value
     return this

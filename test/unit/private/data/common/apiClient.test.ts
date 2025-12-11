@@ -6,10 +6,7 @@
 
 import { ApiClientManager } from '@sudoplatform/sudo-api-client'
 import { Base64, UnknownGraphQLError } from '@sudoplatform/sudo-common'
-import { NormalizedCacheObject } from 'apollo-cache-inmemory'
-import { NetworkStatus } from 'apollo-client/core/networkStatus'
-import { ApolloError } from 'apollo-client/errors/ApolloError'
-import AWSAppSyncClient from 'aws-appsync'
+
 import { GraphQLError } from 'graphql'
 import {
   anything,
@@ -52,11 +49,12 @@ import {
 } from '../../../../../src/gen/graphqlTypes'
 import { ApiClient } from '../../../../../src/private/data/common/apiClient'
 import { GraphQLDataFactory } from '../../../data-factory/graphQl'
+import { GraphQLClient } from '@sudoplatform/sudo-user'
 
 describe('ApiClient Test Suite', () => {
   let instanceUnderTest: ApiClient
   const mockApiClientManager = mock<ApiClientManager>()
-  const mockClient = mock<AWSAppSyncClient<NormalizedCacheObject>>()
+  const mockClient = mock<GraphQLClient>()
 
   beforeEach(() => {
     reset(mockApiClientManager)
@@ -102,9 +100,9 @@ describe('ApiClient Test Suite', () => {
     })
     it('handles thrown error from app sync call', async () => {
       when(mockClient.mutate(anything())).thenReject(
-        new ApolloError({
+        new Error({
           graphQLErrors: [new GraphQLError('appsync failure')],
-        }),
+        } as any),
       )
       await expect(
         instanceUnderTest.createPublicKey({
@@ -118,7 +116,7 @@ describe('ApiClient Test Suite', () => {
     it('handles error from graphQl', async () => {
       when(mockClient.mutate(anything())).thenResolve({
         errors: [new GraphQLError('failed')],
-      })
+      } as any)
       await expect(
         instanceUnderTest.createPublicKey({
           algorithm: '',
@@ -143,7 +141,6 @@ describe('ApiClient Test Suite', () => {
       verify(mockClient.query(anything())).once()
       const [args] = capture(mockClient.query as any).first()
       expect(args).toStrictEqual({
-        fetchPolicy: 'network-only',
         query: GetPublicKeyDocument,
         variables: {
           keyId,
@@ -153,9 +150,9 @@ describe('ApiClient Test Suite', () => {
     })
     it('handles thrown error from app sync call', async () => {
       when(mockClient.query(anything())).thenReject(
-        new ApolloError({
+        new Error({
           graphQLErrors: [new GraphQLError('appsync failure')],
-        }),
+        } as any),
       )
       await expect(instanceUnderTest.getPublicKey('')).rejects.toThrow(
         UnknownGraphQLError,
@@ -165,9 +162,6 @@ describe('ApiClient Test Suite', () => {
       when(mockClient.query(anything())).thenResolve({
         data: null,
         errors: [new GraphQLError('failed')],
-        loading: false,
-        networkStatus: NetworkStatus.error,
-        stale: false,
       })
       await expect(instanceUnderTest.getPublicKey('')).rejects.toThrow(
         UnknownGraphQLError,
@@ -191,7 +185,6 @@ describe('ApiClient Test Suite', () => {
       verify(mockClient.query(anything())).once()
       const [args] = capture(mockClient.query as any).first()
       expect(args).toStrictEqual({
-        fetchPolicy: 'network-only',
         query: GetPublicKeysDocument,
         variables: {
           limit,
@@ -201,9 +194,9 @@ describe('ApiClient Test Suite', () => {
     })
     it('handles thrown error from app sync call', async () => {
       when(mockClient.query(anything())).thenReject(
-        new ApolloError({
+        new Error({
           graphQLErrors: [new GraphQLError('appsync failure')],
-        }),
+        } as any),
       )
       await expect(instanceUnderTest.getPublicKeys()).rejects.toThrow(
         UnknownGraphQLError,
@@ -213,9 +206,6 @@ describe('ApiClient Test Suite', () => {
       when(mockClient.query(anything())).thenResolve({
         data: null,
         errors: [new GraphQLError('failed')],
-        loading: false,
-        networkStatus: NetworkStatus.error,
-        stale: false,
       })
       await expect(instanceUnderTest.getPublicKeys()).rejects.toThrow(
         UnknownGraphQLError,
@@ -248,7 +238,6 @@ describe('ApiClient Test Suite', () => {
       verify(mockClient.query(anything())).once()
       const [args] = capture(mockClient.query as any).first()
       expect(args).toStrictEqual({
-        fetchPolicy: 'network-only',
         query: GetKeyRingDocument,
         variables: {
           keyRingId,
@@ -260,9 +249,9 @@ describe('ApiClient Test Suite', () => {
     })
     it('handles thrown error from app sync call', async () => {
       when(mockClient.query(anything())).thenReject(
-        new ApolloError({
+        new Error({
           graphQLErrors: [new GraphQLError('appsync failure')],
-        }),
+        } as any),
       )
       await expect(
         instanceUnderTest.getKeyRing({ keyRingId: '' }),
@@ -272,9 +261,6 @@ describe('ApiClient Test Suite', () => {
       when(mockClient.query(anything())).thenResolve({
         data: null,
         errors: [new GraphQLError('failed')],
-        loading: false,
-        networkStatus: NetworkStatus.error,
-        stale: false,
       })
       await expect(
         instanceUnderTest.getKeyRing({ keyRingId: '' }),
@@ -297,16 +283,15 @@ describe('ApiClient Test Suite', () => {
       verify(mockClient.query(anything())).once()
       const [args] = capture(mockClient.query as any).first()
       expect(args).toStrictEqual({
-        fetchPolicy: 'network-only',
         variables: undefined,
         query: GetFundingSourceClientConfigurationDocument,
       })
     })
     it('handles thrown error from app sync call', async () => {
       when(mockClient.query(anything())).thenReject(
-        new ApolloError({
+        new Error({
           graphQLErrors: [new GraphQLError('appsync failure')],
-        }),
+        } as any),
       )
       await expect(
         instanceUnderTest.getFundingSourceClientConfiguration(),
@@ -316,9 +301,6 @@ describe('ApiClient Test Suite', () => {
       when(mockClient.query(anything())).thenResolve({
         data: null,
         errors: [new GraphQLError('failed')],
-        loading: false,
-        networkStatus: NetworkStatus.error,
-        stale: false,
       })
       await expect(
         instanceUnderTest.getFundingSourceClientConfiguration(),
@@ -333,39 +315,34 @@ describe('ApiClient Test Suite', () => {
         },
       } as any)
       const id = v4()
-      const fetchPolicy = 'cache-only'
       await expect(
-        instanceUnderTest.getFundingSource(id, fetchPolicy),
+        instanceUnderTest.getFundingSource(id),
       ).resolves.toStrictEqual(GraphQLDataFactory.defaultFundingSource)
       verify(mockClient.query(anything())).once()
       const [args] = capture(mockClient.query as any).first()
       expect(args).toStrictEqual({
-        fetchPolicy: 'cache-only',
         variables: { id },
         query: GetFundingSourceDocument,
       })
     })
     it('handles thrown error from app sync call', async () => {
       when(mockClient.query(anything())).thenReject(
-        new ApolloError({
+        new Error({
           graphQLErrors: [new GraphQLError('appsync failure')],
-        }),
+        } as any),
       )
-      await expect(
-        instanceUnderTest.getFundingSource('', 'cache-only'),
-      ).rejects.toThrow(UnknownGraphQLError)
+      await expect(instanceUnderTest.getFundingSource('')).rejects.toThrow(
+        UnknownGraphQLError,
+      )
     })
     it('handles error from graphQl', async () => {
       when(mockClient.query(anything())).thenResolve({
         data: null,
         errors: [new GraphQLError('failed')],
-        loading: false,
-        networkStatus: NetworkStatus.error,
-        stale: false,
       })
-      await expect(
-        instanceUnderTest.getFundingSource('', 'cache-only'),
-      ).rejects.toThrow(UnknownGraphQLError)
+      await expect(instanceUnderTest.getFundingSource('')).rejects.toThrow(
+        UnknownGraphQLError,
+      )
     })
   })
   describe('listFundingSources', () => {
@@ -378,14 +355,12 @@ describe('ApiClient Test Suite', () => {
           },
         },
       } as any)
-      const fetchPolicy = 'cache-only'
       const limit = 100
       const nextToken = v4()
       const filter = undefined
       const sortOrder = undefined
       await expect(
         instanceUnderTest.listFundingSources(
-          fetchPolicy,
           filter,
           sortOrder,
           limit,
@@ -398,32 +373,28 @@ describe('ApiClient Test Suite', () => {
       verify(mockClient.query(anything())).once()
       const [args] = capture(mockClient.query as any).first()
       expect(args).toStrictEqual({
-        fetchPolicy: 'cache-only',
         variables: { filter, sortOrder, limit, nextToken },
         query: ListFundingSourcesDocument,
       })
     })
     it('handles thrown error from app sync call', async () => {
       when(mockClient.query(anything())).thenReject(
-        new ApolloError({
+        new Error({
           graphQLErrors: [new GraphQLError('appsync failure')],
-        }),
+        } as any),
       )
-      await expect(
-        instanceUnderTest.listFundingSources('cache-only'),
-      ).rejects.toThrow(UnknownGraphQLError)
+      await expect(instanceUnderTest.listFundingSources()).rejects.toThrow(
+        UnknownGraphQLError,
+      )
     })
     it('handles error from graphQl', async () => {
       when(mockClient.query(anything())).thenResolve({
         data: null,
         errors: [new GraphQLError('failed')],
-        loading: false,
-        networkStatus: NetworkStatus.error,
-        stale: false,
       })
-      await expect(
-        instanceUnderTest.listFundingSources('cache-only'),
-      ).rejects.toThrow(UnknownGraphQLError)
+      await expect(instanceUnderTest.listFundingSources()).rejects.toThrow(
+        UnknownGraphQLError,
+      )
     })
   })
   describe('listProvisionalFundingSources', () => {
@@ -436,14 +407,12 @@ describe('ApiClient Test Suite', () => {
           },
         },
       } as any)
-      const fetchPolicy = 'cache-only'
       const filter = undefined
       const sortOrder = undefined
       const limit = 100
       const nextToken = v4()
       await expect(
         instanceUnderTest.listProvisionalFundingSources(
-          fetchPolicy,
           filter,
           sortOrder,
           limit,
@@ -456,31 +425,27 @@ describe('ApiClient Test Suite', () => {
       verify(mockClient.query(anything())).once()
       const [args] = capture(mockClient.query as any).first()
       expect(args).toStrictEqual({
-        fetchPolicy: 'cache-only',
         variables: { filter, sortOrder, limit, nextToken },
         query: ListProvisionalFundingSourcesDocument,
       })
     })
     it('handles thrown error from app sync call', async () => {
       when(mockClient.query(anything())).thenReject(
-        new ApolloError({
+        new Error({
           graphQLErrors: [new GraphQLError('appsync failure')],
-        }),
+        } as any),
       )
       await expect(
-        instanceUnderTest.listProvisionalFundingSources('cache-only'),
+        instanceUnderTest.listProvisionalFundingSources(),
       ).rejects.toThrow(UnknownGraphQLError)
     })
     it('handles error from graphQl', async () => {
       when(mockClient.query(anything())).thenResolve({
         data: null,
         errors: [new GraphQLError('failed')],
-        loading: false,
-        networkStatus: NetworkStatus.error,
-        stale: false,
       })
       await expect(
-        instanceUnderTest.listProvisionalFundingSources('cache-only'),
+        instanceUnderTest.listProvisionalFundingSources(),
       ).rejects.toThrow(UnknownGraphQLError)
     })
   })
@@ -518,9 +483,9 @@ describe('ApiClient Test Suite', () => {
     })
     it('handles thrown error from app sync call', async () => {
       when(mockClient.mutate(anything())).thenReject(
-        new ApolloError({
+        new Error({
           graphQLErrors: [new GraphQLError('appsync failure')],
-        }),
+        } as any),
       )
       await expect(
         instanceUnderTest.setupFundingSource({
@@ -535,7 +500,7 @@ describe('ApiClient Test Suite', () => {
     it('handles error from graphQl', async () => {
       when(mockClient.mutate(anything())).thenResolve({
         errors: [new GraphQLError('failed')],
-      })
+      } as any)
       await expect(
         instanceUnderTest.setupFundingSource({
           currency: '',
@@ -576,9 +541,9 @@ describe('ApiClient Test Suite', () => {
     })
     it('handles thrown error from app sync call', async () => {
       when(mockClient.mutate(anything())).thenReject(
-        new ApolloError({
+        new Error({
           graphQLErrors: [new GraphQLError('appsync failure')],
-        }),
+        } as any),
       )
       await expect(
         instanceUnderTest.completeFundingSource({
@@ -590,7 +555,7 @@ describe('ApiClient Test Suite', () => {
     it('handles error from graphQl', async () => {
       when(mockClient.mutate(anything())).thenResolve({
         errors: [new GraphQLError('failed')],
-      })
+      } as any)
       await expect(
         instanceUnderTest.completeFundingSource({
           completionData: '',
@@ -625,9 +590,9 @@ describe('ApiClient Test Suite', () => {
     })
     it('handles thrown error from app sync call', async () => {
       when(mockClient.mutate(anything())).thenReject(
-        new ApolloError({
+        new Error({
           graphQLErrors: [new GraphQLError('appsync failure')],
-        }),
+        } as any),
       )
       await expect(
         instanceUnderTest.cancelFundingSource({
@@ -638,7 +603,7 @@ describe('ApiClient Test Suite', () => {
     it('handles error from graphQl', async () => {
       when(mockClient.mutate(anything())).thenResolve({
         errors: [new GraphQLError('failed')],
-      })
+      } as any)
       await expect(
         instanceUnderTest.cancelFundingSource({
           id: '',
@@ -673,9 +638,9 @@ describe('ApiClient Test Suite', () => {
     })
     it('handles thrown error from app sync call', async () => {
       when(mockClient.mutate(anything())).thenReject(
-        new ApolloError({
+        new Error({
           graphQLErrors: [new GraphQLError('appsync failure')],
-        }),
+        } as any),
       )
       await expect(
         instanceUnderTest.cancelProvisionalFundingSource({
@@ -686,7 +651,7 @@ describe('ApiClient Test Suite', () => {
     it('handles error from graphQl', async () => {
       when(mockClient.mutate(anything())).thenResolve({
         errors: [new GraphQLError('failed')],
-      })
+      } as any)
       await expect(
         instanceUnderTest.cancelProvisionalFundingSource({
           id: '',
@@ -748,9 +713,9 @@ describe('ApiClient Test Suite', () => {
     })
     it('handles thrown error from app sync call', async () => {
       when(mockClient.mutate(anything())).thenReject(
-        new ApolloError({
+        new Error({
           graphQLErrors: [new GraphQLError('appsync failure')],
-        }),
+        } as any),
       )
       await expect(
         instanceUnderTest.provisionVirtualCard({
@@ -767,7 +732,7 @@ describe('ApiClient Test Suite', () => {
     it('handles error from graphQl', async () => {
       when(mockClient.mutate(anything())).thenResolve({
         errors: [new GraphQLError('failed')],
-      })
+      } as any)
       await expect(
         instanceUnderTest.provisionVirtualCard({
           alias: '',
@@ -789,39 +754,34 @@ describe('ApiClient Test Suite', () => {
         },
       } as any)
       const id = v4()
-      const fetchPolicy = 'cache-only'
       await expect(
-        instanceUnderTest.getProvisionalCard(id, fetchPolicy),
+        instanceUnderTest.getProvisionalCard(id),
       ).resolves.toStrictEqual(GraphQLDataFactory.provisionalCard)
       verify(mockClient.query(anything())).once()
       const [args] = capture(mockClient.query as any).first()
       expect(args).toStrictEqual({
-        fetchPolicy: 'cache-only',
         variables: { id },
         query: GetProvisionalCardDocument,
       })
     })
     it('handles thrown error from app sync call', async () => {
       when(mockClient.query(anything())).thenReject(
-        new ApolloError({
+        new Error({
           graphQLErrors: [new GraphQLError('appsync failure')],
-        }),
+        } as any),
       )
-      await expect(
-        instanceUnderTest.getProvisionalCard('', 'cache-only'),
-      ).rejects.toThrow(UnknownGraphQLError)
+      await expect(instanceUnderTest.getProvisionalCard('')).rejects.toThrow(
+        UnknownGraphQLError,
+      )
     })
     it('handles error from graphQl', async () => {
       when(mockClient.query(anything())).thenResolve({
         data: null,
         errors: [new GraphQLError('failed')],
-        loading: false,
-        networkStatus: NetworkStatus.error,
-        stale: false,
       })
-      await expect(
-        instanceUnderTest.getProvisionalCard('', 'cache-only'),
-      ).rejects.toThrow(UnknownGraphQLError)
+      await expect(instanceUnderTest.getProvisionalCard('')).rejects.toThrow(
+        UnknownGraphQLError,
+      )
     })
   })
   describe('listProvisionalCards', () => {
@@ -834,11 +794,10 @@ describe('ApiClient Test Suite', () => {
           },
         },
       } as any)
-      const fetchPolicy = 'cache-only'
       const limit = 100
       const nextToken = v4()
       await expect(
-        instanceUnderTest.listProvisionalCards(limit, nextToken, fetchPolicy),
+        instanceUnderTest.listProvisionalCards(limit, nextToken),
       ).resolves.toStrictEqual({
         items: [GraphQLDataFactory.provisionalCard],
         nextToken: undefined,
@@ -846,16 +805,15 @@ describe('ApiClient Test Suite', () => {
       verify(mockClient.query(anything())).once()
       const [args] = capture(mockClient.query as any).first()
       expect(args).toStrictEqual({
-        fetchPolicy: 'cache-only',
         variables: { limit, nextToken },
         query: ListProvisionalCardsDocument,
       })
     })
     it('handles thrown error from app sync call', async () => {
       when(mockClient.query(anything())).thenReject(
-        new ApolloError({
+        new Error({
           graphQLErrors: [new GraphQLError('appsync failure')],
-        }),
+        } as any),
       )
       await expect(instanceUnderTest.listProvisionalCards()).rejects.toThrow(
         UnknownGraphQLError,
@@ -865,9 +823,6 @@ describe('ApiClient Test Suite', () => {
       when(mockClient.query(anything())).thenResolve({
         data: null,
         errors: [new GraphQLError('failed')],
-        loading: false,
-        networkStatus: NetworkStatus.error,
-        stale: false,
       })
       await expect(instanceUnderTest.listProvisionalCards()).rejects.toThrow(
         UnknownGraphQLError,
@@ -883,23 +838,21 @@ describe('ApiClient Test Suite', () => {
       } as any)
       const id = v4()
       const keyId = v4()
-      const fetchPolicy = 'cache-only'
       await expect(
-        instanceUnderTest.getCard({ id, keyId }, fetchPolicy),
+        instanceUnderTest.getCard({ id, keyId }),
       ).resolves.toStrictEqual(GraphQLDataFactory.sealedCard)
       verify(mockClient.query(anything())).once()
       const [args] = capture(mockClient.query as any).first()
       expect(args).toStrictEqual({
-        fetchPolicy: 'cache-only',
         variables: { id, keyId },
         query: GetCardDocument,
       })
     })
     it('handles thrown error from app sync call', async () => {
       when(mockClient.query(anything())).thenReject(
-        new ApolloError({
+        new Error({
           graphQLErrors: [new GraphQLError('appsync failure')],
-        }),
+        } as any),
       )
       await expect(instanceUnderTest.getCard({ id: '' })).rejects.toThrow(
         UnknownGraphQLError,
@@ -909,9 +862,6 @@ describe('ApiClient Test Suite', () => {
       when(mockClient.query(anything())).thenResolve({
         data: null,
         errors: [new GraphQLError('failed')],
-        loading: false,
-        networkStatus: NetworkStatus.error,
-        stale: false,
       })
       await expect(instanceUnderTest.getCard({ id: '' })).rejects.toThrow(
         UnknownGraphQLError,
@@ -930,17 +880,10 @@ describe('ApiClient Test Suite', () => {
       } as any)
       const filter = undefined
       const sortOrder = undefined
-      const fetchPolicy = 'cache-only'
       const limit = 100
       const nextToken = v4()
       await expect(
-        instanceUnderTest.listCards(
-          filter,
-          sortOrder,
-          limit,
-          nextToken,
-          fetchPolicy,
-        ),
+        instanceUnderTest.listCards(filter, sortOrder, limit, nextToken),
       ).resolves.toStrictEqual({
         items: [GraphQLDataFactory.sealedCard],
         nextToken: undefined,
@@ -948,16 +891,15 @@ describe('ApiClient Test Suite', () => {
       verify(mockClient.query(anything())).once()
       const [args] = capture(mockClient.query as any).first()
       expect(args).toStrictEqual({
-        fetchPolicy: 'cache-only',
         variables: { filter, sortOrder, limit, nextToken },
         query: ListCardsDocument,
       })
     })
     it('handles thrown error from app sync call', async () => {
       when(mockClient.query(anything())).thenReject(
-        new ApolloError({
+        new Error({
           graphQLErrors: [new GraphQLError('appsync failure')],
-        }),
+        } as any),
       )
       await expect(instanceUnderTest.listCards()).rejects.toThrow(
         UnknownGraphQLError,
@@ -967,9 +909,6 @@ describe('ApiClient Test Suite', () => {
       when(mockClient.query(anything())).thenResolve({
         data: null,
         errors: [new GraphQLError('failed')],
-        loading: false,
-        networkStatus: NetworkStatus.error,
-        stale: false,
       })
       await expect(instanceUnderTest.listCards()).rejects.toThrow(
         UnknownGraphQLError,
@@ -1024,9 +963,9 @@ describe('ApiClient Test Suite', () => {
     })
     it('handles thrown error from app sync call', async () => {
       when(mockClient.mutate(anything())).thenReject(
-        new ApolloError({
+        new Error({
           graphQLErrors: [new GraphQLError('appsync failure')],
-        }),
+        } as any),
       )
       await expect(
         instanceUnderTest.updateVirtualCard({
@@ -1039,7 +978,7 @@ describe('ApiClient Test Suite', () => {
     it('handles error from graphQl', async () => {
       when(mockClient.mutate(anything())).thenResolve({
         errors: [new GraphQLError('failed')],
-      })
+      } as any)
       await expect(
         instanceUnderTest.updateVirtualCard({
           alias: '',
@@ -1078,9 +1017,9 @@ describe('ApiClient Test Suite', () => {
     })
     it('handles thrown error from app sync call', async () => {
       when(mockClient.mutate(anything())).thenReject(
-        new ApolloError({
+        new Error({
           graphQLErrors: [new GraphQLError('appsync failure')],
-        }),
+        } as any),
       )
       await expect(
         instanceUnderTest.cancelVirtualCard({
@@ -1092,7 +1031,7 @@ describe('ApiClient Test Suite', () => {
     it('handles error from graphQl', async () => {
       when(mockClient.mutate(anything())).thenResolve({
         errors: [new GraphQLError('failed')],
-      })
+      } as any)
       await expect(
         instanceUnderTest.cancelVirtualCard({
           id: '',
@@ -1110,20 +1049,15 @@ describe('ApiClient Test Suite', () => {
       } as any)
       const id = v4()
       const keyId = v4()
-      const fetchPolicy = 'cache-only'
       await expect(
-        instanceUnderTest.getTransaction(
-          {
-            id,
-            keyId,
-          },
-          fetchPolicy,
-        ),
+        instanceUnderTest.getTransaction({
+          id,
+          keyId,
+        }),
       ).resolves.toStrictEqual(GraphQLDataFactory.sealedTransaction)
       verify(mockClient.query(anything())).once()
       const [args] = capture(mockClient.query as any).first()
       expect(args).toStrictEqual({
-        fetchPolicy: 'cache-only',
         variables: {
           id,
           keyId,
@@ -1133,9 +1067,9 @@ describe('ApiClient Test Suite', () => {
     })
     it('handles thrown error from app sync call', async () => {
       when(mockClient.query(anything())).thenReject(
-        new ApolloError({
+        new Error({
           graphQLErrors: [new GraphQLError('appsync failure')],
-        }),
+        } as any),
       )
       await expect(
         instanceUnderTest.getTransaction({ id: '' }),
@@ -1145,9 +1079,6 @@ describe('ApiClient Test Suite', () => {
       when(mockClient.query(anything())).thenResolve({
         data: null,
         errors: [new GraphQLError('failed')],
-        loading: false,
-        networkStatus: NetworkStatus.error,
-        stale: false,
       })
       await expect(
         instanceUnderTest.getTransaction({ id: '' }),
@@ -1165,21 +1096,17 @@ describe('ApiClient Test Suite', () => {
           },
         },
       } as any)
-      const fetchPolicy = 'cache-only'
       const limit = 100
       const nextToken = v4()
       const dateRange = { startDateEpochMs: 1.0, endDateEpochMs: 2.0 }
       const sortOrder = SortOrder.Asc
       await expect(
-        instanceUnderTest.listTransactions(
-          {
-            limit,
-            nextToken,
-            dateRange,
-            sortOrder,
-          },
-          fetchPolicy,
-        ),
+        instanceUnderTest.listTransactions({
+          limit,
+          nextToken,
+          dateRange,
+          sortOrder,
+        }),
       ).resolves.toStrictEqual({
         items: [GraphQLDataFactory.sealedTransaction],
         nextToken: undefined,
@@ -1187,7 +1114,6 @@ describe('ApiClient Test Suite', () => {
       verify(mockClient.query(anything())).once()
       const [args] = capture(mockClient.query as any).first()
       expect(args).toStrictEqual({
-        fetchPolicy: 'cache-only',
         variables: {
           limit,
           nextToken,
@@ -1200,9 +1126,9 @@ describe('ApiClient Test Suite', () => {
 
     it('handles thrown error from app sync call', async () => {
       when(mockClient.query(anything())).thenReject(
-        new ApolloError({
+        new Error({
           graphQLErrors: [new GraphQLError('appsync failure')],
-        }),
+        } as any),
       )
       await expect(instanceUnderTest.listTransactions({})).rejects.toThrow(
         UnknownGraphQLError,
@@ -1213,9 +1139,6 @@ describe('ApiClient Test Suite', () => {
       when(mockClient.query(anything())).thenResolve({
         data: null,
         errors: [new GraphQLError('failed')],
-        loading: false,
-        networkStatus: NetworkStatus.error,
-        stale: false,
       })
       await expect(instanceUnderTest.listTransactions({})).rejects.toThrow(
         UnknownGraphQLError,
@@ -1234,22 +1157,18 @@ describe('ApiClient Test Suite', () => {
         },
       } as any)
       const cardId = v4()
-      const fetchPolicy = 'cache-only'
       const limit = 100
       const nextToken = v4()
       const dateRange = { startDateEpochMs: 1.0, endDateEpochMs: 2.0 }
       const sortOrder = SortOrder.Asc
       await expect(
-        instanceUnderTest.listTransactionsByCardId(
-          {
-            cardId,
-            limit,
-            nextToken,
-            dateRange,
-            sortOrder,
-          },
-          fetchPolicy,
-        ),
+        instanceUnderTest.listTransactionsByCardId({
+          cardId,
+          limit,
+          nextToken,
+          dateRange,
+          sortOrder,
+        }),
       ).resolves.toStrictEqual({
         items: [GraphQLDataFactory.sealedTransaction],
         nextToken: undefined,
@@ -1257,7 +1176,6 @@ describe('ApiClient Test Suite', () => {
       verify(mockClient.query(anything())).once()
       const [args] = capture(mockClient.query as any).first()
       expect(args).toStrictEqual({
-        fetchPolicy: 'cache-only',
         variables: {
           cardId,
           limit,
@@ -1270,9 +1188,9 @@ describe('ApiClient Test Suite', () => {
     })
     it('handles thrown error from app sync call', async () => {
       when(mockClient.query(anything())).thenReject(
-        new ApolloError({
+        new Error({
           graphQLErrors: [new GraphQLError('appsync failure')],
-        }),
+        } as any),
       )
       await expect(
         instanceUnderTest.listTransactionsByCardId({ cardId: '' }),
@@ -1282,9 +1200,6 @@ describe('ApiClient Test Suite', () => {
       when(mockClient.query(anything())).thenResolve({
         data: null,
         errors: [new GraphQLError('failed')],
-        loading: false,
-        networkStatus: NetworkStatus.error,
-        stale: false,
       })
       await expect(
         instanceUnderTest.listTransactionsByCardId({ cardId: '' }),
@@ -1304,19 +1219,15 @@ describe('ApiClient Test Suite', () => {
       } as any)
       const cardId = v4()
       const transactionType = TransactionType.Pending
-      const fetchPolicy = 'cache-only'
       const limit = 100
       const nextToken = v4()
       await expect(
-        instanceUnderTest.listTransactionsByCardIdAndType(
-          {
-            cardId,
-            transactionType,
-            limit,
-            nextToken,
-          },
-          fetchPolicy,
-        ),
+        instanceUnderTest.listTransactionsByCardIdAndType({
+          cardId,
+          transactionType,
+          limit,
+          nextToken,
+        }),
       ).resolves.toStrictEqual({
         items: [GraphQLDataFactory.sealedTransaction],
         nextToken: undefined,
@@ -1324,7 +1235,6 @@ describe('ApiClient Test Suite', () => {
       verify(mockClient.query(anything())).once()
       const [args] = capture(mockClient.query as any).first()
       expect(args).toStrictEqual({
-        fetchPolicy: 'cache-only',
         variables: {
           cardId,
           transactionType,
@@ -1336,9 +1246,9 @@ describe('ApiClient Test Suite', () => {
     })
     it('handles thrown error from app sync call', async () => {
       when(mockClient.query(anything())).thenReject(
-        new ApolloError({
+        new Error({
           graphQLErrors: [new GraphQLError('appsync failure')],
-        }),
+        } as any),
       )
       await expect(
         instanceUnderTest.listTransactionsByCardIdAndType({
@@ -1349,11 +1259,8 @@ describe('ApiClient Test Suite', () => {
     })
     it('handles error from graphQl', async () => {
       when(mockClient.query(anything())).thenResolve({
-        data: null,
+        data: null as any,
         errors: [new GraphQLError('failed')],
-        loading: false,
-        networkStatus: NetworkStatus.error,
-        stale: false,
       })
       await expect(
         instanceUnderTest.listTransactionsByCardIdAndType({

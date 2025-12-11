@@ -5,7 +5,6 @@
  */
 
 import {
-  CachePolicy,
   ListOperationResultStatus,
   NotSignedInError,
 } from '@sudoplatform/sudo-common'
@@ -60,13 +59,11 @@ describe('ListTransactionsUseCase Test Suite', () => {
     })
 
     it('completes successfully', async () => {
-      const cachePolicy = CachePolicy.CacheOnly
       const limit = 100
       const nextToken = v4()
       const dateRange = { startDate: new Date(), endDate: new Date() }
       const sortOrder = SortOrder.Asc
       const result = await instanceUnderTest.execute({
-        cachePolicy,
         limit,
         nextToken,
         dateRange,
@@ -75,7 +72,6 @@ describe('ListTransactionsUseCase Test Suite', () => {
       verify(mockTransactionService.listTransactions(anything())).once()
       const [args] = capture(mockTransactionService.listTransactions).first()
       expect(args).toStrictEqual<typeof args>({
-        cachePolicy,
         limit,
         nextToken,
         dateRange,

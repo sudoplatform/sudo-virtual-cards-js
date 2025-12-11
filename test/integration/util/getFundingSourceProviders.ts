@@ -35,7 +35,7 @@ export const getFundingSourceProviders = async (
   for (const fsConfig of config.fundingSourceClientConfiguration) {
     if (isStripeCardFundingSourceClientConfiguration(fsConfig)) {
       stripe = new Stripe(fsConfig.apiKey, {
-        apiVersion: '2025-05-28.basil',
+        apiVersion: '2025-11-17.clover',
         typescript: true,
       })
       stripeCardEnabled = true

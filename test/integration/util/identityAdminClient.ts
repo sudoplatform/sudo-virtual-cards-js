@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { NormalizedCacheObject } from 'apollo-cache-inmemory'
-import AWSAppSyncClient, { AUTH_TYPE } from 'aws-appsync'
 import {
   DisableUserDocument,
   DisableUserMutation,
@@ -14,6 +12,12 @@ import {
   EnableUserMutation,
   EnableUserMutationVariables,
 } from '../../../src/gen/graphqlTypes'
+import {
+  GraphQLClient,
+  GraphQLClientAuthMode,
+  GraphQLClientOptions,
+  internal,
+} from '@sudoplatform/sudo-user'
 
 export interface ClientProps {
   jwtToken?: string
@@ -22,34 +26,30 @@ export interface ClientProps {
   graphqlUrl: string
 }
 export class IdentityAdminClient {
-  private readonly client: AWSAppSyncClient<NormalizedCacheObject>
+  private readonly client: GraphQLClient
   public constructor({ apiKey, jwtToken, region, graphqlUrl }: ClientProps) {
-    this.client = new AWSAppSyncClient({
-      url: graphqlUrl,
-      region: region,
-      auth: apiKey
-        ? {
-            type: AUTH_TYPE.API_KEY,
-            apiKey: apiKey,
-          }
-        : jwtToken
-          ? {
-              type: AUTH_TYPE.AMAZON_COGNITO_USER_POOLS,
-              jwtToken,
-            }
-          : {
-              type: AUTH_TYPE.AWS_IAM,
-              credentials: {
-                accessKeyId:
-                  process.env.AWS_ACCESS_KEY_ID ?? 'aws-access-key-id',
-                secretAccessKey:
-                  process.env.AWS_SECRET_ACCESS_KEY ?? 'aws-secret-access-key',
-                sessionToken:
-                  process.env.AWS_SESSION_TOKEN ?? 'aws-session-token',
-              },
-            },
-      disableOffline: true,
-    })
+    const graphQLOptions: GraphQLClientOptions = {
+      graphqlUrl,
+      region,
+    }
+    if (jwtToken) {
+      graphQLOptions.authMode = GraphQLClientAuthMode.OpenIDConnect
+      graphQLOptions.tokenProvider = () => Promise.resolve(jwtToken)
+    }
+    if (apiKey) {
+      graphQLOptions.authMode = GraphQLClientAuthMode.ApiKey
+      graphQLOptions.apiKey = apiKey
+    }
+    if (!jwtToken && !apiKey) {
+      graphQLOptions.authMode = GraphQLClientAuthMode.IAM
+      graphQLOptions.credentials = {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID ?? 'aws-access-key-id',
+        secretAccessKey:
+          process.env.AWS_SECRET_ACCESS_KEY ?? 'aws-secret-access-key',
+        sessionToken: process.env.AWS_SESSION_TOKEN ?? 'aws-session-token',
+      }
+    }
+    this.client = new internal.AmplifyClient(graphQLOptions)
   }
 
   public async enableUser(variables: EnableUserMutationVariables) {

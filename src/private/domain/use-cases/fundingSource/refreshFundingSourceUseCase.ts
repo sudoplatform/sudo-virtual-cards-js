@@ -49,16 +49,14 @@ interface BaseRefreshFundingSourceUseCaseOutput {
   currency: string
 }
 
-interface RefreshCreditCardFundingSourceUseCaseOutput
-  extends BaseRefreshFundingSourceUseCaseOutput {
+interface RefreshCreditCardFundingSourceUseCaseOutput extends BaseRefreshFundingSourceUseCaseOutput {
   type: FundingSourceType.CreditCard
   last4: string
   network: CreditCardNetwork
   cardType: CardType
 }
 
-interface RefreshBankAccountFundingSourceUseCaseOutput
-  extends BaseRefreshFundingSourceUseCaseOutput {
+interface RefreshBankAccountFundingSourceUseCaseOutput extends BaseRefreshFundingSourceUseCaseOutput {
   type: FundingSourceType.BankAccount
   bankAccountType: BankAccountType
   last4: string

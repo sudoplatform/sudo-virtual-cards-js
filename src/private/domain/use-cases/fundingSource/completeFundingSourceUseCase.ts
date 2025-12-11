@@ -57,16 +57,14 @@ interface BaseCompleteFundingSourceUseCaseOutput {
   currency: string
 }
 
-interface CompleteCreditCardFundingSourceUseCaseOutput
-  extends BaseCompleteFundingSourceUseCaseOutput {
+interface CompleteCreditCardFundingSourceUseCaseOutput extends BaseCompleteFundingSourceUseCaseOutput {
   type: FundingSourceType.CreditCard
   last4: string
   network: CreditCardNetwork
   cardType: CardType
 }
 
-interface CompleteBankAccountFundingSourceUseCaseOutput
-  extends BaseCompleteFundingSourceUseCaseOutput {
+interface CompleteBankAccountFundingSourceUseCaseOutput extends BaseCompleteFundingSourceUseCaseOutput {
   type: FundingSourceType.BankAccount
   bankAccountType: BankAccountType
   last4: string

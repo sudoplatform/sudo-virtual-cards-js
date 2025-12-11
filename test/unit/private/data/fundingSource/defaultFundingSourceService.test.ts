@@ -460,9 +460,9 @@ describe('DefaultFundingSourceService Test Suite', () => {
   })
 
   describe('subscribeToFundingSourceChanges', () => {
-    it('calls services correctly', () => {
+    it('calls services correctly', async () => {
       when(mockSubscriptionManager.getWatcher()).thenReturn(undefined)
-      instanceUnderTest.subscribeToFundingSourceChanges({
+      await instanceUnderTest.subscribeToFundingSourceChanges({
         owner: 'owner-id',
         id: 'subscribe-id',
         subscriber: {
@@ -502,34 +502,27 @@ describe('DefaultFundingSourceService Test Suite', () => {
       ${GraphQLDataFactory.creditCardfundingSource}  | ${EntityDataFactory.creditCardFundingSource}
       ${GraphQLDataFactory.bankAccountfundingSource} | ${EntityDataFactory.bankAccountFundingSource}
     `('calls appsync correctly: $entity.type', async ({ graphql, entity }) => {
-      when(mockAppSync.getFundingSource(anything(), anything())).thenResolve(
-        graphql,
-      )
+      when(mockAppSync.getFundingSource(anything())).thenResolve(graphql)
       const id = v4()
       const result = await instanceUnderTest.getFundingSource({
         id,
-        cachePolicy: CachePolicy.CacheOnly,
       })
-      verify(mockAppSync.getFundingSource(anything(), anything())).once()
-      const [idArg, policyArg] = capture(mockAppSync.getFundingSource).first()
+      verify(mockAppSync.getFundingSource(anything())).once()
+      const [idArg] = capture(mockAppSync.getFundingSource).first()
       expect(idArg).toEqual<typeof idArg>(id)
-      expect(policyArg).toEqual<typeof policyArg>('cache-only')
       expect(result).toEqual(entity)
     })
 
     it('calls appsync correctly with undefined result', async () => {
-      when(mockAppSync.getFundingSource(anything(), anything())).thenResolve(
-        undefined,
-      )
+      when(mockAppSync.getFundingSource(anything())).thenResolve(undefined)
       const id = v4()
       const result = await instanceUnderTest.getFundingSource({
         id,
         cachePolicy: CachePolicy.CacheOnly,
       })
-      verify(mockAppSync.getFundingSource(anything(), anything())).once()
-      const [idArg, policyArg] = capture(mockAppSync.getFundingSource).first()
+      verify(mockAppSync.getFundingSource(anything())).once()
+      const [idArg] = capture(mockAppSync.getFundingSource).first()
       expect(idArg).toEqual<typeof idArg>(id)
-      expect(policyArg).toEqual<typeof policyArg>('cache-only')
       expect(result).toEqual(undefined)
     })
 
@@ -540,7 +533,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
     `(
       'returns transformed result when calling $test',
       async ({ cachePolicy }) => {
-        when(mockAppSync.getFundingSource(anything(), anything())).thenResolve(
+        when(mockAppSync.getFundingSource(anything())).thenResolve(
           GraphQLDataFactory.defaultFundingSource,
         )
         const id = v4()
@@ -550,7 +543,7 @@ describe('DefaultFundingSourceService Test Suite', () => {
             cachePolicy,
           }),
         ).resolves.toEqual(EntityDataFactory.defaultFundingSource)
-        verify(mockAppSync.getFundingSource(anything(), anything())).once()
+        verify(mockAppSync.getFundingSource(anything())).once()
       },
     )
   })
@@ -559,7 +552,6 @@ describe('DefaultFundingSourceService Test Suite', () => {
     it('calls appsync correctly', async () => {
       when(
         mockAppSync.listFundingSources(
-          anything(),
           anything(),
           anything(),
           anything(),
@@ -575,11 +567,8 @@ describe('DefaultFundingSourceService Test Suite', () => {
           anything(),
           anything(),
           anything(),
-          anything(),
         ),
       ).once()
-      const [policyArg] = capture(mockAppSync.listFundingSources).first()
-      expect(policyArg).toEqual<typeof policyArg>('cache-only')
       expect(result).toEqual({
         fundingSources: [
           EntityDataFactory.creditCardFundingSource,
@@ -602,7 +591,6 @@ describe('DefaultFundingSourceService Test Suite', () => {
             anything(),
             anything(),
             anything(),
-            anything(),
           ),
         ).thenResolve(GraphQLDataFactory.fundingSourceConnection)
         await expect(
@@ -618,7 +606,6 @@ describe('DefaultFundingSourceService Test Suite', () => {
         })
         verify(
           mockAppSync.listFundingSources(
-            anything(),
             anything(),
             anything(),
             anything(),
@@ -699,7 +686,6 @@ describe('DefaultFundingSourceService Test Suite', () => {
           anything(),
           anything(),
           anything(),
-          anything(),
         ),
       ).thenResolve(GraphQLDataFactory.provisionalFundingSourceConnection)
       const result = await instanceUnderTest.listProvisionalFundingSources({
@@ -711,13 +697,9 @@ describe('DefaultFundingSourceService Test Suite', () => {
           anything(),
           anything(),
           anything(),
-          anything(),
         ),
       ).once()
-      const [policyArg] = capture(
-        mockAppSync.listProvisionalFundingSources,
-      ).first()
-      expect(policyArg).toEqual<typeof policyArg>('cache-only')
+
       expect(result).toEqual({
         provisionalFundingSources: [
           EntityDataFactory.provisionalFundingSource,
@@ -740,7 +722,6 @@ describe('DefaultFundingSourceService Test Suite', () => {
             anything(),
             anything(),
             anything(),
-            anything(),
           ),
         ).thenResolve(GraphQLDataFactory.provisionalFundingSourceConnection)
         await expect(
@@ -756,7 +737,6 @@ describe('DefaultFundingSourceService Test Suite', () => {
         })
         verify(
           mockAppSync.listProvisionalFundingSources(
-            anything(),
             anything(),
             anything(),
             anything(),

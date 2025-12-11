@@ -10,23 +10,16 @@ import {
   DefaultApiClientManager,
 } from '@sudoplatform/sudo-api-client'
 import {
-  AppSyncError,
   DefaultLogger,
   FatalError,
+  GraphQLNetworkError,
+  isGraphQLNetworkError,
   Logger,
+  mapNetworkErrorToClientError,
   UnknownGraphQLError,
 } from '@sudoplatform/sudo-common'
-import { NormalizedCacheObject } from 'apollo-cache-inmemory'
-import {
-  FetchPolicy,
-  MutationOptions,
-  QueryOptions,
-  SubscriptionOptions,
-} from 'apollo-client/core/watchQueryOptions'
-import { ApolloError } from 'apollo-client/errors/ApolloError'
-import { Observable } from 'apollo-client/util/Observable'
-import { FetchResult } from 'apollo-link'
-import AWSAppSyncClient from 'aws-appsync'
+import Observable from 'zen-observable'
+import { GraphQLOptions } from '@aws-amplify/api-graphql'
 import {
   CancelFundingSourceDocument,
   CancelFundingSourceMutation,
@@ -57,12 +50,15 @@ import {
   GetFundingSourceQuery,
   GetKeyRingDocument,
   GetKeyRingQuery,
+  GetKeyRingQueryVariables,
   GetProvisionalCardDocument,
   GetProvisionalCardQuery,
   GetPublicKeyDocument,
   GetPublicKeyQuery,
+  GetPublicKeyQueryVariables,
   GetPublicKeysDocument,
   GetPublicKeysQuery,
+  GetPublicKeysQueryVariables,
   GetTransactionDocument,
   GetTransactionQuery,
   GetTransactionQueryVariables,
@@ -72,12 +68,16 @@ import {
   KeyFormat,
   ListCardsDocument,
   ListCardsQuery,
+  ListCardsQueryVariables,
   ListFundingSourcesDocument,
   ListFundingSourcesQuery,
+  ListFundingSourcesQueryVariables,
   ListProvisionalCardsDocument,
   ListProvisionalCardsQuery,
+  ListProvisionalCardsQueryVariables,
   ListProvisionalFundingSourcesDocument,
   ListProvisionalFundingSourcesQuery,
+  ListProvisionalFundingSourcesQueryVariables,
   ListTransactionsByCardIdAndTypeDocument,
   ListTransactionsByCardIdAndTypeQuery,
   ListTransactionsByCardIdAndTypeQueryVariables,
@@ -123,10 +123,12 @@ import {
   VirtualCardsConfig,
 } from '../../../gen/graphqlTypes'
 import { ErrorTransformer } from './transformer/errorTransformer'
+import { GraphQLClient } from '@sudoplatform/sudo-user'
+import { SubscriptionResult } from './subscriptionManager'
 
 export class ApiClient {
   private readonly log: Logger
-  private readonly client: AWSAppSyncClient<NormalizedCacheObject>
+  private readonly client: GraphQLClient
 
   public constructor(apiClientManager?: ApiClientManager) {
     this.log = new DefaultLogger(this.constructor.name)
@@ -135,7 +137,6 @@ export class ApiClient {
       apiClientManager ?? DefaultApiClientManager.getInstance()
 
     this.client = clientManager.getClient({
-      disableOffline: true,
       configNamespace: 'vcService',
     })
   }
@@ -166,8 +167,7 @@ export class ApiClient {
   ): Promise<PublicKey | undefined> {
     const data = await this.performQuery<GetPublicKeyQuery>({
       query: GetPublicKeyDocument,
-      variables: { keyId, keyFormats },
-      fetchPolicy: 'network-only',
+      variables: { keyId, keyFormats } as GetPublicKeyQueryVariables,
       calleeName: this.getPublicKey.name,
     })
     return data.getPublicKeyForVirtualCards ?? undefined
@@ -179,8 +179,7 @@ export class ApiClient {
   ): Promise<PaginatedPublicKey> {
     const data = await this.performQuery<GetPublicKeysQuery>({
       query: GetPublicKeysDocument,
-      variables: { limit, nextToken },
-      fetchPolicy: 'network-only',
+      variables: { limit, nextToken } as GetPublicKeysQueryVariables,
       calleeName: this.getPublicKeys.name,
     })
     return data.getPublicKeysForVirtualCards
@@ -199,8 +198,12 @@ export class ApiClient {
   }): Promise<PaginatedPublicKey> {
     const data = await this.performQuery<GetKeyRingQuery>({
       query: GetKeyRingDocument,
-      variables: { keyRingId, limit, nextToken, keyFormats },
-      fetchPolicy: 'network-only',
+      variables: {
+        keyRingId,
+        limit,
+        nextToken,
+        keyFormats,
+      } as GetKeyRingQueryVariables,
       calleeName: this.getKeyRing.name,
     })
     return data.getKeyRingForVirtualCards
@@ -210,7 +213,6 @@ export class ApiClient {
     const data =
       await this.performQuery<GetFundingSourceClientConfigurationQuery>({
         query: GetFundingSourceClientConfigurationDocument,
-        fetchPolicy: 'network-only',
         calleeName: this.getFundingSourceClientConfiguration.name,
       })
     return data.getFundingSourceClientConfiguration
@@ -218,19 +220,16 @@ export class ApiClient {
 
   public async getFundingSource(
     id: string,
-    fetchPolicy: FetchPolicy = 'network-only',
   ): Promise<FundingSource | undefined> {
     const data = await this.performQuery<GetFundingSourceQuery>({
       query: GetFundingSourceDocument,
       variables: { id },
-      fetchPolicy,
       calleeName: this.getFundingSource.name,
     })
     return data.getFundingSource ?? undefined
   }
 
   public async listFundingSources(
-    fetchPolicy: FetchPolicy = 'network-only',
     filter?: FundingSourceFilterInput,
     sortOrder?: SortOrder,
     limit?: number,
@@ -238,8 +237,12 @@ export class ApiClient {
   ): Promise<FundingSourceConnection> {
     const data = await this.performQuery<ListFundingSourcesQuery>({
       query: ListFundingSourcesDocument,
-      variables: { filter, sortOrder, limit, nextToken },
-      fetchPolicy,
+      variables: {
+        filter,
+        sortOrder,
+        limit,
+        nextToken,
+      } as ListFundingSourcesQueryVariables,
       calleeName: this.listFundingSources.name,
     })
     return data.listFundingSources
@@ -278,16 +281,15 @@ export class ApiClient {
     return data.refreshFundingSource
   }
 
-  public onFundingSourceUpdate(
+  public async onFundingSourceUpdate(
     owner: string,
-  ): Observable<FetchResult<OnFundingSourceUpdateSubscription>> {
-    return this.client.subscribe<
-      FetchResult<OnFundingSourceUpdateSubscription>
-    >({
+  ): Promise<
+    Observable<SubscriptionResult<OnFundingSourceUpdateSubscription>>
+  > {
+    return await this.client.subscribe({
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      query: OnFundingSourceUpdateDocument,
+      subscription: OnFundingSourceUpdateDocument,
       variables: { owner },
-      fetchPolicy: 'network-only',
     })
   }
 
@@ -325,7 +327,6 @@ export class ApiClient {
   }
 
   public async listProvisionalFundingSources(
-    fetchPolicy: FetchPolicy = 'network-only',
     filter?: ProvisionalFundingSourceFilterInput,
     sortOrder?: SortOrder,
     limit?: number,
@@ -333,8 +334,12 @@ export class ApiClient {
   ): Promise<ProvisionalFundingSourceConnection> {
     const data = await this.performQuery<ListProvisionalFundingSourcesQuery>({
       query: ListProvisionalFundingSourcesDocument,
-      variables: { filter, sortOrder, limit, nextToken },
-      fetchPolicy,
+      variables: {
+        filter,
+        sortOrder,
+        limit,
+        nextToken,
+      } as ListProvisionalFundingSourcesQueryVariables,
       calleeName: this.listFundingSources.name,
     })
     return data.listProvisionalFundingSources
@@ -353,11 +358,9 @@ export class ApiClient {
 
   public async getProvisionalCard(
     id: string,
-    fetchPolicy: FetchPolicy = 'network-only',
   ): Promise<ProvisionalCard | undefined> {
     const data = await this.performQuery<GetProvisionalCardQuery>({
       query: GetProvisionalCardDocument,
-      fetchPolicy,
       variables: { id },
       calleeName: this.getProvisionalCard.name,
     })
@@ -367,12 +370,10 @@ export class ApiClient {
   public async listProvisionalCards(
     limit?: number,
     nextToken?: string,
-    fetchPolicy: FetchPolicy = 'network-only',
   ): Promise<ProvisionalCardConnection> {
     const data = await this.performQuery<ListProvisionalCardsQuery>({
       query: ListProvisionalCardsDocument,
-      fetchPolicy,
-      variables: { limit, nextToken },
+      variables: { limit, nextToken } as ListProvisionalCardsQueryVariables,
       calleeName: this.listProvisionalCards.name,
     })
     return data.listProvisionalCards
@@ -380,11 +381,9 @@ export class ApiClient {
 
   public async getCard(
     input: GetCardQueryVariables,
-    fetchPolicy: FetchPolicy = 'network-only',
   ): Promise<SealedCard | undefined> {
     const data = await this.performQuery<GetCardQuery>({
       query: GetCardDocument,
-      fetchPolicy,
       variables: input,
       calleeName: this.getCard.name,
     })
@@ -396,12 +395,15 @@ export class ApiClient {
     sortOrder?: SortOrder,
     limit?: number,
     nextToken?: string,
-    fetchPolicy: FetchPolicy = 'network-only',
   ): Promise<SealedCardConnection> {
     const data = await this.performQuery<ListCardsQuery>({
       query: ListCardsDocument,
-      fetchPolicy,
-      variables: { filter, sortOrder, limit, nextToken },
+      variables: {
+        filter,
+        sortOrder,
+        limit,
+        nextToken,
+      } as ListCardsQueryVariables,
       calleeName: this.listCards.name,
     })
     return data.listCards
@@ -427,12 +429,10 @@ export class ApiClient {
 
   async getTransaction(
     input: GetTransactionQueryVariables,
-    fetchPolicy: FetchPolicy = 'network-only',
   ): Promise<SealedTransaction | undefined> {
     const data = await this.performQuery<GetTransactionQuery>({
       query: GetTransactionDocument,
       variables: input,
-      fetchPolicy,
       calleeName: this.getTransaction.name,
     })
     return data.getTransaction ?? undefined
@@ -440,12 +440,10 @@ export class ApiClient {
 
   async listTransactions(
     input: ListTransactionsQueryVariables,
-    fetchPolicy: FetchPolicy = 'network-only',
   ): Promise<SealedTransactionConnection> {
     const data = await this.performQuery<ListTransactionsQuery>({
       query: ListTransactionsDocument,
       variables: input,
-      fetchPolicy,
       calleeName: this.listTransactionsByCardId.name,
     })
     return data.listTransactions2
@@ -453,12 +451,10 @@ export class ApiClient {
 
   async listTransactionsByCardId(
     input: ListTransactionsByCardIdQueryVariables,
-    fetchPolicy: FetchPolicy = 'network-only',
   ): Promise<SealedTransactionConnection> {
     const data = await this.performQuery<ListTransactionsByCardIdQuery>({
       query: ListTransactionsByCardIdDocument,
       variables: input,
-      fetchPolicy,
       calleeName: this.listTransactionsByCardId.name,
     })
     return data.listTransactionsByCardId2
@@ -466,12 +462,10 @@ export class ApiClient {
 
   async listTransactionsByCardIdAndType(
     input: ListTransactionsByCardIdAndTypeQueryVariables,
-    fetchPolicy: FetchPolicy = 'network-only',
   ): Promise<SealedTransactionConnection> {
     const data = await this.performQuery<ListTransactionsByCardIdAndTypeQuery>({
       query: ListTransactionsByCardIdAndTypeDocument,
       variables: input,
-      fetchPolicy,
       calleeName: this.listTransactionsByCardIdAndType.name,
     })
     return data.listTransactionsByCardIdAndType
@@ -483,7 +477,6 @@ export class ApiClient {
     const data = await this.performQuery<SandboxGetPlaidDataQuery>({
       query: SandboxGetPlaidDataDocument,
       variables: input,
-      fetchPolicy: 'network-only',
       calleeName: this.sandboxGetPlaidData.name,
     })
 
@@ -507,31 +500,24 @@ export class ApiClient {
 
   async performQuery<Q>({
     variables,
-    fetchPolicy,
     query,
     calleeName,
-  }: QueryOptions & { calleeName?: string }): Promise<Q> {
+  }: GraphQLOptions & { calleeName?: string }): Promise<Q> {
     let result
     try {
       result = await this.client.query<Q>({
         variables,
-        fetchPolicy,
         query,
       })
     } catch (err: any) {
-      const clientError = err as ApolloError
-      this.log.debug('error received', { calleeName, clientError })
-      const error = clientError.graphQLErrors?.[0]
-      if (error) {
-        this.log.debug('appSync query failed with error', { error })
-        throw ErrorTransformer.toClientError(error)
-      } else {
-        throw new UnknownGraphQLError(err)
+      if (isGraphQLNetworkError(err as Error)) {
+        throw mapNetworkErrorToClientError(err as GraphQLNetworkError)
       }
+      throw this.mapGraphQLCallError(err as Error)
     }
     const error = result.errors?.[0]
     if (error) {
-      this.log.debug('error received', { error })
+      this.log.debug('appsync query failed with error', { error })
       throw ErrorTransformer.toClientError(error)
     }
     if (result.data) {
@@ -547,7 +533,8 @@ export class ApiClient {
     mutation,
     variables,
     calleeName,
-  }: Omit<MutationOptions<M>, 'fetchPolicy'> & {
+  }: Omit<GraphQLOptions, 'query'> & {
+    mutation: GraphQLOptions['query']
     calleeName?: string
   }): Promise<M> {
     let result
@@ -557,15 +544,10 @@ export class ApiClient {
         variables,
       })
     } catch (err) {
-      const clientError = err as ApolloError
-      this.log.debug('error received', { calleeName, clientError })
-      const error = clientError.graphQLErrors?.[0]
-      if (error) {
-        this.log.debug('appSync mutation failed with error', { error })
-        throw ErrorTransformer.toClientError(error)
-      } else {
-        throw new UnknownGraphQLError(err as AppSyncError)
+      if (isGraphQLNetworkError(err as Error)) {
+        throw mapNetworkErrorToClientError(err as GraphQLNetworkError)
       }
+      throw this.mapGraphQLCallError(err as Error)
     }
     const error = result.errors?.[0]
     if (error) {
@@ -582,29 +564,50 @@ export class ApiClient {
   }
 
   subscribeTo<S>({
-    query,
+    subscription,
     variables,
     calleeName,
-  }: Omit<SubscriptionOptions, 'fetchPolicy'> & {
+  }: Omit<GraphQLOptions, 'query'> & {
+    subscription: GraphQLOptions['query']
     calleeName?: string
-  }): Observable<FetchResult<S>> | undefined {
+  }): Promise<Observable<SubscriptionResult<S>> | undefined> {
     let result
     try {
-      result = this.client.subscribe<FetchResult<S>>({
-        query,
+      result = this.client.subscribe<S>({
+        subscription,
         variables,
       })
     } catch (err) {
-      const clientError = err as ApolloError
-      this.log.debug('error received', { calleeName, clientError })
-      const error = clientError.graphQLErrors?.[0]
-      if (error) {
-        this.log.debug('appSync subscription failed with error', { error })
-        throw ErrorTransformer.toClientError(error)
-      } else {
-        throw new UnknownGraphQLError(err as AppSyncError)
+      if (isGraphQLNetworkError(err as Error)) {
+        throw mapNetworkErrorToClientError(err as GraphQLNetworkError)
       }
+      this.log.debug('appSync subscription failed with error', {
+        error: err as Error,
+        calleeName,
+      })
+      throw this.mapGraphQLCallError(err as Error)
     }
     return result
+  }
+
+  mapGraphQLCallError = (err: Error): Error => {
+    if ('graphQLErrors' in err && Array.isArray(err.graphQLErrors)) {
+      const error = err.graphQLErrors[0] as {
+        errorType: string
+        message: string
+        name: string
+      }
+      if (error) {
+        this.log.debug('appSync operation failed with error', { err })
+        return ErrorTransformer.toClientError(error)
+      }
+    }
+    if ('errorType' in err) {
+      this.log.debug('appSync operation failed with error', { err })
+      return ErrorTransformer.toClientError(
+        err as { errorType: string; message: string; errorInfo?: string },
+      )
+    }
+    return new UnknownGraphQLError(err)
   }
 }

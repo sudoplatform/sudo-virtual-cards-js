@@ -281,7 +281,7 @@ export class DefaultDeviceKeyWorker implements DeviceKeyWorker {
       const options = algorithm ? { algorithm } : {}
       unsealedBuffer = await this.keyManager.decryptWithSymmetricKeyName(
         symmetricKeyId,
-        decodeEncrypted,
+        decodeEncrypted.buffer,
         options,
       )
     } catch (err) {
@@ -317,7 +317,7 @@ export class DefaultDeviceKeyWorker implements DeviceKeyWorker {
     try {
       cipherKey = await this.keyManager.decryptWithPrivateKey(
         keyPairId,
-        encryptedCipherKeyB64,
+        encryptedCipherKeyB64.buffer,
       )
     } catch (err) {
       const message = 'Could not decrypt AES key from sealed string'
@@ -331,7 +331,7 @@ export class DefaultDeviceKeyWorker implements DeviceKeyWorker {
     try {
       unsealedBuffer = await this.keyManager.decryptWithSymmetricKey(
         cipherKey,
-        encryptedData,
+        encryptedData.buffer,
         { algorithm: EncryptionAlgorithm.AesCbcPkcs7Padding },
       )
     } catch (err) {

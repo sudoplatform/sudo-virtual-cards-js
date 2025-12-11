@@ -39,8 +39,7 @@ export interface CreditCardFundingSourceEntity extends BaseFundingSourceEntity {
   network: CreditCardNetwork
   cardType: CardType
 }
-export interface BankAccountFundingSourceEntity
-  extends BaseFundingSourceEntity {
+export interface BankAccountFundingSourceEntity extends BaseFundingSourceEntity {
   type: FundingSourceType.BankAccount
   bankAccountType: BankAccountType
   last4: string

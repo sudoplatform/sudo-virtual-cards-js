@@ -24,7 +24,6 @@ import {
   TransactionWorker,
 } from '../common/transactionWorker'
 import { DateRangeTransformer } from '../common/transformer/dateRangeTransformer'
-import { FetchPolicyTransformer } from '../common/transformer/fetchPolicyTransformer'
 import { TransactionSealedAttributes } from './transactionSealedAttributes'
 import { TransactionEntityTransformer } from './transformer/TransactionEntityTransformer'
 import { TransactionTypeEntityTransformer } from './transformer/transactionTypeEntityTransformer'
@@ -38,15 +37,9 @@ export class DefaultTransactionService implements TransactionService {
   async getTransaction(
     input: TransactionServiceGetTransactionInput,
   ): Promise<TransactionEntity | undefined> {
-    const fetchPolicy = input.cachePolicy
-      ? FetchPolicyTransformer.transformCachePolicy(input.cachePolicy)
-      : undefined
-    const sealedTransaction = await this.appSync.getTransaction(
-      {
-        id: input.id,
-      },
-      fetchPolicy,
-    )
+    const sealedTransaction = await this.appSync.getTransaction({
+      id: input.id,
+    })
     if (!sealedTransaction) {
       return undefined
     }
@@ -60,22 +53,16 @@ export class DefaultTransactionService implements TransactionService {
   ): Promise<
     ListOperationResult<TransactionEntity, TransactionSealedAttributes>
   > {
-    const fetchPolicy = input.cachePolicy
-      ? FetchPolicyTransformer.transformCachePolicy(input.cachePolicy)
-      : undefined
     const dateRange = input.dateRange
       ? DateRangeTransformer.transformToGraphQLInput(input.dateRange)
       : undefined
     const { items: sealedTransactions, nextToken: newNextToken } =
-      await this.appSync.listTransactions(
-        {
-          limit: input.limit,
-          nextToken: input.nextToken,
-          dateRange,
-          sortOrder: input.sortOrder,
-        },
-        fetchPolicy,
-      )
+      await this.appSync.listTransactions({
+        limit: input.limit,
+        nextToken: input.nextToken,
+        dateRange,
+        sortOrder: input.sortOrder,
+      })
 
     return this.unsealTransactions(
       sealedTransactions,
@@ -88,23 +75,17 @@ export class DefaultTransactionService implements TransactionService {
   ): Promise<
     ListOperationResult<TransactionEntity, TransactionSealedAttributes>
   > {
-    const fetchPolicy = input.cachePolicy
-      ? FetchPolicyTransformer.transformCachePolicy(input.cachePolicy)
-      : undefined
     const dateRange = input.dateRange
       ? DateRangeTransformer.transformToGraphQLInput(input.dateRange)
       : undefined
     const { items: sealedTransactions, nextToken: newNextToken } =
-      await this.appSync.listTransactionsByCardId(
-        {
-          cardId: input.cardId,
-          limit: input.limit,
-          nextToken: input.nextToken,
-          dateRange,
-          sortOrder: input.sortOrder,
-        },
-        fetchPolicy,
-      )
+      await this.appSync.listTransactionsByCardId({
+        cardId: input.cardId,
+        limit: input.limit,
+        nextToken: input.nextToken,
+        dateRange,
+        sortOrder: input.sortOrder,
+      })
 
     return this.unsealTransactions(
       sealedTransactions,
@@ -117,23 +98,17 @@ export class DefaultTransactionService implements TransactionService {
   ): Promise<
     ListOperationResult<TransactionEntity, TransactionSealedAttributes>
   > {
-    const fetchPolicy = input.cachePolicy
-      ? FetchPolicyTransformer.transformCachePolicy(input.cachePolicy)
-      : undefined
     const transactionType =
       TransactionTypeEntityTransformer.transformToGraphQLInput(
         input.transactionType,
       )
     const { items: sealedTransactions, nextToken: newNextToken } =
-      await this.appSync.listTransactionsByCardIdAndType(
-        {
-          cardId: input.cardId,
-          transactionType: transactionType,
-          limit: input.limit,
-          nextToken: input.nextToken,
-        },
-        fetchPolicy,
-      )
+      await this.appSync.listTransactionsByCardIdAndType({
+        cardId: input.cardId,
+        transactionType: transactionType,
+        limit: input.limit,
+        nextToken: input.nextToken,
+      })
 
     return this.unsealTransactions(
       sealedTransactions,

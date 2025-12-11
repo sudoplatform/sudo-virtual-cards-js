@@ -58,16 +58,14 @@ interface BaseListFundingSourcesUseCaseOutputItem {
   currency: string
 }
 
-interface ListFundingSourcesUseCaseOutputCreditCardItem
-  extends BaseListFundingSourcesUseCaseOutputItem {
+interface ListFundingSourcesUseCaseOutputCreditCardItem extends BaseListFundingSourcesUseCaseOutputItem {
   type: FundingSourceType.CreditCard
   last4: string
   network: CreditCardNetwork
   cardType: CardType
 }
 
-interface ListFundingSourcesUseCaseOutputBankAccountItem
-  extends BaseListFundingSourcesUseCaseOutputItem {
+interface ListFundingSourcesUseCaseOutputBankAccountItem extends BaseListFundingSourcesUseCaseOutputItem {
   type: FundingSourceType.BankAccount
   bankAccountType: BankAccountType
   last4: string

@@ -7,7 +7,7 @@
 import { TextDecoder, TextEncoder } from 'util'
 // Workaround for `jsdom` test environment not providing TextEncoder and
 // TextDecoder.
-global.TextEncoder = TextEncoder
+global.TextEncoder = TextEncoder as typeof global.TextEncoder
 global.TextDecoder = TextDecoder as typeof global.TextDecoder
 
 // [START] - Polyfills

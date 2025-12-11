@@ -44,8 +44,8 @@ describe('DeviceKeyWorker Test Suite', () => {
   const mockKeyManager = mock<SudoKeyManager>()
   const mockUserClient = mock<SudoUserClient>()
 
-  function uint8ArrayFromString(s: string): Uint8Array {
-    return Uint8Array.from(Buffer.from(s).values())
+  function arrayBufferFromString(s: string): ArrayBuffer {
+    return Uint8Array.from(Buffer.from(s).values()).buffer
   }
 
   beforeEach(() => {
@@ -95,7 +95,7 @@ describe('DeviceKeyWorker Test Suite', () => {
   describe('getCurrentPublicKey', () => {
     beforeEach(() => {
       when(mockKeyManager.getPassword(anything())).thenResolve(
-        new TextEncoder().encode('dummyPassword'),
+        new TextEncoder().encode('dummyPassword').buffer,
       )
       when(mockUserClient.getSubject()).thenResolve('dummySubject')
     })
@@ -123,7 +123,9 @@ describe('DeviceKeyWorker Test Suite', () => {
     it('returns undefined when there is no private key for password "vc-keypair"', async () => {
       const keyPairId = v4()
       const keyPairIdBits = new TextEncoder().encode(keyPairId)
-      when(mockKeyManager.getPassword('vc-keypair')).thenResolve(keyPairIdBits)
+      when(mockKeyManager.getPassword('vc-keypair')).thenResolve(
+        keyPairIdBits.buffer,
+      )
       when(mockKeyManager.getPublicKey(keyPairId)).thenResolve(
         ServiceDataFactory.sudoCommonPublicKey,
       )
@@ -146,7 +148,9 @@ describe('DeviceKeyWorker Test Suite', () => {
     it('currentPublicKey is retrieved from keyManager.getPassword if it is not in memory', async () => {
       const keyPairId = v4()
       const keyPairIdBits = new TextEncoder().encode(keyPairId)
-      when(mockKeyManager.getPassword('vc-keypair')).thenResolve(keyPairIdBits)
+      when(mockKeyManager.getPassword('vc-keypair')).thenResolve(
+        keyPairIdBits.buffer,
+      )
       when(mockKeyManager.getPublicKey(keyPairId)).thenResolve(
         ServiceDataFactory.sudoCommonPublicKey,
       )
@@ -257,14 +261,14 @@ describe('DeviceKeyWorker Test Suite', () => {
     beforeEach(() => {
       when(
         mockKeyManager.decryptWithPrivateKey(anything(), anything()),
-      ).thenResolve(new TextEncoder().encode('decryptedPrivate'))
+      ).thenResolve(new TextEncoder().encode('decryptedPrivate').buffer)
       when(
         mockKeyManager.decryptWithSymmetricKey(
           anything(),
           anything(),
           anything() as SymmetricEncryptionOptions,
         ),
-      ).thenResolve(new TextEncoder().encode('decryptedSym'))
+      ).thenResolve(new TextEncoder().encode('decryptedSym').buffer)
     })
 
     describe('keyType == KeyPair', () => {
@@ -331,7 +335,7 @@ describe('DeviceKeyWorker Test Suite', () => {
       it('calls through everything expected', async () => {
         when(
           mockKeyManager.decryptWithPrivateKey(anything(), anything()),
-        ).thenResolve(new TextEncoder().encode('cipherKey'))
+        ).thenResolve(new TextEncoder().encode('cipherKey').buffer)
         await expect(
           instanceUnderTest.unsealString({
             encrypted: btoa(`${new Array(256 + 1).join('0')}aabbccddeeff`),
@@ -351,7 +355,7 @@ describe('DeviceKeyWorker Test Suite', () => {
           (c) => c.charCodeAt(0),
         )
         // This is expected due to the way buffers need to be converted from Buffer -> ArrayBuffer
-        expect(encrypted).toStrictEqual(expectedBuffer)
+        expect(encrypted).toStrictEqual(expectedBuffer.buffer)
         verify(
           mockKeyManager.decryptWithSymmetricKey(
             anything(),
@@ -362,11 +366,13 @@ describe('DeviceKeyWorker Test Suite', () => {
         const [cipherKey, encryptedData] = capture(
           mockKeyManager.decryptWithSymmetricKey,
         ).first()
-        expect(cipherKey).toStrictEqual(new TextEncoder().encode('cipherKey'))
+        expect(cipherKey).toStrictEqual(
+          new TextEncoder().encode('cipherKey').buffer,
+        )
         const expectedEncryptedData = Uint8Array.from('aabbccddeeff', (c) =>
           c.charCodeAt(0),
         )
-        expect(encryptedData).toStrictEqual(expectedEncryptedData)
+        expect(encryptedData).toStrictEqual(expectedEncryptedData.buffer)
       })
     })
     describe('keyType == SymmetricKey', () => {
@@ -377,7 +383,7 @@ describe('DeviceKeyWorker Test Suite', () => {
             anything(),
             anything() as SymmetricEncryptionOptions,
           ),
-        ).thenResolve(new TextEncoder().encode('aa'))
+        ).thenResolve(new TextEncoder().encode('aa').buffer)
       })
       it('calls keyManager.decryptWithSymmetricKeyName correctly', async () => {
         await instanceUnderTest.unsealString({
@@ -423,9 +429,9 @@ describe('DeviceKeyWorker Test Suite', () => {
   describe('signString', () => {
     const keyId = 'key-id'
     const stringToSign = 'string-to-sign'
-    const bufferToSign = uint8ArrayFromString(stringToSign)
+    const bufferToSign = arrayBufferFromString(stringToSign)
     const signatureString = 'signature'
-    const signature = uint8ArrayFromString(signatureString)
+    const signature = arrayBufferFromString(signatureString)
     const signatureBase64 = Base64.encode(signature)
 
     it.each`

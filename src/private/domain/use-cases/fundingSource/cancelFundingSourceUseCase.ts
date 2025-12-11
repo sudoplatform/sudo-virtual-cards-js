@@ -31,16 +31,14 @@ interface BaseCancelFundingSourceUseCaseOutput {
   currency: string
 }
 
-interface CancelCreditCardFundingSourceUseCaseOutput
-  extends BaseCancelFundingSourceUseCaseOutput {
+interface CancelCreditCardFundingSourceUseCaseOutput extends BaseCancelFundingSourceUseCaseOutput {
   type: FundingSourceType.CreditCard
   last4: string
   network: CreditCardNetwork
   cardType: CardType
 }
 
-interface CancelBankAccountFundingSourceUseCaseOutput
-  extends BaseCancelFundingSourceUseCaseOutput {
+interface CancelBankAccountFundingSourceUseCaseOutput extends BaseCancelFundingSourceUseCaseOutput {
   type: FundingSourceType.BankAccount
   bankAccountType: BankAccountType
   last4: string

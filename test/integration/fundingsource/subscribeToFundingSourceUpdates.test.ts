@@ -6,7 +6,7 @@
 
 import { DefaultLogger, PublicKeyFormat } from '@sudoplatform/sudo-common'
 import { SudoUserClient } from '@sudoplatform/sudo-user'
-import { Observable } from 'apollo-client/util/Observable'
+import Observable from 'zen-observable'
 import { anything, instance, mock, when } from 'ts-mockito'
 import { v4 } from 'uuid'
 import waitForExpect from 'wait-for-expect'
@@ -309,7 +309,7 @@ describe('SudoVirtualCardsClient SubscribeToFundingSourceUpdates Test Suite', ()
         message: 'message',
         statusCode: 401,
       }
-      when(mockAppSync.onFundingSourceUpdate(anything())).thenReturn(
+      when(mockAppSync.onFundingSourceUpdate(anything())).thenResolve(
         new Observable((observer) => {
           observer.error(networkError)
         }),
@@ -317,7 +317,7 @@ describe('SudoVirtualCardsClient SubscribeToFundingSourceUpdates Test Suite', ()
       let latestConnectionStatus: ConnectionState = ConnectionState.Disconnected
       let connectionStatusChangedCalled = false
 
-      fundingSourceService.subscribeToFundingSourceChanges({
+      await fundingSourceService.subscribeToFundingSourceChanges({
         owner: 'owner-id',
         id: 'subscribe-id',
         subscriber: {

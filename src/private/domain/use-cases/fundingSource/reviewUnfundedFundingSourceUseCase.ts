@@ -31,16 +31,14 @@ interface BaseReviewFundingSourceUseCaseOutput {
   currency: string
 }
 
-interface ReviewCreditCardFundingSourceUseCaseOutput
-  extends BaseReviewFundingSourceUseCaseOutput {
+interface ReviewCreditCardFundingSourceUseCaseOutput extends BaseReviewFundingSourceUseCaseOutput {
   type: FundingSourceType.CreditCard
   last4: string
   network: CreditCardNetwork
   cardType: CardType
 }
 
-interface ReviewBankAccountFundingSourceUseCaseOutput
-  extends BaseReviewFundingSourceUseCaseOutput {
+interface ReviewBankAccountFundingSourceUseCaseOutput extends BaseReviewFundingSourceUseCaseOutput {
   type: FundingSourceType.BankAccount
   bankAccountType: BankAccountType
   last4: string

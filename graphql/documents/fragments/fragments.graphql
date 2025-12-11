@@ -42,6 +42,7 @@ fragment ProvisionalFundingSource on ProvisionalFundingSource {
 }
 
 fragment CreditCardFundingSource on CreditCardFundingSource {
+  __typename
   id
   owner
   version
@@ -60,6 +61,7 @@ fragment CreditCardFundingSource on CreditCardFundingSource {
 }
 
 fragment BankAccountFundingSource on BankAccountFundingSource {
+  __typename
   id
   owner
   version

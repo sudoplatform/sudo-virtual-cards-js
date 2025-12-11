@@ -19,10 +19,11 @@ import {
 import { DefaultSudoSecureIdVerificationClient } from '@sudoplatform/sudo-secure-id-verification'
 import {
   DefaultSudoUserClient,
+  GraphQLClient,
   TESTAuthenticationProvider,
+  internal,
+  GraphQLClientAuthMode,
 } from '@sudoplatform/sudo-user'
-import { NormalizedCacheObject } from 'apollo-cache-inmemory'
-import AWSAppSyncClient, { AUTH_TYPE } from 'aws-appsync'
 import fs from 'fs'
 import * as t from 'io-ts'
 import Stripe from 'stripe'
@@ -68,20 +69,17 @@ const SimApiConfig = t.type({
 })
 type SimApiConfig = t.TypeOf<typeof SimApiConfig>
 
-const setupApiClient = (): AWSAppSyncClient<NormalizedCacheObject> => {
+const setupApiClient = (): GraphQLClient => {
   const config =
     DefaultConfigurationManager.getInstance().bindConfigSet<SimApiConfig>(
       SimApiConfig,
       'vcSimulator',
     )
-  return new AWSAppSyncClient({
-    disableOffline: true,
-    url: config.apiUrl,
+  return new internal.AmplifyClient({
+    graphqlUrl: config.apiUrl,
     region: config.region,
-    auth: {
-      type: AUTH_TYPE.API_KEY,
-      apiKey: config.apiKey,
-    },
+    authMode: GraphQLClientAuthMode.ApiKey,
+    apiKey: config.apiKey,
   })
 }
 
@@ -177,7 +175,7 @@ export const setupVirtualCardsSimulatorClient = async (
     })
     await userClient.refreshTokens(tokens.refreshToken)
     const virtualCardsSimulatorClient =
-      new DefaultSudoVirtualCardsSimulatorClient({ appSyncClient: client })
+      new DefaultSudoVirtualCardsSimulatorClient({ graphQLClient: client })
 
     const options: SudoVirtualCardsClientOptions = {
       sudoUserClient: userClient,

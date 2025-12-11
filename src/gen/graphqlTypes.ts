@@ -864,7 +864,7 @@ export type ProvisionalFundingSourceFragment = {
 }
 
 export type CreditCardFundingSourceFragment = {
-  __typename?: 'CreditCardFundingSource'
+  __typename: 'CreditCardFundingSource'
   id: string
   owner: string
   version: number
@@ -884,7 +884,7 @@ export type CreditCardFundingSourceFragment = {
 }
 
 export type BankAccountFundingSourceFragment = {
-  __typename?: 'BankAccountFundingSource'
+  __typename: 'BankAccountFundingSource'
   id: string
   owner: string
   version: number
@@ -1307,7 +1307,7 @@ export type CompleteFundingSourceMutation = {
   __typename?: 'Mutation'
   completeFundingSource:
     | {
-        __typename?: 'BankAccountFundingSource'
+        __typename: 'BankAccountFundingSource'
         id: string
         owner: string
         version: number
@@ -1354,7 +1354,7 @@ export type CompleteFundingSourceMutation = {
         } | null
       }
     | {
-        __typename?: 'CreditCardFundingSource'
+        __typename: 'CreditCardFundingSource'
         id: string
         owner: string
         version: number
@@ -1382,7 +1382,7 @@ export type RefreshFundingSourceMutation = {
   __typename?: 'Mutation'
   refreshFundingSource:
     | {
-        __typename?: 'BankAccountFundingSource'
+        __typename: 'BankAccountFundingSource'
         id: string
         owner: string
         version: number
@@ -1429,7 +1429,7 @@ export type RefreshFundingSourceMutation = {
         } | null
       }
     | {
-        __typename?: 'CreditCardFundingSource'
+        __typename: 'CreditCardFundingSource'
         id: string
         owner: string
         version: number
@@ -1457,7 +1457,7 @@ export type CancelFundingSourceMutation = {
   __typename?: 'Mutation'
   cancelFundingSource:
     | {
-        __typename?: 'BankAccountFundingSource'
+        __typename: 'BankAccountFundingSource'
         id: string
         owner: string
         version: number
@@ -1504,7 +1504,7 @@ export type CancelFundingSourceMutation = {
         } | null
       }
     | {
-        __typename?: 'CreditCardFundingSource'
+        __typename: 'CreditCardFundingSource'
         id: string
         owner: string
         version: number
@@ -1551,7 +1551,7 @@ export type ReviewUnfundedFundingSourceMutation = {
   __typename?: 'Mutation'
   reviewUnfundedFundingSource:
     | {
-        __typename?: 'BankAccountFundingSource'
+        __typename: 'BankAccountFundingSource'
         id: string
         owner: string
         version: number
@@ -1598,7 +1598,7 @@ export type ReviewUnfundedFundingSourceMutation = {
         } | null
       }
     | {
-        __typename?: 'CreditCardFundingSource'
+        __typename: 'CreditCardFundingSource'
         id: string
         owner: string
         version: number
@@ -1893,7 +1893,7 @@ export type SandboxSetFundingSourceToRequireRefreshMutation = {
   __typename?: 'Mutation'
   sandboxSetFundingSourceToRequireRefresh:
     | {
-        __typename?: 'BankAccountFundingSource'
+        __typename: 'BankAccountFundingSource'
         id: string
         owner: string
         version: number
@@ -1940,7 +1940,7 @@ export type SandboxSetFundingSourceToRequireRefreshMutation = {
         } | null
       }
     | {
-        __typename?: 'CreditCardFundingSource'
+        __typename: 'CreditCardFundingSource'
         id: string
         owner: string
         version: number
@@ -2124,7 +2124,7 @@ export type GetFundingSourceQuery = {
   __typename?: 'Query'
   getFundingSource?:
     | {
-        __typename?: 'BankAccountFundingSource'
+        __typename: 'BankAccountFundingSource'
         id: string
         owner: string
         version: number
@@ -2171,7 +2171,7 @@ export type GetFundingSourceQuery = {
         } | null
       }
     | {
-        __typename?: 'CreditCardFundingSource'
+        __typename: 'CreditCardFundingSource'
         id: string
         owner: string
         version: number
@@ -2206,7 +2206,7 @@ export type ListFundingSourcesQuery = {
     nextToken?: string | null
     items: Array<
       | {
-          __typename?: 'BankAccountFundingSource'
+          __typename: 'BankAccountFundingSource'
           id: string
           owner: string
           version: number
@@ -2253,7 +2253,7 @@ export type ListFundingSourcesQuery = {
           } | null
         }
       | {
-          __typename?: 'CreditCardFundingSource'
+          __typename: 'CreditCardFundingSource'
           id: string
           owner: string
           version: number
@@ -2954,7 +2954,7 @@ export type OnFundingSourceUpdateSubscription = {
   __typename?: 'Subscription'
   onFundingSourceUpdate?:
     | {
-        __typename?: 'BankAccountFundingSource'
+        __typename: 'BankAccountFundingSource'
         id: string
         owner: string
         version: number
@@ -3001,7 +3001,7 @@ export type OnFundingSourceUpdateSubscription = {
         } | null
       }
     | {
-        __typename?: 'CreditCardFundingSource'
+        __typename: 'CreditCardFundingSource'
         id: string
         owner: string
         version: number
@@ -3144,6 +3144,7 @@ export const CreditCardFundingSourceFragmentDoc = {
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
+          { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
           { kind: 'Field', name: { kind: 'Name', value: 'version' } },
@@ -3209,6 +3210,7 @@ export const BankAccountFundingSourceFragmentDoc = {
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
+          { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
           { kind: 'Field', name: { kind: 'Name', value: 'version' } },
@@ -4783,6 +4785,7 @@ export const CompleteFundingSourceDocument = {
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
+          { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
           { kind: 'Field', name: { kind: 'Name', value: 'version' } },
@@ -4818,6 +4821,7 @@ export const CompleteFundingSourceDocument = {
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
+          { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
           { kind: 'Field', name: { kind: 'Name', value: 'version' } },
@@ -5016,6 +5020,7 @@ export const RefreshFundingSourceDocument = {
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
+          { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
           { kind: 'Field', name: { kind: 'Name', value: 'version' } },
@@ -5051,6 +5056,7 @@ export const RefreshFundingSourceDocument = {
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
+          { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
           { kind: 'Field', name: { kind: 'Name', value: 'version' } },
@@ -5249,6 +5255,7 @@ export const CancelFundingSourceDocument = {
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
+          { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
           { kind: 'Field', name: { kind: 'Name', value: 'version' } },
@@ -5284,6 +5291,7 @@ export const CancelFundingSourceDocument = {
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
+          { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
           { kind: 'Field', name: { kind: 'Name', value: 'version' } },
@@ -5560,6 +5568,7 @@ export const ReviewUnfundedFundingSourceDocument = {
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
+          { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
           { kind: 'Field', name: { kind: 'Name', value: 'version' } },
@@ -5595,6 +5604,7 @@ export const ReviewUnfundedFundingSourceDocument = {
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
+          { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
           { kind: 'Field', name: { kind: 'Name', value: 'version' } },
@@ -6876,6 +6886,7 @@ export const SandboxSetFundingSourceToRequireRefreshDocument = {
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
+          { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
           { kind: 'Field', name: { kind: 'Name', value: 'version' } },
@@ -6911,6 +6922,7 @@ export const SandboxSetFundingSourceToRequireRefreshDocument = {
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
+          { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
           { kind: 'Field', name: { kind: 'Name', value: 'version' } },
@@ -7799,6 +7811,7 @@ export const GetFundingSourceDocument = {
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
+          { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
           { kind: 'Field', name: { kind: 'Name', value: 'version' } },
@@ -7834,6 +7847,7 @@ export const GetFundingSourceDocument = {
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
+          { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
           { kind: 'Field', name: { kind: 'Name', value: 'version' } },
@@ -8096,6 +8110,7 @@ export const ListFundingSourcesDocument = {
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
+          { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
           { kind: 'Field', name: { kind: 'Name', value: 'version' } },
@@ -8131,6 +8146,7 @@ export const ListFundingSourcesDocument = {
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
+          { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
           { kind: 'Field', name: { kind: 'Name', value: 'version' } },
@@ -11052,6 +11068,7 @@ export const OnFundingSourceUpdateDocument = {
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
+          { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
           { kind: 'Field', name: { kind: 'Name', value: 'version' } },
@@ -11087,6 +11104,7 @@ export const OnFundingSourceUpdateDocument = {
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
+          { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
           { kind: 'Field', name: { kind: 'Name', value: 'id' } },
           { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
           { kind: 'Field', name: { kind: 'Name', value: 'version' } },
