@@ -15,7 +15,11 @@ import {
   SudoCryptoProvider,
   SudoKeyManager,
 } from '@sudoplatform/sudo-common'
-import { SudoUserClient } from '@sudoplatform/sudo-user'
+import {
+  SudoUserClient,
+  SudoPlatformSignInCallback,
+  SignInGuard,
+} from '@sudoplatform/sudo-user'
 import { WebSudoCryptoProvider } from '@sudoplatform/sudo-web-crypto-provider'
 import { Mutex } from 'async-mutex'
 import { ApiClient } from '../private/data/common/apiClient'
@@ -868,6 +872,21 @@ export interface SudoVirtualCardsClient {
   importKeys(archiveData: ArrayBuffer): Promise<void>
 
   /**
+   * Sets an optional callback to handle sign-in when operations are attempted
+   * while not signed in.
+   *
+   * When set, all operations (exception subscriptions and initialization/reset) will
+   * check sign-in status before performing their normal behavior. If the client is
+   * not signed in, the callback will be invoked to allow the host app to perform
+   * sign-in. Once the callback completes, then the client will attempt the original
+   * operation that triggered the callback.
+   * If the callback throws an error, then the error will be propagated to the caller
+   * and the original operation will not be attempted.
+   * To clear the callback, call this method with no arguments or undefined.
+   */
+  setSignInCallback(callback?: SudoPlatformSignInCallback): void
+
+  /**
    * Removes any cached data maintained by this client.
    */
   reset(): Promise<void>
@@ -886,6 +905,7 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
   private readonly keyManager: SudoKeyManager
   private readonly cryptoProvider: SudoCryptoProvider
   private readonly sudoUserClient: SudoUserClient
+  private readonly signInGuard: SignInGuard
 
   private readonly log: Logger
   private readonly serialise: Mutex
@@ -935,10 +955,17 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
       this.transactionWorker,
     )
     this.sudoUserService = new DefaultSudoUserService(this.sudoUserClient)
+    this.signInGuard = new SignInGuard(this.sudoUserClient)
+
     if (!DefaultConfigurationManager.getInstance().getConfigSet('vcService')) {
       throw new VirtualCardsServiceConfigNotFoundError()
     }
   }
+
+  public setSignInCallback(callback?: SudoPlatformSignInCallback): void {
+    this.signInGuard.setCallback(callback)
+  }
+
   /**
    * Create key pair and secret key for use by the Virtual Cards Client if
    * they have not already been created.
@@ -963,6 +990,7 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
   public async getFundingSourceClientConfiguration(): Promise<
     FundingSourceClientConfiguration[]
   > {
+    await this.ensureSignedIn()
     const useCase = new GetFundingSourceClientConfigurationUseCase(
       this.fundingSourceService,
     )
@@ -976,6 +1004,7 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
   public async setupFundingSource(
     input: SetupFundingSourceInput,
   ): Promise<ProvisionalFundingSource> {
+    await this.ensureSignedIn()
     return this.serialise.runExclusive(async () => {
       const useCase = new SetupFundingSourceUseCase(
         this.fundingSourceService,
@@ -989,6 +1018,7 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
   public async completeFundingSource(
     input: CompleteFundingSourceInput,
   ): Promise<FundingSource> {
+    await this.ensureSignedIn()
     return this.serialise.runExclusive(async () => {
       const useCase = new CompleteFundingSourceUseCase(
         this.fundingSourceService,
@@ -1001,6 +1031,7 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
   public async refreshFundingSource(
     input: RefreshFundingSourceInput,
   ): Promise<FundingSource> {
+    await this.ensureSignedIn()
     return this.serialise.runExclusive(async () => {
       const useCase = new RefreshFundingSourceUseCase(
         this.fundingSourceService,
@@ -1032,6 +1063,7 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
     id,
     cachePolicy,
   }: GetFundingSourceInput): Promise<FundingSource | undefined> {
+    await this.ensureSignedIn()
     this.log.debug(this.getFundingSource.name, {
       id,
       cachePolicy,
@@ -1050,6 +1082,7 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
   public async listFundingSources(
     input?: ListFundingSourcesInput,
   ): Promise<ListOutput<FundingSource>> {
+    await this.ensureSignedIn()
     const filterInput = input?.filter
     const sortOrder = input?.sortOrder
     const cachePolicy = input?.cachePolicy
@@ -1081,6 +1114,7 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
   }
 
   public async cancelFundingSource(id: string): Promise<FundingSource> {
+    await this.ensureSignedIn()
     return this.serialise.runExclusive(async () => {
       this.log.debug(this.cancelFundingSource.name, {
         id,
@@ -1094,6 +1128,7 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
   }
 
   public async reviewUnfundedFundingSource(id: string): Promise<FundingSource> {
+    await this.ensureSignedIn()
     return this.serialise.runExclusive(async () => {
       this.log.debug(this.reviewUnfundedFundingSource.name, {
         id,
@@ -1109,7 +1144,8 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
   public async cancelProvisionalFundingSource(
     id: string,
   ): Promise<ProvisionalFundingSource> {
-    this.log.debug(this.listProvisionalFundingSources.name, {
+    await this.ensureSignedIn()
+    this.log.debug(this.cancelProvisionalFundingSource.name, {
       id,
     })
     const useCase = new CancelProvisionalFundingSourceUseCase(
@@ -1126,6 +1162,7 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
   public async listProvisionalFundingSources(
     input: ListProvisionalFundingSourcesInput,
   ): Promise<ListOutput<ProvisionalFundingSource>> {
+    await this.ensureSignedIn()
     this.log.debug(this.listProvisionalFundingSources.name, {
       input,
     })
@@ -1147,6 +1184,7 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
   public async provisionVirtualCard(
     input: ProvisionVirtualCardInput,
   ): Promise<ProvisionalVirtualCard> {
+    await this.ensureSignedIn()
     return this.serialise.runExclusive(async () => {
       const useCase = new ProvisionVirtualCardUseCase(
         this.virtualCardService,
@@ -1159,6 +1197,7 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
   public async updateVirtualCard(
     input: UpdateVirtualCardInput,
   ): Promise<APIResult<VirtualCard, VirtualCardSealedAttributes>> {
+    await this.ensureSignedIn()
     return this.serialise.runExclusive(async () => {
       const useCase = new UpdateVirtualCardUseCase(
         this.virtualCardService,
@@ -1171,6 +1210,7 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
   public async cancelVirtualCard(
     input: CancelVirtualCardInput,
   ): Promise<APIResult<VirtualCard, VirtualCardSealedAttributes>> {
+    await this.ensureSignedIn()
     return this.serialise.runExclusive(async () => {
       const useCase = new CancelVirtualCardUseCase(
         this.virtualCardService,
@@ -1184,6 +1224,7 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
     id,
     cachePolicy,
   }: GetProvisionalCardInput): Promise<ProvisionalVirtualCard | undefined> {
+    await this.ensureSignedIn()
     return this.serialise.runExclusive(async () => {
       const useCase = new GetProvisionalCardUseCase(
         this.virtualCardService,
@@ -1193,9 +1234,10 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
     })
   }
 
-  async listProvisionalCards(
+  public async listProvisionalCards(
     input: ListProvisionalCardsInput,
   ): Promise<ListProvisionalCardsResults> {
+    await this.ensureSignedIn()
     return this.serialise.runExclusive(async () => {
       const useCase = new ListProvisionalCardsUseCase(
         this.virtualCardService,
@@ -1205,10 +1247,11 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
     })
   }
 
-  async getVirtualCard({
+  public async getVirtualCard({
     id,
     cachePolicy,
   }: GetVirtualCardInput): Promise<VirtualCard | undefined> {
+    await this.ensureSignedIn()
     return this.serialise.runExclusive(async () => {
       const useCase = new GetVirtualCardUseCase(
         this.virtualCardService,
@@ -1218,9 +1261,10 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
     })
   }
 
-  async listVirtualCards(
+  public async listVirtualCards(
     input: ListVirtualCardsInput,
   ): Promise<ListVirtualCardsResults> {
+    await this.ensureSignedIn()
     const filterInput = input?.filter
     const sortOrder = input?.sortOrder
     const cachePolicy = input?.cachePolicy
@@ -1242,9 +1286,10 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
     })
   }
 
-  async getTransaction(
+  public async getTransaction(
     input: GetTransactionInput,
   ): Promise<Transaction | undefined> {
+    await this.ensureSignedIn()
     return this.serialise.runExclusive(async () => {
       const useCase = new GetTransactionUseCase(
         this.transactionService,
@@ -1254,9 +1299,10 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
     })
   }
 
-  async listTransactions(
+  public async listTransactions(
     input: ListTransactionsInput,
   ): Promise<ListTransactionsResults> {
+    await this.ensureSignedIn()
     return this.serialise.runExclusive(async () => {
       const useCase = new ListTransactionsUseCase(
         this.transactionService,
@@ -1266,9 +1312,10 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
     })
   }
 
-  async listTransactionsByCardId(
+  public async listTransactionsByCardId(
     input: ListTransactionsByCardIdInput,
   ): Promise<ListTransactionsResults> {
+    await this.ensureSignedIn()
     return this.serialise.runExclusive(async () => {
       const useCase = new ListTransactionsByCardIdUseCase(
         this.transactionService,
@@ -1278,9 +1325,10 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
     })
   }
 
-  async listTransactionsByCardIdAndType(
+  public async listTransactionsByCardIdAndType(
     input: ListTransactionsByCardIdAndTypeInput,
   ): Promise<ListTransactionsResults> {
+    await this.ensureSignedIn()
     return this.serialise.runExclusive(async () => {
       const useCase = new ListTransactionsByCardIdAndTypeUseCase(
         this.transactionService,
@@ -1290,7 +1338,8 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
     })
   }
 
-  async getVirtualCardsConfig(): Promise<VirtualCardsConfig> {
+  public async getVirtualCardsConfig(): Promise<VirtualCardsConfig> {
+    await this.ensureSignedIn()
     const useCase = new GetVirtualCardsConfigUseCase(
       this.configurationDataService,
       this.sudoUserService,
@@ -1299,9 +1348,10 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
     return VirtualCardsConfigAPITransformer.transformEntity(result)
   }
 
-  async sandboxGetPlaidData(
+  public async sandboxGetPlaidData(
     input: SandboxGetPlaidDataInput,
   ): Promise<SandboxPlaidData> {
+    await this.ensureSignedIn()
     return this.serialise.runExclusive(async () => {
       const useCase = new SandboxGetPlaidDataUseCase(
         this.fundingSourceService,
@@ -1311,9 +1361,10 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
     })
   }
 
-  async sandboxSetFundingSourceToRequireRefresh(
+  public async sandboxSetFundingSourceToRequireRefresh(
     input: SandboxSetFundingSourceToRequireRefreshInput,
   ): Promise<FundingSource> {
+    await this.ensureSignedIn()
     return this.serialise.runExclusive(async () => {
       const useCase = new SandboxSetFundingSourceToRequireRefreshUseCase(
         this.fundingSourceService,
@@ -1323,15 +1374,25 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
     })
   }
 
-  async exportKeys(): Promise<ArrayBuffer> {
+  public async exportKeys(): Promise<ArrayBuffer> {
     return await this.keyService.exportKeys()
   }
 
-  async importKeys(archiveData: ArrayBuffer): Promise<void> {
+  public async importKeys(archiveData: ArrayBuffer): Promise<void> {
     await this.keyService.importKeys(archiveData)
   }
 
-  async reset(): Promise<void> {
+  public async reset(): Promise<void> {
     await this.keyManager.removeAllKeys()
+  }
+
+  /**
+   * Checks if user is signed in and invokes callback if needed.
+   * Only performs check if callback is configured.
+   *
+   * Throws: Any error thrown by the sign-in callback
+   */
+  private async ensureSignedIn(): Promise<void> {
+    await this.signInGuard.ensureSignedIn()
   }
 }

@@ -3,20 +3,52 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-
+import JSDOMEnvironment from 'jest-environment-jsdom'
 import { TextDecoder, TextEncoder } from 'util'
-// Workaround for `jsdom` test environment not providing TextEncoder and
-// TextDecoder.
-global.TextEncoder = TextEncoder as typeof global.TextEncoder
-global.TextDecoder = TextDecoder as typeof global.TextDecoder
+import waitForExpect from 'wait-for-expect'
+import { setImmediate } from 'timers'
+import dotenv from 'dotenv'
+import { webcrypto } from 'crypto'
 
-// [START] - Polyfills
-global.fetch = require('node-fetch')
-require('isomorphic-fetch')
-// jsdom does some crypto polyfill magic but we want to use crypto.subtle so we need to add it back in
-const localCrypto = require('crypto').webcrypto
-global.crypto = localCrypto
-// @ts-ignore
-global.crypto.subtle = localCrypto.subtle
+dotenv.config({ quiet: true })
 
-// [END] - Polyfills
+waitForExpect.defaults.interval = 500
+waitForExpect.defaults.timeout = 30000
+
+global.setImmediate = setImmediate
+
+export default class JSDomEnvironmentPlusMissing extends JSDOMEnvironment {
+  constructor(...args: ConstructorParameters<typeof JSDOMEnvironment>) {
+    super(...args)
+
+    // Workaround for `jsdom` test environment not providing structuredClone.
+    this.global.structuredClone = structuredClone
+    // Workaround for `jsdom` test environment not providing TextEncoder and
+    // TextDecoder.
+    this.global.TextEncoder = TextEncoder as typeof global.TextEncoder
+    this.global.TextDecoder = TextDecoder as typeof global.TextDecoder
+
+    // Add proper crypto support for v17 sudo-user JWT operations
+    if (!this.global.crypto || !this.global.crypto.subtle) {
+      Object.defineProperty(this.global, 'crypto', {
+        value: webcrypto,
+        writable: true,
+        configurable: true,
+      })
+    }
+
+    // Ensure proper fetch support
+    if (!this.global.fetch) {
+      Object.defineProperty(this.global, 'fetch', {
+        value: require('node-fetch'),
+        writable: true,
+        configurable: true,
+      })
+    }
+
+    // Fix Uint8Array for jose library compatibility
+    // jose requires actual Uint8Array instances, not jsdom's version
+    this.global.Uint8Array = Uint8Array
+    this.global.ArrayBuffer = ArrayBuffer
+  }
+}

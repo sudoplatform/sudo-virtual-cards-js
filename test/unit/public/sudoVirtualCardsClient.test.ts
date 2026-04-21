@@ -336,6 +336,17 @@ describe('SudoVirtualCardsClient Test Suite', () => {
   const mockSandboxSetFundingSourceToRequireRefreshUseCase =
     mock<SandboxSetFundingSourceToRequireRefreshUseCase>()
 
+  const spyOnEnsureSignedIn = (
+    instanceUnderTest: SudoVirtualCardsClient,
+  ): jest.SpyInstance => {
+    const ensureSignedInSpy = jest.spyOn(
+      instanceUnderTest as any,
+      'ensureSignedIn',
+    )
+    ensureSignedInSpy.mockResolvedValue(undefined)
+    return ensureSignedInSpy
+  }
+
   let instanceUnderTest: SudoVirtualCardsClient
 
   const resetMocks = (): void => {
@@ -626,12 +637,21 @@ describe('SudoVirtualCardsClient Test Suite', () => {
         EntityDataFactory.defaultFundingSource,
       )
     })
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
     it('generates use case', async () => {
+      // Spy on the private ensureSignedIn method to verify it's called
+      const ensureSignedInSpy = spyOnEnsureSignedIn(instanceUnderTest)
+
       await instanceUnderTest.completeFundingSource({
         id: '',
         completionData: { provider: 'stripe', paymentMethod: '' },
       })
       expect(JestMockCompleteFundingSourceUseCase).toHaveBeenCalledTimes(1)
+      // Verify that ensureSignedIn was called
+      expect(ensureSignedInSpy).toHaveBeenCalledTimes(1)
+      expect(ensureSignedInSpy).toHaveBeenCalledWith()
     })
     it('calls use case as expected for credit card', async () => {
       const id = v4()
@@ -727,7 +747,13 @@ describe('SudoVirtualCardsClient Test Suite', () => {
         EntityDataFactory.defaultFundingSource,
       )
     })
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
     it('generates use case', async () => {
+      // Spy on the private ensureSignedIn method to verify it's called
+      const ensureSignedInSpy = spyOnEnsureSignedIn(instanceUnderTest)
+
       await instanceUnderTest.refreshFundingSource({
         id: '',
         refreshData: {
@@ -738,6 +764,9 @@ describe('SudoVirtualCardsClient Test Suite', () => {
         },
       })
       expect(JestMockRefreshFundingSourceUseCase).toHaveBeenCalledTimes(1)
+      // Verify that ensureSignedIn was called
+      expect(ensureSignedInSpy).toHaveBeenCalledTimes(1)
+      expect(ensureSignedInSpy).toHaveBeenCalledWith()
     })
     it('calls use case as expected for bank account', async () => {
       const id = v4()
@@ -867,12 +896,21 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       )
       when(mockSudoUserClient.isSignedIn()).thenResolve(true)
     })
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
     it('generates use case', async () => {
+      // Spy on the private ensureSignedIn method to verify it's called
+      const ensureSignedInSpy = spyOnEnsureSignedIn(instanceUnderTest)
+
       await instanceUnderTest.getFundingSource({
         id: '',
         cachePolicy: CachePolicy.CacheOnly,
       })
       expect(JestMockGetFundingSourceUseCase).toHaveBeenCalledTimes(1)
+      // Verify that ensureSignedIn was called
+      expect(ensureSignedInSpy).toHaveBeenCalledTimes(1)
+      expect(ensureSignedInSpy).toHaveBeenCalledWith()
     })
     it('calls use case as expected', async () => {
       const id = v4()
@@ -1119,7 +1157,13 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       )
       when(mockSudoUserClient.isSignedIn()).thenResolve(true)
     })
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
     it('generates use case', async () => {
+      // Spy on the private ensureSignedIn method to verify it's called
+      const ensureSignedInSpy = spyOnEnsureSignedIn(instanceUnderTest)
+
       await instanceUnderTest.provisionVirtualCard({
         ownershipProofs: [],
         fundingSourceId: '',
@@ -1128,6 +1172,9 @@ describe('SudoVirtualCardsClient Test Suite', () => {
         currency: '',
       })
       expect(JestMockProvisionVirtualCardUseCase).toHaveBeenCalledTimes(1)
+      // Verify that ensureSignedIn was called
+      expect(ensureSignedInSpy).toHaveBeenCalledTimes(1)
+      expect(ensureSignedInSpy).toHaveBeenCalledWith()
     })
     it('calls use case as expected', async () => {
       const clientRefId = v4()
@@ -1303,9 +1350,18 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       })
       when(mockSudoUserClient.isSignedIn()).thenResolve(true)
     })
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
     it('generates use case', async () => {
+      // Spy on the private ensureSignedIn method to verify it's called
+      const ensureSignedInSpy = spyOnEnsureSignedIn(instanceUnderTest)
+
       await instanceUnderTest.listProvisionalCards()
       expect(JestMockListProvisionalCardsUseCase).toHaveBeenCalledTimes(1)
+      // Verify that ensureSignedIn was called
+      expect(ensureSignedInSpy).toHaveBeenCalledTimes(1)
+      expect(ensureSignedInSpy).toHaveBeenCalledWith()
     })
     it('calls use case as expected', async () => {
       const limit = 23

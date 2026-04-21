@@ -34,6 +34,15 @@ describe('SudoVirtualCardsClient SetupFundingSource Test Suite', () => {
 
   describe('SetupFundingSource', () => {
     it('returns expected output', async () => {
+      // Set up callback to track sign-in guard behavior
+      let callbackExecuted = false
+      instanceUnderTest.setSignInCallback({
+        signIn: async () => {
+          callbackExecuted = true
+          await Promise.resolve()
+        },
+      })
+
       const result = await instanceUnderTest.setupFundingSource({
         currency: 'USD',
         type: FundingSourceType.CreditCard,
@@ -49,6 +58,9 @@ describe('SudoVirtualCardsClient SetupFundingSource Test Suite', () => {
         version: 1,
         provider: defaultFsClientConfig.type,
       })
+      // Verify that ensureSignedIn was called (callback should not execute in normal flow)
+      // Since user is already signed in during integration tests, callback should not be called
+      expect(callbackExecuted).toBe(false)
     })
 
     it('throws an error', async () => {
@@ -59,6 +71,49 @@ describe('SudoVirtualCardsClient SetupFundingSource Test Suite', () => {
           applicationName: 'system-test-app',
         }),
       ).rejects.toThrow()
+    })
+
+    it('executes sign-in callback when ensureSignedIn is triggered', async () => {
+      let callbackInvocations = 0
+      let callbackError: Error | undefined
+      const signInDelegate = async () => {
+        // Re-sign in the user since we signed them out for this test
+        try {
+          callbackInvocations++
+          await userClient.signInWithKey()
+        } catch (error) {
+          callbackError = error as Error
+          throw error
+        }
+      }
+
+      // Set up callback to track when it gets executed
+      instanceUnderTest.setSignInCallback({
+        signIn: signInDelegate,
+      })
+
+      // Sign out the user to trigger the callback
+      await userClient.globalSignOut()
+
+      try {
+        // This should trigger the ensureSignedIn callback
+        const result = await instanceUnderTest.setupFundingSource({
+          currency: 'USD',
+          type: FundingSourceType.CreditCard,
+          applicationName: 'system-test-app',
+        })
+
+        // Verify the callback was executed and successful
+        expect(callbackInvocations).toBe(1)
+        expect(callbackError).toBeUndefined()
+        expect(result.state).toBe(ProvisionalFundingSourceState.Provisioning)
+      } catch (error) {
+        // If test fails, make sure we're signed back in for cleanup
+        if (!callbackInvocations) {
+          await userClient.signInWithKey()
+        }
+        throw error
+      }
     })
 
     describe('checkout specific tests', () => {

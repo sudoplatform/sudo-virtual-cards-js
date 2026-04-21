@@ -21,6 +21,7 @@ import { FundingSourceProviders } from '../util/getFundingSourceProviders'
 import { provisionVirtualCard } from '../util/provisionVirtualCard'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 import { runTestsIfSimulatorAvailable } from '../util/runTestsIf'
+import { SudoUserClient } from '@sudoplatform/sudo-user'
 
 describe('ListTransactions Test Suite', () => {
   jest.setTimeout(240000)
@@ -32,6 +33,7 @@ describe('ListTransactions Test Suite', () => {
   let optionalSimulator: SudoVirtualCardsSimulatorClient | undefined
   let profilesClient: SudoProfilesClient
   let fundingSourceProviders: FundingSourceProviders
+  let userClient: SudoUserClient
 
   let sudo: Sudo
 
@@ -39,6 +41,7 @@ describe('ListTransactions Test Suite', () => {
     const result = await setupVirtualCardsClient(log)
     instanceUnderTest = result.virtualCardsClient
     profilesClient = result.profilesClient
+    userClient = result.userClient
     sudo = result.sudo
     fundingSourceProviders = result.fundingSourceProviders
     optionalSimulator = result.virtualCardsSimulatorClient!
@@ -157,6 +160,15 @@ describe('ListTransactions Test Suite', () => {
         })
 
         it('returns expected result', async () => {
+          // Set up callback to track sign-in guard behavior
+          let callbackExecuted = false
+          instanceUnderTest.setSignInCallback({
+            signIn: async () => {
+              callbackExecuted = true
+              await Promise.resolve()
+            },
+          })
+
           const result = await instanceUnderTest.listTransactions({})
 
           if (result.status !== ListOperationResultStatus.Success) {
@@ -198,6 +210,9 @@ describe('ListTransactions Test Suite', () => {
           })
           expect(declined?.declineReason).toBeDefined()
           expect(declined?.settledAt).toBeFalsy()
+          // Verify that ensureSignedIn was called (callback should not execute in normal flow)
+          // Since user is already signed in during integration tests, callback should not be called
+          expect(callbackExecuted).toBe(false)
         })
 
         it('limits transactions as expected', async () => {
@@ -208,6 +223,45 @@ describe('ListTransactions Test Suite', () => {
             fail('unexpected result')
           }
           expect(result.items).toHaveLength(1)
+        })
+
+        it('executes sign-in callback when ensureSignedIn is triggered', async () => {
+          let callbackError: Error | undefined
+          let callbackInvocations = 0
+          const signInDelegate = async () => {
+            // Re-sign in the user since we signed them out for this test
+            try {
+              callbackInvocations++
+              await userClient.signInWithKey()
+            } catch (error) {
+              callbackError = error as Error
+              throw error
+            }
+          }
+
+          // Set up callback to track when it gets executed
+          instanceUnderTest.setSignInCallback({
+            signIn: signInDelegate,
+          })
+
+          // Sign out the user to trigger the callback
+          await userClient.globalSignOut()
+
+          try {
+            // This should trigger the ensureSignedIn callback
+            const result = await instanceUnderTest.listTransactions({})
+
+            // Verify the callback was executed and successful
+            expect(callbackInvocations).toBe(1)
+            expect(callbackError).toBeUndefined()
+            expect(result.status).toBe(ListOperationResultStatus.Success)
+          } catch (error) {
+            // If test fails, make sure we're signed back in for cleanup
+            if (!callbackInvocations) {
+              await userClient.signInWithKey()
+            }
+            throw error
+          }
         })
       })
     },

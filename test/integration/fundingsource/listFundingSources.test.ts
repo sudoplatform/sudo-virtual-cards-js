@@ -16,6 +16,7 @@ import {
 import { createCardFundingSource } from '../util/createFundingSource'
 import { FundingSourceProviders } from '../util/getFundingSourceProviders'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
+import { SudoUserClient } from '@sudoplatform/sudo-user'
 
 describe('SudoVirtualCardsClient ListFundingSources Test Suite', () => {
   jest.setTimeout(240000)
@@ -24,11 +25,13 @@ describe('SudoVirtualCardsClient ListFundingSources Test Suite', () => {
   let fundingSources: FundingSource[] = []
   let instanceUnderTest: SudoVirtualCardsClient
   let fundingSourceProviders: FundingSourceProviders
+  let userClient: SudoUserClient
 
   beforeEach(async () => {
     const result = await setupVirtualCardsClient(log)
     instanceUnderTest = result.virtualCardsClient
     fundingSourceProviders = result.fundingSourceProviders
+    userClient = result.userClient
   })
 
   afterEach(() => {
@@ -66,6 +69,15 @@ describe('SudoVirtualCardsClient ListFundingSources Test Suite', () => {
 
         it('returns expected result', async () => {
           if (skip) return
+
+          // Set up callback to track sign-in guard behavior
+          let callbackExecuted = false
+          instanceUnderTest.setSignInCallback({
+            signIn: async () => {
+              callbackExecuted = true
+              await Promise.resolve()
+            },
+          })
 
           const visaFundingSource = await createCardFundingSource(
             instanceUnderTest,
@@ -114,6 +126,9 @@ describe('SudoVirtualCardsClient ListFundingSources Test Suite', () => {
               ascendingFundingSources[i - 1].updatedAt.getTime(),
             ).toBeLessThan(ascendingFundingSources[i].updatedAt.getTime())
           }
+          // Verify that ensureSignedIn was called (callback should not execute in normal flow)
+          // Since user is already signed in during integration tests, callback should not be called
+          expect(callbackExecuted).toBe(false)
         })
 
         it('returns empty list result for no matching funding sources', async () => {
@@ -217,6 +232,59 @@ describe('SudoVirtualCardsClient ListFundingSources Test Suite', () => {
             cachePolicy: CachePolicy.RemoteOnly,
           })
           expect(result3.items).toEqual([])
+        })
+
+        it('executes sign-in callback when ensureSignedIn is triggered', async () => {
+          let callbackError: Error | undefined
+          let callbackInvocations = 0
+          const signInDelegate = async () => {
+            // Re-sign in the user since we signed them out for this test
+            try {
+              callbackInvocations++
+              await userClient.signInWithKey()
+            } catch (error) {
+              callbackError = error as Error
+              throw error
+            }
+          }
+
+          // Set up callback to track when it gets executed
+          instanceUnderTest.setSignInCallback({
+            signIn: signInDelegate,
+          })
+          try {
+            // Sign out the user to trigger the callback inside CreateCardFundingSource
+            await userClient.globalSignOut()
+
+            const visaFundingSource = await createCardFundingSource(
+              instanceUnderTest,
+              fundingSourceProviders,
+              {
+                testCard: 'Visa-No3DS-1',
+                supportedProviders: [provider],
+              },
+            )
+            fundingSources.push(visaFundingSource)
+
+            // Sign out again the user to trigger the callback inside listFundingSources
+            await userClient.globalSignOut()
+
+            // This should trigger the ensureSignedIn callback
+            const result = await instanceUnderTest.listFundingSources({
+              cachePolicy: CachePolicy.RemoteOnly,
+            })
+
+            expect(result.items).toHaveLength(1)
+            // Verify the callback was executed and successful
+            expect(callbackInvocations).toBe(2)
+            expect(callbackError).toBeUndefined()
+          } catch (error) {
+            // If test fails, make sure we're signed back in for cleanup
+            if (!callbackInvocations) {
+              await userClient.signInWithKey()
+            }
+            throw error
+          }
         })
       },
     )

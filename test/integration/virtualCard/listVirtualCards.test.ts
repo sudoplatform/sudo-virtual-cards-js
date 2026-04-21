@@ -28,6 +28,7 @@ import { FundingSourceProviders } from '../util/getFundingSourceProviders'
 import { provisionVirtualCard } from '../util/provisionVirtualCard'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 import { runTestsIfSimulatorAvailable } from '../util/runTestsIf'
+import { SudoUserClient } from '@sudoplatform/sudo-user'
 
 describe('ListVirtualCards Test Suite', () => {
   jest.setTimeout(240000)
@@ -40,6 +41,7 @@ describe('ListVirtualCards Test Suite', () => {
   let optionalSimulator: SudoVirtualCardsSimulatorClient | undefined
   let sudo: Sudo
   let fundingSourceProviders: FundingSourceProviders
+  let userClient: SudoUserClient
   const cards: VirtualCard[] = []
   let beforeAllComplete = false
 
@@ -50,6 +52,7 @@ describe('ListVirtualCards Test Suite', () => {
     optionalSimulator = result.virtualCardsSimulatorClient
     sudo = result.sudo
     fundingSourceProviders = result.fundingSourceProviders
+    userClient = result.userClient
 
     const fundingSource = await createCardFundingSource(
       instanceUnderTest,
@@ -94,6 +97,15 @@ describe('ListVirtualCards Test Suite', () => {
     it('returns expected output', async () => {
       expectSetupComplete()
 
+      // Set up callback to track sign-in guard behavior
+      let callbackExecuted = false
+      instanceUnderTest.setSignInCallback({
+        signIn: async () => {
+          callbackExecuted = true
+          await Promise.resolve()
+        },
+      })
+
       const result = await instanceUnderTest.listVirtualCards()
       if (result.status !== ListOperationResultStatus.Success) {
         fail(`Wrong status: ${result.status}`)
@@ -127,6 +139,9 @@ describe('ListVirtualCards Test Suite', () => {
           ascendingCards[i].updatedAt.getTime(),
         )
       }
+      // Verify that ensureSignedIn was called (callback should not execute in normal flow)
+      // Since user is already signed in during integration tests, callback should not be called
+      expect(callbackExecuted).toBe(false)
     })
 
     it('limits cards as expected', async () => {
@@ -197,6 +212,43 @@ describe('ListVirtualCards Test Suite', () => {
         fail(`Wrong status: ${result3.status}`)
       }
       expect(result3.items).toEqual([])
+    })
+
+    it('executes sign-in callback when ensureSignedIn is triggered', async () => {
+      let callbackInvocations = 0
+      let callbackError: Error | undefined
+      const signInDelegate = async () => {
+        // Re-sign in the user since we signed them out for this test
+        try {
+          callbackInvocations++
+          await userClient.signInWithKey()
+        } catch (error) {
+          callbackError = error as Error
+          throw error
+        }
+      }
+
+      // Set up callback to track when it gets executed
+      instanceUnderTest.setSignInCallback({
+        signIn: signInDelegate,
+      })
+
+      // Sign out the user to trigger the callback
+      await userClient.globalSignOut()
+
+      try {
+        // This should trigger the ensureSignedIn callback
+        const result = await instanceUnderTest.listVirtualCards()
+        expect(callbackInvocations).toBe(1)
+        expect(callbackError).toBeUndefined()
+        expect(result.status).toBe(ListOperationResultStatus.Success)
+      } catch (error) {
+        // If test fails, make sure we're signed back in for cleanup
+        if (!callbackInvocations) {
+          await userClient.signInWithKey()
+        }
+        throw error
+      }
     })
   })
 

@@ -1,6 +1,6 @@
 {
-  "preset": "ts-jest",
-  "testEnvironment": "jsdom",
+  "preset": "ts-jest/presets/js-with-ts",
+  "testEnvironment": "./jest.setup.ts",
   "testMatch": ["<rootDir>/test/**/*.test.ts"],
   "testPathIgnorePatterns": ["/node_modules/", "/lib/"],
   "setupFilesAfterEnv": ["./jest.setup.ts"],
@@ -23,5 +23,6 @@
   },
   "transform": {
     ".*\\.ts$": ["ts-jest", { "tsconfig": "tsconfig.test.json" }]
-  }
+  },
+  "transformIgnorePatterns": ["node_modules/(?!(mimetext|jose)/)"]
 }

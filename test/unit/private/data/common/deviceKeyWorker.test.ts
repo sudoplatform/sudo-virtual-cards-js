@@ -16,6 +16,7 @@ import {
   SignatureAlgorithm,
   SudoKeyManager,
   SymmetricEncryptionOptions,
+  Buffer as BufferUtil,
 } from '@sudoplatform/sudo-common'
 import { SudoUserClient } from '@sudoplatform/sudo-user'
 import {
@@ -333,9 +334,10 @@ describe('DeviceKeyWorker Test Suite', () => {
         ).rejects.toStrictEqual(error)
       })
       it('calls through everything expected', async () => {
+        const mockCipherKey = BufferUtil.fromString('cipherKey')
         when(
           mockKeyManager.decryptWithPrivateKey(anything(), anything()),
-        ).thenResolve(new TextEncoder().encode('cipherKey').buffer)
+        ).thenResolve(mockCipherKey)
         await expect(
           instanceUnderTest.unsealString({
             encrypted: btoa(`${new Array(256 + 1).join('0')}aabbccddeeff`),
@@ -366,9 +368,7 @@ describe('DeviceKeyWorker Test Suite', () => {
         const [cipherKey, encryptedData] = capture(
           mockKeyManager.decryptWithSymmetricKey,
         ).first()
-        expect(cipherKey).toStrictEqual(
-          new TextEncoder().encode('cipherKey').buffer,
-        )
+        expect(cipherKey).toStrictEqual(mockCipherKey)
         const expectedEncryptedData = Uint8Array.from('aabbccddeeff', (c) =>
           c.charCodeAt(0),
         )

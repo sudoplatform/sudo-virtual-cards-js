@@ -61,7 +61,11 @@
   },
   "resolutions": {
     "graphql": "^16.12.0",
-    "tmp": "^0.2.5"
+    "tmp": "^0.2.5",
+    "axios": "^1.15.0",
+    "fast-xml-parser": "^5.5.11",
+    "@typescript-eslint/typescript-estree/minimatch": "^9.0.9",
+    "@sudoplatform/sudo-secure-id-verification": "13.0.0"
   },
   "devDependencies": {
     "@graphql-codegen/add": "^6.0.0",
@@ -69,13 +73,13 @@
     "@graphql-codegen/typed-document-node": "^6.1.4",
     "@graphql-codegen/typescript": "^5.0.6",
     "@graphql-codegen/typescript-operations": "^5.0.6",
-    "@sudoplatform/sudo-api-client": "^16.0.0",
-    "@sudoplatform/sudo-common": "^12.2.0",
-    "@sudoplatform/sudo-entitlements": "^18.0.0",
+    "@sudoplatform/sudo-api-client": "^16.1.1",
+    "@sudoplatform/sudo-common": "^12.2.4",
+    "@sudoplatform/sudo-entitlements": "^18.0.2",
     "@sudoplatform/sudo-entitlements-admin": "^13.0.0",
     "@sudoplatform/sudo-profiles": "^19.0.0",
-    "@sudoplatform/sudo-secure-id-verification": "^13.0.0",
-    "@sudoplatform/sudo-user": "^16.0.1",
+    "@sudoplatform/sudo-secure-id-verification": "^13.1.0",
+    "@sudoplatform/sudo-user": "^17.1.0",
     "@sudoplatform/sudo-virtual-cards-simulator": "^7.0.0",
     "@sudoplatform/sudo-web-crypto-provider": "^12.0.0",
     "@types/jest": "^29.5.14",
@@ -86,6 +90,7 @@
     "@typescript-eslint/parser": "^6.21.0",
     "checkout-sdk-node": "^2.7.0",
     "concurrently": "^9.2.1",
+    "dotenv": "^17.4.1",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.2",
     "eslint-plugin-import": "^2.32.0",
@@ -114,5 +119,97 @@
   "engines": {
     "node": ">=22"
   },
-  "packageManager": "yarn@4.12.0+sha512.f45ab632439a67f8bc759bf32ead036a1f413287b9042726b7cc4818b7b49e14e9423ba49b18f9e06ea4941c1ad062385b1d8760a8d5091a1a31e5f6219afca8"
+  "packageManager": "yarn@4.12.0+sha512.f45ab632439a67f8bc759bf32ead036a1f413287b9042726b7cc4818b7b49e14e9423ba49b18f9e06ea4941c1ad062385b1d8760a8d5091a1a31e5f6219afca8",
+  "auditSuppressions": {
+    "1113153": {
+      "until": 1778626301,
+      "untilISO": "2026-05-12T22:51:41Z",
+      "reason": "fast-xml-parser pinned by @aws-sdk — transitive dep"
+    },
+    "1113274": {
+      "until": 1778626301,
+      "untilISO": "2026-05-12T22:51:41Z",
+      "reason": "axios 0.30.2 pinned by checkout-sdk-node — transitive dep"
+    },
+    "1113465": {
+      "until": 1778626301,
+      "untilISO": "2026-05-12T22:51:41Z",
+      "reason": "minimatch 9.0.3 pinned by @typescript-eslint — transitive dep"
+    },
+    "1113544": {
+      "until": 1778626301,
+      "untilISO": "2026-05-12T22:51:41Z",
+      "reason": "minimatch 9.0.3 pinned by @typescript-eslint — transitive dep"
+    },
+    "1113552": {
+      "until": 1778626301,
+      "untilISO": "2026-05-12T22:51:41Z",
+      "reason": "minimatch 9.0.3 pinned by @typescript-eslint — transitive dep"
+    },
+    "1113567": {
+      "until": 1778626301,
+      "untilISO": "2026-05-12T22:51:41Z",
+      "reason": "fast-xml-parser 4.4.1 pinned by @aws-sdk/core — transitive dep"
+    },
+    "1113568": {
+      "until": 1778626301,
+      "untilISO": "2026-05-12T22:51:41Z",
+      "reason": "fast-xml-parser pinned by @aws-sdk — transitive dep"
+    },
+    "1113569": {
+      "until": 1778626301,
+      "untilISO": "2026-05-12T22:51:41Z",
+      "reason": "fast-xml-parser pinned by @aws-sdk — transitive dep"
+    },
+    "1113570": {
+      "until": 1778626301,
+      "untilISO": "2026-05-12T22:51:41Z",
+      "reason": "fast-xml-parser 4.4.1 pinned by @aws-sdk/core — transitive dep"
+    },
+    "1113719": {
+      "until": 1778626301,
+      "untilISO": "2026-05-12T22:51:41Z",
+      "reason": "qs 6.14.0 pinned by stripe — transitive dep"
+    },
+    "1114158": {
+      "until": 1778626301,
+      "untilISO": "2026-05-12T22:51:41Z",
+      "reason": "immutable 3.7.6 pinned by @ardatan/relay-compiler — transitive dep"
+    },
+    "1115338": {
+      "until": 1778626301,
+      "untilISO": "2026-05-12T22:51:41Z",
+      "reason": "fast-xml-parser 4.4.1 pinned by @aws-sdk/core — transitive dep"
+    },
+    "1115339": {
+      "until": 1778626301,
+      "untilISO": "2026-05-12T22:51:41Z",
+      "reason": "fast-xml-parser pinned by @aws-sdk — transitive dep"
+    },
+    "1116276": {
+      "until": 1778626301,
+      "untilISO": "2026-05-12T22:51:41Z",
+      "reason": "axios 0.30.2 pinned by checkout-sdk-node — transitive dep"
+    },
+    "1116307": {
+      "until": 1778626301,
+      "untilISO": "2026-05-12T22:51:41Z",
+      "reason": "fast-xml-parser pinned by @aws-sdk — transitive dep"
+    },
+    "1116308": {
+      "until": 1778626301,
+      "untilISO": "2026-05-12T22:51:41Z",
+      "reason": "fast-xml-parser 4.4.1 pinned by @aws-sdk/core — transitive dep"
+    },
+    "1116365": {
+      "until": 1778626301,
+      "untilISO": "2026-05-12T22:51:41Z",
+      "reason": "axios 0.30.2 pinned by checkout-sdk-node — transitive dep"
+    },
+    "1116473": {
+      "until": 1778626301,
+      "untilISO": "2026-05-12T22:51:41Z",
+      "reason": "axios 0.30.2 pinned by checkout-sdk-node — transitive dep"
+    }
+  }
 }
