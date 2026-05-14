@@ -65,7 +65,7 @@
     "axios": "^1.15.0",
     "fast-xml-parser": "^5.5.11",
     "@typescript-eslint/typescript-estree/minimatch": "^9.0.9",
-    "@sudoplatform/sudo-secure-id-verification": "13.0.0"
+    "socks": "2.8.8"
   },
   "devDependencies": {
     "@graphql-codegen/add": "^6.0.0",
@@ -78,7 +78,7 @@
     "@sudoplatform/sudo-entitlements": "^18.0.2",
     "@sudoplatform/sudo-entitlements-admin": "^13.0.0",
     "@sudoplatform/sudo-profiles": "^19.0.0",
-    "@sudoplatform/sudo-secure-id-verification": "^13.1.0",
+    "@sudoplatform/sudo-secure-id-verification": "^13.1.1",
     "@sudoplatform/sudo-user": "^17.1.0",
     "@sudoplatform/sudo-virtual-cards-simulator": "^7.0.0",
     "@sudoplatform/sudo-web-crypto-provider": "^12.0.0",
@@ -210,6 +210,11 @@
       "until": 1778626301,
       "untilISO": "2026-05-12T22:51:41Z",
       "reason": "axios 0.30.2 pinned by checkout-sdk-node — transitive dep"
+    },
+    "1116970": {
+      "until": 1780099622,
+      "untilISO": "2026-05-30T00:07:02Z",
+      "reason": "Transitive dev dep - uuid pinned by @smithy/middleware-retry"
     }
   }
 }
