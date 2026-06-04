@@ -16,9 +16,9 @@ import {
   SudoKeyManager,
 } from '@sudoplatform/sudo-common'
 import {
-  SudoUserClient,
-  SudoPlatformSignInCallback,
   SignInGuard,
+  SudoPlatformSignInCallback,
+  SudoUserClient,
 } from '@sudoplatform/sudo-user'
 import { WebSudoCryptoProvider } from '@sudoplatform/sudo-web-crypto-provider'
 import { Mutex } from 'async-mutex'
@@ -50,10 +50,6 @@ import { CompleteFundingSourceUseCase } from '../private/domain/use-cases/fundin
 import { GetFundingSourceClientConfigurationUseCase } from '../private/domain/use-cases/fundingSource/getFundingSourceClientConfigurationUseCase'
 import { GetFundingSourceUseCase } from '../private/domain/use-cases/fundingSource/getFundingSourceUseCase'
 import { ListFundingSourcesUseCase } from '../private/domain/use-cases/fundingSource/listFundingSourcesUseCase'
-import { RefreshFundingSourceUseCase } from '../private/domain/use-cases/fundingSource/refreshFundingSourceUseCase'
-import { ReviewUnfundedFundingSourceUseCase } from '../private/domain/use-cases/fundingSource/reviewUnfundedFundingSourceUseCase'
-import { SandboxGetPlaidDataUseCase } from '../private/domain/use-cases/fundingSource/sandboxGetPlaidDataUseCase'
-import { SandboxSetFundingSourceToRequireRefreshUseCase } from '../private/domain/use-cases/fundingSource/sandboxSetFundingSourceToRequireRefreshUseCase'
 import { SetupFundingSourceUseCase } from '../private/domain/use-cases/fundingSource/setupFundingSourceUseCase'
 import { SubscribeToFundingSourceChangesUseCase } from '../private/domain/use-cases/fundingSource/subscribeToFundingSourceChangesUseCase'
 import { UnsubscribeFromFundingSourceChangesUseCase } from '../private/domain/use-cases/fundingSource/unsubscribeFromFundingSourceChangesUseCase'
@@ -70,7 +66,6 @@ import { ListVirtualCardsUseCase } from '../private/domain/use-cases/virtualCard
 import { ProvisionVirtualCardUseCase } from '../private/domain/use-cases/virtualCard/provisionVirtualCardUseCase'
 import { UpdateVirtualCardUseCase } from '../private/domain/use-cases/virtualCard/updateVirtualCardUseCase'
 import { VirtualCardsServiceConfigNotFoundError } from './errors'
-import { AuthorizationText, SandboxPlaidData } from './typings'
 import { APIResult } from './typings/apiResult'
 import { CreateKeysIfAbsentResult } from './typings/createKeysIfAbsentResult'
 import { DateRange } from './typings/dateRange'
@@ -147,50 +142,8 @@ export interface CompleteFundingSourceStripeCardCompletionDataInput {
   paymentMethod: string
 }
 
-/**
- * Input for the completion data of {@link SudoVirtualCardsClient#completeFundingSource}.
- *
- * @property {string} provider Provider used to save the funding source information.
- * @property {FundingSourceType.BankAccount} type Funding source provider type. Must be BankAccount.
- * @property {string} publicToken Token to be exchanged in order to perform bank account operations.
- * @property {string} accountId Identifier of the bank account to be used.
- * @property {string} institutionId Identifier of the institution at which account to be used is held.
- * @property {AuthorizationText} authorizationText Authorization text presented to and agreed to by the user
- */
-export interface CompleteFundingSourceCheckoutBankAccountCompletionDataInput {
-  provider: 'checkout'
-  type: FundingSourceType.BankAccount
-  publicToken: string
-  accountId: string
-  institutionId: string
-  authorizationText: AuthorizationText
-}
-
 export type CompleteFundingSourceCompletionDataInput =
-  | CompleteFundingSourceCheckoutBankAccountCompletionDataInput
-  | CompleteFundingSourceStripeCardCompletionDataInput
-
-/**
- * Input for the refresh data of {@link SudoVirtualCardsClient#refreshFundingSource}.
- *
- * @property {string} provider Provider used to save the funding source information.
- * @property {FundingSourceType.BankAccount} type Funding source provider type. Must be BankAccount.
- * @property {string} applicationName
- * The name of the client application. Must be shared with the service for
- * configuration purposes.
- * @property {string} accountId The identifier of the account associated with the funding source being refreshed, if known
- * @property {AuthorizationText} authorizationText Authorization text presented to and agreed to by the user.
- */
-export interface RefreshFundingSourceCheckoutBankAccountRefreshDataInput {
-  provider: 'checkout'
-  type: FundingSourceType.BankAccount
-  applicationName: string
-  accountId?: string
-  authorizationText?: AuthorizationText
-}
-
-export type RefreshFundingSourceRefreshDataInput =
-  RefreshFundingSourceCheckoutBankAccountRefreshDataInput
+  CompleteFundingSourceStripeCardCompletionDataInput
 
 /**
  * Input for {@link SudoVirtualCardsClient.completeFundingSource}.
@@ -204,26 +157,6 @@ export interface CompleteFundingSourceInput {
   id: string
   completionData: CompleteFundingSourceCompletionDataInput
   updateCardFundingSource?: boolean
-}
-
-/**
- * Input for {@link SudoVirtualCardsClient#refreshFundingSource}.
- *
- * @property {string} id The identifier of the funding source to be refreshed
- * @property {string} refreshData JSON string of the refresh data to be passed back to the service.
- * @property {string} language
- *   Some funding source types require presentation of end-user language
- *   specific agreements. This property allows the client application
- *   to specify the user's preferred language. If such presentation is
- *   required and has no translation in the requested language or no
- *   preferred language is specified, the default translation will be
- *   presented. The default is a property of service instance
- *   configuration. The value is an RFC 5646 language tag e.g. en-US.
- */
-export interface RefreshFundingSourceInput {
-  id: string
-  refreshData: RefreshFundingSourceRefreshDataInput
-  language?: string
 }
 
 /**
@@ -475,28 +408,6 @@ export interface ListTransactionsByCardIdAndTypeInput {
 }
 
 /**
- * Input for {@link SudoVirtualCardsClient.sandboxGetPlaidData}
- *
- * @property {string} institutionId ID of Plaid sandbox institution to use
- * @property {string} plaidUsername Username of Plaid sandbox user to obtain data for
- */
-export interface SandboxGetPlaidDataInput {
-  institutionId: string
-  plaidUsername: string
-}
-
-/**
- * Input for {@link SudoVirtualCardsClient.sandboxSetFundingSourceToRequireRefresh}
- *
- * @property {string} fundingSourceId
- *   ID of funding source to set to refresh state.
- *   Must identify a bank account funding source.
- */
-export interface SandboxSetFundingSourceToRequireRefreshInput {
-  fundingSourceId: string
-}
-
-/**
  * Sudo Platform Virtual Cards client API
  *
  * All methods should be expected to be able to throw the following
@@ -585,26 +496,6 @@ export interface SudoVirtualCardsClient {
   ): Promise<FundingSource>
 
   /**
-   * Refresh a funding source.
-   *
-   * @param {RefreshFundingSourceInput} input Parameters used to refresh the funding source.
-   *
-   * @returns {FundingSource} The funding source which has been refreshed.
-   *
-   * @throws {@link FundingSourceNotFoundError}
-   * No funding source with the ID specified could be found.
-   * @throws {@link FundingSourceStateError}
-   *  Funding source cannot be refreshed as it is in an invalid state.
-   * @throws {@link UnacceptableFundingSourceError}
-   *  Funding source cannot be refreshed as the provider has prevented it.
-   * @throws {@link FundingSourceRequiresUserInteractionError}
-   *  The funding source requires additional user interaction before refresh
-   *  can complete. The error's interactionData property contains
-   *  provider specific data to be used in this process.
-   */
-  refreshFundingSource(input: RefreshFundingSourceInput): Promise<FundingSource>
-
-  /**
    * Subscribe to changes to funding sources
    *
    * @param {string} id unique identifier to differentiate subscriptions; note that specifying a duplicate subscription
@@ -663,19 +554,6 @@ export interface SudoVirtualCardsClient {
    *   No funding source matching the specified ID could be found.
    */
   cancelFundingSource(id: string): Promise<FundingSource>
-
-  /**
-   * Request a review of an unfunded funding source, identified by id.
-   * Note that reviewing a funding source which is not unfunded will
-   * be a no-op but is not an error.
-   *
-   * @param {string} id The identifier of the funding source to review.
-   * @returns {FundingSource} The funding source that was reviewed.
-   *
-   * @throws {@link FundingSourceNotFoundError}
-   *   No funding source matching the specified ID could be found.
-   */
-  reviewUnfundedFundingSource(id: string): Promise<FundingSource>
 
   /**
    * Cancel a single provisional funding source identified by id.
@@ -836,32 +714,6 @@ export interface SudoVirtualCardsClient {
    */
   getVirtualCardsConfig(): Promise<VirtualCardsConfig>
 
-  /**
-   * Sandbox API to obtain data normally returned by full Plaid Link flow. Useful for testing
-   * ahead of full Plaid Link integration during application development.
-   *
-   * @returns {SandboxPlaidData}
-   *   Sandbox Plaid data for provisioning new funding
-   *   source at requested institution and user
-   */
-  sandboxGetPlaidData(
-    input: SandboxGetPlaidDataInput,
-  ): Promise<SandboxPlaidData>
-
-  /**
-   * Sandbox API to set a funding source to refresh state to facilitate testing
-   *
-   * @returns {FundingSource} The funding source in refresh state
-   */
-  sandboxSetFundingSourceToRequireRefresh(
-    input: SandboxSetFundingSourceToRequireRefreshInput,
-  ): Promise<FundingSource>
-
-  /**
-   * Export the cryptographic keys to a key archive.
-   *
-   * @return Key archive data.
-   */
   exportKeys(): Promise<ArrayBuffer>
 
   /**
@@ -1028,19 +880,6 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
     })
   }
 
-  public async refreshFundingSource(
-    input: RefreshFundingSourceInput,
-  ): Promise<FundingSource> {
-    await this.ensureSignedIn()
-    return this.serialise.runExclusive(async () => {
-      const useCase = new RefreshFundingSourceUseCase(
-        this.fundingSourceService,
-        this.sudoUserClient,
-      )
-      return await useCase.execute(input)
-    })
-  }
-
   public async subscribeToFundingSourceChanges(
     id: string,
     subscriber: FundingSourceChangeSubscriber,
@@ -1120,20 +959,6 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
         id,
       })
       const useCase = new CancelFundingSourceUseCase(
-        this.fundingSourceService,
-        this.sudoUserService,
-      )
-      return await useCase.execute(id)
-    })
-  }
-
-  public async reviewUnfundedFundingSource(id: string): Promise<FundingSource> {
-    await this.ensureSignedIn()
-    return this.serialise.runExclusive(async () => {
-      this.log.debug(this.reviewUnfundedFundingSource.name, {
-        id,
-      })
-      const useCase = new ReviewUnfundedFundingSourceUseCase(
         this.fundingSourceService,
         this.sudoUserService,
       )
@@ -1346,32 +1171,6 @@ export class DefaultSudoVirtualCardsClient implements SudoVirtualCardsClient {
     )
     const result = await useCase.execute()
     return VirtualCardsConfigAPITransformer.transformEntity(result)
-  }
-
-  public async sandboxGetPlaidData(
-    input: SandboxGetPlaidDataInput,
-  ): Promise<SandboxPlaidData> {
-    await this.ensureSignedIn()
-    return this.serialise.runExclusive(async () => {
-      const useCase = new SandboxGetPlaidDataUseCase(
-        this.fundingSourceService,
-        this.sudoUserService,
-      )
-      return await useCase.execute(input)
-    })
-  }
-
-  public async sandboxSetFundingSourceToRequireRefresh(
-    input: SandboxSetFundingSourceToRequireRefreshInput,
-  ): Promise<FundingSource> {
-    await this.ensureSignedIn()
-    return this.serialise.runExclusive(async () => {
-      const useCase = new SandboxSetFundingSourceToRequireRefreshUseCase(
-        this.fundingSourceService,
-        this.sudoUserService,
-      )
-      return await useCase.execute(input)
-    })
   }
 
   public async exportKeys(): Promise<ArrayBuffer> {

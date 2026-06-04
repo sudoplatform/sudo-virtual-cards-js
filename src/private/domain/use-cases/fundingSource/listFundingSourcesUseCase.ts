@@ -10,14 +10,12 @@ import {
   Logger,
   NotSignedInError,
 } from '@sudoplatform/sudo-common'
-import { BankAccountType } from '../../../../public/typings/bankAccountType'
 import { CardType } from '../../../../public/typings/cardType'
 import {
   CreditCardNetwork,
+  FundingSourceFilterInput,
   FundingSourceState,
   FundingSourceType,
-  FundingSourceFlags,
-  FundingSourceFilterInput,
 } from '../../../../public/typings/fundingSource'
 import { FundingSourceService } from '../../entities/fundingSource/fundingSourceService'
 import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
@@ -54,7 +52,6 @@ interface BaseListFundingSourcesUseCaseOutputItem {
   updatedAt: Date
   type: FundingSourceType
   state: FundingSourceState
-  flags: FundingSourceFlags[]
   currency: string
 }
 
@@ -65,20 +62,8 @@ interface ListFundingSourcesUseCaseOutputCreditCardItem extends BaseListFundingS
   cardType: CardType
 }
 
-interface ListFundingSourcesUseCaseOutputBankAccountItem extends BaseListFundingSourcesUseCaseOutputItem {
-  type: FundingSourceType.BankAccount
-  bankAccountType: BankAccountType
-  last4: string
-  institutionName: string
-  institutionLogo?: {
-    type: string
-    data: string
-  }
-}
-
 type ListFundingSourcesUseCaseOutputItem =
-  | ListFundingSourcesUseCaseOutputCreditCardItem
-  | ListFundingSourcesUseCaseOutputBankAccountItem
+  ListFundingSourcesUseCaseOutputCreditCardItem
 
 interface ListFundingSourcesUseCaseOutput {
   fundingSources: Array<ListFundingSourcesUseCaseOutputItem>

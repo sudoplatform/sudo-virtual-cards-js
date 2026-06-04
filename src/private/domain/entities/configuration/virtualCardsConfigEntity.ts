@@ -30,9 +30,6 @@ export interface VirtualCardsConfigEntity {
   maxTransactionAmount: CurrencyAmountEntity[]
   virtualCardCurrencies: string[]
   fundingSourceSupportInfo: FundingSourceSupportInfo[]
-  bankAccountFundingSourceExpendableEnabled: boolean
-  bankAccountFundingSourceCreationEnabled?: boolean
   fundingSourceClientConfiguration?: FundingSourceClientConfigurationEntity
-  clientApplicationConfiguration?: ClientApplicationConfigurationEntity
   pricingPolicy?: PricingPolicyEntity
 }

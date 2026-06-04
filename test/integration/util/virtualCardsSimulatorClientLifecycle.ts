@@ -26,7 +26,6 @@ import {
 } from '@sudoplatform/sudo-user'
 import fs from 'fs'
 import * as t from 'io-ts'
-import Stripe from 'stripe'
 import { v4 } from 'uuid'
 import { createSudo } from './createSudo'
 import { EntitlementsBuilder } from './entitlements'
@@ -39,7 +38,7 @@ import {
   SudoVirtualCardsClient,
   SudoVirtualCardsClientOptions,
 } from '../../../src'
-import { getStripe } from './getFundingSourceProviders'
+import { getStripe, StripeClient } from './getFundingSourceProviders'
 
 export const sudoIssuer = 'sudoplatform.sudoservice'
 
@@ -88,7 +87,7 @@ interface SetupVirtualCardsClientOutput {
   virtualCardsSimulatorClient: SudoVirtualCardsSimulatorClient
   virtualCardsClient: SudoVirtualCardsClient
   profilesClient: SudoProfilesClient
-  stripe: Stripe
+  stripe: StripeClient
 }
 
 async function grantIdentityVerificationConsent(

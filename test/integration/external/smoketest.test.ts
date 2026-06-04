@@ -19,10 +19,7 @@ import {
 } from '../../../src'
 import { setupVirtualCardsClient } from '../util/virtualCardsClientLifecycle'
 import { FundingSourceProviders } from '../util/getFundingSourceProviders'
-import {
-  createBankAccountFundingSource,
-  createCardFundingSource,
-} from '../util/createFundingSource'
+import { createCardFundingSource } from '../util/createFundingSource'
 import { provisionVirtualCard } from '../util/provisionVirtualCard'
 import { Sudo, SudoProfilesClient } from '@sudoplatform/sudo-profiles'
 import { SudoVirtualCardsSimulatorClient } from '@sudoplatform/sudo-virtual-cards-simulator'
@@ -93,24 +90,6 @@ runTestsIfSmoketestTenant(
           instanceUnderTest,
           fundingSourceProviders,
           { supportedProviders: ['stripe'] },
-        )
-        expect(fundingSource).toBeDefined()
-        createdFundingSources.push(fundingSource)
-      })
-
-      it('returns expected result for bank account funding source creation if configured', async () => {
-        if (!fundingSourceProviders.checkoutBankAccountEnabled) {
-          console.log('Bank account funding source not enabled, skipping test')
-          return
-        }
-
-        await instanceUnderTest.createKeysIfAbsent()
-        const fundingSource = await createBankAccountFundingSource(
-          instanceUnderTest,
-          {
-            username: 'custom_checking_500',
-            supportedProviders: ['checkout'],
-          },
         )
         expect(fundingSource).toBeDefined()
         createdFundingSources.push(fundingSource)

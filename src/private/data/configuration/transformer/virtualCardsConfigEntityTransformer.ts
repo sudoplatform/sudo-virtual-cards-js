@@ -10,7 +10,6 @@ import {
   VirtualCardsConfig,
 } from '../../../../gen/graphqlTypes'
 import {
-  ClientApplicationConfigurationEntity,
   CurrencyVelocityEntity,
   PricingPolicyEntity,
   VirtualCardsConfigEntity,
@@ -33,23 +32,10 @@ export class VirtualCardsConfigEntityTransformer {
         data.maxTransactionVelocity,
       ),
       virtualCardCurrencies: data.virtualCardCurrencies,
-      bankAccountFundingSourceExpendableEnabled:
-        data.bankAccountFundingSourceExpendableEnabled,
-      bankAccountFundingSourceCreationEnabled:
-        data.bankAccountFundingSourceCreationEnabled
-          ? data.bankAccountFundingSourceCreationEnabled
-          : undefined,
       fundingSourceClientConfiguration: data.fundingSourceClientConfiguration
         ? {
             data: (
               data.fundingSourceClientConfiguration as FundingSourceClientConfigurationEntity
-            ).data,
-          }
-        : undefined,
-      clientApplicationConfiguration: data.clientApplicationsConfiguration
-        ? {
-            data: (
-              data.clientApplicationsConfiguration as ClientApplicationConfigurationEntity
             ).data,
           }
         : undefined,

@@ -5,12 +5,7 @@
  */
 
 import { CachePolicy } from '@sudoplatform/sudo-common'
-import {
-  AuthorizationText,
-  SandboxGetPlaidDataInput,
-  SandboxSetFundingSourceToRequireRefreshInput,
-  SortOrder,
-} from '../../../../public'
+import { SortOrder } from '../../../../public'
 import {
   FundingSourceChangeSubscriber,
   FundingSourceFilterInput,
@@ -19,7 +14,6 @@ import {
 } from '../../../../public/typings/fundingSource'
 import { FundingSourceEntity } from './fundingSourceEntity'
 import { ProvisionalFundingSourceEntity } from './provisionalFundingSourceEntity'
-import { SandboxPlaidDataEntity } from './sandboxPlaidDataEntity'
 
 export interface FundingSourceServiceSetupData {
   applicationName: string
@@ -38,29 +32,8 @@ export interface FundingSourceServiceStripeCardCompletionData {
   paymentMethod: string
 }
 
-export interface FundingSourceServiceCheckoutBankAccountCompletionData {
-  provider: 'checkout'
-  type: FundingSourceType.BankAccount
-  publicToken: string
-  accountId: string
-  institutionId: string
-  authorizationText: AuthorizationText
-}
-
 export type FundingSourceServiceCompletionData =
-  | FundingSourceServiceStripeCardCompletionData
-  | FundingSourceServiceCheckoutBankAccountCompletionData
-
-export interface FundingSourceServiceCheckoutBankAccountRefreshData {
-  provider: 'checkout'
-  type: FundingSourceType.BankAccount
-  applicationName: string
-  accountId?: string
-  authorizationText?: AuthorizationText
-}
-
-export type FundingSourceServiceRefreshData =
-  FundingSourceServiceCheckoutBankAccountRefreshData
+  FundingSourceServiceStripeCardCompletionData
 
 export function isFundingSourceServiceStripeCardCompletionData(
   d: FundingSourceServiceCompletionData,
@@ -71,27 +44,10 @@ export function isFundingSourceServiceStripeCardCompletionData(
   )
 }
 
-export function isFundingSourceServiceCheckoutBankAccountCompletionData(
-  d: FundingSourceServiceCompletionData,
-): d is FundingSourceServiceCheckoutBankAccountCompletionData {
-  return d.provider === 'checkout' && d.type === FundingSourceType.BankAccount
-}
-
-export function isFundingSourceServiceCheckoutBankAccountRefreshData(
-  d: FundingSourceServiceRefreshData,
-): d is FundingSourceServiceCheckoutBankAccountRefreshData {
-  return d.provider === 'checkout' && d.type === FundingSourceType.BankAccount
-}
-
 export interface FundingSourceServiceCompleteFundingSourceInput {
   id: string
   completionData: FundingSourceServiceCompletionData
   updateCardFundingSource?: boolean
-}
-export interface FundingSourceServiceRefreshFundingSourceInput {
-  id: string
-  refreshData: FundingSourceServiceRefreshData
-  language?: string
 }
 
 /**
@@ -141,16 +97,6 @@ export interface FundingSourceServiceListFundingSourcesOutput {
  * @property {string} id The identifier of the funding source to cancel.
  */
 export interface FundingSourceServiceCancelFundingSourceInput {
-  id: string
-}
-
-/**
- * Input for {@link FundingSourceService.reviewUnfundedFundingSource} method.
- *
- * @interface FundingSourceServiceReviewUnfundedFundingSourceInput
- * @property {string} id The identifier of the funding source to review.
- */
-export interface FundingSourceServiceReviewUnfundedFundingSourceInput {
   id: string
 }
 
@@ -221,10 +167,6 @@ export interface FundingSourceService {
     input: FundingSourceServiceCompleteFundingSourceInput,
   ): Promise<FundingSourceEntity>
 
-  refreshFundingSource(
-    input: FundingSourceServiceRefreshFundingSourceInput,
-  ): Promise<FundingSourceEntity>
-
   /**
    * Get a funding source.
    *
@@ -256,16 +198,6 @@ export interface FundingSourceService {
   ): Promise<FundingSourceEntity>
 
   /**
-   * Review a funding source.
-   *
-   * @param {FundingSourceServiceReviewUnfundedFundingSourceInput} input Parameters used to review a funding source.
-   * @returns {FundingSourceEntity} The funding source that was cancelled.
-   */
-  reviewUnfundedFundingSource(
-    input: FundingSourceServiceReviewUnfundedFundingSourceInput,
-  ): Promise<FundingSourceEntity>
-
-  /**
    * Cancel a provisional funding source.
    *
    * @param {FundingSourceServiceCancelProvisionalFundingSourceInput} input Parameters used to cancel a provisional funding source.
@@ -294,15 +226,4 @@ export interface FundingSourceService {
   unsubscribeFromFundingSourceChanges(
     input: FundingSourceServiceUnsubscribeFromFundingSourceChangesInput,
   ): void
-
-  /*
-   * Sandbox API
-   */
-  sandboxGetPlaidData(
-    input: SandboxGetPlaidDataInput,
-  ): Promise<SandboxPlaidDataEntity>
-
-  sandboxSetFundingSourceToRequireRefresh(
-    input: SandboxSetFundingSourceToRequireRefreshInput,
-  ): Promise<FundingSourceEntity>
 }

@@ -56,7 +56,6 @@ describe('SetupFundingSourceUseCase Test Suite', () => {
     it.each`
       type
       ${FundingSourceType.CreditCard}
-      ${FundingSourceType.BankAccount}
     `(
       'calls FundingSourceService setupFundingSource for $type input',
       async ({ type }) => {
@@ -80,7 +79,6 @@ describe('SetupFundingSourceUseCase Test Suite', () => {
     it.each`
       type
       ${FundingSourceType.CreditCard}
-      ${FundingSourceType.BankAccount}
     `(
       'returns FundingSourceService result for $type input',
       async ({ type }) => {

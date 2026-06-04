@@ -9,12 +9,10 @@ import {
   Logger,
   NotSignedInError,
 } from '@sudoplatform/sudo-common'
-import { BankAccountType } from '../../../../public/typings/bankAccountType'
 import { CardType } from '../../../../public/typings/cardType'
 import {
   CreditCardNetwork,
   FundingSourceState,
-  FundingSourceFlags,
 } from '../../../../public/typings/fundingSource'
 import { FundingSourceService } from '../../entities/fundingSource/fundingSourceService'
 import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
@@ -27,7 +25,6 @@ interface BaseCancelFundingSourceUseCaseOutput {
   createdAt: Date
   updatedAt: Date
   state: FundingSourceState
-  flags: FundingSourceFlags[]
   currency: string
 }
 
@@ -38,20 +35,8 @@ interface CancelCreditCardFundingSourceUseCaseOutput extends BaseCancelFundingSo
   cardType: CardType
 }
 
-interface CancelBankAccountFundingSourceUseCaseOutput extends BaseCancelFundingSourceUseCaseOutput {
-  type: FundingSourceType.BankAccount
-  bankAccountType: BankAccountType
-  last4: string
-  institutionName: string
-  institutionLogo?: {
-    type: string
-    data: string
-  }
-}
-
 type CancelFundingSourceUseCaseOutput =
-  | CancelCreditCardFundingSourceUseCaseOutput
-  | CancelBankAccountFundingSourceUseCaseOutput
+  CancelCreditCardFundingSourceUseCaseOutput
 
 /**
  * Application business logic for cancelling a funding source.

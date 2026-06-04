@@ -197,12 +197,3 @@ query ListTransactionsByCardIdAndType(
   }
 }
 
-query SandboxGetPlaidData($input: SandboxGetPlaidDataRequest!) {
-  sandboxGetPlaidData(input: $input) {
-    accountMetadata {
-      accountId
-      subtype
-    }
-    publicToken
-  }
-}

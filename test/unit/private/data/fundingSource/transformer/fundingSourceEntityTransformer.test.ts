@@ -5,7 +5,6 @@
  */
 
 import { CardType as CardTypeGraphQL } from '../../../../../../src/gen/graphqlTypes'
-import { FundingSourceFlags as FundingSourceFlagsGraphQL } from '../../../../../../src/gen/graphqlTypes'
 import {
   CardTypeTransformer,
   FundingSourceEntityTransformer,
@@ -13,43 +12,15 @@ import {
 import { CardType } from '../../../../../../src/public/typings/cardType'
 import { EntityDataFactory } from '../../../../data-factory/entity'
 import { GraphQLDataFactory } from '../../../../data-factory/graphQl'
-import { FundingSourceFlags } from '../../../../../../src/public/typings/fundingSource'
 
 describe('FundingSourceEntityTransformer Test Suite', () => {
   describe('FundingSourceEntityTransformer', () => {
-    it.each`
-      graphql                                                | entity
-      ${GraphQLDataFactory.creditCardfundingSource}          | ${EntityDataFactory.creditCardFundingSource}
-      ${GraphQLDataFactory.bankAccountFundingSourceUnsealed} | ${EntityDataFactory.bankAccountFundingSource}
-    `(
-      'successfully transforms graphql to entity format: $entity.type',
-      ({ graphql, entity }) => {
-        expect(
-          FundingSourceEntityTransformer.transformGraphQL(graphql),
-        ).toStrictEqual(entity)
-      },
-    )
-    it('successfully transforms unfunded bank account funding source graphql to entity format', () => {
-      const modifiedGraphql = {
-        ...GraphQLDataFactory.bankAccountFundingSourceUnsealed,
-        flags: [FundingSourceFlagsGraphQL.Unfunded],
-        unfundedAmount: {
-          currency:
-            GraphQLDataFactory.bankAccountFundingSourceUnsealed.currency,
-          amount: 123,
-        },
-      }
-      const modifiedEntity = {
-        ...EntityDataFactory.bankAccountFundingSource,
-        flags: [FundingSourceFlags.Unfunded],
-        unfundedAmount: {
-          currency: EntityDataFactory.bankAccountFundingSource.currency,
-          amount: 123,
-        },
-      }
+    it('successfully transforms credit card graphql to entity format', () => {
       expect(
-        FundingSourceEntityTransformer.transformGraphQL(modifiedGraphql),
-      ).toStrictEqual(modifiedEntity)
+        FundingSourceEntityTransformer.transformGraphQL(
+          GraphQLDataFactory.creditCardfundingSource,
+        ),
+      ).toStrictEqual(EntityDataFactory.creditCardFundingSource)
     })
   })
 

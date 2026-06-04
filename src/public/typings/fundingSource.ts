@@ -4,11 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AuthorizationText } from './authorizationText'
-import { BankAccountType } from './bankAccountType'
 import { CardType } from './cardType'
 import { TransactionVelocity } from './transactionVelocity'
-import { CurrencyAmount } from './currencyAmount'
 import { IDFilterInput } from './identifier'
 
 export interface BaseFundingSourceClientConfiguration {
@@ -38,16 +35,8 @@ export interface StripeCardFundingSourceClientConfiguration extends BaseFundingS
 export type StripeFundingSourceClientConfiguration =
   StripeCardFundingSourceClientConfiguration
 
-export interface CheckoutBankAccountFundingSourceClientConfiguration extends BaseFundingSourceClientConfiguration {
-  type: 'checkout'
-  fundingSourceType: FundingSourceType.BankAccount
-  version: number
-  apiKey: string
-}
-
 export type FundingSourceClientConfiguration =
   | StripeCardFundingSourceClientConfiguration
-  | CheckoutBankAccountFundingSourceClientConfiguration
 
   // Allow this so that future additions are not breaking. Consumers
   // must handle the "unknown" case.
@@ -59,15 +48,6 @@ export function isStripeCardFundingSourceClientConfiguration(
   return (
     config.type === 'stripe' &&
     config.fundingSourceType === FundingSourceType.CreditCard
-  )
-}
-
-export function isCheckoutBankAccountFundingSourceClientConfiguration(
-  config: FundingSourceClientConfiguration,
-): config is CheckoutBankAccountFundingSourceClientConfiguration {
-  return (
-    config.type === 'checkout' &&
-    config.fundingSourceType === FundingSourceType.BankAccount
   )
 }
 
@@ -97,7 +77,6 @@ export interface BaseFundingSource {
   updatedAt: Date
   type: FundingSourceType
   state: FundingSourceState
-  flags: FundingSourceFlags[]
   currency: string
   transactionVelocity?: TransactionVelocity
 }
@@ -120,38 +99,7 @@ export interface CreditCardFundingSource extends BaseFundingSource {
   network: CreditCardNetwork
 }
 
-/**
- * The Sudo Platform SDK representation of attributes of a bank account
- * funding source.
- *
- * @interface BankAccountFundingSource
- * @extends BaseFundingSource
- * @property {FundingSourceType.BankAccount} type Type of funding source
- * @property {BankAccountType} bankAccountType The type of bank account
- * @property {string} last4 The last 4 digits of the bank account number.
- * @property {string} institutionName
- *   The name of the institution at which the bank account is held.
- * @property {string} institutionLogo.type
- *   Mime type of institution logo if any
- * @property {string} institutionLogo.data
- *   Base64 encoded image data of institution logo if any
- * @property { CurrencyAmount} unfundedAmount
- *   If this bank account funding source is unfunded, the amount by which it is unfunded
- *   in the funding source's currency. Undefined otherwise
- */
-export interface BankAccountFundingSource extends BaseFundingSource {
-  type: FundingSourceType.BankAccount
-  bankAccountType: BankAccountType
-  last4: string
-  institutionName: string
-  institutionLogo?: {
-    type: string
-    data: string
-  }
-  unfundedAmount?: CurrencyAmount
-}
-
-export type FundingSource = CreditCardFundingSource | BankAccountFundingSource
+export type FundingSource = CreditCardFundingSource
 
 export function isCreditCardFundingSource(
   fundingSource: FundingSource,
@@ -190,29 +138,8 @@ export interface StripeCardProvisionalFundingSourceProvisioningData extends Base
   intent: string
 }
 
-/**
- * Provisioning data for Checkout bank account provisional funding source.
- *
- * @property {'checkout'} provider Provider of the provisioning data.
- * @property {1} version Version of the format of the provisioning data.
- * @property {FundingSourceType.BankAccount} type Type of funding source provider.
- * @property {string} linkToken Plaid Link link token for use in initializing Plaid Link
- * @property {AuthorizationText[]} authorizationText
- *   Array of different content type representations of the same agreement in the language
- *   most closely matching the language specified in the call to
- *   {@link SudoVirtualCardsClient.setupFundingSource}
- */
-export interface CheckoutBankAccountProvisionalFundingSourceProvisioningData {
-  provider: 'checkout'
-  version: 1
-  type: FundingSourceType.BankAccount
-  linkToken: string
-  authorizationText: AuthorizationText[]
-}
-
 export type ProvisionalFundingSourceProvisioningData =
   | StripeCardProvisionalFundingSourceProvisioningData
-  | CheckoutBankAccountProvisionalFundingSourceProvisioningData
   | BaseProvisionalFundingSourceProvisioningData
 
 export function isStripeCardProvisionalFundingSourceProvisioningData(
@@ -221,16 +148,6 @@ export function isStripeCardProvisionalFundingSourceProvisioningData(
   return (
     data.provider === 'stripe' &&
     data.type === FundingSourceType.CreditCard &&
-    data.version === 1
-  )
-}
-
-export function isCheckoutBankAccountProvisionalFundingSourceProvisioningData(
-  data: ProvisionalFundingSourceProvisioningData,
-): data is CheckoutBankAccountProvisionalFundingSourceProvisioningData {
-  return (
-    data.provider === 'checkout' &&
-    data.type === FundingSourceType.BankAccount &&
     data.version === 1
   )
 }
@@ -244,27 +161,8 @@ export function isCheckoutBankAccountProvisionalFundingSourceProvisioningData(
 export type BaseProvisionalFundingSourceInteractionData =
   BaseProvisionalFundingSourceProvisioningData
 
-export interface CheckoutBankAccountRefreshFundingSourceInteractionData extends BaseProvisionalFundingSourceInteractionData {
-  provider: 'checkout'
-  version: 1
-  type: FundingSourceType.BankAccount
-  linkToken: string
-  authorizationText: AuthorizationText[]
-}
-
 export type FundingSourceInteractionData =
-  | CheckoutBankAccountRefreshFundingSourceInteractionData
-  | BaseProvisionalFundingSourceProvisioningData
-
-export function isCheckoutBankAccountRefreshFundingSourceInteractionData(
-  data: FundingSourceInteractionData,
-): data is CheckoutBankAccountRefreshFundingSourceInteractionData {
-  return (
-    data.provider === 'checkout' &&
-    data.type === FundingSourceType.BankAccount &&
-    data.version === 1
-  )
-}
+  BaseProvisionalFundingSourceProvisioningData
 
 /**
  * The Sudo Platform SDK representation of a provisional funding source.
@@ -377,16 +275,6 @@ export enum FundingSourceState {
 }
 
 /**
- * The Sudo Platform SDK representation of an enumeration depicting the set of possible funding source flags.
- *
- * @enum FundingSourceFlags
- */
-export enum FundingSourceFlags {
-  Unfunded = 'UNFUNDED',
-  Refresh = 'REFRESH',
-}
-
-/**
  * The Sudo Platform SDK representation of a filter used to filter funding source entities based
  * on their funding source state.
  *
@@ -417,14 +305,6 @@ export type FundingSourceFilterInput = {
   or?: FundingSourceFilterInput[]
 }
 
-export function isFundingSourceUnfunded(fs: FundingSource): boolean {
-  return fs.flags.includes(FundingSourceFlags.Unfunded)
-}
-
-export function fundingSourceNeedsRefresh(fs: FundingSource): boolean {
-  return fs.flags.includes(FundingSourceFlags.Refresh)
-}
-
 /**
  * The Sudo Platform SDK representation of an enumeration depicting the funding source type.
  *
@@ -432,7 +312,6 @@ export function fundingSourceNeedsRefresh(fs: FundingSource): boolean {
  */
 export enum FundingSourceType {
   CreditCard = 'CREDIT_CARD',
-  BankAccount = 'BANK_ACCOUNT',
 }
 
 /**

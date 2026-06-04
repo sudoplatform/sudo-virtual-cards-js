@@ -15,7 +15,6 @@ import {
 } from '../../../domain/entities/configuration/virtualCardsConfigEntity'
 import { CurrencyAmountEntity } from '../../../domain/entities/transaction/transactionEntity'
 import {
-  decodeClientApplicationConfiguration,
   decodeFundingSourceClientConfiguration,
   decodePricingPolicy,
 } from '../clientConfiguration'
@@ -36,20 +35,11 @@ export class VirtualCardsConfigAPITransformer {
         entity.maxTransactionVelocity,
       ),
       virtualCardCurrencies: entity.virtualCardCurrencies,
-      bankAccountFundingSourceExpendableEnabled:
-        entity.bankAccountFundingSourceExpendableEnabled,
-      bankAccountFundingSourceCreationEnabled:
-        entity.bankAccountFundingSourceCreationEnabled,
       fundingSourceClientConfiguration: entity.fundingSourceClientConfiguration
         ? decodeFundingSourceClientConfiguration(
             entity.fundingSourceClientConfiguration.data,
           )
         : [],
-      clientApplicationConfiguration: entity.clientApplicationConfiguration
-        ? decodeClientApplicationConfiguration(
-            entity.clientApplicationConfiguration.data,
-          )
-        : {},
       pricingPolicy: entity.pricingPolicy
         ? decodePricingPolicy(entity.pricingPolicy.data)
         : undefined,

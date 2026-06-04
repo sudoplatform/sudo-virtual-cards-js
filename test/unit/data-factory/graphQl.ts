@@ -5,9 +5,7 @@
  */
 
 import { Base64, EncryptionAlgorithm } from '@sudoplatform/sudo-common'
-import { BankAccountType } from '../../../src'
 import {
-  BankAccountFundingSource,
   CardState,
   CardType,
   CreditCardFundingSource,
@@ -31,10 +29,7 @@ import {
   TransactionType,
   VirtualCardsConfig,
 } from '../../../src/gen/graphqlTypes'
-import {
-  BankAccountFundingSourceUnsealed,
-  FundingSourceUnsealed,
-} from '../../../src/private/data/fundingSource/fundingSourceSealedAttributes'
+import { FundingSourceUnsealed } from '../../../src/private/data/fundingSource/fundingSourceSealedAttributes'
 
 export class GraphQLDataFactory {
   private static readonly commonProps = {
@@ -51,59 +46,6 @@ export class GraphQLDataFactory {
       intent: 'dummyIntent',
     }),
   )
-  private static readonly bankAccountProvisioningData = Base64.encodeString(
-    JSON.stringify({
-      provider: 'checkout',
-      version: 1,
-      type: 'BANK_ACCOUNT',
-      plaidLinkToken: {
-        link_token: 'link_token',
-        expiration: 'expiration',
-        request_id: 'request_id',
-      },
-      authorizationText: [
-        {
-          content: 'authorization-text-0',
-          contentType: 'authorization-text-0-content-type',
-          language: 'authorization-text-0-language',
-          hash: 'authorization-text-0-hash',
-          hashAlgorithm: 'authorization-text-0-hash-algorithm',
-        },
-        {
-          content: 'authorization-text-1',
-          contentType: 'authorization-text-1-content-type',
-          language: 'authorization-text-1-language',
-          hash: 'authorization-text-1-hash',
-          hashAlgorithm: 'authorization-text-1-hash-algorithm',
-        },
-      ],
-    }),
-  )
-
-  static readonly interactionDataErrorInfo = {
-    provisioningData: Base64.encodeString(
-      JSON.stringify({
-        __typename: 'CheckoutBankAccountRefreshFundingSourceInteractionData',
-        provider: 'checkout',
-        version: 1,
-        type: 'BANK_ACCOUNT',
-        plaidLinkToken: {
-          link_token: 'link_token',
-          expiration: 'expiration',
-          request_id: 'request_id',
-        },
-        authorizationText: [
-          {
-            content: 'authorization-text-0',
-            contentType: 'authorization-text-0-content-type',
-            language: 'authorization-text-0-language',
-            hash: 'authorization-text-0-hash',
-            hashAlgorithm: 'authorization-text-0-hash-algorithm',
-          },
-        ],
-      }),
-    ),
-  }
 
   static readonly provisionalFundingSource: ProvisionalFundingSource = {
     ...GraphQLDataFactory.commonProps,
@@ -112,15 +54,6 @@ export class GraphQLDataFactory {
     provisioningData: this.provisioningData,
     last4: '1234',
   }
-
-  static readonly provisionalBankAccountFundingSource: ProvisionalFundingSource =
-    {
-      ...GraphQLDataFactory.commonProps,
-      id: 'dummyFundingSourceId',
-      state: ProvisionalFundingSourceState.Completed,
-      provisioningData: this.bankAccountProvisioningData,
-      last4: '1234',
-    }
 
   static readonly provisionalFundingSourceFilter: ProvisionalFundingSourceFilterInput =
     {
@@ -161,10 +94,7 @@ export class GraphQLDataFactory {
 
   static readonly provisionalFundingSourceConnection: ProvisionalFundingSourceConnection =
     {
-      items: [
-        GraphQLDataFactory.provisionalFundingSource,
-        GraphQLDataFactory.provisionalBankAccountFundingSource,
-      ],
+      items: [GraphQLDataFactory.provisionalFundingSource],
       nextToken: undefined,
     }
 
@@ -195,63 +125,10 @@ export class GraphQLDataFactory {
   static readonly defaultFundingSourceUnsealed: FundingSourceUnsealed =
     this.creditCardfundingSource
 
-  static readonly bankAccountfundingSource: BankAccountFundingSource = {
-    ...GraphQLDataFactory.commonFundingSourceUnsealedProps,
-    __typename: 'BankAccountFundingSource',
-    bankAccountType: BankAccountType.Savings,
-    authorization: {
-      content: 'dummyAuthorizationContent',
-      contentType: 'dummyAuthorizationContentType',
-      algorithm: 'dummyAuthorizationAlgorithm',
-      signature: 'dummyAuthorizationSignature',
-      data: 'dummyAuthorizationData',
-      keyId: 'dummyAuthorizationKeyId',
-      language: 'dummyAuthorizationLanguage',
-    },
-    last4: '1234',
-    institutionName: {
-      algorithm: 'RSAEncryptionOAEPAESCBC',
-      plainTextType: 'string',
-      keyId: 'dummyKeyId',
-      base64EncodedSealedData: 'sealed-dummyInstitutionName',
-    },
-    institutionLogo: {
-      algorithm: 'RSAEncryptionOAEPAESCBC',
-      plainTextType: 'json-string',
-      keyId: 'dummyKeyId',
-      base64EncodedSealedData: 'sealed-dummyInstitutionLogo',
-    },
-  }
-
   static readonly fundingSourceConnection: FundingSourceConnection = {
-    items: [
-      GraphQLDataFactory.creditCardfundingSource,
-      GraphQLDataFactory.bankAccountfundingSource,
-    ],
+    items: [GraphQLDataFactory.creditCardfundingSource],
     nextToken: undefined,
   }
-
-  static readonly bankAccountFundingSourceUnsealed: BankAccountFundingSourceUnsealed =
-    {
-      ...GraphQLDataFactory.commonFundingSourceUnsealedProps,
-      __typename: 'BankAccountFundingSource',
-      bankAccountType: BankAccountType.Savings,
-      authorization: {
-        content: 'dummyAuthorizationContent',
-        contentType: 'dummyAuthorizationContentType',
-        algorithm: 'dummyAuthorizationAlgorithm',
-        signature: 'dummyAuthorizationSignature',
-        data: 'dummyAuthorizationData',
-        keyId: 'dummyAuthorizationKeyId',
-        language: 'dummyAuthorizationLanguage',
-      },
-      last4: '1234',
-      institutionName: 'dummyInstitutionName',
-      institutionLogo: {
-        type: 'image/png',
-        data: 'dummyInstitutionLogo',
-      },
-    }
 
   static readonly provisionalCard: ProvisionalCard = {
     ...this.commonProps,
@@ -406,15 +283,14 @@ export class GraphQLDataFactory {
       },
     ],
     virtualCardCurrencies: ['USD'],
-    bankAccountFundingSourceExpendableEnabled: true,
-    bankAccountFundingSourceCreationEnabled: true,
+    bankAccountFundingSourceExpendableEnabled: false,
     fundingSourceClientConfiguration: {
       data: Base64.encodeString(
         JSON.stringify({
           fundingSourceTypes: [
             {
-              type: 'checkout',
-              fundingSourceType: FundingSourceType.BankAccount,
+              type: 'stripe',
+              fundingSourceType: FundingSourceType.CreditCard,
               version: 1,
               apiKey: 'dummyApiKey',
             },
@@ -448,41 +324,6 @@ export class GraphQLDataFactory {
                     markup: {
                       flat: 1000,
                       percent: 10,
-                    },
-                  },
-                ],
-              },
-            },
-          },
-          checkout: {
-            creditCard: {
-              DEFAULT: {
-                tiers: [
-                  {
-                    minThreshold: 0,
-                    markup: {
-                      flat: 2500,
-                      percent: 25,
-                    },
-                  },
-                ],
-              },
-            },
-            bankAccount: {
-              DEFAULT: {
-                tiers: [
-                  {
-                    minThreshold: 0,
-                    markup: {
-                      flat: 1000,
-                      percent: 0,
-                    },
-                  },
-                  {
-                    minThreshold: 10000,
-                    markup: {
-                      flat: 2000,
-                      percent: 0,
                     },
                   },
                 ],

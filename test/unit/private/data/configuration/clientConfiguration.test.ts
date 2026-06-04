@@ -46,13 +46,32 @@ describe('Client Configuration Test Suite', () => {
   })
 
   describe('decodeClientApplicationConfiguration', () => {
+    const clientAppConfigData = Base64.encodeString(
+      JSON.stringify({
+        webApplication: {
+          funding_source_providers: {
+            plaid: {
+              client_name: 'dummyClientName',
+              redirect_uri: 'dummyRedirectUri',
+            },
+          },
+        },
+      }),
+    )
+
     it('should decode successfully', () => {
-      expect(
-        decodeClientApplicationConfiguration(
-          EntityDataFactory.configurationData.clientApplicationConfiguration!
-            .data,
-        ),
-      ).toEqual(ApiDataFactory.configurationData.clientApplicationConfiguration)
+      expect(decodeClientApplicationConfiguration(clientAppConfigData)).toEqual(
+        {
+          webApplication: {
+            funding_source_providers: {
+              plaid: {
+                client_name: 'dummyClientName',
+                redirect_uri: 'dummyRedirectUri',
+              },
+            },
+          },
+        },
+      )
     })
 
     it('should throw a FatalError if encoded config data is not valid JSON', () => {

@@ -49,7 +49,6 @@ fragment CreditCardFundingSource on CreditCardFundingSource {
   createdAtEpochMs
   updatedAtEpochMs
   state
-  flags
   currency
   transactionVelocity {
     maximum
@@ -68,22 +67,12 @@ fragment BankAccountFundingSource on BankAccountFundingSource {
   createdAtEpochMs
   updatedAtEpochMs
   state
-  flags
   currency
   transactionVelocity {
     maximum
     velocity
   }
   bankAccountType
-  authorization {
-    language
-    content
-    contentType
-    signature
-    keyId
-    algorithm
-    data
-  }
   last4
   institutionName {
     ...SealedAttribute

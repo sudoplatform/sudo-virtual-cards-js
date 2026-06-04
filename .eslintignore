@@ -4,4 +4,4 @@ lib
 document
 gen
 graphql
-
+src/gen

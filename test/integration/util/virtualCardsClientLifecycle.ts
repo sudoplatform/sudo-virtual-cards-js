@@ -138,7 +138,6 @@ interface SetupVirtualCardsClientOutput {
   profilesClient: SudoProfilesClient
   identityAdminClient: IdentityAdminClient
   fundingSourceProviders: FundingSourceProviders
-  bankAccountFundingSourceExpendableEnabled: boolean
 }
 export type SetupVirtualCardsClientOpts = {
   log: Logger
@@ -184,7 +183,7 @@ export const setupVirtualCardsClient = async (
   const log: Logger = isSetupVirtualCardsClientOpts(optsOrLog)
     ? optsOrLog.log
     : optsOrLog
-  let entitlements = isSetupVirtualCardsClientOpts(optsOrLog)
+  const entitlements = isSetupVirtualCardsClientOpts(optsOrLog)
     ? (optsOrLog.entitlements ?? undefined)
     : undefined
 
@@ -227,17 +226,6 @@ export const setupVirtualCardsClient = async (
     const virtualCardsClient = new DefaultSudoVirtualCardsClient(options)
 
     const identityAdminClient = setupIdentityAdminClient(adminApiKey)
-
-    const config = await virtualCardsClient.getVirtualCardsConfig()
-
-    if (config.bankAccountFundingSourceExpendableEnabled) {
-      entitlements ??= [
-        {
-          name: 'sudoplatform.virtual-cards.bankAccountFundingSourceExpendable',
-          value: 5,
-        },
-      ]
-    }
 
     await new EntitlementsBuilder({ entitlements })
       .setEntitlementsClient(entitlementsClient)
@@ -296,8 +284,6 @@ export const setupVirtualCardsClient = async (
       identityAdminClient,
       fundingSourceProviders:
         await getFundingSourceProviders(virtualCardsClient),
-      bankAccountFundingSourceExpendableEnabled:
-        config.bankAccountFundingSourceExpendableEnabled,
     }
   } catch (err) {
     log.error(`${setupVirtualCardsClient.name} FAILED`)

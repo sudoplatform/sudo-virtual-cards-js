@@ -5,7 +5,7 @@
  */
 
 import { Base64 } from '@sudoplatform/sudo-common'
-import { BankAccountType, ChargeDetailState, VirtualCard } from '../../../src'
+import { ChargeDetailState, VirtualCard } from '../../../src'
 import { VirtualCardsConfigEntity } from '../../../src/private/domain/entities/configuration/virtualCardsConfigEntity'
 import { FundingSourceEntity } from '../../../src/private/domain/entities/fundingSource/fundingSourceEntity'
 import { ProvisionalFundingSourceEntity } from '../../../src/private/domain/entities/fundingSource/provisionalFundingSourceEntity'
@@ -43,35 +43,6 @@ export class EntityDataFactory {
     }),
   )
 
-  private static readonly bankAccountProvisioningData = Base64.encodeString(
-    JSON.stringify({
-      provider: 'checkout',
-      version: 1,
-      type: 'BANK_ACCOUNT',
-      plaidLinkToken: {
-        link_token: 'link_token',
-        expiration: 'expiration',
-        request_id: 'request_id',
-      },
-      authorizationText: [
-        {
-          content: 'authorization-text-0',
-          contentType: 'authorization-text-0-content-type',
-          language: 'authorization-text-0-language',
-          hash: 'authorization-text-0-hash',
-          hashAlgorithm: 'authorization-text-0-hash-algorithm',
-        },
-        {
-          content: 'authorization-text-1',
-          contentType: 'authorization-text-1-content-type',
-          language: 'authorization-text-1-language',
-          hash: 'authorization-text-1-hash',
-          hashAlgorithm: 'authorization-text-1-hash-algorithm',
-        },
-      ],
-    }),
-  )
-
   static readonly provisionalFundingSource: ProvisionalFundingSourceEntity = {
     ...this.commonProps,
     id: 'dummyFundingSourceId',
@@ -81,22 +52,11 @@ export class EntityDataFactory {
     last4: '1234',
   }
 
-  static readonly provisionalBankAccountFundingSource: ProvisionalFundingSourceEntity =
-    {
-      ...this.commonProps,
-      id: 'dummyFundingSourceId',
-      provisioningData: this.bankAccountProvisioningData,
-      state: ProvisionalFundingSourceState.Completed,
-      type: FundingSourceType.BankAccount,
-      last4: '1234',
-    }
-
   private static readonly commonFundingSourceProps = {
     ...this.commonProps,
     id: 'dummyFundingSourceId',
     currency: 'dummyCurrency',
     state: FundingSourceState.Active,
-    flags: [],
     transactionVelocity: {
       maximum: 10000,
       velocity: ['10000/P1D'],
@@ -112,19 +72,6 @@ export class EntityDataFactory {
   }
 
   static readonly defaultFundingSource = this.creditCardFundingSource
-
-  static readonly bankAccountFundingSource: FundingSourceEntity = {
-    ...this.commonFundingSourceProps,
-    type: FundingSourceType.BankAccount,
-    bankAccountType: BankAccountType.Savings,
-    last4: '1234',
-    institutionName: 'dummyInstitutionName',
-    institutionLogo: {
-      type: 'image/png',
-      data: 'dummyInstitutionLogo',
-    },
-    unfundedAmount: undefined,
-  }
 
   static readonly provisionalFundingSourceFilter: ProvisionalFundingSourceFilterInput =
     {
@@ -313,33 +260,17 @@ export class EntityDataFactory {
       },
     ],
     virtualCardCurrencies: ['USD'],
-    bankAccountFundingSourceExpendableEnabled: true,
-    bankAccountFundingSourceCreationEnabled: true,
     fundingSourceClientConfiguration: {
       data: Base64.encodeString(
         JSON.stringify({
           fundingSourceTypes: [
             {
-              type: 'checkout',
-              fundingSourceType: FundingSourceType.BankAccount,
+              type: 'stripe',
+              fundingSourceType: FundingSourceType.CreditCard,
               version: 1,
               apiKey: 'dummyApiKey',
             },
           ],
-        }),
-      ),
-    },
-    clientApplicationConfiguration: {
-      data: Base64.encodeString(
-        JSON.stringify({
-          webApplication: {
-            funding_source_providers: {
-              plaid: {
-                client_name: 'dummyClientName',
-                redirect_uri: 'dummyRedirectUri',
-              },
-            },
-          },
         }),
       ),
     },
@@ -355,41 +286,6 @@ export class EntityDataFactory {
                     markup: {
                       flat: 1000,
                       percent: 10,
-                    },
-                  },
-                ],
-              },
-            },
-          },
-          checkout: {
-            creditCard: {
-              DEFAULT: {
-                tiers: [
-                  {
-                    minThreshold: 0,
-                    markup: {
-                      flat: 2500,
-                      percent: 25,
-                    },
-                  },
-                ],
-              },
-            },
-            bankAccount: {
-              DEFAULT: {
-                tiers: [
-                  {
-                    minThreshold: 0,
-                    markup: {
-                      flat: 1000,
-                      percent: 0,
-                    },
-                  },
-                  {
-                    minThreshold: 10000,
-                    markup: {
-                      flat: 2000,
-                      percent: 0,
                     },
                   },
                 ],

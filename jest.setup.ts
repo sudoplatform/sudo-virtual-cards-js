@@ -37,14 +37,14 @@ export default class JSDomEnvironmentPlusMissing extends JSDOMEnvironment {
       })
     }
 
-    // Ensure proper fetch support
-    if (!this.global.fetch) {
-      Object.defineProperty(this.global, 'fetch', {
-        value: require('node-fetch'),
-        writable: true,
-        configurable: true,
-      })
-    }
+    // Ensure proper fetch support.
+    // Assign Node's native fetch globals to the jsdom environment.
+    // stripe v22 requires standard Web Fetch API (not node-fetch).
+    // Other SDKs (sudo-profiles, etc.) also use fetch.
+    this.global.fetch = globalThis.fetch
+    this.global.Request = globalThis.Request
+    this.global.Response = globalThis.Response
+    this.global.Headers = globalThis.Headers
 
     // Fix Uint8Array for jose library compatibility
     // jose requires actual Uint8Array instances, not jsdom's version

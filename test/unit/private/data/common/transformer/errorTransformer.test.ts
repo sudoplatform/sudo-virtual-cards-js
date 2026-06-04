@@ -18,7 +18,6 @@ import {
   FundingSourceNotActiveError,
   FundingSourceNotFoundError,
   FundingSourceNotSetupError,
-  FundingSourceRequiresUserInteractionError,
   FundingSourceStateError,
   IdentityVerificationNotVerifiedError,
   ProvisionalFundingSourceNotFoundError,
@@ -26,8 +25,6 @@ import {
   VelocityExceededError,
 } from '../../../../../../src'
 import { ErrorTransformer } from '../../../../../../src/private/data/common/transformer/errorTransformer'
-import { decodeFundingSourceInteractionData } from '../../../../../../src/private/data/fundingSourceProviderData/interactionData'
-import { GraphQLDataFactory } from '../../../../data-factory/graphQl'
 
 class InstanceUnderTest extends ErrorTransformer {}
 
@@ -75,21 +72,4 @@ describe('Error Transformer Test Suite', () => {
       )
     },
   )
-
-  it('converts sudoplatform.virtual-cards.FundingSourceRequiresUserInteractionError with errorInfo to FundingSourceRequiresUserInteractionError', () => {
-    const error = {
-      errorType:
-        'sudoplatform.virtual-cards.FundingSourceRequiresUserInteractionError',
-      message: errorMsg,
-      errorInfo: GraphQLDataFactory.interactionDataErrorInfo,
-    } as any
-
-    const interactionData = decodeFundingSourceInteractionData(
-      GraphQLDataFactory.interactionDataErrorInfo,
-    )
-
-    expect(InstanceUnderTest.toClientError(error)).toStrictEqual(
-      new FundingSourceRequiresUserInteractionError(interactionData),
-    )
-  })
 })

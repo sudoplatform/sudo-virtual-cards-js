@@ -20,11 +20,10 @@ import { PricingPolicy } from './pricingPolicy'
  * @property {CurrencyVelocity[]} maxTransactionVelocity The maximum number of transactions that can be created within a defined period.
  * @property {CurrencyAmount[]} maxTransactionAmount The maximum transaction amount per currency.
  * @property {string[]} virtualCardCurrencies The list of supported virtual card currencies.
- * @property {ProviderCardFundingSourceSupportDetail[]} fundingSourceSupportInfo Funding source support info.
+ * @property {FundingSourceSupportDetail[]} fundingSourceSupportInfo Funding source support info.
  * @property {Boolean} bankAccountFundingSourceCreationEnabled Flag determining whether bank account funding source creation flows are enabled.
  *  Mainly used to test edge cases around bank account funding.
  * @property {FundingSourceClientConfiguration[]} fundingSourceClientConfiguration The funding source client configuration.
- * @property {[applicationName: string]: ClientApplicationConfiguration} clientApplicationConfiguration The client application
  *  configuration keyed by application name.
  * @property {PricingPolicy} pricingPolicy The pricing policy for each funding source provider.
  */
@@ -37,12 +36,7 @@ export interface VirtualCardsConfig {
   maxTransactionAmount: CurrencyAmount[]
   virtualCardCurrencies: string[]
   fundingSourceSupportInfo: FundingSourceSupportInfo[]
-  bankAccountFundingSourceExpendableEnabled: boolean
-  bankAccountFundingSourceCreationEnabled?: boolean
   fundingSourceClientConfiguration: FundingSourceClientConfiguration[]
-  clientApplicationConfiguration: {
-    [applicationName: string]: ClientApplicationConfiguration
-  }
   pricingPolicy?: PricingPolicy
 }
 

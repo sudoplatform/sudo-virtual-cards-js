@@ -4,33 +4,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  DefaultLogger,
-  InsufficientEntitlementsError,
-} from '@sudoplatform/sudo-common'
-import { SudoEntitlementsClient } from '@sudoplatform/sudo-entitlements'
-import { SudoEntitlementsAdminClient } from '@sudoplatform/sudo-entitlements-admin'
+import { DefaultLogger } from '@sudoplatform/sudo-common'
 import { SudoUserClient } from '@sudoplatform/sudo-user'
 import { v4 } from 'uuid'
-import waitForExpect from 'wait-for-expect'
 import {
-  BankAccountType,
   CompleteFundingSourceCompletionDataInput,
   CreditCardNetwork,
   FundingSourceCompletionDataInvalidError,
   FundingSourceNotSetupError,
   FundingSourceState,
   FundingSourceType,
-  IdentityVerificationNotVerifiedError,
   ProvisionalFundingSourceNotFoundError,
   SudoVirtualCardsClient,
-  isCheckoutBankAccountProvisionalFundingSourceProvisioningData,
   isStripeCardProvisionalFundingSourceProvisioningData,
 } from '../../../src'
 import { uuidV4Regex } from '../../utility/uuidV4Regex'
 import {
   confirmStripeSetupIntent,
-  createBankAccountFundingSource,
   getTestCard,
 } from '../util/createFundingSource'
 import { FundingSourceProviders } from '../util/getFundingSourceProviders'
@@ -40,31 +30,15 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
   jest.setTimeout(240000)
   const log = new DefaultLogger('SudoVirtualCardsClientIntegrationTests')
   let instanceUnderTest: SudoVirtualCardsClient
-  let entitlementsAdminClient: SudoEntitlementsAdminClient
-  let entitlementsClient: SudoEntitlementsClient
   let userClient: SudoUserClient
   let fundingSourceProviders: FundingSourceProviders
-  let bankAccountFundingSourceExpendableEnabled: boolean
   let beforeAllComplete = false
 
   beforeAll(async () => {
-    const result = await setupVirtualCardsClient({
-      log,
-      // Override default entitlement so we can control authorization
-      entitlements: [
-        {
-          name: 'sudoplatform.virtual-cards.bankAccountFundingSourceExpendable',
-          value: 0,
-        },
-      ],
-    })
+    const result = await setupVirtualCardsClient({ log })
     instanceUnderTest = result.virtualCardsClient
-    entitlementsAdminClient = result.entitlementsAdminClient
-    entitlementsClient = result.entitlementsClient
     userClient = result.userClient
     fundingSourceProviders = result.fundingSourceProviders
-    bankAccountFundingSourceExpendableEnabled =
-      result.bankAccountFundingSourceExpendableEnabled
 
     beforeAllComplete = true
   })
@@ -81,256 +55,9 @@ describe('SudoVirtualCardsClient CompleteFundingSource Test Suite', () => {
       provider: 'stripe',
       paymentMethod: 'dummyPaymentMethod',
     },
-    checkoutBankAccount: {
-      provider: 'checkout',
-      type: FundingSourceType.BankAccount,
-      accountId: 'dummyAccountId',
-      institutionId: 'dummyInstitutionId',
-      publicToken: 'dummyPublicToken',
-      authorizationText: {
-        language: 'en-US',
-        content: 'authorization-text-content',
-        contentType: 'authorization-text-content-type',
-        hash: 'authorization-text-hash',
-        hashAlgorithm: 'authorization-text-hash-algorithm',
-      },
-    },
   }
 
   describe('CompleteFundingSource', () => {
-    waitForExpect.defaults.timeout = 7500
-    waitForExpect.defaults.interval = 500
-
-    describe('for checkout bank account provider', () => {
-      let skip = false
-      beforeAll(() => {
-        // Since we determine availability of provider
-        // asynchronously we can't use that knowledge
-        // to control the set of providers we iterate
-        // over so we have to use a flag
-        if (!fundingSourceProviders.checkoutBankAccountEnabled) {
-          console.warn(
-            `Checkout bank account provider not enabled. Skipping tests.`,
-          )
-          skip = true
-        }
-      })
-
-      let beforeEachComplete = false
-      beforeEach(async () => {
-        if (skip) return
-        await unentitleBankAccountFundingSourceExpendable()
-        await waitForExpect(async () => {
-          const entitlements =
-            await entitlementsClient.getEntitlementsConsumption()
-          expect(
-            entitlements?.consumption.find(
-              (c) =>
-                c.name ===
-                  'sudoplatform.virtual-cards.bankAccountFundingSourceExpendable' &&
-                c.available !== 0,
-            ),
-          ).toBeFalsy()
-        })
-        beforeEachComplete = true
-      })
-
-      afterEach(() => {
-        beforeEachComplete = false
-      })
-
-      function expectSetupComplete() {
-        expect({ beforeAllComplete, beforeEachComplete }).toEqual({
-          beforeAllComplete: true,
-          beforeEachComplete: true,
-        })
-      }
-
-      async function entitleBankAccountFundingSourceExpendable(
-        n = 1,
-      ): Promise<void> {
-        if (bankAccountFundingSourceExpendableEnabled) {
-          const userName = await userClient.getUserName()
-          if (userName === undefined) {
-            fail('userName unexpectedly falsy')
-          }
-          await entitlementsAdminClient.applyExpendableEntitlementsToUser(
-            userName,
-            [
-              {
-                name: 'sudoplatform.virtual-cards.bankAccountFundingSourceExpendable',
-                value: n,
-              },
-            ],
-            v4(),
-          )
-        }
-      }
-
-      async function unentitleBankAccountFundingSourceExpendable(): Promise<void> {
-        if (bankAccountFundingSourceExpendableEnabled) {
-          const userName = await userClient.getUserName()
-          if (userName === undefined) {
-            fail('userName unexpectedly falsy')
-          }
-          const entitlements =
-            await entitlementsAdminClient.getEntitlementsForUser(userName)
-          const available =
-            entitlements?.consumption.find(
-              (e) =>
-                e.name ===
-                'sudoplatform.virtual-cards.bankAccountFundingSourceExpendable',
-            )?.available ?? 0
-
-          if (available > 0) {
-            await entitlementsAdminClient.applyExpendableEntitlementsToUser(
-              userName,
-              [
-                {
-                  name: 'sudoplatform.virtual-cards.bankAccountFundingSourceExpendable',
-                  value: -available,
-                },
-              ],
-              v4(),
-            )
-          }
-        }
-      }
-
-      it('returns ProvisionalFundingSourceNotFoundError if invalid id', async () => {
-        if (skip) return
-
-        expectSetupComplete()
-
-        await instanceUnderTest.createKeysIfAbsent()
-
-        await expect(
-          instanceUnderTest.completeFundingSource({
-            id: v4(),
-            completionData:
-              dummyCompletionDataForProvider['checkoutBankAccount'],
-          }),
-        ).rejects.toThrow(ProvisionalFundingSourceNotFoundError)
-      })
-
-      it('returns IdentityVerificationNotVerifiedError for user that does not match identity verification', async () => {
-        if (skip) return
-
-        expectSetupComplete()
-
-        await entitleBankAccountFundingSourceExpendable()
-        await instanceUnderTest.createKeysIfAbsent()
-
-        await expect(
-          createBankAccountFundingSource(instanceUnderTest, {
-            username: 'custom_identity_mismatch',
-            supportedProviders: ['checkout'],
-          }),
-        ).rejects.toThrow(IdentityVerificationNotVerifiedError)
-      })
-
-      it('returns fully provisioned bank account funding source', async () => {
-        if (skip) return
-
-        expectSetupComplete()
-
-        await entitleBankAccountFundingSourceExpendable()
-        await instanceUnderTest.createKeysIfAbsent()
-
-        const result = await createBankAccountFundingSource(instanceUnderTest, {
-          username: 'custom_checking_500',
-          supportedProviders: ['checkout'],
-        })
-        expect(result).toMatchObject({
-          version: 1,
-          currency: 'USD',
-          last4: expect.stringMatching(/\d{4}/),
-          state: FundingSourceState.Active,
-          type: FundingSourceType.BankAccount,
-          bankAccountType: BankAccountType.Checking,
-          institutionName: 'First Platypus Bank',
-          unfundedAmount: undefined,
-        })
-      })
-
-      it.each`
-        name               | accountId      | institutionId      | publicToken
-        ${'accountId'}     | ${''}          | ${'institutionId'} | ${'publicToken'}
-        ${'institutionId'} | ${'accountId'} | ${''}              | ${'publicToken'}
-        ${'publicToken'}   | ${'accountId'} | ${'institutionId'} | ${''}
-      `(
-        'returns FundingSourceCompletionDataInvalidError if empty $name in completionData',
-        async ({ accountId, institutionId, publicToken }) => {
-          if (skip) return
-
-          await instanceUnderTest.createKeysIfAbsent()
-
-          const provisionalFundingSource =
-            await instanceUnderTest.setupFundingSource({
-              currency: 'USD',
-              type: FundingSourceType.BankAccount,
-              supportedProviders: ['checkout'],
-              applicationName: 'system-test-app',
-            })
-
-          const provisioningData = provisionalFundingSource.provisioningData
-          if (
-            !isCheckoutBankAccountProvisionalFundingSourceProvisioningData(
-              provisioningData,
-            )
-          ) {
-            throw new Error('Unexpected provisioning data type')
-          }
-          expect(
-            provisioningData.authorizationText.length,
-          ).toBeGreaterThanOrEqual(1)
-
-          const checkoutBankAccountCompletionData: CompleteFundingSourceCompletionDataInput =
-            {
-              provider: 'checkout',
-              type: FundingSourceType.BankAccount,
-              accountId,
-              institutionId,
-              publicToken,
-              authorizationText: provisioningData.authorizationText[0],
-            }
-
-          await expect(
-            instanceUnderTest.completeFundingSource({
-              id: provisionalFundingSource.id,
-              completionData: checkoutBankAccountCompletionData,
-            }),
-          ).rejects.toThrow(FundingSourceCompletionDataInvalidError)
-        },
-      )
-
-      describe('for expendable entitlement enabled', () => {
-        beforeAll(() => {
-          if (!skip && !bankAccountFundingSourceExpendableEnabled) {
-            console.warn(
-              `Bank account funding source expendable entitlement not enabled. Skipping tests.`,
-            )
-            skip = true
-          }
-        })
-
-        it('should throw InsufficientEntitlementsException on complete if not entitled', async () => {
-          if (skip) return
-
-          expectSetupComplete()
-
-          await instanceUnderTest.createKeysIfAbsent()
-
-          await expect(
-            createBankAccountFundingSource(instanceUnderTest, {
-              username: 'custom_checking_500',
-              supportedProviders: ['checkout'],
-            }),
-          ).rejects.toThrow(new InsufficientEntitlementsError())
-        })
-      })
-    })
-
     describe.each`
       provider    | providerEnabled
       ${'stripe'} | ${'stripeCardEnabled'}

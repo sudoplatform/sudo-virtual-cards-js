@@ -10,13 +10,11 @@ import {
   Logger,
   NotSignedInError,
 } from '@sudoplatform/sudo-common'
-import { BankAccountType } from '../../../../public/typings/bankAccountType'
 import { CardType } from '../../../../public/typings/cardType'
 import {
   CreditCardNetwork,
   FundingSourceState,
   FundingSourceType,
-  FundingSourceFlags,
 } from '../../../../public/typings/fundingSource'
 import { FundingSourceService } from '../../entities/fundingSource/fundingSourceService'
 import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
@@ -41,7 +39,6 @@ interface BaseGetFundingSourceUseCaseOutput {
   updatedAt: Date
   type: FundingSourceType
   state: FundingSourceState
-  flags: FundingSourceFlags[]
   currency: string
 }
 
@@ -52,20 +49,8 @@ export interface GetCreditCardFundingSourceUseCaseOutput extends BaseGetFundingS
   cardType: CardType
 }
 
-export interface GetBankAccountFundingSourceUseCaseOutput extends BaseGetFundingSourceUseCaseOutput {
-  type: FundingSourceType.BankAccount
-  bankAccountType: BankAccountType
-  last4: string
-  institutionName: string
-  institutionLogo?: {
-    type: string
-    data: string
-  }
-}
-
 export type GetFundingSourceUseCaseOutput =
-  | GetCreditCardFundingSourceUseCaseOutput
-  | GetBankAccountFundingSourceUseCaseOutput
+  GetCreditCardFundingSourceUseCaseOutput
 
 /**
  * Application business logic for retrieving a funding source.

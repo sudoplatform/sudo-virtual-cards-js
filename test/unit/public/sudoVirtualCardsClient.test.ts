@@ -25,13 +25,7 @@ import {
   when,
 } from 'ts-mockito'
 import { v4 } from 'uuid'
-import {
-  BankAccountType,
-  FundingSource,
-  FundingSourceRequiresUserInteractionError,
-  SandboxPlaidData,
-  TransactionType,
-} from '../../../src'
+import { FundingSource, TransactionType } from '../../../src'
 import { ApiClient } from '../../../src/private/data/common/apiClient'
 import { SudoVirtualCardsClientPrivateOptions } from '../../../src/private/data/common/privateSudoVirtualCardsClientOptions'
 import { DefaultFundingSourceService } from '../../../src/private/data/fundingSource/defaultFundingSourceService'
@@ -42,10 +36,6 @@ import { CompleteFundingSourceUseCase } from '../../../src/private/domain/use-ca
 import { GetFundingSourceClientConfigurationUseCase } from '../../../src/private/domain/use-cases/fundingSource/getFundingSourceClientConfigurationUseCase'
 import { GetFundingSourceUseCase } from '../../../src/private/domain/use-cases/fundingSource/getFundingSourceUseCase'
 import { ListFundingSourcesUseCase } from '../../../src/private/domain/use-cases/fundingSource/listFundingSourcesUseCase'
-import { RefreshFundingSourceUseCase } from '../../../src/private/domain/use-cases/fundingSource/refreshFundingSourceUseCase'
-import { ReviewUnfundedFundingSourceUseCase } from '../../../src/private/domain/use-cases/fundingSource/reviewUnfundedFundingSourceUseCase'
-import { SandboxGetPlaidDataUseCase } from '../../../src/private/domain/use-cases/fundingSource/sandboxGetPlaidDataUseCase'
-import { SandboxSetFundingSourceToRequireRefreshUseCase } from '../../../src/private/domain/use-cases/fundingSource/sandboxSetFundingSourceToRequireRefreshUseCase'
 import { SetupFundingSourceUseCase } from '../../../src/private/domain/use-cases/fundingSource/setupFundingSourceUseCase'
 import { SubscribeToFundingSourceChangesUseCase } from '../../../src/private/domain/use-cases/fundingSource/subscribeToFundingSourceChangesUseCase'
 import { UnsubscribeFromFundingSourceChangesUseCase } from '../../../src/private/domain/use-cases/fundingSource/unsubscribeFromFundingSourceChangesUseCase'
@@ -63,16 +53,11 @@ import { ProvisionVirtualCardUseCase } from '../../../src/private/domain/use-cas
 import { UpdateVirtualCardUseCase } from '../../../src/private/domain/use-cases/virtualCard/updateVirtualCardUseCase'
 import {
   DefaultSudoVirtualCardsClient,
-  SandboxGetPlaidDataInput,
-  SandboxSetFundingSourceToRequireRefreshInput,
   SudoVirtualCardsClient,
 } from '../../../src/public/sudoVirtualCardsClient'
 import { APIResultStatus } from '../../../src/public/typings/apiResult'
 import { CreateKeysIfAbsentResult } from '../../../src/public/typings/createKeysIfAbsentResult'
-import {
-  CheckoutBankAccountRefreshFundingSourceInteractionData,
-  FundingSourceType,
-} from '../../../src/public/typings/fundingSource'
+import { FundingSourceType } from '../../../src/public/typings/fundingSource'
 import { SortOrder } from '../../../src/public/typings/sortOrder'
 import { ApiDataFactory } from '../data-factory/api'
 import { EntityDataFactory } from '../data-factory/entity'
@@ -131,13 +116,6 @@ const JestMockCompleteFundingSourceUseCase =
     typeof CompleteFundingSourceUseCase
   >
 jest.mock(
-  '../../../src/private/domain/use-cases/fundingSource/refreshFundingSourceUseCase',
-)
-const JestMockRefreshFundingSourceUseCase =
-  RefreshFundingSourceUseCase as jest.MockedClass<
-    typeof RefreshFundingSourceUseCase
-  >
-jest.mock(
   '../../../src/private/domain/use-cases/fundingSource/subscribeToFundingSourceChangesUseCase',
 )
 const JestMockSubscribeToFundingSourceChangesUseCase =
@@ -169,13 +147,6 @@ jest.mock(
 const JestMockCancelFundingSourceUseCase =
   CancelFundingSourceUseCase as jest.MockedClass<
     typeof CancelFundingSourceUseCase
-  >
-jest.mock(
-  '../../../src/private/domain/use-cases/fundingSource/reviewUnfundedFundingSourceUseCase',
-)
-const JestMockReviewUnfundedFundingSourceUseCase =
-  ReviewUnfundedFundingSourceUseCase as jest.MockedClass<
-    typeof ReviewUnfundedFundingSourceUseCase
   >
 jest.mock(
   '../../../src/private/domain/use-cases/fundingSource/cancelProvisionalFundingSourceUseCase',
@@ -271,22 +242,6 @@ const JestMockListTransactionsByCardIdAndTypeUseCase =
     typeof ListTransactionsByCardIdAndTypeUseCase
   >
 
-jest.mock(
-  '../../../src/private/domain/use-cases/fundingSource/sandboxGetPlaidDataUseCase',
-)
-const JestMockSandboxGetPlaidDataUseCase =
-  SandboxGetPlaidDataUseCase as jest.MockedClass<
-    typeof SandboxGetPlaidDataUseCase
-  >
-
-jest.mock(
-  '../../../src/private/domain/use-cases/fundingSource/sandboxSetFundingSourceToRequireRefreshUseCase',
-)
-const JestMockSandboxSetFundingSourceToRequireRefreshUseCase =
-  SandboxSetFundingSourceToRequireRefreshUseCase as jest.MockedClass<
-    typeof SandboxSetFundingSourceToRequireRefreshUseCase
-  >
-
 describe('SudoVirtualCardsClient Test Suite', () => {
   // Opt Mocks
   const mockSudoUserClient = mock<SudoUserClient>()
@@ -304,7 +259,6 @@ describe('SudoVirtualCardsClient Test Suite', () => {
   const mockGetFundingSourceClientConfigurationUseCase =
     mock<GetFundingSourceClientConfigurationUseCase>()
   const mockCompleteFundingSourceUseCase = mock<CompleteFundingSourceUseCase>()
-  const mockRefreshFundingSourceUseCase = mock<RefreshFundingSourceUseCase>()
   const mockSubscribeToFundingSourceChangesUseCase =
     mock<SubscribeToFundingSourceChangesUseCase>()
   const mockUnsubscribeFromFundingSourceChangesUseCase =
@@ -314,8 +268,6 @@ describe('SudoVirtualCardsClient Test Suite', () => {
   const mockListProvisionalFundingSourcesUseCase =
     mock<ListProvisionalFundingSourcesUseCase>()
   const mockCancelFundingSourceUseCase = mock<CancelFundingSourceUseCase>()
-  const mockReviewUnfundedFundingSourceUseCase =
-    mock<ReviewUnfundedFundingSourceUseCase>()
   const mockCancelProvisionalFundingSourceUseCase =
     mock<CancelProvisionalFundingSourceUseCase>()
   const mockProvisionVirtualCardUseCase = mock<ProvisionVirtualCardUseCase>()
@@ -332,9 +284,6 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     mock<ListTransactionsByCardIdUseCase>()
   const mockListTransactionsByCardIdAndTypeUseCase =
     mock<ListTransactionsByCardIdAndTypeUseCase>()
-  const mockSandboxGetPlaidDataUseCase = mock<SandboxGetPlaidDataUseCase>()
-  const mockSandboxSetFundingSourceToRequireRefreshUseCase =
-    mock<SandboxSetFundingSourceToRequireRefreshUseCase>()
 
   const spyOnEnsureSignedIn = (
     instanceUnderTest: SudoVirtualCardsClient,
@@ -361,7 +310,6 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     reset(mockSetupFundingSourceUseCase)
     reset(mockGetFundingSourceClientConfigurationUseCase)
     reset(mockCompleteFundingSourceUseCase)
-    reset(mockRefreshFundingSourceUseCase)
     reset(mockSubscribeToFundingSourceChangesUseCase)
     reset(mockUnsubscribeFromFundingSourceChangesUseCase)
     reset(mockGetFundingSourceUseCase)
@@ -369,7 +317,6 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     reset(mockListProvisionalFundingSourcesUseCase)
     reset(mockCancelFundingSourceUseCase)
     reset(mockCancelProvisionalFundingSourceUseCase)
-    reset(mockReviewUnfundedFundingSourceUseCase)
     reset(mockProvisionVirtualCardUseCase)
     reset(mockGetProvisionalCardUseCase)
     reset(mockListProvisionalCardsUseCase)
@@ -382,8 +329,6 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     reset(mockListTransactionsUseCase)
     reset(mockListTransactionsByCardIdUseCase)
     reset(mockListTransactionsByCardIdAndTypeUseCase)
-    reset(mockSandboxGetPlaidDataUseCase)
-    reset(mockSandboxSetFundingSourceToRequireRefreshUseCase)
 
     JestMockDefaultFundingSourceService.mockClear()
     JestMockApiClient.mockClear()
@@ -393,14 +338,12 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     JestMockSetupFundingSourceUseCase.mockClear()
     JestMockGetFundingSourceClientConfigurationUseCase.mockClear()
     JestMockCompleteFundingSourceUseCase.mockClear()
-    JestMockRefreshFundingSourceUseCase.mockClear()
     JestMockSubscribeToFundingSourceChangesUseCase.mockClear()
     JestMockUnsubscribeFromFundingSourceChangesUseCase.mockClear()
     JestMockGetFundingSourceUseCase.mockClear()
     JestMockListFundingSourcesUseCase.mockClear()
     JestMockListProvisionalFundingSourcesUseCase.mockClear()
     JestMockCancelFundingSourceUseCase.mockClear()
-    JestMockReviewUnfundedFundingSourceUseCase.mockClear()
     JestMockProvisionVirtualCardUseCase.mockClear()
     JestMockGetProvisionalCardUseCase.mockClear()
     JestMockListProvisionalCardsUseCase.mockClear()
@@ -431,9 +374,6 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     JestMockCompleteFundingSourceUseCase.mockImplementation(() =>
       instance(mockCompleteFundingSourceUseCase),
     )
-    JestMockRefreshFundingSourceUseCase.mockImplementation(() =>
-      instance(mockRefreshFundingSourceUseCase),
-    )
     JestMockSubscribeToFundingSourceChangesUseCase.mockImplementation(() =>
       instance(mockSubscribeToFundingSourceChangesUseCase),
     )
@@ -448,9 +388,6 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     )
     JestMockCancelFundingSourceUseCase.mockImplementation(() =>
       instance(mockCancelFundingSourceUseCase),
-    )
-    JestMockReviewUnfundedFundingSourceUseCase.mockImplementation(() =>
-      instance(mockReviewUnfundedFundingSourceUseCase),
     )
     JestMockCancelProvisionalFundingSourceUseCase.mockImplementation(() =>
       instance(mockCancelProvisionalFundingSourceUseCase),
@@ -493,12 +430,6 @@ describe('SudoVirtualCardsClient Test Suite', () => {
     )
     JestMockListTransactionsByCardIdAndTypeUseCase.mockImplementation(() =>
       instance(mockListTransactionsByCardIdAndTypeUseCase),
-    )
-    JestMockSandboxGetPlaidDataUseCase.mockImplementation(() =>
-      instance(mockSandboxGetPlaidDataUseCase),
-    )
-    JestMockSandboxSetFundingSourceToRequireRefreshUseCase.mockImplementation(
-      () => instance(mockSandboxSetFundingSourceToRequireRefreshUseCase),
     )
   }
 
@@ -666,45 +597,6 @@ describe('SudoVirtualCardsClient Test Suite', () => {
         completionData: { provider: 'stripe', paymentMethod: '' },
       })
     })
-    it('calls use case as expected for bank account', async () => {
-      const id = v4()
-      await instanceUnderTest.completeFundingSource({
-        id,
-        completionData: {
-          provider: 'checkout',
-          type: FundingSourceType.BankAccount,
-          publicToken: 'publicToken',
-          accountId: 'accountId',
-          institutionId: 'institutionId',
-          authorizationText: {
-            content: 'authorizationText',
-            contentType: 'authorizationTextContentType',
-            language: 'authorizationTextLanguage',
-            hash: 'authorizationTextHash',
-            hashAlgorithm: 'authorizationTextHashAlgorithm',
-          },
-        },
-      })
-      verify(mockCompleteFundingSourceUseCase.execute(anything())).once()
-      const [args] = capture(mockCompleteFundingSourceUseCase.execute).first()
-      expect(args).toEqual<typeof args>({
-        id,
-        completionData: {
-          provider: 'checkout',
-          type: FundingSourceType.BankAccount,
-          publicToken: 'publicToken',
-          accountId: 'accountId',
-          institutionId: 'institutionId',
-          authorizationText: {
-            content: 'authorizationText',
-            contentType: 'authorizationTextContentType',
-            language: 'authorizationTextLanguage',
-            hash: 'authorizationTextHash',
-            hashAlgorithm: 'authorizationTextHashAlgorithm',
-          },
-        },
-      })
-    })
 
     it('returns expected result for credit card', async () => {
       await expect(
@@ -713,156 +605,6 @@ describe('SudoVirtualCardsClient Test Suite', () => {
           completionData: { provider: 'stripe', paymentMethod: '' },
         }),
       ).resolves.toEqual(ApiDataFactory.defaultFundingSource)
-    })
-
-    it('returns expected result for bank account', async () => {
-      when(mockCompleteFundingSourceUseCase.execute(anything())).thenResolve(
-        EntityDataFactory.bankAccountFundingSource,
-      )
-      await expect(
-        instanceUnderTest.completeFundingSource({
-          id: '',
-          completionData: {
-            provider: 'checkout',
-            type: FundingSourceType.BankAccount,
-            publicToken: 'publicToken',
-            accountId: 'accountId',
-            institutionId: 'institutionId',
-            authorizationText: {
-              content: 'authorizationText',
-              contentType: 'authorizationTextContentType',
-              language: 'authorizationTextLanguage',
-              hash: 'authorizationTextHash',
-              hashAlgorithm: 'authorizationTextHashAlgorithm',
-            },
-          },
-        }),
-      ).resolves.toEqual(ApiDataFactory.bankAccountFundingSource)
-    })
-  })
-
-  describe('refreshFundingSource', () => {
-    beforeEach(() => {
-      when(mockRefreshFundingSourceUseCase.execute(anything())).thenResolve(
-        EntityDataFactory.defaultFundingSource,
-      )
-    })
-    afterEach(() => {
-      jest.restoreAllMocks()
-    })
-    it('generates use case', async () => {
-      // Spy on the private ensureSignedIn method to verify it's called
-      const ensureSignedInSpy = spyOnEnsureSignedIn(instanceUnderTest)
-
-      await instanceUnderTest.refreshFundingSource({
-        id: '',
-        refreshData: {
-          provider: 'checkout',
-          type: FundingSourceType.BankAccount,
-          accountId: 'accountId',
-          applicationName: 'system-test-app',
-        },
-      })
-      expect(JestMockRefreshFundingSourceUseCase).toHaveBeenCalledTimes(1)
-      // Verify that ensureSignedIn was called
-      expect(ensureSignedInSpy).toHaveBeenCalledTimes(1)
-      expect(ensureSignedInSpy).toHaveBeenCalledWith()
-    })
-    it('calls use case as expected for bank account', async () => {
-      const id = v4()
-      await instanceUnderTest.refreshFundingSource({
-        id,
-        refreshData: {
-          provider: 'checkout',
-          type: FundingSourceType.BankAccount,
-          accountId: 'accountId',
-          applicationName: 'system-test-app',
-          authorizationText: {
-            content: 'authorizationText',
-            contentType: 'authorizationTextContentType',
-            language: 'authorizationTextLanguage',
-            hash: 'authorizationTextHash',
-            hashAlgorithm: 'authorizationTextHashAlgorithm',
-          },
-        },
-      })
-      verify(mockRefreshFundingSourceUseCase.execute(anything())).once()
-      const [args] = capture(mockRefreshFundingSourceUseCase.execute).first()
-      expect(args).toEqual<typeof args>({
-        id,
-        refreshData: {
-          provider: 'checkout',
-          type: FundingSourceType.BankAccount,
-          applicationName: 'system-test-app',
-          accountId: 'accountId',
-          authorizationText: {
-            content: 'authorizationText',
-            contentType: 'authorizationTextContentType',
-            language: 'authorizationTextLanguage',
-            hash: 'authorizationTextHash',
-            hashAlgorithm: 'authorizationTextHashAlgorithm',
-          },
-        },
-      })
-    })
-
-    it('returns expected result for bank account', async () => {
-      when(mockRefreshFundingSourceUseCase.execute(anything())).thenResolve(
-        EntityDataFactory.bankAccountFundingSource,
-      )
-      await expect(
-        instanceUnderTest.refreshFundingSource({
-          id: v4(),
-          refreshData: {
-            provider: 'checkout',
-            type: FundingSourceType.BankAccount,
-            applicationName: 'system-test-app',
-            accountId: 'accountId',
-            authorizationText: {
-              content: 'authorizationText',
-              contentType: 'authorizationTextContentType',
-              language: 'authorizationTextLanguage',
-              hash: 'authorizationTextHash',
-              hashAlgorithm: 'authorizationTextHashAlgorithm',
-            },
-          },
-        }),
-      ).resolves.toEqual(ApiDataFactory.bankAccountFundingSource)
-    })
-
-    it('returns expected result for bank account on failure', async () => {
-      const interactionData: CheckoutBankAccountRefreshFundingSourceInteractionData =
-        {
-          authorizationText: [
-            {
-              content: 'authorizationText',
-              contentType: 'authorizationTextContentType',
-              language: 'authorizationTextLanguage',
-              hash: 'authorizationTextHash',
-              hashAlgorithm: 'authorizationTextHashAlgorithm',
-            },
-          ],
-          linkToken: 'link-token',
-          provider: 'checkout',
-          type: FundingSourceType.BankAccount,
-          version: 1,
-        }
-      when(mockRefreshFundingSourceUseCase.execute(anything())).thenReject(
-        new FundingSourceRequiresUserInteractionError(interactionData),
-      )
-      await expect(
-        instanceUnderTest.refreshFundingSource({
-          id: v4(),
-          refreshData: {
-            provider: 'checkout',
-            type: FundingSourceType.BankAccount,
-            accountId: 'accountId',
-            applicationName: 'system-test-app',
-          },
-        }),
-      ).rejects.toEqual(
-        new FundingSourceRequiresUserInteractionError(interactionData),
-      )
     })
   })
 
@@ -1021,35 +763,6 @@ describe('SudoVirtualCardsClient Test Suite', () => {
       await expect(instanceUnderTest.cancelFundingSource('')).resolves.toEqual(
         ApiDataFactory.defaultFundingSource,
       )
-    })
-  })
-
-  describe('reviewUnfundedFundingSource', () => {
-    beforeEach(() => {
-      when(
-        mockReviewUnfundedFundingSourceUseCase.execute(anything()),
-      ).thenResolve(EntityDataFactory.defaultFundingSource)
-      when(mockSudoUserClient.isSignedIn()).thenResolve(true)
-    })
-    it('generates use case', async () => {
-      await instanceUnderTest.reviewUnfundedFundingSource('')
-      expect(JestMockReviewUnfundedFundingSourceUseCase).toHaveBeenCalledTimes(
-        1,
-      )
-    })
-    it('calls use case as expected', async () => {
-      const id = v4()
-      await instanceUnderTest.reviewUnfundedFundingSource(id)
-      verify(mockReviewUnfundedFundingSourceUseCase.execute(anything())).once()
-      const [actualId] = capture(
-        mockReviewUnfundedFundingSourceUseCase.execute,
-      ).first()
-      expect(actualId).toEqual(id)
-    })
-    it('returns expected result', async () => {
-      await expect(
-        instanceUnderTest.reviewUnfundedFundingSource(''),
-      ).resolves.toEqual(ApiDataFactory.defaultFundingSource)
     })
   })
 
@@ -1674,70 +1387,6 @@ describe('SudoVirtualCardsClient Test Suite', () => {
         status: ListOperationResultStatus.Success,
         items: [ApiDataFactory.transaction],
       })
-    })
-  })
-
-  describe('sandboxGetPlaidData', () => {
-    const result: SandboxPlaidData = {
-      accountMetadata: [
-        { accountId: 'account-id', subtype: BankAccountType.Checking },
-      ],
-      publicToken: 'public-token',
-    }
-
-    beforeEach(() => {
-      when(mockSandboxGetPlaidDataUseCase.execute(anything())).thenResolve(
-        result,
-      )
-    })
-
-    it('returns expected result', async () => {
-      const input: SandboxGetPlaidDataInput = {
-        institutionId: 'institution-id',
-        plaidUsername: 'plaid-username',
-      }
-
-      await expect(
-        instanceUnderTest.sandboxGetPlaidData(input),
-      ).resolves.toEqual(result)
-
-      expect(JestMockSandboxGetPlaidDataUseCase).toHaveBeenCalledTimes(1)
-
-      verify(mockSandboxGetPlaidDataUseCase.execute(anything())).once()
-      const [actualInput] = capture(
-        mockSandboxGetPlaidDataUseCase.execute,
-      ).first()
-      expect(actualInput).toEqual(input)
-    })
-  })
-
-  describe('sandboxSetFundingSourceToRequireRefresh', () => {
-    beforeEach(() => {
-      when(
-        mockSandboxSetFundingSourceToRequireRefreshUseCase.execute(anything()),
-      ).thenResolve(EntityDataFactory.bankAccountFundingSource)
-    })
-
-    it('returns expected result', async () => {
-      const input: SandboxSetFundingSourceToRequireRefreshInput = {
-        fundingSourceId: EntityDataFactory.bankAccountFundingSource.id,
-      }
-
-      await expect(
-        instanceUnderTest.sandboxSetFundingSourceToRequireRefresh(input),
-      ).resolves.toEqual(EntityDataFactory.bankAccountFundingSource)
-
-      expect(
-        JestMockSandboxSetFundingSourceToRequireRefreshUseCase,
-      ).toHaveBeenCalledTimes(1)
-
-      verify(
-        mockSandboxSetFundingSourceToRequireRefreshUseCase.execute(anything()),
-      ).once()
-      const [actualInput] = capture(
-        mockSandboxSetFundingSourceToRequireRefreshUseCase.execute,
-      ).first()
-      expect(actualInput).toEqual(input)
     })
   })
 

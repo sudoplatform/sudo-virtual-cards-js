@@ -5,20 +5,19 @@
  */
 
 import { FatalError } from '@sudoplatform/sudo-common'
-import { Checkout } from 'checkout-sdk-node'
 import Stripe from 'stripe'
+
 import {
-  isCheckoutBankAccountFundingSourceClientConfiguration,
   isStripeCardFundingSourceClientConfiguration,
   SudoVirtualCardsClient,
 } from '../../../src'
 
+export type StripeClient = InstanceType<typeof Stripe>
+
 export interface FundingSourceProviders {
   stripeCardEnabled: boolean
-  checkoutBankAccountEnabled: boolean
   apis: {
-    stripe: Stripe
-    checkout?: Checkout
+    stripe: StripeClient
   }
 }
 export const getFundingSourceProviders = async (
@@ -26,31 +25,17 @@ export const getFundingSourceProviders = async (
 ): Promise<FundingSourceProviders> => {
   const config = await vcClient.getVirtualCardsConfig()
 
-  let stripe: Stripe | undefined
-  let checkout: Checkout | undefined
+  let stripe: StripeClient | undefined
 
   let stripeCardEnabled = false
-  let checkoutBankAccountEnabled = false
 
   for (const fsConfig of config.fundingSourceClientConfiguration) {
     if (isStripeCardFundingSourceClientConfiguration(fsConfig)) {
       stripe = new Stripe(fsConfig.apiKey, {
-        apiVersion: '2026-02-25.clover',
+        apiVersion: '2026-05-27.dahlia',
         typescript: true,
       })
       stripeCardEnabled = true
-    } else if (
-      isCheckoutBankAccountFundingSourceClientConfiguration(fsConfig)
-    ) {
-      checkout = new Checkout(undefined, {
-        pk: fsConfig.apiKey,
-      })
-      if (
-        isCheckoutBankAccountFundingSourceClientConfiguration(fsConfig) &&
-        config.bankAccountFundingSourceCreationEnabled
-      ) {
-        checkoutBankAccountEnabled = true
-      }
     }
   }
 
@@ -62,17 +47,15 @@ export const getFundingSourceProviders = async (
 
   return {
     stripeCardEnabled,
-    checkoutBankAccountEnabled,
     apis: {
       stripe,
-      checkout,
     },
   }
 }
 
 export const getStripe = async (
   vcClient: SudoVirtualCardsClient,
-): Promise<Stripe> => {
+): Promise<StripeClient> => {
   const fundingSourceProviders = await getFundingSourceProviders(vcClient)
 
   if (!fundingSourceProviders.apis.stripe) {

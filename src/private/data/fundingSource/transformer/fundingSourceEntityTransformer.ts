@@ -1,10 +1,5 @@
 import { FatalError } from '@sudoplatform/sudo-common'
-import {
-  BankAccountType,
-  CardType,
-  TransactionVelocity,
-} from '../../../../gen/graphqlTypes'
-import { BankAccountType as BankAccountTypeEntity } from '../../../../public/typings/bankAccountType'
+import { CardType, TransactionVelocity } from '../../../../gen/graphqlTypes'
 import { CardType as CardTypeEntity } from '../../../../public/typings/cardType'
 import { FundingSourceType } from '../../../../public/typings/fundingSource'
 import { TransactionVelocity as TransactionVelocityEntity } from '../../../../public/typings/transactionVelocity'
@@ -14,9 +9,7 @@ import { FundingSourceEntity } from '../../../domain/entities/fundingSource/fund
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-
 import { FundingSourceUnsealed } from '../fundingSourceSealedAttributes'
-import { CurrencyAmountTransformer } from '../../common/transformer/currencyAmountTransformer'
 
 export class FundingSourceEntityTransformer {
   static transformGraphQL(data: FundingSourceUnsealed): FundingSourceEntity {
@@ -27,7 +20,6 @@ export class FundingSourceEntityTransformer {
       updatedAt: new Date(data.updatedAtEpochMs),
       currency: data.currency,
       state: data.state,
-      flags: data.flags,
       version: data.version,
       transactionVelocity: TransactionVelocityTransformer.transformGraphQL(
         data.transactionVelocity,
@@ -41,22 +33,6 @@ export class FundingSourceEntityTransformer {
           last4: data.last4,
           cardType: CardTypeTransformer.transformGraphQL(data.cardType),
           network: data.network,
-        }
-      case 'BankAccountFundingSource':
-        return {
-          ...commonProps,
-          type: FundingSourceType.BankAccount,
-          bankAccountType: BankAccountTypeTransformer.transformGraphQL(
-            data.bankAccountType,
-          ),
-          last4: data.last4,
-          institutionName: data.institutionName,
-          institutionLogo: data.institutionLogo,
-          unfundedAmount: data.unfundedAmount
-            ? CurrencyAmountTransformer.transformToCurrencyAmountEntity(
-                data.unfundedAmount,
-              )
-            : undefined,
         }
       default:
         throw new FatalError('Unrecognized funding source type')
@@ -92,19 +68,6 @@ export class CardTypeTransformer {
         return CardTypeEntity.Prepaid
       case CardType.Other:
         return CardTypeEntity.Other
-    }
-  }
-}
-
-export class BankAccountTypeTransformer {
-  static transformGraphQL(data: BankAccountType): BankAccountTypeEntity {
-    switch (data) {
-      case BankAccountType.Checking:
-        return BankAccountTypeEntity.Checking
-      case BankAccountType.Savings:
-        return BankAccountTypeEntity.Savings
-      case BankAccountType.Other:
-        return BankAccountTypeEntity.Other
     }
   }
 }

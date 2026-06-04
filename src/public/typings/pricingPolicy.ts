@@ -12,16 +12,10 @@ import { Markup } from './markup'
  */
 export interface PricingPolicy {
   stripe?: StripePricingPolicy
-  checkout?: CheckoutPricingPolicy
 }
 
 export interface StripePricingPolicy {
   creditCard: { [key: string]: TieredMarkupPolicy }
-}
-
-export interface CheckoutPricingPolicy {
-  creditCard: { [key: string]: TieredMarkupPolicy }
-  bankAccount: { [key: string]: TieredMarkupPolicy }
 }
 
 export interface TieredMarkup {

@@ -6,11 +6,7 @@
 
 import { Base64, FatalError, isJsonRecord } from '@sudoplatform/sudo-common'
 import * as t from 'io-ts'
-import {
-  FundingSourceInteractionData,
-  FundingSourceType,
-} from '../../../public/typings/fundingSource'
-import { AuthorizationTextCodec, PlaidLinkTokenCodec } from './provisioningData'
+import { FundingSourceInteractionData } from '../../../public/typings/fundingSource'
 
 /* eslint-disable tree-shaking/no-side-effects-in-initialization */
 const BaseProvisionalFundingSourceInteractionDataProperties = {
@@ -24,26 +20,8 @@ const BaseProvisionalFundingSourceInteractionDataCodec = t.type(
   'BaseProvisionalFundingSourceInteractionData',
 )
 
-const CheckoutBankAccountRefreshFundingSourceInteractionDataProperties = {
-  provider: t.literal('checkout'),
-  version: t.literal(1),
-  type: t.literal('BANK_ACCOUNT'),
-  plaidLinkToken: PlaidLinkTokenCodec,
-  authorizationText: t.array(AuthorizationTextCodec),
-}
-
-const CheckoutBankAccountRefreshFundingSourceInteractionDataCodec = t.type(
-  CheckoutBankAccountRefreshFundingSourceInteractionDataProperties,
-  'CheckoutBankAccountRefreshFundingSourceInteractionData',
-)
-
-const ProvisionalFundingSourceInteractionDataCodec = t.union(
-  [
-    CheckoutBankAccountRefreshFundingSourceInteractionDataCodec,
-    BaseProvisionalFundingSourceInteractionDataCodec,
-  ],
-  'ProvisionalFundingSourceInteractionData',
-)
+const ProvisionalFundingSourceInteractionDataCodec =
+  BaseProvisionalFundingSourceInteractionDataCodec
 /* eslint-enable tree-shaking/no-side-effects-in-initialization */
 
 export function decodeFundingSourceInteractionData(
@@ -96,18 +74,7 @@ export function decodeFundingSourceInteractionData(
       )}`,
     )
   }
-
-  if (CheckoutBankAccountRefreshFundingSourceInteractionDataCodec.is(decoded)) {
-    return {
-      provider: 'checkout',
-      type: FundingSourceType.BankAccount,
-      version: 1,
-      linkToken: decoded.plaidLinkToken.link_token,
-      authorizationText: decoded.authorizationText,
-    }
-  } else {
-    throw new FatalError(
-      `${msg}: Unrecognized interaction data: ${decoded.provider}:${decoded.version}:${decoded.type}`,
-    )
-  }
+  throw new FatalError(
+    `${msg}: Unrecognized interaction data: ${decoded.provider}:${decoded.version}:${decoded.type}`,
+  )
 }

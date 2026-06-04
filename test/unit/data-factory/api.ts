@@ -5,7 +5,6 @@
  */
 
 import {
-  BankAccountType,
   CardState,
   CardType,
   ChargeDetailState,
@@ -46,43 +45,11 @@ export class ApiDataFactory {
     state: ProvisionalFundingSourceState.Completed,
   }
 
-  static readonly provisionalBankAccountFundingSource: ProvisionalFundingSource =
-    {
-      ...this.commonProps,
-      id: 'dummyFundingSourceId',
-      type: FundingSourceType.BankAccount,
-      last4: '1234',
-      provisioningData: {
-        version: 1,
-        provider: 'checkout',
-        type: FundingSourceType.BankAccount,
-        linkToken: 'link_token',
-        authorizationText: [
-          {
-            content: 'authorization-text-0',
-            contentType: 'authorization-text-0-content-type',
-            language: 'authorization-text-0-language',
-            hash: 'authorization-text-0-hash',
-            hashAlgorithm: 'authorization-text-0-hash-algorithm',
-          },
-          {
-            content: 'authorization-text-1',
-            contentType: 'authorization-text-1-content-type',
-            language: 'authorization-text-1-language',
-            hash: 'authorization-text-1-hash',
-            hashAlgorithm: 'authorization-text-1-hash-algorithm',
-          },
-        ],
-      },
-      state: ProvisionalFundingSourceState.Completed,
-    }
-
   private static readonly commonFundingSourceProps = {
     ...this.commonProps,
     id: 'dummyFundingSourceId',
     currency: 'dummyCurrency',
     state: FundingSourceState.Active,
-    flags: [],
     transactionVelocity: {
       maximum: 10000,
       velocity: ['10000/P1D'],
@@ -97,18 +64,6 @@ export class ApiDataFactory {
   }
 
   static readonly defaultFundingSource = this.creditCardFundingSource
-
-  static readonly bankAccountFundingSource: FundingSource = {
-    ...this.commonFundingSourceProps,
-    type: FundingSourceType.BankAccount,
-    bankAccountType: BankAccountType.Savings,
-    last4: '1234',
-    institutionName: 'dummyInstitutionName',
-    institutionLogo: {
-      type: 'image/png',
-      data: 'dummyInstitutionLogo',
-    },
-  }
 
   static readonly provisionalVirtualCard: ProvisionalVirtualCard = {
     ...this.commonProps,
@@ -258,26 +213,14 @@ export class ApiDataFactory {
       },
     ],
     virtualCardCurrencies: ['USD'],
-    bankAccountFundingSourceExpendableEnabled: true,
-    bankAccountFundingSourceCreationEnabled: true,
     fundingSourceClientConfiguration: [
       {
-        type: 'checkout',
-        fundingSourceType: FundingSourceType.BankAccount,
+        type: 'stripe',
+        fundingSourceType: FundingSourceType.CreditCard,
         version: 1,
         apiKey: 'dummyApiKey',
       },
     ],
-    clientApplicationConfiguration: {
-      webApplication: {
-        funding_source_providers: {
-          plaid: {
-            client_name: 'dummyClientName',
-            redirect_uri: 'dummyRedirectUri',
-          },
-        },
-      },
-    },
     pricingPolicy: {
       stripe: {
         creditCard: {
@@ -288,41 +231,6 @@ export class ApiDataFactory {
                 markup: {
                   flat: 1000,
                   percent: 10,
-                },
-              },
-            ],
-          },
-        },
-      },
-      checkout: {
-        creditCard: {
-          DEFAULT: {
-            tiers: [
-              {
-                minThreshold: 0,
-                markup: {
-                  flat: 2500,
-                  percent: 25,
-                },
-              },
-            ],
-          },
-        },
-        bankAccount: {
-          DEFAULT: {
-            tiers: [
-              {
-                minThreshold: 0,
-                markup: {
-                  flat: 1000,
-                  percent: 0,
-                },
-              },
-              {
-                minThreshold: 10000,
-                markup: {
-                  flat: 2000,
-                  percent: 0,
                 },
               },
             ],

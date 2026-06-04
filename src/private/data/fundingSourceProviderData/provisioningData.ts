@@ -25,39 +25,6 @@ const BaseProvisionalFundingSourceProvisioningDataCodec = t.type(
   'BaseProvisionalFundingSourceProvisioningData',
 )
 
-const PlaidLinkTokenProps = {
-  link_token: t.string,
-  expiration: t.string,
-  request_id: t.string,
-}
-export const PlaidLinkTokenCodec = t.type(PlaidLinkTokenProps, 'PlaidLinkToken')
-
-const AuthorizationTextProperties = {
-  language: t.string,
-  content: t.string,
-  contentType: t.string,
-  hash: t.string,
-  hashAlgorithm: t.string,
-}
-
-export const AuthorizationTextCodec = t.type(
-  AuthorizationTextProperties,
-  'AuthorizationText',
-)
-
-const CheckoutBankAccountProvisionalFundingSourceProvisioningDataProperties = {
-  provider: t.literal('checkout'),
-  version: t.literal(1),
-  type: t.literal('BANK_ACCOUNT'),
-  plaidLinkToken: PlaidLinkTokenCodec,
-  authorizationText: t.array(AuthorizationTextCodec),
-}
-
-const CheckoutBankAccountProvisionalFundingSourceProvisioningDataCodec = t.type(
-  CheckoutBankAccountProvisionalFundingSourceProvisioningDataProperties,
-  'CheckoutBankAccountProvisionalFundingSourceProvisioningData',
-)
-
 const StripeCardProvisionalFundingSourceProvisioningDataRequiredProperties = {
   provider: t.literal('stripe'),
   version: t.literal(1),
@@ -84,7 +51,6 @@ const StripeCardProvisionalFundingSourceProvisioningDataCodec = t.intersection(
 
 const ProvisionalFundingSourceProvisioningDataCodec = t.union(
   [
-    CheckoutBankAccountProvisionalFundingSourceProvisioningDataCodec,
     StripeCardProvisionalFundingSourceProvisioningDataCodec,
     BaseProvisionalFundingSourceProvisioningDataCodec,
   ],
@@ -144,16 +110,6 @@ export function decodeProvisionalFundingSourceProvisioningData(
       type: FundingSourceType.CreditCard,
       clientSecret: decoded.client_secret,
       intent: decoded.intent,
-    }
-  } else if (
-    CheckoutBankAccountProvisionalFundingSourceProvisioningDataCodec.is(decoded)
-  ) {
-    return {
-      provider: decoded.provider,
-      version: decoded.version,
-      type: FundingSourceType.BankAccount,
-      linkToken: decoded.plaidLinkToken.link_token,
-      authorizationText: decoded.authorizationText,
     }
   } else {
     throw new FatalError(

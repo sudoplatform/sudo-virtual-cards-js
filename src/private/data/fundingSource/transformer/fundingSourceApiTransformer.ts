@@ -6,14 +6,12 @@
 
 import { FatalError } from '@sudoplatform/sudo-common'
 import {
-  BankAccountFundingSource,
   CreditCardFundingSource,
   FundingSource,
   FundingSourceType,
 } from '../../../../public/typings/fundingSource'
 import {
   FundingSourceEntity,
-  isBankAccountFundingSourceEntity,
   isCreditCardFundingSourceEntity,
 } from '../../../domain/entities/fundingSource/fundingSourceEntity'
 
@@ -27,7 +25,6 @@ export class FundingSourceAPITransformer {
       updatedAt: entity.updatedAt,
       currency: entity.currency,
       state: entity.state,
-      flags: entity.flags,
       version: entity.version,
       transactionVelocity: entity.transactionVelocity,
     }
@@ -38,20 +35,6 @@ export class FundingSourceAPITransformer {
         last4: entity.last4,
         cardType: entity.cardType,
         network: entity.network,
-      }
-      return transformed
-    }
-    if (isBankAccountFundingSourceEntity(entity)) {
-      const transformed: BankAccountFundingSource = {
-        ...commonProps,
-        type: FundingSourceType.BankAccount,
-        bankAccountType: entity.bankAccountType,
-        last4: entity.last4,
-        institutionName: entity.institutionName,
-        institutionLogo: entity.institutionLogo,
-        unfundedAmount: entity.unfundedAmount
-          ? entity.unfundedAmount
-          : undefined,
       }
       return transformed
     }

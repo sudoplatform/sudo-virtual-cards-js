@@ -115,35 +115,5 @@ describe('SudoVirtualCardsClient SetupFundingSource Test Suite', () => {
         throw error
       }
     })
-
-    describe('checkout specific tests', () => {
-      it('should return a checkout bank account provisional funding source', async () => {
-        const checkoutBankAccountFsConfig =
-          clientConfig.fundingSourceClientConfiguration.find(
-            (config) =>
-              config.type === 'checkout' &&
-              config.fundingSourceType === FundingSourceType.BankAccount,
-          )
-        if (
-          !checkoutBankAccountFsConfig ||
-          !clientConfig.bankAccountFundingSourceCreationEnabled
-        ) {
-          return
-        }
-
-        const result = await instanceUnderTest.setupFundingSource({
-          currency: 'USD',
-          type: FundingSourceType.BankAccount,
-          supportedProviders: ['checkout'],
-          applicationName: 'system-test-app',
-        })
-
-        expect(result.provisioningData).toMatchObject({
-          version: 1,
-          provider: checkoutBankAccountFsConfig.type,
-          type: FundingSourceType.BankAccount,
-        })
-      })
-    })
   })
 })

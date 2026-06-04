@@ -98,18 +98,6 @@ import {
   ProvisionVirtualCardDocument,
   ProvisionVirtualCardMutation,
   PublicKey,
-  RefreshFundingSourceDocument,
-  RefreshFundingSourceMutation,
-  RefreshFundingSourceRequest,
-  ReviewUnfundedFundingSourceDocument,
-  ReviewUnfundedFundingSourceMutation,
-  SandboxGetPlaidDataDocument,
-  SandboxGetPlaidDataQuery,
-  SandboxGetPlaidDataQueryVariables,
-  SandboxGetPlaidDataResponse,
-  SandboxSetFundingSourceToRequireRefreshDocument,
-  SandboxSetFundingSourceToRequireRefreshMutation,
-  SandboxSetFundingSourceToRequireRefreshMutationVariables,
   SealedCard,
   SealedCardConnection,
   SealedTransaction,
@@ -270,17 +258,6 @@ export class ApiClient {
     return data.completeFundingSource
   }
 
-  public async refreshFundingSource(
-    input: RefreshFundingSourceRequest,
-  ): Promise<FundingSource> {
-    const data = await this.performMutation<RefreshFundingSourceMutation>({
-      mutation: RefreshFundingSourceDocument,
-      variables: { input },
-      calleeName: this.refreshFundingSource.name,
-    })
-    return data.refreshFundingSource
-  }
-
   public async onFundingSourceUpdate(
     owner: string,
   ): Promise<
@@ -300,18 +277,6 @@ export class ApiClient {
       calleeName: this.cancelFundingSource.name,
     })
     return data.cancelFundingSource
-  }
-
-  public async reviewUnfundedFundingSource(
-    input: IdInput,
-  ): Promise<FundingSource> {
-    const data =
-      await this.performMutation<ReviewUnfundedFundingSourceMutation>({
-        mutation: ReviewUnfundedFundingSourceDocument,
-        variables: { input },
-        calleeName: this.reviewUnfundedFundingSource.name,
-      })
-    return data.reviewUnfundedFundingSource
   }
 
   public async cancelProvisionalFundingSource(
@@ -469,33 +434,6 @@ export class ApiClient {
       calleeName: this.listTransactionsByCardIdAndType.name,
     })
     return data.listTransactionsByCardIdAndType
-  }
-
-  async sandboxGetPlaidData(
-    input: SandboxGetPlaidDataQueryVariables,
-  ): Promise<SandboxGetPlaidDataResponse> {
-    const data = await this.performQuery<SandboxGetPlaidDataQuery>({
-      query: SandboxGetPlaidDataDocument,
-      variables: input,
-      calleeName: this.sandboxGetPlaidData.name,
-    })
-
-    return data.sandboxGetPlaidData
-  }
-
-  async sandboxSetFundingSourceToRequireRefresh(
-    input: SandboxSetFundingSourceToRequireRefreshMutationVariables,
-  ): Promise<FundingSource> {
-    const data =
-      await this.performMutation<SandboxSetFundingSourceToRequireRefreshMutation>(
-        {
-          mutation: SandboxSetFundingSourceToRequireRefreshDocument,
-          variables: input,
-          calleeName: this.sandboxSetFundingSourceToRequireRefresh.name,
-        },
-      )
-
-    return data.sandboxSetFundingSourceToRequireRefresh
   }
 
   async performQuery<Q>({

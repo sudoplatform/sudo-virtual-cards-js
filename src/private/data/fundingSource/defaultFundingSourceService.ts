@@ -9,12 +9,8 @@ import {
   Base64,
   DefaultLogger,
   FatalError,
-  KeyNotFoundError,
   Logger,
-  SignatureAlgorithm,
 } from '@sudoplatform/sudo-common'
-import { isLeft } from 'fp-ts/lib/Either'
-import { PathReporter } from 'io-ts/lib/PathReporter'
 import {
   FundingSource,
   OnFundingSourceUpdateSubscription,
@@ -23,8 +19,6 @@ import {
   ConnectionState,
   FundingSourceChangeSubscriber,
   FundingSourceType,
-  SandboxGetPlaidDataInput,
-  SandboxSetFundingSourceToRequireRefreshInput,
 } from '../../../public'
 import { FundingSourceEntity } from '../../domain/entities/fundingSource/fundingSourceEntity'
 import {
@@ -37,29 +31,21 @@ import {
   FundingSourceServiceListFundingSourcesOutput,
   FundingSourceServiceListProvisionalFundingSourcesInput,
   FundingSourceServiceListProvisionalFundingSourcesOutput,
-  FundingSourceServiceRefreshFundingSourceInput,
-  FundingSourceServiceReviewUnfundedFundingSourceInput,
   FundingSourceServiceSetupFundingSourceInput,
   FundingSourceServiceSubscribeToFundingSourceChangesInput,
   FundingSourceServiceUnsubscribeFromFundingSourceChangesInput,
-  isFundingSourceServiceCheckoutBankAccountCompletionData,
-  isFundingSourceServiceCheckoutBankAccountRefreshData,
   isFundingSourceServiceStripeCardCompletionData,
 } from '../../domain/entities/fundingSource/fundingSourceService'
 import { ProvisionalFundingSourceEntity } from '../../domain/entities/fundingSource/provisionalFundingSourceEntity'
-import { SandboxPlaidDataEntity } from '../../domain/entities/fundingSource/sandboxPlaidDataEntity'
 import { ApiClient } from '../common/apiClient'
-import { DeviceKeyWorker, KeyType } from '../common/deviceKeyWorker'
+import { DeviceKeyWorker } from '../common/deviceKeyWorker'
 import {
   SubscriptionManager,
   SubscriptionResult,
 } from '../common/subscriptionManager'
-import { AlgorithmTransformer } from '../common/transformer/algorithmTransformer'
-import { decodeBankAccountFundingSourceInstitutionLogo } from '../fundingSourceProviderData/sealedData'
 import { FundingSourceUnsealed } from './fundingSourceSealedAttributes'
 import { FundingSourceEntityTransformer } from './transformer/fundingSourceEntityTransformer'
 import { ProvisionalFundingSourceEntityTransformer } from './transformer/provisionalFundingSourceEntityTransformer'
-import { SandboxPlaidDataEntityTransformer } from './transformer/sandboxPlaidDataTransformer'
 import { ProvisionalFundingSourceFilterTransformer } from './transformer/provisionalFundingSourceFilterTransformer'
 import { SortOrderTransformer } from '../common/transformer/sortOrderTransformer'
 import { FundingSourceFilterTransformer } from './transformer/fundingSourceFilterTransformer'
@@ -126,47 +112,6 @@ export class DefaultFundingSourceService implements FundingSourceService {
           payment_method: completionData.paymentMethod,
         }),
       )
-    } else if (
-      isFundingSourceServiceCheckoutBankAccountCompletionData(completionData)
-    ) {
-      const publicKey = await this.deviceKeyWorker.getCurrentPublicKey()
-      if (!publicKey) {
-        throw new KeyNotFoundError()
-      }
-
-      const signedAt = new Date()
-      const authorizationTextSignatureData = {
-        hash: completionData.authorizationText.hash,
-        hashAlgorithm: completionData.authorizationText.hashAlgorithm,
-        signedAt,
-        account: completionData.accountId,
-      }
-      const data = JSON.stringify(authorizationTextSignatureData)
-      const signature = await this.deviceKeyWorker.signString({
-        plainText: data,
-        keyId: publicKey.id,
-        keyType: KeyType.PrivateKey,
-        algorithm: SignatureAlgorithm.RsaPkcs15Sha256,
-      })
-      const authorizationTextSignature = {
-        data,
-        algorithm: 'RSASignatureSSAPKCS15SHA256',
-        keyId: publicKey.id,
-        signature,
-      }
-
-      encodedCompletionData = Base64.encodeString(
-        JSON.stringify({
-          provider,
-          version: 1,
-          type,
-          keyId: publicKey.id,
-          public_token: completionData.publicToken,
-          account_id: completionData.accountId,
-          institution_id: completionData.institutionId,
-          authorizationTextSignature,
-        }),
-      )
     } else {
       throw new FatalError(`Unexpected provider: ${provider}:${type}`)
     }
@@ -175,66 +120,6 @@ export class DefaultFundingSourceService implements FundingSourceService {
       id,
       completionData: encodedCompletionData,
       updateCardFundingSource,
-    })
-
-    const unsealed = await this.unsealFundingSource(result)
-    return FundingSourceEntityTransformer.transformGraphQL(unsealed)
-  }
-
-  async refreshFundingSource({
-    id,
-    refreshData,
-    language,
-  }: FundingSourceServiceRefreshFundingSourceInput): Promise<FundingSourceEntity> {
-    let encodedRefreshData: string
-    const provider = refreshData.provider
-    const type = refreshData.type ?? FundingSourceType.CreditCard
-    if (isFundingSourceServiceCheckoutBankAccountRefreshData(refreshData)) {
-      let authorizationTextSignature = undefined
-      const publicKey = await this.deviceKeyWorker.getCurrentPublicKey()
-      if (!publicKey) {
-        throw new KeyNotFoundError()
-      }
-      if (refreshData.authorizationText) {
-        const signedAt = new Date()
-        const authorizationTextSignatureData = {
-          hash: refreshData.authorizationText.hash,
-          hashAlgorithm: refreshData.authorizationText.hashAlgorithm,
-          signedAt,
-          account: refreshData.accountId,
-        }
-        const data = JSON.stringify(authorizationTextSignatureData)
-        const signature = await this.deviceKeyWorker.signString({
-          plainText: data,
-          keyId: publicKey.id,
-          keyType: KeyType.PrivateKey,
-          algorithm: SignatureAlgorithm.RsaPkcs15Sha256,
-        })
-        authorizationTextSignature = {
-          data,
-          algorithm: 'RSASignatureSSAPKCS15SHA256',
-          keyId: publicKey.id,
-          signature,
-        }
-      }
-      encodedRefreshData = Base64.encodeString(
-        JSON.stringify({
-          provider,
-          version: 1,
-          type,
-          keyId: publicKey.id,
-          authorizationTextSignature,
-          applicationName: refreshData.applicationName,
-        }),
-      )
-    } else {
-      throw new FatalError(`Unexpected provider: ${provider}:${type}`)
-    }
-
-    const result = await this.appSync.refreshFundingSource({
-      id,
-      refreshData: encodedRefreshData,
-      language,
     })
 
     const unsealed = await this.unsealFundingSource(result)
@@ -290,14 +175,6 @@ export class DefaultFundingSourceService implements FundingSourceService {
     id,
   }: FundingSourceServiceCancelFundingSourceInput): Promise<FundingSourceEntity> {
     const result = await this.appSync.cancelFundingSource({ id })
-    const unsealed = await this.unsealFundingSource(result)
-    return FundingSourceEntityTransformer.transformGraphQL(unsealed)
-  }
-
-  async reviewUnfundedFundingSource({
-    id,
-  }: FundingSourceServiceReviewUnfundedFundingSourceInput): Promise<FundingSourceEntity> {
-    const result = await this.appSync.reviewUnfundedFundingSource({ id })
     const unsealed = await this.unsealFundingSource(result)
     return FundingSourceEntityTransformer.transformGraphQL(unsealed)
   }
@@ -366,91 +243,11 @@ export class DefaultFundingSourceService implements FundingSourceService {
     this.subscriptionManager.unsubscribe(input.id)
   }
 
-  public async sandboxGetPlaidData(
-    input: SandboxGetPlaidDataInput,
-  ): Promise<SandboxPlaidDataEntity> {
-    const result = await this.appSync.sandboxGetPlaidData({
-      input: {
-        institutionId: input.institutionId,
-        username: input.plaidUsername,
-      },
-    })
-    return SandboxPlaidDataEntityTransformer.transformGraphQL(result)
-  }
-
-  public async sandboxSetFundingSourceToRequireRefresh(
-    input: SandboxSetFundingSourceToRequireRefreshInput,
-  ): Promise<FundingSourceEntity> {
-    const result = await this.appSync.sandboxSetFundingSourceToRequireRefresh({
-      input,
-    })
-
-    const unsealed = await this.unsealFundingSource(result)
-    return FundingSourceEntityTransformer.transformGraphQL(unsealed)
-  }
-
-  private async unsealFundingSource(
+  private unsealFundingSource(
     sealed: FundingSource,
   ): Promise<FundingSourceUnsealed> {
     if (sealed.__typename === 'CreditCardFundingSource') {
-      return sealed
-    }
-
-    if (sealed.__typename === 'BankAccountFundingSource') {
-      if (sealed.institutionName.plainTextType !== 'string') {
-        const msg = `institutionName plain text type '${sealed.institutionName.plainTextType}' is invalid`
-        this.log.error(msg, { sealed: JSON.stringify(sealed) })
-        throw new FatalError(msg)
-      }
-      if (
-        sealed.institutionLogo &&
-        sealed.institutionLogo.plainTextType !== 'json-string'
-      ) {
-        const msg = `institutionLogo plain text type '${sealed.institutionLogo.plainTextType}' is invalid`
-        this.log.error(msg, { sealed: JSON.stringify(sealed) })
-        throw new FatalError(msg)
-      }
-
-      const institutionNamePromise = this.deviceKeyWorker.unsealString({
-        keyId: sealed.institutionName.keyId,
-        keyType: KeyType.PrivateKey,
-        encrypted: sealed.institutionName.base64EncodedSealedData,
-        algorithm: AlgorithmTransformer.toEncryptionAlgorithm(
-          KeyType.PrivateKey,
-          sealed.institutionName.algorithm,
-        ),
-      })
-      const institutionLogoPromise = sealed.institutionLogo
-        ? this.deviceKeyWorker.unsealString({
-            keyId: sealed.institutionLogo.keyId,
-            keyType: KeyType.PrivateKey,
-            encrypted: sealed.institutionLogo.base64EncodedSealedData,
-            algorithm: AlgorithmTransformer.toEncryptionAlgorithm(
-              KeyType.PrivateKey,
-              sealed.institutionLogo.algorithm,
-            ),
-          })
-        : Promise.resolve(undefined)
-      const [institutionName, institutionLogo] = await Promise.all([
-        institutionNamePromise,
-        institutionLogoPromise,
-      ])
-
-      const decodedLogo = institutionLogo
-        ? decodeBankAccountFundingSourceInstitutionLogo(institutionLogo)
-        : undefined
-      if (decodedLogo && isLeft(decodedLogo)) {
-        const failures = PathReporter.report(decodedLogo)
-        const msg = `institutionLogo could not be decoded`
-        this.log.error(msg, {
-          sealed: JSON.stringify(sealed),
-          failures: failures.join('\n'),
-          institutionLogo,
-        })
-        throw new FatalError(msg)
-      }
-
-      return { ...sealed, institutionName, institutionLogo: decodedLogo?.right }
+      return Promise.resolve(sealed)
     }
 
     throw new FatalError('Unable to disambiguate funding source')

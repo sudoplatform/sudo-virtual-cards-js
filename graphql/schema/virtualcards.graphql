@@ -13,7 +13,6 @@ interface CommonFundingSource {
   createdAtEpochMs: Float!
   updatedAtEpochMs: Float!
   state: FundingSourceState!
-  flags: [FundingSourceFlags!]!
   currency: String!
   transactionVelocity: TransactionVelocity
 }
@@ -145,7 +144,6 @@ type CreditCardFundingSource implements CommonObject & CommonFundingSource {
   createdAtEpochMs: Float!
   updatedAtEpochMs: Float!
   state: FundingSourceState!
-  flags: [FundingSourceFlags!]!
   currency: String!
   transactionVelocity: TransactionVelocity
   last4: String!
@@ -153,15 +151,6 @@ type CreditCardFundingSource implements CommonObject & CommonFundingSource {
   cardType: CardType!
 }
 
-type SignedAuthorizationText {
-  data: String!
-  signature: String!
-  algorithm: String!
-  keyId: String!
-  content: String!
-  contentType: String!
-  language: String!
-}
 
 type BankAccountFundingSource implements CommonObject & CommonFundingSource {
   id: ID!
@@ -170,11 +159,9 @@ type BankAccountFundingSource implements CommonObject & CommonFundingSource {
   createdAtEpochMs: Float!
   updatedAtEpochMs: Float!
   state: FundingSourceState!
-  flags: [FundingSourceFlags!]!
   currency: String!
   transactionVelocity: TransactionVelocity
   bankAccountType: BankAccountType!
-  authorization: SignedAuthorizationText!
   last4: String!
   institutionName: SealedAttribute!
   institutionLogo: SealedAttribute
@@ -330,14 +317,9 @@ enum FundingSourceState {
   INACTIVE
 }
 
-enum FundingSourceFlags {
-  UNFUNDED
-  REFRESH
-}
 
 enum FundingSourceType {
   CREDIT_CARD
-  BANK_ACCOUNT
 }
 
 enum ProvisioningState {
@@ -360,11 +342,6 @@ input CompleteFundingSourceRequest {
   updateCardFundingSource: Boolean
 }
 
-input RefreshFundingSourceRequest {
-  id: ID!
-  refreshData: ID!
-  language: String
-}
 
 input IdInput {
   id: ID!
@@ -550,10 +527,8 @@ type Mutation {
     input: SetupFundingSourceRequest!
   ): ProvisionalFundingSource!
   completeFundingSource(input: CompleteFundingSourceRequest!): FundingSource!
-  refreshFundingSource(input: RefreshFundingSourceRequest!): FundingSource!
   cancelFundingSource(input: IdInput!): FundingSource!
   cancelProvisionalFundingSource(input: IdInput!): ProvisionalFundingSource!
-  reviewUnfundedFundingSource(input: IdInput!): FundingSource!
   cardProvision(input: CardProvisionRequest!): ProvisionalCard!
   updateCard(input: CardUpdateRequest): SealedCard!
   cancelCard(input: CardCancelRequest!): SealedCard!

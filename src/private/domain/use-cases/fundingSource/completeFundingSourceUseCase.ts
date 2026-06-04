@@ -9,13 +9,10 @@ import {
   Logger,
   NotSignedInError,
 } from '@sudoplatform/sudo-common'
-import { AuthorizationText } from '../../../../public'
-import { BankAccountType } from '../../../../public/typings/bankAccountType'
 import { CardType } from '../../../../public/typings/cardType'
 import {
   CreditCardNetwork,
   FundingSourceState,
-  FundingSourceFlags,
 } from '../../../../public/typings/fundingSource'
 import { FundingSourceService } from '../../entities/fundingSource/fundingSourceService'
 import { SudoUserService } from '../../entities/sudoUser/sudoUserService'
@@ -26,18 +23,8 @@ interface CompleteFundingSourceUseCaseStripeCompletionData {
   paymentMethod: string
 }
 
-interface CompleteFundingSourceUseCaseCheckoutBankAccountCompletionData {
-  provider: 'checkout'
-  type: FundingSourceType.BankAccount
-  publicToken: string
-  accountId: string
-  institutionId: string
-  authorizationText: AuthorizationText
-}
-
 type CompleteFundingSourceUseCaseCompletionData =
-  | CompleteFundingSourceUseCaseStripeCompletionData
-  | CompleteFundingSourceUseCaseCheckoutBankAccountCompletionData
+  CompleteFundingSourceUseCaseStripeCompletionData
 
 interface CompleteFundingSourceUseCaseInput {
   id: string
@@ -52,7 +39,6 @@ interface BaseCompleteFundingSourceUseCaseOutput {
   createdAt: Date
   updatedAt: Date
   state: FundingSourceState
-  flags: FundingSourceFlags[]
   type: FundingSourceType
   currency: string
 }
@@ -64,24 +50,11 @@ interface CompleteCreditCardFundingSourceUseCaseOutput extends BaseCompleteFundi
   cardType: CardType
 }
 
-interface CompleteBankAccountFundingSourceUseCaseOutput extends BaseCompleteFundingSourceUseCaseOutput {
-  type: FundingSourceType.BankAccount
-  bankAccountType: BankAccountType
-  last4: string
-  institutionName: string
-  institutionLogo?: {
-    type: string
-    data: string
-  }
-}
-
 export type CompleteFundingSourceUseCaseOutput =
-  | CompleteCreditCardFundingSourceUseCaseOutput
-  | CompleteBankAccountFundingSourceUseCaseOutput
+  CompleteCreditCardFundingSourceUseCaseOutput
 
 export enum FundingSourceType {
   CreditCard = 'CREDIT_CARD',
-  BankAccount = 'BANK_ACCOUNT',
 }
 
 export class CompleteFundingSourceUseCase {
